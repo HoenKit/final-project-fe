@@ -1,9 +1,37 @@
+using Serilog.Formatting.Json;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+// Config Logger
+Log.Logger = new LoggerConfiguration()
+
+    .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        new JsonFormatter(),
+        path: "logs/console/console-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+
+    .WriteTo.File(
+        new JsonFormatter(),
+        path: "logs/error/error-.log",
+        rollingInterval: RollingInterval.Day,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
+
+
+//Config AddHttpClient
+/*builder.Services.AddHttpClient("APIClient", client =>
+{
+    client.BaseAddress = new Uri("https://your-api-base-url.com/"); 
+});*/
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
