@@ -21,6 +21,28 @@
 
 </head>
 <body>
+	@* <h2>Danh sách bình luận</h2>
+
+	@if (Model.Comments != null && Model.Comments.Items.Any())
+	{
+		<ul>
+			@foreach (var comment in Model.Comments.Items)
+			{
+				<li>
+					<strong>User:</strong> @comment.UserId <br>
+					<strong>Post ID:</strong> @comment.PostId <br>
+					<strong>Content:</strong> @comment.Content <br>
+					<hr>
+				</li>
+			}
+		</ul>
+
+		<p>Trang @Model.Comments.CurrentPage / @Model.Comments.TotalPages</p>
+	}
+	else
+	{
+		<p>Không có bình luận nào.</p>
+	} *@
 	<!--<div class="se-pre-con"></div>-->
 	<div class="theme-layout">	
 		<section>
