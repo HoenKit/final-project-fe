@@ -1,0 +1,25 @@
+# Visual Studio files
+.vs/
+*.csproj.user
+
+# Build results
+bin/
+obj/
+build/
+
+# User-specific files
+*.suo
+*.user
+*.userprefs
+*.DS_STORE
+
+# VS Code files
+.vscode/
+
+# App settings (if sensitive)
+appsettings.json
+
+# Other possible files to ignore
+*.log
+*.tlog
+*.pdb
