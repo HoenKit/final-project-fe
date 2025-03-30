@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+	var token = Context.Request.Cookies["AccessToken"];
+	bool isAuthenticated = !string.IsNullOrEmpty(token);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -269,16 +273,18 @@
 		<div class="side-panel">
 			<h4 class="panel-title">Account Manage</h4>
 			<ul class="navbar-nav flex-grow-1">
-				<li class="Login">
-					<a class="text-dark" asp-area="" asp-page="/Login">Login</a>
-				</li>	
-				<li class="Register">
-					<a class="text-dark" asp-area="" asp-page="/Register">Register</a>
-				</li>
-				<li>
-					<i class="ti-power-off"></i>
-					<a href="#" title="">Logout</a>
-				</li>
+				@if (isAuthenticated)
+				{
+					<li>
+						<i class="ti-power-off"></i>
+						<a asp-page="/Logout">Logout</a>
+					</li>
+				}
+				else
+				{
+					<li><a asp-page="/Login">Login</a></li>
+					<li><a asp-page="/Register">Register</a></li>
+				}
 			</ul>
 		</div><!-- side panel -->
 	</header>

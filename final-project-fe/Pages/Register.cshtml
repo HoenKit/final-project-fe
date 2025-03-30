@@ -4,16 +4,15 @@
     ViewData["Title"] = "Register";
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-    <title>Winku Social Network Toolkit</title>
+    <meta name="description" content="Register to Winku" />
+    <meta name="keywords" content="social network, register, signup" />
+    <title>Register - Winku Social Network</title>
     <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16">
 
     <link rel="stylesheet" href="css/main.min.css">
@@ -42,56 +41,48 @@
 
 <body>
     <div class="theme-layout">
-            <div class="container-fluid pdng0">
-                <div class="row merged">
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                        <div class="land-featurearea">
-                            <div class="land-meta">
-                                <h1>Winku</h1>
-                                <p>
-                                    Winku is free to use for as long as you want with two active projects.
-                                </p>
-                                <div class="friend-logo">
-                                    <span><img src="images/wink.png" alt=""></span>
-                                </div>
-                                <a href="#" title="" class="folow-me">Follow Us on</a>
+        <div class="container-fluid pdng0">
+            <div class="row merged">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <div class="land-featurearea">
+                        <div class="land-meta">
+                            <h1>Winku</h1>
+                            <p>Winku is free to use for as long as you want with two active projects.</p>
+                            <div class="friend-logo">
+                                <span><img src="images/wink.png" alt="Winku Logo"></span>
                             </div>
+                            <a href="#" class="folow-me">Follow Us on</a>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                        <div class="login-reg-bg show">
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <div class="login-reg-bg show">
                         <div class="log-reg-area reg">
                             <h2 class="log-title">Register</h2>
-                            <p>Don’t use Winku Yet? <a href="#" title="">Take the tour</a> or <a href="#" title="">Join now</a></p>
+                            <p>Don’t use Winku Yet? <a href="#">Take the tour</a> or <a href="#">Join now</a></p>
 
                             <form method="post">
+                                <div asp-validation-summary="All" class="text-danger"></div>
+
                                 <div class="form-group">
-                                    <input type="text" required="required" />
-                                    <label class="control-label" for="input">First & Last Name</label><i class="mtrl-select"></i>
+                                    <input asp-for="RegisterData.Email" type="email" required />
+                                    <label class="control-label">Email</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.Email" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
-                                    <input type="text" required="required" />
-                                    <label class="control-label" for="input">User Name</label><i class="mtrl-select"></i>
+                                    <input asp-for="RegisterData.Password" type="password" required />
+                                    <label class="control-label">Password</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.Password" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
-                                    <input type="password" required="required" />
-                                    <label class="control-label" for="input">Password</label><i class="mtrl-select"></i>
-                                </div>
-                                <div class="form-radio">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="radio" checked="checked" /><i class="check-box"></i>Male
-                                        </label>
-                                    </div>
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="radio" /><i class="check-box"></i>Female
-                                        </label>
-                                    </div>
+                                    <input asp-for="RegisterData.ConfirmPassword" type="password" required />
+                                    <label class="control-label">Confirm Password</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.ConfirmPassword" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
-                                    <input type="email" required="required" />
-                                    <label class="control-label" for="input">Email</label><i class="mtrl-select"></i>
+                                    <input asp-for="RegisterData.Phone" type="tel" required />
+                                    <label class="control-label">Phone</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.Phone" class="text-danger"></span>
                                 </div>
                                 <div class="checkbox">
                                     <label>
@@ -110,9 +101,6 @@
         </div>
     </div>
 
-    <script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script src="js/main.min.js"></script>
-
 </body>
-
 </html>
