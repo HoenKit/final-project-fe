@@ -23,9 +23,12 @@ namespace final_project_fe.Pages
         }
         public PageResult<CommentDto> Comments { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int postId, int? page)
         {
-            string apiUrl = $"{_apiSettings.BaseUrl}/Comment"; // URL của API 
+            int currentPage = page ?? 1;
+            postId = 1;
+
+            string apiUrl = $"{_apiSettings.BaseUrl}/Comment?postId={postId}&page={currentPage}";
 
             try
             {
