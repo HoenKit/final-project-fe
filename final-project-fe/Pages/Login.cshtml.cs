@@ -57,7 +57,7 @@ namespace final_project_fe.Pages.Shared
                         {
                             Response.Cookies.Append("AccessToken", loginResponse.Token, new CookieOptions
                             {
-                                HttpOnly = true,
+                                HttpOnly = false,
                                 Secure = true,
                                 SameSite = SameSiteMode.Strict,
                                 Expires = DateTime.UtcNow.AddDays(7)
@@ -70,7 +70,7 @@ namespace final_project_fe.Pages.Shared
                     {
                         Response.Cookies.Append("AccessToken", responseContent, new CookieOptions
                         {
-                            HttpOnly = true,
+                            HttpOnly = false,
                             Secure = true,
                             SameSite = SameSiteMode.Strict,
                             Expires = DateTime.UtcNow.AddDays(7)

@@ -6,6 +6,10 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
 
@@ -23,7 +27,9 @@ namespace final_project_fe.Pages
 			_apiSettings = apiSettings.Value;
 			_httpClient = httpClient;
 		}
-		public PageResult<CommentDto> Comments { get; set; }
+        [BindProperty]
+        public CommentCreateDto NewComment { get; set; }
+        public PageResult<CommentDto> Comments { get; set; }
 		public PageResult<PostDto> Posts { get; set; }
 		public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
 		public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
@@ -177,7 +183,62 @@ namespace final_project_fe.Pages
 				_logger.LogError($"Lỗi khi gọi API: {ex.Message}");
 			}
 		}
-	}
+
+
+		public async Task<IActionResult> OnPostAsync()
+		{
+
+            try
+            {
+                string token = Request.Cookies["AccessToken"];
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Unauthorized();
+                }
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+                if (jsonToken == null)
+                {
+                    return Unauthorized();
+                }
+                var userId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var requestData = new
+                {
+                    UserId = userId,
+                    PostId = NewComment.PostId,
+                    Content = NewComment.Content,
+                    ParentCommentId = NewComment.ParentCommentId
+                };
+
+                var jsonContent = JsonSerializer.Serialize(requestData);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"{_apiSettings.BaseUrl}/Comment", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("/Index", new { id = NewComment.PostId });
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Lỗi khi gửi bình luận.");
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Đã xảy ra lỗi: {ex.Message}");
+                return Page();
+            }
+        }
+    }
 }
 
 
