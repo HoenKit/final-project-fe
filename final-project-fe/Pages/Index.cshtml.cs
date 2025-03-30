@@ -1,5 +1,6 @@
 ﻿using final_project_fe.Dtos;
 using final_project_fe.Dtos.Comment;
+using final_project_fe.Dtos.Post;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,25 +23,45 @@ namespace final_project_fe.Pages
             _httpClient = httpClient;
         }
         public PageResult<CommentDto> Comments { get; set; }
-
+        public PageResult<PostDto> Posts { get; set; }
         public async Task OnGetAsync()
         {
-            string apiUrl = $"{_apiSettings.BaseUrl}/Comment"; // URL của API 
+            // URL Post API
+            string postsApiUrl = $"{_apiSettings.BaseUrl}/Post";
+
+            // URL Comment API
+            string commentsApiUrl = $"{_apiSettings.BaseUrl}/Comment";
 
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
-                if (response.IsSuccessStatusCode)
+                // Gọi API Posts
+                HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
+                if (postsResponse.IsSuccessStatusCode)
                 {
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    Comments = JsonSerializer.Deserialize<PageResult<CommentDto>>(jsonResponse, new JsonSerializerOptions
+                    string postsJsonResponse = await postsResponse.Content.ReadAsStringAsync();
+                    Posts = JsonSerializer.Deserialize<PageResult<PostDto>>(postsJsonResponse, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
+                }
+                else
+                {
+                    _logger.LogError($"Lỗi API Post: {postsResponse.StatusCode}");
+                }
+
+                // Gọi API Comments
+                HttpResponseMessage commentsResponse = await _httpClient.GetAsync(commentsApiUrl);
+                if (commentsResponse.IsSuccessStatusCode)
+                {
+                    string commentsJsonResponse = await commentsResponse.Content.ReadAsStringAsync();
+                    Comments = JsonSerializer.Deserialize<PageResult<CommentDto>>(commentsJsonResponse, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     }) ?? new PageResult<CommentDto>(new List<CommentDto>(), 0, 1, 10);
                 }
                 else
                 {
-                    _logger.LogError($"Lỗi API: {response.StatusCode}");
+                    _logger.LogError($"Lỗi API Comment: {commentsResponse.StatusCode}");
                 }
             }
             catch (Exception ex)

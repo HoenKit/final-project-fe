@@ -21,7 +21,7 @@
 
 </head>
 <body>
-	@* <h2>Danh sách bình luận</h2>
+@* 	<h2>Danh sách bình luận</h2>
 
 	@if (Model.Comments != null && Model.Comments.Items.Any())
 	{
@@ -161,6 +161,67 @@
 									<div class="loadMore">
 										<div class="central-meta item">
 											<div class="user-post">
+												@if (Model.Posts != null && Model.Posts.Items.Any())
+												{
+													<div class="central-meta item">
+														<div class="user-post">
+															<ul>
+																@foreach (var post in Model.Posts.Items)
+																{
+																	<li>
+																		<div class="friend-info">
+																			<figure>
+																				<!-- Assuming you have a property for the user's avatar image -->
+																				<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																			</figure>
+																			<div class="friend-name">
+																				<!-- Assuming you have a property for the user's name -->
+																				<ins><a href="time-line.html" title="">@post.UserId</a></ins>
+																			</div>
+																			<div class="post-meta">
+																				<!-- Displaying post image (if any) -->
+																				<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg" alt="Post Image">
+																				<div class="description">
+																					<p>@post.Content</p>
+																				</div>
+																			</div>
+																		</div>
+
+																		<!-- Comment input form -->
+																		<div class="coment-area">
+																			<ul class="we-comet">
+																				<li class="post-comment">
+																					<div class="comet-avatar">
+																						<!-- Assuming you have a default avatar for users -->
+																						<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																					</div>
+																					<div class="post-comt-box">
+																						<form method="post">
+																							<textarea name="CommentContent" placeholder="Post your comment"></textarea>
+																							<button type="submit">Post Comment</button>
+																						</form>
+																					</div>
+																				</li>
+																			</ul>
+																		</div>
+
+																		<!-- Hidden PostId for later use -->
+																		<input type="hidden" name="PostId" value="@post.PostId" />
+																		<hr>
+																	</li>
+																}
+															</ul>
+
+															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+														</div>
+													</div>
+												}
+												else
+												{
+													<p>No posts available.</p>
+												}
+
+	
 												<div class="friend-info">
 													<figure>
 														<img src="images/resources/friend-avatar10.jpg" alt="">
