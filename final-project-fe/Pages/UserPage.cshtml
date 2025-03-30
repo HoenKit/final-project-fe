@@ -192,46 +192,68 @@
 											<figure>
 												<img src="images/resources/admin3.jpg" alt="">
 											</figure>
-											<div class="newpst-input">
-												<form method="post">
-													<textarea rows="3" placeholder="write something"></textarea>
-													<div class="attachments">
-														<ul>
-															<li>
-																<i class="fa fa-music"></i>
-																<label class="fileContainer">
-																	<input type="file">
-																</label>
-															</li>
-															<li>
-																<i class="fa fa-image"></i>
-																<label class="fileContainer">
-																	<input type="file">
-																</label>
-															</li>
-															<li>
-																<i class="fa fa-video-camera"></i>
-																<label class="fileContainer">
-																	<input type="file">
-																</label>
-															</li>
-															<li>
-																<i class="fa fa-camera"></i>
-																<label class="fileContainer">
-																	<input type="file">
-																</label>
-															</li>
-															<li>
-																<button type="submit">Publish</button>
-															</li>
-														</ul>
-													</div>
-												</form>
-											</div>
+										<div class="newpst-input">
+											<form method="post">
+												<textarea rows="3" placeholder="Write something..." asp-for="PostContent"></textarea>
+												<div class="attachments">
+													<ul>
+														<li>
+															<i class="fa fa-music"></i>
+															<label class="fileContainer">
+																<input type="file" />
+															</label>
+														</li>
+														<li>
+															<i class="fa fa-image"></i>
+															<label class="fileContainer">
+																<input type="file" />
+															</label>
+														</li>
+														<li>
+															<i class="fa fa-video-camera"></i>
+															<label class="fileContainer">
+																<input type="file" />
+															</label>
+														</li>
+														<li>
+															<i class="fa fa-camera"></i>
+															<label class="fileContainer">
+																<input type="file" />
+															</label>
+														</li>
+														<button type="submit" class="mtr-btn signup" id="publish-post-button">
+															Publish
+														</button>
+													</ul>
+												</div>
+											</form>
+										</div>
 										</div>
 									</div><!-- add post new box -->
 									<div class="loadMore">
 										<div class="central-meta item">
+	@* 										@if (Model.Posts != null && Model.Posts.Items.Any())
+											{
+												<ul>
+													@foreach (var post in Model.Posts.Items)
+													{
+														<li>
+															<strong>Title:</strong> @post.Title <br>
+															<strong>Content:</strong> @post.Content <br>
+															<strong>Posted on:</strong> @post.CreateAt <br>
+															<!-- Hidden PostId for later use -->
+															<input type="hidden" name="PostId" value="@post.PostId" />
+															<hr>
+														</li>
+													}
+												</ul>
+
+												<p>Trang @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+											}
+											else
+											{
+												<p>No posts available.</p>
+											} *@
 											<div class="user-post">
 												<div class="friend-info">
 													<figure>
