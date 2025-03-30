@@ -18,31 +18,10 @@
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/color.css">
 	<link rel="stylesheet" href="css/responsive.css">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 </head>
 <body>
-	 <h2>Danh sách bình luận</h2>
-
-	@if (Model.Comments != null && Model.Comments.Items.Any())
-	{
-		<ul>
-			@foreach (var comment in Model.Comments.Items)
-			{
-				<li>
-					<strong>User:</strong> @comment.UserId <br>
-					<strong>Post ID:</strong> @comment.PostId <br>
-					<strong>Content:</strong> @comment.Content <br>
-					<hr>
-				</li>
-			}
-		</ul>
-
-		<p>Trang @Model.Comments.CurrentPage / @Model.Comments.TotalPages</p>
-	}
-	else
-	{
-		<p>Không có bình luận nào.</p>
-	} 
 	<!--<div class="se-pre-con"></div>-->
 	<div class="theme-layout">	
 		<section>
@@ -161,6 +140,125 @@
 									<div class="loadMore">
 										<div class="central-meta item">
 											<div class="user-post">
+												@if (Model.Posts != null && Model.Posts.Items.Any())
+												{
+													<div class="central-meta item">
+														<div class="user-post">
+															<ul>
+																@foreach (var post in Model.Posts.Items)
+																{
+																	<li>
+																		<div class="friend-info">
+																			<figure>
+																				<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
+																					 alt="User Avatar">
+
+																			</figure>
+
+																			<div class="post-meta">
+																				<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+																					@post.Title
+																				</p>
+																			</div>
+
+
+																			<div class="friend-name">
+																				<ins>
+																					<a href="time-line.html" title="">
+																						@((post.User?.UserMetaData != null)
+																							? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}"
+																							: post.User?.Email)
+																					</a>
+																				</ins>
+																			</div>
+
+																			<div class="post-meta">
+																				@if (Model.PostFilesByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có postFile
+																				{
+																					@foreach (var file in Model.PostFilesByPost[post.PostId])
+																					{
+																						@if (file.PostFileType.ToLower() == "image")
+																						{
+																							<img src="@file.FileUrl" alt="Post Image" width="400" />
+																						}
+																						else if (file.PostFileType.ToLower() == "video")
+																						{
+																							<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+																						}
+																					}
+																				}
+
+																				<div class="description">
+																					<p>@post.Content</p>
+																				</div>
+																			</div>
+
+																			<!-- Comment section -->
+																			<div class="comments-section">
+																				@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
+																				{
+																					@foreach (var comment in Model.CommentsByPost[post.PostId])
+																					{
+																						<div class="comment">
+																							<div class="comet-avatar">
+																								<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar)"
+																									 alt="User Avatar">
+																							</div>
+																							<div class="we-comment">
+																								<div class="coment-head">
+																									<h5>
+																										<a href="time-line.html" title="">
+																											@((comment.User?.UserMetaData != null)
+																												? $"{comment.User.UserMetaData.FirstName} {comment.User.UserMetaData.LastName}"
+																												: comment.User?.Email)
+																										</a>
+																									</h5>
+																									<span>@comment.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																									<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+																								</div>
+																								<p>@comment.Content</p>
+																							</div>
+																						</div>
+																					}
+																				}
+																				else
+																				{
+																					<p>Chưa có bình luận nào.</p>
+																				}
+																			</div>
+																			<!-- Comment input form -->
+																			<div class="coment-area">
+																				<ul class="we-comet">
+																					<li class="post-comment">
+																						<div class="comet-avatar">
+																							<!-- Assuming you have a default avatar for users -->
+																							<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																						</div>
+																						<div class="post-comt-box">
+																							<form method="post">
+																								<textarea name="CommentContent" placeholder="Post your comment"></textarea>
+																								<button class="bi bi-send" type="submit" style="font-size: 24px; color: black"></button>
+																							</form>
+																						</div>
+																					</li>
+																				</ul>
+																			</div>
+																		</div>
+																	</li>
+																}
+
+															</ul>
+
+															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+														</div>
+													</div>
+												}
+												else
+												{
+													<p>No posts available.</p>
+												}
+
+	
 												<div class="friend-info">
 													<figure>
 														<img src="images/resources/friend-avatar10.jpg" alt="">
