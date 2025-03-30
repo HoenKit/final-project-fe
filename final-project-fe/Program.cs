@@ -7,12 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
-
-builder.Services.AddHttpClient();
-
-var app = builder.Build();
-// Config Logger
+//Config Logger
 Log.Logger = new LoggerConfiguration()
 
     .WriteTo.Console(outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
@@ -31,12 +26,14 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 
-//Config AddHttpClient
-/*builder.Services.AddHttpClient("APIClient", client =>
-{
-    client.BaseAddress = new Uri("https://your-api-base-url.com/"); 
-});*/
+builder.Host.UseSerilog();
 
+
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+
+builder.Services.AddHttpClient();
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
