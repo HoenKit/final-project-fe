@@ -1,0 +1,59 @@
+﻿@page
+@model final_project_fe.Pages.Admin.UserManager.DetailModel
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Detail</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="#">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/UserManager/Index">User Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.UserDetail.UserId">@Model.UserDetail.UserProfile.FirstName @Model.UserDetail.UserProfile.LastName</a>
+        </li>
+    </ul>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title"></h4>
+            </div>
+        <div class="card-body">
+                @if (Model.UserDetail != null)
+                {
+                    <p><strong>Email:</strong> @Model.UserDetail.Email</p>
+                    <p><strong>Phone:</strong> @Model.UserDetail.Phone</p>
+                    <p><strong>Points:</strong> @Model.UserDetail.Point</p>
+                    <p><strong>Status:</strong> @(Model.UserDetail.IsBanned ? "Banned" : "Active")</p>
+                    <p><strong>Created At:</strong> @Model.UserDetail.CreateAt.ToString("yyyy-MM-dd HH:mm")</p>
+
+                    @if (Model.UserDetail.UserProfile != null)
+                    {
+                        <p><strong>Full Name:</strong> @Model.UserDetail.UserProfile.FirstName @Model.UserDetail.UserProfile.LastName</p>
+                        <p><strong>Birthday:</strong> @(Model.UserDetail.UserProfile.Birthday?.ToString("yyyy-MM-dd") ?? "N/A")</p>
+                        <p><strong>Gender:</strong> @Model.UserDetail.UserProfile.Gender</p>
+                        <p><strong>Address:</strong> @Model.UserDetail.UserProfile.Address</p>
+                    }
+                }
+                else
+                {
+                    <p class="text-danger">User not found.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<a asp-page="/Admin/UserManager/Index" class="btn btn-secondary mt-3">Back to List</a>
