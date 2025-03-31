@@ -76,25 +76,26 @@ namespace final_project_fe.Pages.Shared
                     }
                     else
                     {
-                    Response.Cookies.Append("AccessToken", responseContent, new CookieOptions
-                    {
-                        HttpOnly = false,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Expires = DateTime.UtcNow.AddDays(7)
-                    });
+                        Response.Cookies.Append("AccessToken", responseContent, new CookieOptions
+                        {
+                            HttpOnly = false,
+                            Secure = true,
+                            SameSite = SameSiteMode.Strict,
+                            Expires = DateTime.UtcNow.AddDays(7)
+                        });
 
-                    string? role = JwtHelper.GetRoleFromToken(responseContent);
-                    _logger.LogInformation($"User Role: {role}");
+                        string? role = JwtHelper.GetRoleFromToken(responseContent);
+                        _logger.LogInformation($"User Role: {role}");
 
-                    if (role == "Admin")
-                    {
-                        return RedirectToPage("/Admin/UserManager/Index");
+                        if (role == "Admin")
+                        {
+                            return RedirectToPage("/Admin/UserManager/Index");
+                        }
+                        return RedirectToPage("/Index");
                     }
-                    return RedirectToPage("/Index");
-                }
 
-                ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
+                    ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
+                }
             }
             catch (Exception ex)
             {

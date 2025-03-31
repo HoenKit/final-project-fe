@@ -11,6 +11,8 @@ namespace final_project_fe.Dtos.Post
         public int SubCategoryId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-		public User? User { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime? UpdateAt { get; set; }
+        public User? User { get; set; }
 	}
 }

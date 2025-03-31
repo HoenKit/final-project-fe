@@ -34,7 +34,7 @@ namespace final_project_fe.Pages
 		public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
 		public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
 
-		public async Task OnGetAsync(int postId, int? page)
+		public async Task OnGetAsync(int? page)
 		{
 			int currentPage = page ?? 1;
 			CommentsByPost = new Dictionary<int, List<CommentDto>>();
@@ -42,8 +42,6 @@ namespace final_project_fe.Pages
 			string postsApiUrl = $"{_apiSettings.BaseUrl}/Post";
 
 			// URL Comment API
-			string commentsApiUrl = $"{_apiSettings.BaseUrl}/Comment?postId={postId}&page={currentPage}";
-
 			string userApiUrl = $"{_apiSettings.BaseUrl}/UserManager/";
 
 			string postFileApiUrl = $"{_apiSettings.BaseUrl}/PostFile";
@@ -82,11 +80,11 @@ namespace final_project_fe.Pages
 							if (userResponse.IsSuccessStatusCode)
 							{
 								var userJson = await userResponse.Content.ReadAsStringAsync();
-								var apiResponse = JsonSerializer.Deserialize<ApiResponse<User>>(userJson, new JsonSerializerOptions
+								var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
 								{
 									PropertyNameCaseInsensitive = true
 								});
-								post.User = apiResponse?.Result;
+								post.User = apiResponse;
 							}
 						}
 						catch (Exception ex)
@@ -121,7 +119,7 @@ namespace final_project_fe.Pages
 						}
 					}));
 
-					// 🔹 Gọi API lấy Comments song song
+					// Gọi API lấy Comments song song
 					commentTasks.Add(Task.Run(async () =>
 					{
 						try
@@ -150,11 +148,11 @@ namespace final_project_fe.Pages
 										if (userResponse.IsSuccessStatusCode)
 										{
 											var userJson = await userResponse.Content.ReadAsStringAsync();
-											var apiResponse = JsonSerializer.Deserialize<ApiResponse<User>>(userJson, new JsonSerializerOptions
+											var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
 											{
 												PropertyNameCaseInsensitive = true
 											});
-											comment.User = apiResponse?.Result;
+											comment.User = apiResponse;
 										}
 									}
 									catch (Exception ex)
@@ -224,7 +222,7 @@ namespace final_project_fe.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToPage("/Index", new { id = NewComment.PostId });
+                    return RedirectToPage("/Index");
                 }
                 else
                 {
