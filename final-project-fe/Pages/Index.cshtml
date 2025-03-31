@@ -35,10 +35,19 @@
 										<div class="widget">
 											<h4 class="widget-title">Shortcuts</h4>
 											<ul class="naves">
-												<li>
-													<i class="ti-files"></i>
-													<a asp-page="/UserPage" title="">My pages</a>
-												</li>
+												@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+												@{
+													var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+												}
+
+												@if (!string.IsNullOrEmpty(userToken))
+												{
+													<li>
+														<i class="ti-files"></i>
+														<a asp-page="/UserPage" title="">My pages</a>
+													</li>
+												}
 												<li>
 													<i class="ti-comments-smiley"></i>
 													<a href="#" title="">Messages</a>
@@ -142,126 +151,128 @@
 											<div class="user-post">
 												@if (Model.Posts != null && Model.Posts.Items.Any())
 												{
-													<div class="central-meta item">
-														<div class="user-post">
-															<ul>
-																@foreach (var post in Model.Posts.Items)
-																{
-																	<li>
-																		<div class="friend-info">
-																			<figure>
-																				<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-																					 alt="User Avatar">
+													<ul>
+														@foreach (var post in Model.Posts.Items)
+														{
+															<li>
+																<div class="friend-info">
+																	<figure>
+																		<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
+																			 alt="User Avatar">
 
-																			</figure>
-
-																			<div class="post-meta">
-																				<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
-																					@post.Title
-																				</p>
-																			</div>
+																	</figure>
+																	
+																	<div class="post-meta">
+																		<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+																			@post.Title
+																		</p>
+																	</div>
 
 
-																			<div class="friend-name">
-																				<ins>
-																					<a href="time-line.html" title="">
-																						@((post.User?.UserMetaData != null)
-																							? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}"
-																							: post.User?.Email)
-																					</a>
-																				</ins>
-																			</div>
+																	<div class="friend-name">
+																		<ins>
+																			<a href="time-line.html" title="">
+																				@((post.User?.UserMetaData != null)
+																				? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}"
+																				: post.User?.Email)
+																			</a>
+																		</ins>
+																		<span>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																	</div>
 
-																			<div class="post-meta">
-																				@if (Model.PostFilesByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có postFile
+																	<div class="post-meta">
+																		@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
+																		{
+																			@foreach (var file in Model.PostFilesByPost[post.PostId])
+																			{
+																				@if (file.PostFileType.ToLower() == "image")
 																				{
-																					@foreach (var file in Model.PostFilesByPost[post.PostId])
-																					{
-																						@if (file.PostFileType.ToLower() == "image")
-																						{
-																							<img src="@file.FileUrl" alt="Post Image" width="400" />
-																						}
-																						else if (file.PostFileType.ToLower() == "video")
-																						{
-																							<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-																						}
-																					}
+																					<img src="@file.FileUrl" alt="Post Image" width="400" />
 																				}
-
-																				<div class="description">
-																					<p>@post.Content</p>
-																				</div>
-																			</div>
-
-																			<!-- Comment section -->
-																			<div class="comments-section">
-																				@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
+																				else if (file.PostFileType.ToLower() == "video")
 																				{
-																					var comments = Model.CommentsByPost[post.PostId];
-																					@foreach (var comment in comments)
-																					{
-																						<div class="comment">
-																							<div class="comet-avatar">
-																								<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar.ToString())"
-																									 alt="User Avatar">
-																							</div>
-																							<div class="we-comment">
-																								<div class="coment-head">
-																									<h5>
-																										<a href="time-line.html" title="">
-																											@((comment.User?.UserMetaData != null)
-																												? $"{comment.User.UserMetaData.FirstName} {comment.User.UserMetaData.LastName}"
-																												: comment.User?.Email)
-																										</a>
-																									</h5>
-																									<span>@comment.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																									<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																								</div>
-																								<p>@comment.Content</p>
-																							</div>
-																						</div>
-																					}
+																					<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 																				}
-																				else
-																				{
-																					<p>Chưa có bình luận nào.</p>
-																				}
-																			</div>
-																			<!-- Comment input form -->
-																			<div class="coment-area">
-																				<ul class="we-comet">
-																					<li class="post-comment">
-																						<div class="comet-avatar">
-																							<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
-																						</div>
-																						<div class="post-comt-box">
-																							<form method="post">
-																								<input type="hidden" value="@post.PostId" asp-for="NewComment.PostId " />
-																								<input type="hidden" asp-for="NewComment.ParentCommentId" />
-																								<label>Bình luận:</label>
-																								<textarea asp-for="NewComment.Content"></textarea>
-																								<button type="submit">Gửi</button>
-																							</form>
-																						</div>
-																					</li>
-																				</ul>
-																			</div>
+																			}
+																		}
+																	@* 	else
+																		{
+																			<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
+																				 alt="Default Post Image" width="400" />
+																		} *@
+
+																		<div class="description">
+																			<p>@post.Content</p>
 																		</div>
-																	</li>
-																}
+																	</div>
 
-															</ul>
+																	<!-- Comment section -->
+																	<div class="comments-section">
+																		@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
+																		{
+																			var comments = Model.CommentsByPost[post.PostId];
+																			@foreach (var comment in comments)
+																			{
+																				<div class="comment">
+																					<div class="comet-avatar">
+																						<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar.ToString())"
+																							 alt="User Avatar">
+																					</div>
+																					<div class="we-comment">
+																						<div class="coment-head">
+																							<h5>
+																								<a href="time-line.html" title="">
+																									@((comment.User?.UserMetaData != null)
+																									? $"{comment.User.UserMetaData.FirstName} {comment.User.UserMetaData.LastName}"
+																									: comment.User?.Email)
+																								</a>
+																							</h5>
+																							<span>@comment.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																							<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+																						</div>
+																						<p>@comment.Content</p>
+																					</div>
+																				</div>
+																			}
+																		}
+																		else
+																		{
+																			<p>Chưa có bình luận nào.</p>
+																		}
+																	</div>
+																	<!-- Comment input form -->
+																	<div class="coment-area">
+																		<ul class="we-comet">
+																			<li class="post-comment">
+																				<div class="comet-avatar">
+																					<!-- Assuming you have a default avatar for users -->
+																					<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																				</div>
+																				<div class="post-comt-box">
+																					<form method="post">
+																						<input type="hidden" value="@post.PostId" asp-for="NewComment.PostId " />
+																						<input type="hidden" asp-for="NewComment.ParentCommentId" />
+																						<label>Comment:</label>
+																						<textarea asp-for="NewComment.Content">Post your comment</textarea>
+																						<button class="bi bi-send" type="submit" style="font-size: 24px; color: black"></button>
+																					</form>
+																				</div>
+																			</li>
+																		</ul>
+																	</div>
+																</div>
+															</li>
+														}
 
-															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
-														</div>
-													</div>
+													</ul>
+
+													<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+
 												}
 												else
 												{
 													<p>No posts available.</p>
-												}
-
-	
+												}	
 												<div class="friend-info">
 													<figure>
 														<img src="images/resources/friend-avatar10.jpg" alt="">
