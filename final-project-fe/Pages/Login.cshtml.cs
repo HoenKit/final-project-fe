@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using final_project_fe.Dtos.Users;
 using System.Security.Claims;
+
 
 namespace final_project_fe.Pages.Shared
 {
@@ -34,10 +36,13 @@ namespace final_project_fe.Pages.Shared
                 Response.Redirect("/Index");
             }
         }
-
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
 
             string loginApiUrl = $"{_apiSettings.BaseUrl}/Auth/Login";
 
@@ -51,15 +56,34 @@ namespace final_project_fe.Pages.Shared
 
                 if (response.IsSuccessStatusCode)
                 {
+
+                    if (responseContent.Trim().StartsWith("{"))
+                    {
+                        var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
+                        {
+                            Response.Cookies.Append("AccessToken", loginResponse.Token, new CookieOptions
+                            {
+                                HttpOnly = false,
+                                Secure = true,
+                                SameSite = SameSiteMode.Strict,
+                                Expires = DateTime.UtcNow.AddDays(7)
+                            });
+
+                            return RedirectToPage("/Index");
+                        }
+                    }
+                    else
+                    {
                     Response.Cookies.Append("AccessToken", responseContent, new CookieOptions
                     {
-                        HttpOnly = true,
+                        HttpOnly = false,
                         Secure = true,
                         SameSite = SameSiteMode.Strict,
                         Expires = DateTime.UtcNow.AddDays(7)
                     });
 
-                    // Giải mã token để lấy Role
                     string? role = JwtHelper.GetRoleFromToken(responseContent);
                     _logger.LogInformation($"User Role: {role}");
 
@@ -80,6 +104,5 @@ namespace final_project_fe.Pages.Shared
 
             return Page();
         }
-
     }
 }

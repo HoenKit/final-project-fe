@@ -150,7 +150,7 @@
 																	<li>
 																		<div class="friend-info">
 																			<figure>
-																				<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
+																				<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
 																					 alt="User Avatar">
 
 																			</figure>
@@ -197,11 +197,12 @@
 																			<div class="comments-section">
 																				@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
 																				{
-																					@foreach (var comment in Model.CommentsByPost[post.PostId])
+																					var comments = Model.CommentsByPost[post.PostId];
+																					@foreach (var comment in comments)
 																					{
 																						<div class="comment">
 																							<div class="comet-avatar">
-																								<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar)"
+																								<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar.ToString())"
 																									 alt="User Avatar">
 																							</div>
 																							<div class="we-comment">
@@ -231,13 +232,15 @@
 																				<ul class="we-comet">
 																					<li class="post-comment">
 																						<div class="comet-avatar">
-																							<!-- Assuming you have a default avatar for users -->
 																							<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
 																						</div>
 																						<div class="post-comt-box">
 																							<form method="post">
-																								<textarea name="CommentContent" placeholder="Post your comment"></textarea>
-																								<button class="bi bi-send" type="submit" style="font-size: 24px; color: black"></button>
+																								<input type="hidden" value="@post.PostId" asp-for="NewComment.PostId " />
+																								<input type="hidden" asp-for="NewComment.ParentCommentId" />
+																								<label>Bình luận:</label>
+																								<textarea asp-for="NewComment.Content"></textarea>
+																								<button type="submit">Gửi</button>
 																							</form>
 																						</div>
 																					</li>
