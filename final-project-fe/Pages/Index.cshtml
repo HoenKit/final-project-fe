@@ -1,7 +1,10 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+	ViewData["Title"] = "Home page";
+}
+@{
+	var token = HttpContext.Request.Cookies["AccessToken"];
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -152,16 +155,16 @@
 												@if (Model.Posts != null && Model.Posts.Items.Any())
 												{
 													<ul>
-														@foreach (var post in Model.Posts.Items)
+														@foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
 														{
 															<li>
 																<div class="friend-info">
 																	<figure>
 																		<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-																			 alt="User Avatar">
+																		alt="User Avatar">
 
 																	</figure>
-																	
+
 																	<div class="post-meta">
 																		<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
 																			@post.Title
@@ -173,8 +176,8 @@
 																		<ins>
 																			<a href="time-line.html" title="">
 																				@((post.User?.UserMetaData != null)
-																				? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}"
-																				: post.User?.Email)
+																																																				? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}"
+																																																				: post.User?.Email)
 																			</a>
 																		</ins>
 																		<span>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
@@ -195,7 +198,7 @@
 																				}
 																			}
 																		}
-																	@* 	else
+																		@* 	else
 																		{
 																			<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
 																				 alt="Default Post Image" width="400" />
@@ -207,59 +210,86 @@
 																	</div>
 
 																	<!-- Comment section -->
-																	<div class="comments-section">
+																	<div class="comments-section" id="commentList-@post.PostId">
 																		@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
 																		{
 																			var comments = Model.CommentsByPost[post.PostId];
 																			@foreach (var comment in comments)
 																			{
-																				<div class="comment">
+																				var isReply = comment.ParentCommentId != null;
+																				var commentClass = isReply ? "comment reply-comment" : "comment";
+
+																				<div class="@commentClass" data-comment-id="@comment.CommentId">
 																					<div class="comet-avatar">
-																						<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar.ToString())"
-																							 alt="User Avatar">
+																						<img src="@(string.IsNullOrEmpty(comment.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : comment.User?.UserMetaData.Avatar)"
+																						alt="User Avatar">
 																					</div>
 																					<div class="we-comment">
 																						<div class="coment-head">
 																							<h5>
 																								<a href="time-line.html" title="">
 																									@((comment.User?.UserMetaData != null)
-																									? $"{comment.User.UserMetaData.FirstName} {comment.User.UserMetaData.LastName}"
-																									: comment.User?.Email)
+																																																																		? $"{comment.User.UserMetaData.FirstName} {comment.User.UserMetaData.LastName}"
+																																																																		: comment.User?.Email)
 																								</a>
 																							</h5>
 																							<span>@comment.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																							<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
+																							@if (!string.IsNullOrEmpty(token))
+
+																							{
+																							<a class="we-reply" href="javascript:void(0)" data-reply-to="@comment.CommentId" title="Reply">
+																								<i class="fa fa-reply"></i>
+																							</a>
+																							}
 																						</div>
 																						<p>@comment.Content</p>
+																						@if (!string.IsNullOrEmpty(token))
+
+																						{
+																							<!-- Form trả lời ẩn -->
+																							<div class="reply-form" style="display: none; margin-top: 10px;">
+																								<form class="comment-form">
+																									<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																									<input type="hidden" name="NewComment.ParentCommentId" value="@comment.CommentId" />
+																									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																								</form>
+																							</div>
+
+																						}
 																					</div>
 																				</div>
 																			}
 																		}
 																		else
 																		{
-																			<p>Chưa có bình luận nào.</p>
+																			<p>No Comment available.</p>
 																		}
 																	</div>
+
 																	<!-- Comment input form -->
-																	<div class="coment-area">
-																		<ul class="we-comet">
-																			<li class="post-comment">
-																				<div class="comet-avatar">
-																					<!-- Assuming you have a default avatar for users -->
-																					<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
-																				</div>
-																				<div class="post-comt-box">
-																					<form method="post">
-																						<input type="hidden" value="@post.PostId" asp-for="NewComment.PostId " />
-																						<input type="hidden" asp-for="NewComment.ParentCommentId" />
-																						<label>Comment:</label>
-																						<textarea asp-for="NewComment.Content">Post your comment</textarea>
-																						<button class="bi bi-send" type="submit" style="font-size: 24px; color: black"></button>
-																					</form>
-																				</div>
-																			</li>
-																		</ul>
-																	</div>
+																	@if (!string.IsNullOrEmpty(token))
+																	{
+																		<!-- Comment input form -->
+																		<div class="coment-area">
+																			<ul class="we-comet">
+																				<li class="post-comment">
+																					<div class="comet-avatar">
+																						<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																					</div>
+																					<div class="post-comt-box">
+																						<form class="comment-form">
+																							<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																							<input type="hidden" name="NewComment.ParentCommentId" />
+																							<label>Comment:</label>
+																							<textarea name="NewComment.Content" placeholder="Viết bình luận..."></textarea>
+																							<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+																						</form>
+																					</div>
+																				</li>
+																			</ul>
+																		</div>
+																	}
 																</div>
 															</li>
 														}
@@ -273,579 +303,7 @@
 												{
 													<p>No posts available.</p>
 												}	
-												<div class="friend-info">
-													<figure>
-														<img src="images/resources/friend-avatar10.jpg" alt="">
-													</figure>
-													<div class="friend-name">
-														<ins><a href="time-line.html" title="">Janice Griffith</a></ins>
-														<span>published: june,2 2018 19:PM</span>
-													</div>
-													<div class="post-meta">
-														<img src="images/resources/user-post.jpg" alt="">
-														<div class="we-video-info">
-															<ul>
-																<li>
-																	<span class="views" data-toggle="tooltip" title="views">
-																		<i class="fa fa-eye"></i>
-																		<ins>1.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="comment" data-toggle="tooltip" title="Comments">
-																		<i class="fa fa-comments-o"></i>
-																		<ins>52</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="like" data-toggle="tooltip" title="like">
-																		<i class="ti-heart"></i>
-																		<ins>2.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="dislike" data-toggle="tooltip" title="dislike">
-																		<i class="ti-heart-broken"></i>
-																		<ins>200</ins>
-																	</span>
-																</li>
-																<li class="social-media">
-																	<div class="menu">
-																		<div class="btn trigger"><i class="fa fa-share-alt"></i></div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-html5"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-facebook"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-google-plus"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-twitter"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-css3"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-instagram"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-dribbble"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-pinterest"></i></a>
-																			</div>
-																		</div>
 
-																	</div>
-																</li>
-															</ul>
-														</div>
-														<div class="description">
-
-															<p>
-																World's most beautiful car in Curabitur <a href="#" title="">#test drive booking !</a> the most beatuiful car available in america and the saudia arabia, you can book your test drive by our official website
-															</p>
-														</div>
-													</div>
-												</div>
-												<div class="coment-area">
-													<ul class="we-comet">
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-1.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Jason borne</a></h5>
-																	<span>1 year ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>we are working for the dance and sing songs. this car is very awesome for the youngster. please vote this car and like our post</p>
-															</div>
-															<ul>
-																<li>
-																	<div class="comet-avatar">
-																		<img src="images/resources/comet-2.jpg" alt="">
-																	</div>
-																	<div class="we-comment">
-																		<div class="coment-head">
-																			<h5><a href="time-line.html" title="">alexendra dadrio</a></h5>
-																			<span>1 month ago</span>
-																			<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																		</div>
-																		<p>yes, really very awesome car i see the features of this car in the official website of <a href="#" title="">#Mercedes-Benz</a> and really impressed :-)</p>
-																	</div>
-																</li>
-																<li>
-																	<div class="comet-avatar">
-																		<img src="images/resources/comet-3.jpg" alt="">
-																	</div>
-																	<div class="we-comment">
-																		<div class="coment-head">
-																			<h5><a href="time-line.html" title="">Olivia</a></h5>
-																			<span>16 days ago</span>
-																			<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																		</div>
-																		<p>i like lexus cars, lexus cars are most beautiful with the awesome features, but this car is really outstanding than lexus</p>
-																	</div>
-																</li>
-															</ul>
-														</li>
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-1.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Donald Trump</a></h5>
-																	<span>1 week ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>
-																	we are working for the dance and sing songs. this video is very awesome for the youngster. please vote this video and like our channel
-																	<i class="em em-smiley"></i>
-																</p>
-															</div>
-														</li>
-														<li>
-															<a href="#" title="" class="showmore underline">more comments</a>
-														</li>
-														<li class="post-comment">
-															<div class="comet-avatar">
-																<img src="images/resources/comet-1.jpg" alt="">
-															</div>
-															<div class="post-comt-box">
-																<form method="post">
-																	<textarea placeholder="Post your comment"></textarea>
-																	<div class="add-smiles">
-																		<span class="em em-expressionless" title="add icon"></span>
-																	</div>
-																	<div class="smiles-bunch">
-																		<i class="em em---1"></i>
-																		<i class="em em-smiley"></i>
-																		<i class="em em-anguished"></i>
-																		<i class="em em-laughing"></i>
-																		<i class="em em-angry"></i>
-																		<i class="em em-astonished"></i>
-																		<i class="em em-blush"></i>
-																		<i class="em em-disappointed"></i>
-																		<i class="em em-worried"></i>
-																		<i class="em em-kissing_heart"></i>
-																		<i class="em em-rage"></i>
-																		<i class="em em-stuck_out_tongue"></i>
-																	</div>
-																	<button type="submit"></button>
-																</form>
-															</div>
-														</li>
-													</ul>
-												</div>
-											</div>
-										</div>
-										<div class="central-meta item">
-											<div class="user-post">
-												<div class="friend-info">
-													<figure>
-														<img src="images/resources/nearly1.jpg" alt="">
-													</figure>
-													<div class="friend-name">
-														<ins><a href="time-line.html" title="">Sara Grey</a></ins>
-														<span>published: june,2 2018 19:PM</span>
-													</div>
-													<div class="post-meta">
-														<iframe src="https://player.vimeo.com/video/15232052" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-														<div class="we-video-info">
-															<ul>
-																<li>
-																	<span class="views" data-toggle="tooltip" title="views">
-																		<i class="fa fa-eye"></i>
-																		<ins>1.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="comment" data-toggle="tooltip" title="Comments">
-																		<i class="fa fa-comments-o"></i>
-																		<ins>52</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="like" data-toggle="tooltip" title="like">
-																		<i class="ti-heart"></i>
-																		<ins>2.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="dislike" data-toggle="tooltip" title="dislike">
-																		<i class="ti-heart-broken"></i>
-																		<ins>200</ins>
-																	</span>
-																</li>
-																<li class="social-media">
-																	<div class="menu">
-																		<div class="btn trigger"><i class="fa fa-share-alt"></i></div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-html5"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-facebook"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-google-plus"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-twitter"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-css3"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-instagram"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-dribbble"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-pinterest"></i></a>
-																			</div>
-																		</div>
-
-																	</div>
-																</li>
-															</ul>
-														</div>
-														<div class="description">
-
-															<p>
-																Lonely Cat Enjoying in Summer Curabitur <a href="#" title="">#mypage</a> ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
-															</p>
-														</div>
-													</div>
-												</div>
-												<div class="coment-area">
-													<ul class="we-comet">
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-1.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Jason borne</a></h5>
-																	<span>1 year ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>we are working for the dance and sing songs. this video is very awesome for the youngster. please vote this video and like our channel</p>
-															</div>
-
-														</li>
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-2.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Sophia</a></h5>
-																	<span>1 week ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>
-																	we are working for the dance and sing songs. this video is very awesome for the youngster.
-																	<i class="em em-smiley"></i>
-																</p>
-															</div>
-														</li>
-														<li>
-															<a href="#" title="" class="showmore underline">more comments</a>
-														</li>
-														<li class="post-comment">
-															<div class="comet-avatar">
-																<img src="images/resources/comet-2.jpg" alt="">
-															</div>
-															<div class="post-comt-box">
-																<form method="post">
-																	<textarea placeholder="Post your comment"></textarea>
-																	<div class="add-smiles">
-																		<span class="em em-expressionless" title="add icon"></span>
-																	</div>
-																	<div class="smiles-bunch">
-																		<i class="em em---1"></i>
-																		<i class="em em-smiley"></i>
-																		<i class="em em-anguished"></i>
-																		<i class="em em-laughing"></i>
-																		<i class="em em-angry"></i>
-																		<i class="em em-astonished"></i>
-																		<i class="em em-blush"></i>
-																		<i class="em em-disappointed"></i>
-																		<i class="em em-worried"></i>
-																		<i class="em em-kissing_heart"></i>
-																		<i class="em em-rage"></i>
-																		<i class="em em-stuck_out_tongue"></i>
-																	</div>
-																	<button type="submit"></button>
-																</form>
-															</div>
-														</li>
-													</ul>
-												</div>
-											</div>
-										</div>
-										<div class="central-meta item">
-											<div class="user-post">
-												<div class="friend-info">
-													<figure>
-														<img src="images/resources/nearly6.jpg" alt="">
-													</figure>
-													<div class="friend-name">
-														<ins><a href="time-line.html" title="">Sophia</a></ins>
-														<span>published: january,5 2018 19:PM</span>
-													</div>
-													<div class="post-meta">
-														<div class="post-map">
-															<div class="nearby-map">
-																<div id="map-canvas"></div>
-															</div>
-														</div><!-- near by map -->
-														<div class="we-video-info">
-															<ul>
-																<li>
-																	<span class="views" data-toggle="tooltip" title="views">
-																		<i class="fa fa-eye"></i>
-																		<ins>1.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="comment" data-toggle="tooltip" title="Comments">
-																		<i class="fa fa-comments-o"></i>
-																		<ins>52</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="like" data-toggle="tooltip" title="like">
-																		<i class="ti-heart"></i>
-																		<ins>2.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="dislike" data-toggle="tooltip" title="dislike">
-																		<i class="ti-heart-broken"></i>
-																		<ins>200</ins>
-																	</span>
-																</li>
-																<li class="social-media">
-																	<div class="menu">
-																		<div class="btn trigger"><i class="fa fa-share-alt"></i></div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-html5"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-facebook"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-google-plus"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-twitter"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-css3"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-instagram"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-dribbble"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-pinterest"></i></a>
-																			</div>
-																		</div>
-
-																	</div>
-																</li>
-															</ul>
-														</div>
-														<div class="description">
-
-															<p>
-																Curabitur Lonely Cat Enjoying in Summer <a href="#" title="">#mypage</a> ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
-															</p>
-														</div>
-													</div>
-												</div>
-												<div class="coment-area">
-													<ul class="we-comet">
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-1.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Jason borne</a></h5>
-																	<span>1 year ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>we are working for the dance and sing songs. this video is very awesome for the youngster. please vote this video and like our channel</p>
-															</div>
-
-														</li>
-														<li>
-															<div class="comet-avatar">
-																<img src="images/resources/comet-2.jpg" alt="">
-															</div>
-															<div class="we-comment">
-																<div class="coment-head">
-																	<h5><a href="time-line.html" title="">Sophia</a></h5>
-																	<span>1 week ago</span>
-																	<a class="we-reply" href="#" title="Reply"><i class="fa fa-reply"></i></a>
-																</div>
-																<p>
-																	we are working for the dance and sing songs. this video is very awesome for the youngster.
-																	<i class="em em-smiley"></i>
-																</p>
-															</div>
-														</li>
-														<li>
-															<a href="#" title="" class="showmore underline">more comments</a>
-														</li>
-														<li class="post-comment">
-															<div class="comet-avatar">
-																<img src="images/resources/comet-2.jpg" alt="">
-															</div>
-															<div class="post-comt-box">
-																<form method="post">
-																	<textarea placeholder="Post your comment"></textarea>
-																	<div class="add-smiles">
-																		<span class="em em-expressionless" title="add icon"></span>
-																	</div>
-																	<div class="smiles-bunch">
-																		<i class="em em---1"></i>
-																		<i class="em em-smiley"></i>
-																		<i class="em em-anguished"></i>
-																		<i class="em em-laughing"></i>
-																		<i class="em em-angry"></i>
-																		<i class="em em-astonished"></i>
-																		<i class="em em-blush"></i>
-																		<i class="em em-disappointed"></i>
-																		<i class="em em-worried"></i>
-																		<i class="em em-kissing_heart"></i>
-																		<i class="em em-rage"></i>
-																		<i class="em em-stuck_out_tongue"></i>
-																	</div>
-																	<button type="submit"></button>
-																</form>
-															</div>
-														</li>
-													</ul>
-												</div>
-											</div>
-										</div>
-										<div class="central-meta item">
-											<div class="user-post">
-												<div class="friend-info">
-													<figure>
-														<img alt="" src="images/resources/friend-avatar10.jpg">
-													</figure>
-													<div class="friend-name">
-														<ins><a title="" href="time-line.html">Janice Griffith</a></ins>
-														<span>published: june,2 2018 19:PM</span>
-													</div>
-													<div class="description">
-
-														<p>
-															Curabitur World's most beautiful car in <a title="" href="#">#test drive booking !</a> the most beatuiful car available in america and the saudia arabia, you can book your test drive by our official website
-														</p>
-													</div>
-													<div class="post-meta">
-														<div class="linked-image align-left">
-															<a title="" href="#"><img alt="" src="images/resources/page1.jpg"></a>
-														</div>
-														<div class="detail">
-															<span>Love Maid - ChillGroves</span>
-															<p>Lorem ipsum dolor sit amet, consectetur ipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua... </p>
-															<a title="" href="#">www.sample.com</a>
-														</div>
-														<div class="we-video-info">
-															<ul>
-																<li>
-																	<span class="views" data-toggle="tooltip" title="views">
-																		<i class="fa fa-eye"></i>
-																		<ins>1.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="comment" data-toggle="tooltip" title="Comments">
-																		<i class="fa fa-comments-o"></i>
-																		<ins>52</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="like" data-toggle="tooltip" title="like">
-																		<i class="ti-heart"></i>
-																		<ins>2.2k</ins>
-																	</span>
-																</li>
-																<li>
-																	<span class="dislike" data-toggle="tooltip" title="dislike">
-																		<i class="ti-heart-broken"></i>
-																		<ins>200</ins>
-																	</span>
-																</li>
-																<li class="social-media">
-																	<div class="menu">
-																		<div class="btn trigger"><i class="fa fa-share-alt"></i></div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-html5"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-facebook"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-google-plus"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-twitter"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon"><a href="#" title=""><i class="fa fa-css3"></i></a></div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-instagram"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-dribbble"></i></a>
-																			</div>
-																		</div>
-																		<div class="rotater">
-																			<div class="btn btn-icon">
-																				<a href="#" title=""><i class="fa fa-pinterest"></i></a>
-																			</div>
-																		</div>
-
-																	</div>
-																</li>
-															</ul>
-														</div>
-													</div>
-												</div>
 											</div>
 										</div>
 									</div>
@@ -1133,7 +591,358 @@
 	<script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
 	<script src="js/map-init.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8c55_YHLvDHGACkQscgbGLtLRdxBDCfI"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script>
+		currentUserId = '@Model.CurrentUserId';
+		document.addEventListener('DOMContentLoaded', () => {
+		  const HubUrl  = "@Model.HubUrl";
+		  const BaseUrl = "@Model.BaseUrl";
+		  const userId  = currentUserId;
+
+		  // Hiển thị thông tin kết nối để debug
+		  console.log("Connecting to SignalR hub:", HubUrl);
+		  console.log("Base API URL:", BaseUrl);
+		  console.log("Current User ID:", userId);
+
+		  const connection = new signalR.HubConnectionBuilder()
+			.withUrl(`${HubUrl}/postHub`)
+			.withAutomaticReconnect() // Thêm tự động kết nối lại
+			.build();
+
+		  async function getUserInfo(id) {
+			const defaultAvatar = "images/resources/friend-avatar9.jpg";
+			const defaultName   = "Unknown User";
+			if (!id) return { avatar: defaultAvatar, name: defaultName };
+
+			try {
+			  const res = await fetch(`${BaseUrl}/UserManager/${id}`, { credentials: 'include' });
+			  if (res.ok) {
+				const u = await res.json();
+				return {
+				  avatar: u?.userMetaData?.avatar || defaultAvatar,
+				  name:   u?.userMetaData
+							? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
+							: u.email || defaultName
+				};
+			  }
+			} catch (error) {
+			  console.error("Error fetching user info:", error);
+			}
+			return { avatar: defaultAvatar, name: defaultName };
+		  }
+
+		  function createPostHtml(post, avatar, name) {
+			const d = new Date(post.createAt).toLocaleString();
+
+			// Handle file attachments (images and videos)
+			let mediaContent = '';
+			if (post.files && post.files.length > 0) {
+			  post.files.forEach(file => {
+				if (file.postFileType?.toLowerCase() === "image") {
+				  mediaContent += `<img src="${file.fileUrl}" alt="Post Image" width="400" />`;
+				} else if (file.postFileType?.toLowerCase() === "video") {
+				  mediaContent += `<iframe src="${file.fileUrl}" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+				}
+			  });
+			}
+
+			return `
+			  <li id="post-${post.postId}">
+				<div class="friend-info">
+				  <figure>
+					<img src="${avatar}" alt="User Avatar">
+				  </figure>
+				  <div class="post-meta">
+					<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+					  ${post.title}
+					</p>
+				  </div>
+				  <div class="friend-name">
+					<ins><a href="time-line.html" title="">${name}</a></ins>
+					<span>${d}</span>
+				  </div>
+				  <div class="post-meta">
+					${mediaContent}
+					<div class="description">
+					  <p>${post.content}</p>
+					</div>
+				  </div>
+				  <div class="comments-section" id="commentList-${post.postId}"></div>
+				  <div class="coment-area">
+					<ul class="we-comet">
+					  <li class="post-comment">
+						<div class="comet-avatar">
+						  <img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+						</div>
+						<div class="post-comt-box">
+						  <form class="comment-form">
+							<input type="hidden" name="NewComment.PostId" value="${post.postId}">
+							<input type="hidden" name="NewComment.ParentCommentId">
+							<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+							<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+						  </form>
+						</div>
+					  </li>
+					</ul>
+				  </div>
+				</div>
+			  </li>`;
+		  }
+
+		  function createCommentHtml(comment, avatar, name) {
+			const isReply = comment.parentCommentId != null;
+			const cls = isReply ? "comment reply-comment" : "comment";
+			const date = new Date(comment.createAt);
+
+			const formattedDate = date.toLocaleDateString("vi-VN");
+			const formattedTime = date.toLocaleTimeString("vi-VN", {
+			  hour: "2-digit",
+			  minute: "2-digit"
+			});
+
+			const d = `${formattedDate} ${formattedTime}`;
+
+			return `
+			  <div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}">
+				<div class="comet-avatar">
+				  <img src="${avatar}" alt="User Avatar">
+				</div>
+				<div class="we-comment">
+				  <div class="coment-head">
+					<h5>
+					  <a href="time-line.html" title="">${name}</a>
+					</h5>
+					<span>${d}</span>
+					<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply">
+					  <i class="fa fa-reply"></i>
+					</a>
+				  </div>
+				  <p>${comment.content}</p>
+				  <!-- Form trả lời ẩn -->
+				  <div class="reply-form" style="display: none; margin-top: 10px;">
+					<form class="comment-form">
+					  <input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
+					  <input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+					  <textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+					  <button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+					</form>
+				  </div>
+				</div>
+			  </div>`;
+		  }
+
+		  // Nhận post từ SignalR
+		  connection.on("ReceivePost", async post => {
+			console.log("Received post:", post);
+			const { avatar, name } = await getUserInfo(post.userId);
+			const postList = document.querySelector("#post-list");
+			if (postList) {
+			  // Thêm post mới vào đầu danh sách
+			  postList.insertAdjacentHTML("afterbegin", createPostHtml(post, avatar, name));
+			  console.log("Post added to DOM at the beginning of list");
+			} else {
+			  console.error("Element #post-list not found");
+			}
+		  });
+
+		  // Nhận comment từ SignalR
+		  connection.on("ReceiveComment", async comment => {
+			console.log("Received comment:", comment);
+			const { avatar, name } = await getUserInfo(comment.userId);
+
+			if (comment.parentCommentId) {
+			  // Đây là reply - thêm vào sau comment cha
+			  const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
+			  if (parentComment) {
+				// Tìm vị trí để chèn reply
+				let nextElement = parentComment.nextElementSibling;
+				// Nếu phần tử tiếp theo không phải là reply hoặc là reply của comment khác,
+				// thì chèn ngay sau comment cha
+				if (!nextElement ||
+					!nextElement.classList.contains('reply-comment') ||
+					nextElement.getAttribute('data-parent-id') !== comment.parentCommentId) {
+				  parentComment.insertAdjacentHTML("afterend", createCommentHtml(comment, avatar, name));
+				} else {
+				  // Nếu đã có reply, tìm reply cuối cùng trong nhóm
+				  while (nextElement &&
+						 nextElement.classList.contains('reply-comment') &&
+						 nextElement.getAttribute('data-parent-id') === comment.parentCommentId) {
+					const temp = nextElement.nextElementSibling;
+					if (!temp ||
+						!temp.classList.contains('reply-comment') ||
+						temp.getAttribute('data-parent-id') !== comment.parentCommentId) {
+					  break;
+					}
+					nextElement = temp;
+				  }
+				  // Chèn sau reply cuối cùng
+				  nextElement.insertAdjacentHTML("afterend", createCommentHtml(comment, avatar, name));
+				}
+				console.log("Reply added after parent comment");
+			  } else {
+				console.error(`Parent comment with ID ${comment.parentCommentId} not found`);
+			  }
+			} else {
+			  // Đây là comment gốc - thêm vào đầu danh sách comments
+			  const commentList = document.querySelector(`#commentList-${comment.postId}`);
+			  if (commentList) {
+				commentList.insertAdjacentHTML("afterbegin", createCommentHtml(comment, avatar, name));
+				console.log("Comment added to the beginning of comment list");
+			  } else {
+				console.error(`Element #commentList-${comment.postId} not found`);
+			  }
+			}
+		  });
+
+		  // Xử lý kết nối SignalR
+		  connection.start()
+			.then(() => {
+			  console.log("SignalR connected successfully");
+			})
+			.catch(err => {
+			  console.error("SignalR connection error:", err);
+			  // Thử kết nối lại sau 5 giây
+			  setTimeout(() => connection.start(), 5000);
+			});
+
+		  // Handle connection events
+		  connection.onclose(error => {
+			console.log("SignalR connection closed, attempting to reconnect...");
+		  });
+
+		  connection.onreconnecting(error => {
+			console.log("SignalR reconnecting...", error);
+		  });
+
+		  connection.onreconnected(connectionId => {
+			console.log("SignalR reconnected. ConnectionId:", connectionId);
+		  });
+
+		  // Xử lý sự kiện click nút reply
+		  document.body.addEventListener('click', e => {
+			const btn = e.target.closest('.we-reply');
+			if (!btn) return;
+			e.preventDefault();
+			const id = btn.getAttribute('data-reply-to');
+			const form = document.querySelector(`.comment[data-comment-id="${id}"] .reply-form`);
+			if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+		  });
+
+		  // Xử lý sự kiện submit form comment
+		  document.body.addEventListener('submit', async e => {
+			const form = e.target.closest('form.comment-form');
+			const replyform = e.target.closest('.reply-form')
+			if (!form) return;
+			e.preventDefault();
+
+			const fm = new FormData(form);
+			const payload = {
+			  postId: Number(fm.get('NewComment.PostId')),
+			  parentCommentId: fm.get('NewComment.ParentCommentId')
+							? Number(fm.get('NewComment.ParentCommentId'))
+							: null,
+			  content: fm.get('NewComment.Content').trim(),
+			  userId: currentUserId
+			};
+
+			if (!payload.content) return;
+			console.log("Submitting comment:", payload);
+
+			try {
+			  const res = await fetch(`${BaseUrl}/Comment`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			  });
+
+			  if (!res.ok) {
+				const errorText = await res.text();
+				console.error('Post comment failed:', errorText);
+				alert('Comment could not be submitted. Please try again later.');
+				return;
+			  }
+
+			  console.log("Comment posted successfully");
+			  form.reset();
+			  if (replyform) replyform.style.display = 'none';
+			} catch (error) {
+			  console.error("Error posting comment:", error);
+			  alert('An error occurred while submitting the comment.');
+			}
+		  });
+
+		  // Thêm form tạo post mới (nếu cần)
+		  document.body.addEventListener('submit', async e => {
+			const form = e.target.closest('form.post-form');
+			if (!form) return;
+			e.preventDefault();
+
+			const fm = new FormData(form);
+			const payload = {
+			  title: fm.get('NewPost.Title').trim(),
+			  content: fm.get('NewPost.Content').trim(),
+			  userId: currentUserId
+			};
+
+			if (!payload.title || !payload.content) return;
+			console.log("Submitting post:", payload);
+
+			try {
+			  const res = await fetch(`${BaseUrl}/Post`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			  });
+
+			  if (!res.ok) {
+				const errorText = await res.text();
+				console.error('Post creation failed:', errorText);
+				alert('Không thể tạo bài viết. Vui lòng thử lại sau.');
+				return;
+			  }
+
+			  console.log("Post created successfully");
+			  form.reset();
+			} catch (error) {
+			  console.error("Error creating post:", error);
+			  alert('Đã xảy ra lỗi khi tạo bài viết.');
+			}
+		  });
+		});
+	</script>
+
+
+	<style>
+		.comments-section .comment {
+			margin-bottom: 20px; /* Tạo khoảng cách giữa các comment */
+			padding-bottom: 10px; /* Tạo khoảng cách phía dưới comment */
+			border-bottom: 1px solid #ddd; /* Thêm một đường phân cách giữa các comment */
+		}
+
+			.comments-section .comment.reply-comment {
+				margin-left: 40px; /* Thụt vào cho các reply */
+				border-left: 2px solid #ccc; /* Đường viền phân biệt reply */
+				padding-left: 10px;
+			}
+
+		.coment-area {
+			margin-top: 20px;
+		}
+
+			.coment-area .post-comt-box {
+				margin-top: 10px;
+			}
+
+				.coment-area .post-comt-box textarea {
+					width: 100%;
+					height: 100px;
+					padding: 10px;
+					border: 1px solid #ddd;
+					border-radius: 5px;
+				}
+	</style>
 
 </body>
 
