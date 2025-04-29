@@ -1,6 +1,7 @@
 using Serilog.Formatting.Json;
 using Serilog;
 using final_project_fe.Utils;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,10 @@ builder.Host.UseSerilog();
 
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+
+//Config SignalR
+builder.Services.Configure<SignalrSetting>(builder.Configuration.GetSection("SignalrSetting"));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<SignalrSetting>>().Value);
 
 builder.Services.AddHttpClient();
 

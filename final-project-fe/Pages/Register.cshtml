@@ -69,21 +69,65 @@
                                     <label class="control-label">Email</label><i class="mtrl-select"></i>
                                     <span asp-validation-for="RegisterData.Email" class="text-danger"></span>
                                 </div>
+
                                 <div class="form-group">
                                     <input asp-for="RegisterData.Password" type="password" required />
                                     <label class="control-label">Password</label><i class="mtrl-select"></i>
                                     <span asp-validation-for="RegisterData.Password" class="text-danger"></span>
                                 </div>
+
                                 <div class="form-group">
                                     <input asp-for="RegisterData.ConfirmPassword" type="password" required />
                                     <label class="control-label">Confirm Password</label><i class="mtrl-select"></i>
                                     <span asp-validation-for="RegisterData.ConfirmPassword" class="text-danger"></span>
                                 </div>
+
+
                                 <div class="form-group">
-                                    <input asp-for="RegisterData.Phone" type="tel" required />
+                                    <input asp-for="RegisterData.Phone" type="tel" required pattern="^\d{10,15}$" />
                                     <label class="control-label">Phone</label><i class="mtrl-select"></i>
                                     <span asp-validation-for="RegisterData.Phone" class="text-danger"></span>
                                 </div>
+
+                                <!-- Metadata fields -->
+                                <div class="form-group">
+                                    <input asp-for="RegisterData.UserMetadataDto.FirstName" required />
+                                    <label class="control-label">First Name</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.UserMetadataDto.FirstName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <input asp-for="RegisterData.UserMetadataDto.LastName" required />
+                                    <label class="control-label">Last Name</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.UserMetadataDto.LastName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <input asp-for="RegisterData.UserMetadataDto.Birthday"
+                                           type="date"
+                                           required
+                                           max="@DateTime.Now.AddYears(-10).ToString("yyyy-MM-dd")" />
+                                    <label class="control-label">Birthday</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.UserMetadataDto.Birthday" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <select asp-for="RegisterData.UserMetadataDto.Gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                    <label class="control-label">Gender</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.UserMetadataDto.Gender" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <input asp-for="RegisterData.UserMetadataDto.Address" required />
+                                    <label class="control-label">Address</label><i class="mtrl-select"></i>
+                                    <span asp-validation-for="RegisterData.UserMetadataDto.Address" class="text-danger"></span>
+                                </div>
+
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" checked="checked" /><i class="check-box"></i>Accept Terms & Conditions ?

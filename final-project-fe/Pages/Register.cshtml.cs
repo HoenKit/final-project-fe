@@ -21,7 +21,10 @@ namespace final_project_fe.Pages
             _httpClient = httpClient;
         }
         [BindProperty]
-        public RegisterDto RegisterData { get; set; } = new RegisterDto();
+        public RegisterDto RegisterData { get; set; } = new RegisterDto
+        {
+            UserMetadataDto = new UserMetadataDto()
+        };
         public async Task OnGetAsync()
         {
             if (Request.Cookies.ContainsKey("AccessToken"))
@@ -42,13 +45,19 @@ namespace final_project_fe.Pages
                 return Page();
             }
 
-            string registerApiUrl = $"{_apiSettings.BaseUrl}/Auth/register";
+            string registerApiUrl = $"{_apiSettings.BaseUrl}/Auth/Register";
 
             try
             {
-                var jsonContent = new StringContent(JsonSerializer.Serialize(RegisterData), Encoding.UTF8, "application/json");
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+
+                var jsonContent = new StringContent(JsonSerializer.Serialize(RegisterData, options), Encoding.UTF8, "application/json");
 
                 HttpResponseMessage response = await _httpClient.PostAsync(registerApiUrl, jsonContent);
+
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToPage("/Login");
@@ -56,13 +65,13 @@ namespace final_project_fe.Pages
                 else
                 {
                     _logger.LogError($"Lỗi API Đăng Ký: {response.StatusCode}");
-                    ModelState.AddModelError("", "Đăng ký thất bại!");
+                    ModelState.AddModelError(string.Empty, "Đăng ký thất bại! Vui lòng kiểm tra lại thông tin.");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
-                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng ký.");
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi trong quá trình đăng ký.");
             }
 
             return Page();

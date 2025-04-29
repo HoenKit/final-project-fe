@@ -20,13 +20,15 @@ namespace final_project_fe.Pages
 		private readonly ILogger<IndexModel> _logger;
 		private readonly ApiSettings _apiSettings;
 		private readonly HttpClient _httpClient;
+        private readonly SignalrSetting _signalrSetting;
 
-		public IndexModel(ILogger<IndexModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
+        public IndexModel(ILogger<IndexModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient, SignalrSetting signalrSetting)
 		{
 			_logger = logger;
 			_apiSettings = apiSettings.Value;
 			_httpClient = httpClient;
-		}
+            _signalrSetting = signalrSetting;
+        }
         [BindProperty]
         public CommentCreateDto NewComment { get; set; }
         public PageResult<CommentDto> Comments { get; set; }
@@ -34,12 +36,22 @@ namespace final_project_fe.Pages
 		public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
 		public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
 
-		public async Task OnGetAsync(int? page)
+        public string HubUrl { get; set; }
+        public string BaseUrl { get; set; }
+
+        public string CurrentUserId { get; set; }
+
+        public async Task OnGetAsync(int? page)
 		{
 			int currentPage = page ?? 1;
 			CommentsByPost = new Dictionary<int, List<CommentDto>>();
-			// URL Post API
-			string postsApiUrl = $"{_apiSettings.BaseUrl}/Post";
+
+            //URL to Html
+            HubUrl = _signalrSetting.HubUrl;
+            BaseUrl = _apiSettings.BaseUrl;
+
+            // URL Post API
+            string postsApiUrl = $"{_apiSettings.BaseUrl}/Post";
 
 			// URL Comment API
 			string userApiUrl = $"{_apiSettings.BaseUrl}/UserManager/";
@@ -48,8 +60,42 @@ namespace final_project_fe.Pages
 
 			try
 			{
-				// 1️ Gọi API lấy danh sách Posts
-				HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
+
+                // Lay Current User dang dang nhap
+
+                string token = Request.Cookies["AccessToken"];
+                var handler = new JwtSecurityTokenHandler();
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogError("Lỗi không tìm thấy token");
+                    // Optionally, set a default or fallback value if token is missing
+                    CurrentUserId = null; // or other default value
+                }
+                else
+                {
+                    var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                    if (jsonToken == null)
+                    {
+                        _logger.LogError("Lỗi không thể đọc token");
+                        CurrentUserId = null; // or other default value
+                    }
+                    else
+                    {
+                        var userId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                        if (userId != null)
+                        {
+                            CurrentUserId = userId;
+                        }
+                        else
+                        {
+                            _logger.LogError("Không tìm thấy userId trong token");
+                            CurrentUserId = null; // or other default value
+                        }
+                    }
+                }
+
+                // 1️ Gọi API lấy danh sách Posts
+                HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
 				if (postsResponse.IsSuccessStatusCode)
 				{
 					string postsJsonResponse = await postsResponse.Content.ReadAsStringAsync();
@@ -183,59 +229,6 @@ namespace final_project_fe.Pages
 		}
 
 
-		public async Task<IActionResult> OnPostAsync()
-		{
-
-            try
-            {
-                string token = Request.Cookies["AccessToken"];
-                if (string.IsNullOrEmpty(token))
-                {
-                    return Unauthorized();
-                }
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-
-                if (jsonToken == null)
-                {
-                    return Unauthorized();
-                }
-                var userId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized();
-                }
-
-                var requestData = new
-                {
-                    UserId = userId,
-                    PostId = NewComment.PostId,
-                    Content = NewComment.Content,
-                    ParentCommentId = NewComment.ParentCommentId
-                };
-
-                var jsonContent = JsonSerializer.Serialize(requestData);
-                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync($"{_apiSettings.BaseUrl}/Comment", content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToPage("/Index");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Lỗi khi gửi bình luận.");
-                    return Page();
-                }
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Đã xảy ra lỗi: {ex.Message}");
-                return Page();
-            }
-        }
     }
 }
 
