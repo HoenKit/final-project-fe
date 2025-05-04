@@ -31,19 +31,62 @@ namespace final_project_fe.Pages
         }
         [BindProperty]
         public CommentCreateDto NewComment { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public string Query { get; set; } = string.Empty;
         public PageResult<CommentDto> Comments { get; set; }
 		public PageResult<PostDto> Posts { get; set; }
-		public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
+
+        [BindProperty]
+        public PostCreateDto NewPost { get; set; }
+        public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
 		public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
 
         public string HubUrl { get; set; }
         public string BaseUrl { get; set; }
-
         public string CurrentUserId { get; set; }
+        public int currentPage { get; set; }
+
+        //Search Post
+        public async Task<IActionResult> OnGetSearchPostAsync()
+        {
+            try
+            {
+                // Gọi API lấy danh sách post theo query
+                string apiUrl = $"{_apiSettings.BaseUrl}/Post?title={Query}";
+                var response = await _httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    Posts = JsonSerializer.Deserialize<PageResult<PostDto>>(jsonResponse, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
+                }
+
+
+                else
+                {
+                    _logger.LogError($"Failed to fetch posts. Status Code: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching posts");
+            }
+
+            return Page();
+        }
 
         public async Task OnGetAsync(int? page)
 		{
-			int currentPage = page ?? 1;
+            if (!string.IsNullOrWhiteSpace(Query))
+            {
+                await OnGetSearchPostAsync();
+                return;
+            }
+
+            int currentPage = page ?? 1;
 			CommentsByPost = new Dictionary<int, List<CommentDto>>();
 
             //URL to Html
@@ -228,6 +271,68 @@ namespace final_project_fe.Pages
 			}
 		}
 
+        //Create Post
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (NewPost.Title == null || NewPost.Content == null)
+            {
+                await OnGetAsync(currentPage);
+                _logger.LogError("Invalid model state");
+                return Page();
+            }
+
+            string token = Request.Cookies["AccessToken"];
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var userId = jsonToken.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+
+            if (userId == null)
+            {
+                _logger.LogError("Không tìm thấy UserId của người dùng đã đăng nhập.");
+                return Page();
+            }
+
+            var requestData = new
+            {
+                UserId = userId,
+                Title = NewPost.Title,
+                Content = NewPost.Content,
+                SubCategoryId = 3,
+            };
+
+            var jsonContent = JsonSerializer.Serialize(requestData);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            try
+            {
+                var response = await _httpClient.PostAsync($"{_apiSettings.BaseUrl}/Post", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Bài viết đã được tạo thành công.");
+                    return RedirectToPage("/Index");
+                }
+                else
+                {
+                    string errorMessage = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Lỗi khi tạo bài viết: {StatusCode}, Nội dung lỗi: {ErrorMessage}",
+                                     response.StatusCode, errorMessage);
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "Lỗi HTTP khi gửi yêu cầu tạo bài viết.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi không xác định khi tạo bài viết.");
+            }
+
+            await OnGetAsync(currentPage);
+            return Page();
+        }
 
     }
 }
