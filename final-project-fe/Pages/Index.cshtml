@@ -38,6 +38,14 @@
 										<div class="widget">
 											<h4 class="widget-title">Shortcuts</h4>
 											<ul class="naves">
+												<form style="margin-bottom: -15px;" method="get" asp-page-handler="SearchPost" class="d-flex">
+													<div class="input-group" style="margin-bottom: 40px">
+														<input type="text" asp-for="Query" placeholder="Search by title..." class="form-control" />
+														<button type="submit" class="btn btn-primary">
+															<i class="bi bi-search"></i>
+														</button>
+													</div>
+												</form>
 												@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
 												@{
@@ -51,18 +59,18 @@
 														<a asp-page="/UserPage" title="">My pages</a>
 													</li>
 												}
-												<li>
+												@* <li>
 													<i class="ti-comments-smiley"></i>
 													<a href="#" title="">Messages</a>
 												</li>
 												<li>
 													<i class="ti-mouse-alt"></i>
 													<a href="#" title="">Inbox</a>
-												</li>
+												</li> 
 												<li>
 													<i class="ti-user"></i>
 													<a href="#" title="">friends</a>
-												</li>
+												</li>*@
 												<li>
 													<i class="ti-image"></i>
 													<a href="#" title="">images</a>
@@ -74,10 +82,6 @@
 												<li>
 													<i class="ti-bell"></i>
 													<a href="#" title="">Notifications</a>
-												</li>
-												<li>
-													<i class="fa fa-bar-chart-o"></i>
-													<a href="#" title="">insights</a>
 												</li>
 											</ul>
 										</div><!-- Shortcuts -->
@@ -152,6 +156,86 @@
 									<div class="loadMore">
 										<div class="central-meta item">
 											<div class="user-post">
+
+												@* <div class="newpst-input"> *@
+													<div class="card p-3 mb-3 shadow-sm rounded">
+														<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
+															<div class="d-flex align-items-center">
+																<img src="images/resources/friend-avatar9.jpg" class="rounded-circle me-2" width="40" height="40" />
+																<span class="text-muted">what are you thinking?</span>
+															</div>
+														</button>
+
+														<hr class="my-2" />
+
+														<div class="d-flex justify-content-between text-center">
+															<div class="text-danger" style="cursor: pointer;">
+																<i class="fa fa-video-camera me-1"></i>
+																Live video
+															</div>
+															<div class="text-success" style="cursor: pointer;">
+																<i class="fa fa-image me-1"></i>
+																Photos/videos
+															</div>
+															<div class="text-warning" style="cursor: pointer;">
+																<i class="fa fa-smile-o me-1"></i>
+																Feelings/Activities
+															</div>
+														</div>
+													</div>
+
+													<!-- Modal -->
+													<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+														<div class="modal-dialog modal-dialog-centered">
+															<div class="modal-content rounded">
+																<div class="modal-header">
+																	<h5 class="modal-title" id="createPostModalLabel">Create new post</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+																</div>
+																<div class="modal-body">
+																	<div class="d-flex align-items-center mb-3">
+																		<img src="images/resources/friend-avatar9.jpg" class="rounded-circle" width="40" height="40" />
+																		<div class="ms-2">
+																			@* <strong>Nguyễn Bình</strong><br /> *@
+																		</div>
+																	</div>
+
+																	<form method="post">
+																		<div class="form-group">
+																			<input asp-for="NewPost.Title" type="text" placeholder="Enter Post Title" class="form-control" required />
+																		</div>
+
+																		<div class="form-group">
+																			<textarea asp-for="NewPost.Content" rows="3" placeholder="Write something..." class="form-control" required></textarea>
+																		</div>
+																		<div class="d-flex justify-content-around border-top pt-2">
+																			<label class="btn btn-light">
+																				<i class="fa fa-image text-success"></i> Photos/videos
+																				<input type="file" name="Images" hidden />
+																			</label>
+																			<label class="btn btn-light">
+																				<i class="fa fa-smile-o text-warning"></i> Feeling
+																				<input type="file" hidden />
+																			</label>
+																			<label class="btn btn-light">
+																				<i class="fa fa-map-marker text-danger"></i> Location
+																				<input type="file" hidden />
+																			</label>
+																		</div>
+																		<div class="mt-3">
+																			<button type="submit" class="btn btn-primary w-100">Publish</button>
+																		</div>
+																	</form>
+																</div>
+															</div>
+														</div>
+													</div>
+													<!-- add post new box -->
+
+												@if (!string.IsNullOrWhiteSpace(Model.Query))
+												{
+													<h3>Search results for: "@Model.Query"</h3>
+												}
 												@if (Model.Posts != null && Model.Posts.Items.Any())
 												{
 													<ul>
@@ -184,7 +268,7 @@
 																	</div>
 
 																	<div class="post-meta">
-																		@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
+																	@* 	@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
 																		{
 																			@foreach (var file in Model.PostFilesByPost[post.PostId])
 																			{
@@ -197,12 +281,27 @@
 																					<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 																				}
 																			}
-																		}
+																		} *@
 																		@* 	else
 																		{
 																			<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
 																				 alt="Default Post Image" width="400" />
 																		} *@
+
+																		@if (post.PostFiles != null && post.PostFiles.Any())
+																		{
+																			foreach (var postFile in post.PostFiles)
+																			{
+																				if (postFile.PostFileType.ToLower() == "image")
+																				{
+																					<img src="@postFile.FileUrl" alt="Post Image" width="400" />
+																				}
+																				else
+																				{
+																					<iframe src="@postFile.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+																				}
+																			}
+																		}
 
 																		<div class="description">
 																			<p>@post.Content</p>
@@ -211,10 +310,14 @@
 
 																	<!-- Comment section -->
 																	<div class="comments-section" id="commentList-@post.PostId">
-																		@if (Model.CommentsByPost.ContainsKey(post.PostId)) // Kiểm tra nếu có comment
+																		 @if (Model.CommentsByPost.ContainsKey(post.PostId)) 
 																		{
 																			var comments = Model.CommentsByPost[post.PostId];
 																			@foreach (var comment in comments)
+
+																			@*@if (post.Comments != null && post.Comments.Any()) // Kiểm tra nếu có comment
+																		{
+																			foreach (var comment in post.Comments)*@
 																			{
 																				var isReply = comment.ParentCommentId != null;
 																				var commentClass = isReply ? "comment reply-comment" : "comment";
@@ -282,7 +385,7 @@
 																							<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
 																							<input type="hidden" name="NewComment.ParentCommentId" />
 																							<label>Comment:</label>
-																							<textarea name="NewComment.Content" placeholder="Viết bình luận..."></textarea>
+																							<textarea name="NewComment.Content" placeholder="Write a comment..."></textarea>
 																							<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
 																						</form>
 																					</div>
