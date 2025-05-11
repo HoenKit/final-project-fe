@@ -1,11 +1,13 @@
 ﻿@page
 @model final_project_fe.Pages.Admin.UserManager.DetailModel
-
+@{
+    ViewData["ActivePage"] = "UserManager";
+}
 <div class="page-header">
     <h3 class="fw-bold mb-3">Detail</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
-            <a href="#">
+            <a asp-page="/Admin/Dashboard/Index">
                 <i class="icon-home"></i>
             </a>
         </li>
@@ -19,7 +21,7 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.UserDetail.UserId">@Model.UserDetail.UserProfile.FirstName @Model.UserDetail.UserProfile.LastName</a>
+            <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.UserDetail.UserId">@Model.UserDetail.UserMetaData.FirstName @Model.UserDetail.UserMetaData.LastName</a>
         </li>
     </ul>
 </div>
@@ -29,22 +31,32 @@
             <div class="card-header">
                 <h4 class="card-title"></h4>
             </div>
-        <div class="card-body">
+            <div class="card-body" style="display: flex; align-items: center; gap: 20px;">
                 @if (Model.UserDetail != null)
                 {
-                    <p><strong>Email:</strong> @Model.UserDetail.Email</p>
-                    <p><strong>Phone:</strong> @Model.UserDetail.Phone</p>
-                    <p><strong>Points:</strong> @Model.UserDetail.Point</p>
-                    <p><strong>Status:</strong> @(Model.UserDetail.IsBanned ? "Banned" : "Active")</p>
-                    <p><strong>Created At:</strong> @Model.UserDetail.CreateAt.ToString("yyyy-MM-dd HH:mm")</p>
-
-                    @if (Model.UserDetail.UserProfile != null)
-                    {
-                        <p><strong>Full Name:</strong> @Model.UserDetail.UserProfile.FirstName @Model.UserDetail.UserProfile.LastName</p>
-                        <p><strong>Birthday:</strong> @(Model.UserDetail.UserProfile.Birthday?.ToString("yyyy-MM-dd") ?? "N/A")</p>
-                        <p><strong>Gender:</strong> @Model.UserDetail.UserProfile.Gender</p>
-                        <p><strong>Address:</strong> @Model.UserDetail.UserProfile.Address</p>
-                    }
+                    <div style="flex-basis: 30%; text-align: center;">
+                        <img src="@(Model.UserDetail.UserMetaData.Avatar)" style="max-width: 100%; height: 200px;" />
+                        <p>
+                            @if (Model.UserDetail.IsBanned == true)
+                            {
+                                <span class="badge badge-danger"><i class="fas fa-user-alt-slash"></i> Banned</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success"><i class="fas fa-user-alt"></i> Active</span>
+                            }
+                        </p>
+                        <p><strong>Points:</strong> @Model.UserDetail.Point</p>
+                    </div>
+                    <div style="flex-basis: 70%;">
+                        <p><strong>Full Name:</strong> @Model.UserDetail.UserMetaData.FirstName @Model.UserDetail.UserMetaData.LastName</p>
+                        <p><strong>Email:</strong> @Model.UserDetail.Email</p>
+                        <p><strong>Phone:</strong> @Model.UserDetail.Phone</p>
+                        <p><strong>Created At:</strong> @Model.UserDetail.CreateAt.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p><strong>Birthday:</strong> @(Model.UserDetail.UserMetaData.Birthday)</p>
+                        <p><strong>Gender:</strong> @Model.UserDetail.UserMetaData.Gender</p>
+                        <p><strong>Address:</strong> @Model.UserDetail.UserMetaData.Address</p>
+                    </div>
                 }
                 else
                 {

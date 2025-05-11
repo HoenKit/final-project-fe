@@ -1,20 +1,20 @@
 ﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Category;
+using final_project_fe.Dtos.Post;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Hosting;
 using System.Text.Json;
-using System.Xml.Linq;
-using final_project_fe.Dtos.Users;
 
-namespace final_project_fe.Pages.Admin.UserManager
+namespace final_project_fe.Pages.Admin.PostManager
 {
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
         private readonly ApiSettings _apiSettings;
         private readonly HttpClient _httpClient;
+
         public IndexModel(ILogger<IndexModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
         {
             _logger = logger;
@@ -22,52 +22,50 @@ namespace final_project_fe.Pages.Admin.UserManager
             _httpClient = httpClient;
         }
 
-        public PageResult<User> Users { get; set; }
+        public PageResult<PostManagerDto> Posts { get; set; }
         public int CurrentPage { get; set; }
         public int PageSize { get; set; } = 10;
 
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
-            {
                 return RedirectToPage("/Login");
-            }
 
             string token = Request.Cookies["AccessToken"];
-
             string? role = JwtHelper.GetRoleFromToken(token);
+
             if (role != "Admin")
-            {
                 return RedirectToPage("/Index");
-            }
 
             CurrentPage = pageNumber;
 
-            string usersApiUrl = $"{_apiSettings.BaseUrl}/User?page={pageNumber}&pageSize={PageSize}";
+            string apiUrl = $"{_apiSettings.BaseUrl}/Post/GetAllPosts?page={pageNumber}&pageSize={PageSize}";
 
             try
             {
-                HttpResponseMessage usersResponse = await _httpClient.GetAsync(usersApiUrl);
-                if (usersResponse.IsSuccessStatusCode)
+                var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.SendAsync(request);
+                if (response.IsSuccessStatusCode)
                 {
-                    string usersJsonResponse = await usersResponse.Content.ReadAsStringAsync();
-                    Users = JsonSerializer.Deserialize<PageResult<User>>(usersJsonResponse, new JsonSerializerOptions
+                    string json = await response.Content.ReadAsStringAsync();
+                    Posts = JsonSerializer.Deserialize<PageResult<PostManagerDto>>(json, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
-                    }) ?? new PageResult<User>(new List<User>(), 0, 1, PageSize);
+                    }) ?? Posts;
                 }
                 else
                 {
-                    _logger.LogError($"Lỗi API User: {usersResponse.StatusCode}");
+                    _logger.LogError($"Lỗi khi gọi API Post: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
+                _logger.LogError($"Lỗi khi gọi API Post: {ex.Message}");
             }
 
             return Page();
         }
-
     }
 }
