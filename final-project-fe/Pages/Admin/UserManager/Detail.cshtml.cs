@@ -1,4 +1,4 @@
-﻿using final_project_fe.Dtos.UserManager;
+﻿using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -20,7 +20,7 @@ namespace final_project_fe.Pages.Admin.UserManager
             _httpClient = httpClient;
         }
 
-        public UserManagerDto UserDetail { get; set; } = new();
+        public User UserDetail { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(Guid userId)
         {
@@ -42,7 +42,7 @@ namespace final_project_fe.Pages.Admin.UserManager
                 return BadRequest("Invalid user ID.");
             }
 
-            string apiUrl = $"{_apiSettings.BaseUrl}/UserManager/{userId}";
+            string apiUrl = $"{_apiSettings.BaseUrl}/User/{userId}";
 
             try
             {
@@ -50,18 +50,19 @@ namespace final_project_fe.Pages.Admin.UserManager
                 if (response.IsSuccessStatusCode)
                 {
                     string jsonResponse = await response.Content.ReadAsStringAsync();
-                    UserDetail = JsonSerializer.Deserialize<UserManagerDto>(jsonResponse, new JsonSerializerOptions
+                    UserDetail = JsonSerializer.Deserialize<User>(jsonResponse, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
-                    }) ?? new UserManagerDto();
+                    }) ?? new User();
 
-                    if (UserDetail.UserProfile == null)
+                    if (UserDetail.UserMetaData == null)
                     {
-                        UserDetail.UserProfile = new UserProfileDto
+                        UserDetail.UserMetaData = new UserMetadata
                         {
                             FirstName = "N/A",
                             LastName = "N/A",
                             Gender = "Unknown",
+                            Avatar = "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg",
                             Address = "Not Available"
                         };
                     }

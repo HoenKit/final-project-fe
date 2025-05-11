@@ -1,4 +1,4 @@
-﻿using final_project_fe.Dtos.UserManager;
+﻿using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -20,7 +20,7 @@ namespace final_project_fe.Pages.Admin.UserManager
             _httpClient = httpClient;
         }
 
-        public UserManagerDto? User { get; set; }
+        public User? User { get; set; }
 
         public async Task<IActionResult> OnGetAsync(Guid userId)
         {
@@ -43,7 +43,7 @@ namespace final_project_fe.Pages.Admin.UserManager
                 return RedirectToPage("/Index");
             }
 
-            string apiUrl = $"{_apiSettings.BaseUrl}/UserManager/toggle-ban/{userId}";
+            string apiUrl = $"{_apiSettings.BaseUrl}/User/toggle-ban/{userId}";
 
             try
             {
@@ -53,7 +53,7 @@ namespace final_project_fe.Pages.Admin.UserManager
                 if (response.IsSuccessStatusCode)
                 {
                     string jsonResponse = await response.Content.ReadAsStringAsync();
-                    User = JsonSerializer.Deserialize<UserManagerDto>(jsonResponse, new JsonSerializerOptions
+                    User = JsonSerializer.Deserialize<User>(jsonResponse, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
