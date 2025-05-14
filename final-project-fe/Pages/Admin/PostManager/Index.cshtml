@@ -3,6 +3,23 @@
 @{
     ViewData["ActivePage"] = "PostManager";
 }
+
+<style>
+    .text-truncate-multiline {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Số dòng muốn hiện */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-height: 3.6em; /* Điều chỉnh tương ứng dòng */
+    }
+
+    .content-cell {
+        max-width: 300px;
+    }
+</style>
+
+
 <div class="page-header">
     <h3 class="fw-bold mb-3">Post Manager</h3>
     <ul class="breadcrumbs mb-3">
@@ -55,7 +72,7 @@
                             </tr>
                         </tfoot>
                         <tbody>
-                            @if (!Model.Posts.Items.Any())
+                            @if (Model.Posts == null || !Model.Posts.Items.Any())
                             {
                                 <tr>
                                     <td colspan="9" class="text-center">NULL</td>
@@ -65,15 +82,21 @@
                             {
                             @foreach (var post in Model.Posts.Items)
                             {
-                                <tr>
+                                var user = Model.Users.Items.FirstOrDefault(u => u.UserId == post.UserId);
+                                var subCat = Model.SubCategories.Items.FirstOrDefault(s => s.SubCategoryId == post.SubCategoryId);
+                                <tr class="clickable-row" data-id="@post.PostId" style="cursor:pointer;">
                                     <td>@post.PostId</td>
-                                    <td>@post.User?.Email</td>
-                                    <td>@post.ParentPostId</td>
-                                    <td>@post.SubCategory?.Title</td>
-                                    <td>@post.Title</td>
-                                    <td>@post.Content</td>
+                                    <td>@user.Email</td>
+                                    <td>@(post.ParentPostId == null || post.ParentPostId == 0 ? "None" : post.ParentPostId.ToString())</td>
+                                    <td>@subCat.Title</td>
+                                    <td class="content-cell">
+                                        <div class="text-truncate-multiline">@post.Title</div>
+                                    </td>
+                                    <td class="content-cell">
+                                        <div class="text-truncate-multiline">@post.Content</div>
+                                    </td>
                                     <td>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@post.UpdateAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(post.UpdateAt?.ToString("dd/MM/yyyy HH:mm") ?? "None")</td>
                                 </tr>
                             }
                             }
@@ -111,7 +134,8 @@
         </div>
     </div>
 </div>
-<script>
+
+@* <script>
       // Add Row
       $("#add-row").DataTable({
         pageLength: 5,
@@ -131,5 +155,19 @@
           ]);
         $("#addRowModal").modal("hide");
       });
+    });
+</script> *@
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rows = document.querySelectorAll(".clickable-row");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                const postId = row.getAttribute("data-id");
+                if (postId) {
+                    window.location.href = `/Admin/PostManager/Detail?id=${postId}`;
+                }
+            });
+        });
     });
 </script>
