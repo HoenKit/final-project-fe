@@ -95,7 +95,7 @@
                                     <td class="content-cell">
                                         <div class="text-truncate-multiline">@post.Content</div>
                                     </td>
-                                    <td>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@post.CreateAt?.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>@(post.UpdateAt?.ToString("dd/MM/yyyy HH:mm") ?? "None")</td>
                                 </tr>
                             }
