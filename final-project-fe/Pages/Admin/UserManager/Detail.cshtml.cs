@@ -21,6 +21,7 @@ namespace final_project_fe.Pages.Admin.UserManager
         }
 
         public User UserDetail { get; set; } = new();
+        public string ReturnUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync(Guid userId)
         {
@@ -36,6 +37,8 @@ namespace final_project_fe.Pages.Admin.UserManager
             {
                 return RedirectToPage("/Index");
             }
+
+            ReturnUrl = Request.Headers["Referer"].ToString();
 
             if (userId == Guid.Empty)
             {
@@ -63,7 +66,7 @@ namespace final_project_fe.Pages.Admin.UserManager
                             LastName = "N/A",
                             Gender = "Unknown",
                             Avatar = "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg",
-                            Address = "Not Available"
+                            Address = "None"
                         };
                     }
                 }

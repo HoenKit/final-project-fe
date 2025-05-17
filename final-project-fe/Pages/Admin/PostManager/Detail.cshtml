@@ -4,7 +4,7 @@
     ViewData["ActivePage"] = "PostManager";
 }
 <div class="page-header">
-    <h3 class="fw-bold mb-3">User Manager</h3>
+    <h3 class="fw-bold mb-3">Detail</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
             <a asp-page="/Admin/Dashboard/Index">
@@ -17,5 +17,117 @@
         <li class="nav-item">
             <a asp-page="/Admin/PostManager/Index">Post Manager</a>
         </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a>@Model.Post.Title</a>
+        </li>
     </ul>
 </div>
+<div class="card">
+    <div class="card-body">
+        <!-- Header with user info -->
+        <div class="d-flex align-items-center mb-4">
+            <div class="avatar me-3">
+                <img src=@(Model.User.UserMetaData?.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg") alt="Avatar" class="rounded-circle" width="50">
+            </div>
+            <div>
+                <h5 class="mb-0">
+                    <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.User.UserId">
+                        @(Model.User.UserMetaData?.LastName ?? Model.User.Email)
+                    </a>
+                </h5>
+                <div class="text-muted small">
+                    <span>Created: @Model.Post.CreateAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                    @if (Model.Post.UpdateAt != null)
+                    {
+                        <span class="ms-2">Updated: @Model.Post.UpdateAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Post content -->
+        <div class="post-content mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold">@Model.Post.Title</h4>
+                <span class="badge bg-primary">@Model.SubCategory?.Title</span>
+            </div>
+            <div class="post-body bg-light p-3 rounded mb-3">
+                @Model.Post.Content
+            </div>
+
+            <div class="post-meta text-muted small">
+                <span class="me-3">Post ID: @Model.Post.PostId</span>
+                @if (Model.Post.ParentPostId != null)
+                {
+                    <span>Parent Post: @Model.Post.ParentPostId</span>
+                }
+            </div>
+        </div>
+
+        <!-- Files gallery -->
+        @if (Model.PostFiles.Any())
+        {
+            <hr class="my-4">
+            <div class="row g-3">
+                @foreach (var file in Model.PostFiles)
+                {
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                @if (file.PostFileType == "image")
+                                {
+                                    <img src="@file.FileUrl" alt="Image" class="img-fluid rounded mb-2" style="max-height: 150px;">
+                                }
+                                else if (file.PostFileType == "video")
+                                {
+                                    <video controls width="100%" style="max-height: 150px;">
+                                        <source src="@file.FileUrl" type="video/mp4">
+                                    </video>
+                                }
+                                <div>
+                                    <span class="badge bg-secondary">@file.PostFileType</span>
+                                    <a href="@file.FileUrl" target="_blank" class="d-block text-truncate small mt-1">View File</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Footer actions -->
+    <div class="card-footer bg-transparent border-top-0">
+        <a asp-page="./Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <div class="float-end">
+            <form method="post" asp-page="/Admin/PostManager/Delete" asp-route-id="@Model.Post.PostId" class="d-inline">
+                <button type="submit" class="btn btn-link btn-danger"
+                        onclick="return confirm('Are you sure you want to delete this post?')"
+                        title="Delete Post">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<style>
+    .avatar img {
+        object-fit: cover;
+    }
+
+    .post-body {
+        white-space: pre-line;
+    }
+
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    }
+</style>
