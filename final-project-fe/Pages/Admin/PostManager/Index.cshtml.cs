@@ -25,7 +25,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
         public PageResult<PostManagerDto> Posts { get; set; }
         public PageResult<User> Users { get; set; }
-        public PageResult<SubCategoryDto> SubCategories { get; set; }
+        public PageResult<CategoryDto> Categories { get; set; }
         public int CurrentPage { get; set; }
         public int PageSize { get; set; } = 10;
        
@@ -44,7 +44,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             string postApiUrl = $"{_apiSettings.BaseUrl}/Post?page={pageNumber}&pageSize={PageSize}";
             string userApiUrl = $"{_apiSettings.BaseUrl}/User/";
-            string subCategoryApiUrl = $"{_apiSettings.BaseUrl}/SubCategory/";
+            string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category/";
 
             try
             {
@@ -54,15 +54,15 @@ namespace final_project_fe.Pages.Admin.PostManager
                 var requestUser = new HttpRequestMessage(HttpMethod.Get, userApiUrl);
                 requestUser.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                var requestSubCategory = new HttpRequestMessage(HttpMethod.Get, subCategoryApiUrl);
-                requestSubCategory.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var requestCategory = new HttpRequestMessage(HttpMethod.Get, categoryApiUrl);
+                requestCategory.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi api song song 3 request
                 var postTask = _httpClient.SendAsync(requestPost);
                 var userTask = _httpClient.SendAsync(requestUser);
-                var subCategoryTask = _httpClient.SendAsync(requestSubCategory);
+                var categoryTask = _httpClient.SendAsync(requestCategory);
 
-                await Task.WhenAll(postTask, userTask, subCategoryTask);
+                await Task.WhenAll(postTask, userTask, categoryTask);
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
@@ -79,10 +79,10 @@ namespace final_project_fe.Pages.Admin.PostManager
                     Users = JsonSerializer.Deserialize<PageResult<User>>(json, options);
                 }
 
-                if (subCategoryTask.Result.IsSuccessStatusCode)
+                if (categoryTask.Result.IsSuccessStatusCode)
                 {
-                    string json = await subCategoryTask.Result.Content.ReadAsStringAsync();
-                    SubCategories = JsonSerializer.Deserialize<PageResult<SubCategoryDto>>(json, options);
+                    string json = await categoryTask.Result.Content.ReadAsStringAsync();
+                    Categories = JsonSerializer.Deserialize<PageResult<CategoryDto>>(json, options);
                 }
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             Posts ??= new PageResult<PostManagerDto>(Enumerable.Empty<PostManagerDto>(), 0, CurrentPage, PageSize);
             Users ??= new PageResult<User>(Enumerable.Empty<User>(), 0, 1, 10);
-            SubCategories ??= new PageResult<SubCategoryDto>(Enumerable.Empty<SubCategoryDto>(), 0, 1, 10);
+            Categories ??= new PageResult<CategoryDto>(Enumerable.Empty<CategoryDto>(), 0, 1, 10);
 
             return Page();
         }

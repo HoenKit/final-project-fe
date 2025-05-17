@@ -52,7 +52,7 @@
                                 <th>PostId</th>
                                 <th>Email</th>
                                 <th>ParentPostId</th>
-                                <th>SubCategory</th>
+                                <th>Category</th>
                                 <th>Title</th>
                                 <th>Content</th>
                                 <th>CreateAt</th>
@@ -64,7 +64,7 @@
                                 <th>PostId</th>
                                 <th>Email</th>
                                 <th>ParentPostId</th>
-                                <th>SubCategory</th>
+                                <th>Category</th>
                                 <th>Title</th>
                                 <th>Content</th>
                                 <th>CreateAt</th>
@@ -83,12 +83,12 @@
                             @foreach (var post in Model.Posts.Items)
                             {
                                 var user = Model.Users.Items.FirstOrDefault(u => u.UserId == post.UserId);
-                                var subCat = Model.SubCategories.Items.FirstOrDefault(s => s.SubCategoryId == post.SubCategoryId);
+                                var Category = Model.Categories.Items.FirstOrDefault(s => s.CategoryId == post.CategoryId);
                                 <tr class="clickable-row" data-id="@post.PostId" style="cursor:pointer;">
                                     <td>@post.PostId</td>
                                     <td>@user.Email</td>
                                     <td>@(post.ParentPostId == null || post.ParentPostId == 0 ? "None" : post.ParentPostId.ToString())</td>
-                                    <td>@subCat.Title</td>
+                                        <td>@Category.Title</td>
                                     <td class="content-cell">
                                         <div class="text-truncate-multiline">@post.Title</div>
                                     </td>
