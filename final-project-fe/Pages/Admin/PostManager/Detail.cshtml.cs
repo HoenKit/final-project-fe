@@ -1,12 +1,106 @@
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Category;
+using final_project_fe.Dtos.Post;
+using final_project_fe.Dtos.Users;
+using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Options;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace final_project_fe.Pages.Admin.PostManager
 {
     public class DetailModel : PageModel
     {
-        public void OnGet()
+        private readonly ILogger<DetailModel> _logger;
+        private readonly ApiSettings _apiSettings;
+        private readonly HttpClient _httpClient;
+
+        public DetailModel(ILogger<DetailModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
         {
+            _logger = logger;
+            _apiSettings = apiSettings.Value;
+            _httpClient = httpClient;
+        }
+
+        public PostManagerDto? Post { get; set; }
+
+        public User? User { get; set; }
+        public SubCategoryDto? SubCategory { get; set; }
+        public List<PostFileDto> PostFiles { get; set; } = new();
+
+        public async Task<IActionResult> OnGetAsync(int id)
+        {
+            if (!Request.Cookies.ContainsKey("AccessToken"))
+                return RedirectToPage("/Login");
+
+            string token = Request.Cookies["AccessToken"];
+            string? role = JwtHelper.GetRoleFromToken(token);
+
+            if (role != "Admin")
+                return RedirectToPage("/Index");
+
+            // Lấy thông tin Post
+            string postUrl = $"{_apiSettings.BaseUrl}/Post/{id}";
+            var postRequest = new HttpRequestMessage(HttpMethod.Get, postUrl);
+            postRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var postResponse = await _httpClient.SendAsync(postRequest);
+            if (!postResponse.IsSuccessStatusCode)
+            {
+                return NotFound();
+            }
+
+            var postJson = await postResponse.Content.ReadAsStringAsync();
+            var postRoot = JsonNode.Parse(postJson);
+            Post = postRoot?["result"]?.Deserialize<PostManagerDto>(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new PostManagerDto();
+
+            if (Post == null) return NotFound();
+
+            // Lấy thông tin User
+            string userUrl = $"{_apiSettings.BaseUrl}/User/{Post.UserId}";
+            var userResponse = await _httpClient.GetAsync(userUrl);
+            if (userResponse.IsSuccessStatusCode)
+            {
+                var userJson = await userResponse.Content.ReadAsStringAsync();
+                User = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+
+            // Lấy thông tin SubCategory
+            string subCatUrl = $"{_apiSettings.BaseUrl}/SubCategory/{Post.SubCategoryId}";
+            var subCatResponse = await _httpClient.GetAsync(subCatUrl);
+            if (subCatResponse.IsSuccessStatusCode)
+            {
+                var subCatJson = await subCatResponse.Content.ReadAsStringAsync();
+                var subCatRoot = JsonNode.Parse(subCatJson);
+                SubCategory = subCatRoot?["result"]?.Deserialize<SubCategoryDto>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new SubCategoryDto();
+            }
+
+            // Gọi API lấy PostFile
+            string postFileUrl = $"{_apiSettings.BaseUrl}/PostFile?postId={id}";
+            var postFileRequest = new HttpRequestMessage(HttpMethod.Get, postFileUrl);
+            postFileRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var postFileResponse = await _httpClient.SendAsync(postFileRequest);
+            if (postFileResponse.IsSuccessStatusCode)
+            {
+                var fileJson = await postFileResponse.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                PostFiles = JsonSerializer.Deserialize<List<PostFileDto>>(fileJson, options) ?? new();
+            }
+
+            return Page();
         }
     }
 }
