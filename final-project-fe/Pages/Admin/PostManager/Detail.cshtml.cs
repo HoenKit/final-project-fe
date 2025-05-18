@@ -28,7 +28,7 @@ namespace final_project_fe.Pages.Admin.PostManager
         public PostManagerDto? Post { get; set; }
 
         public User? User { get; set; }
-        public SubCategoryDto? SubCategory { get; set; }
+        public CategoryDto? Category { get; set; }
         public List<PostFileDto> PostFiles { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -74,17 +74,17 @@ namespace final_project_fe.Pages.Admin.PostManager
                 });
             }
 
-            // Lấy thông tin SubCategory
-            string subCatUrl = $"{_apiSettings.BaseUrl}/SubCategory/{Post.SubCategoryId}";
-            var subCatResponse = await _httpClient.GetAsync(subCatUrl);
-            if (subCatResponse.IsSuccessStatusCode)
+            // Lấy thông tin Category
+            string categoryUrl = $"{_apiSettings.BaseUrl}/Category/{Post.CategoryId}";
+            var categoryResponse = await _httpClient.GetAsync(categoryUrl);
+            if (categoryResponse.IsSuccessStatusCode)
             {
-                var subCatJson = await subCatResponse.Content.ReadAsStringAsync();
-                var subCatRoot = JsonNode.Parse(subCatJson);
-                SubCategory = subCatRoot?["result"]?.Deserialize<SubCategoryDto>(new JsonSerializerOptions
+                var categoryJson = await categoryResponse.Content.ReadAsStringAsync();
+                var categoryRoot = JsonNode.Parse(categoryJson);
+                Category = categoryRoot?["result"]?.Deserialize<CategoryDto>(new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
-                }) ?? new SubCategoryDto();
+                }) ?? new CategoryDto();
             }
 
             // Gọi API lấy PostFile
