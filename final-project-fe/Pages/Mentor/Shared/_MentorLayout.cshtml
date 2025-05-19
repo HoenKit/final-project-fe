@@ -1,0 +1,237 @@
+﻿@{
+	var token = Context.Request.Cookies["AccessToken"];
+	bool isAuthenticated = !string.IsNullOrEmpty(token);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+@*     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+	<link rel="icon" href="~/images/fav.png" type="image/png" sizes="16x16">
+
+	<link rel="stylesheet" href="~/css/main.min.css">
+	<link rel="stylesheet" href="~/css/style.css">
+	<link rel="stylesheet" href="~/css/color.css">
+	<link rel="stylesheet" href="~/css/responsive.css">
+	<link rel="stylesheet" href="~/css/strip.css">
+ *@
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<title>@ViewData["Title"]</title>
+	<link rel="icon" href="~/images/fav.png" type="image/png" sizes="16x16">
+
+	<link rel="stylesheet" href="~/css/main.min.css">
+	<link rel="stylesheet" href="~/css/strip.css">
+	<link rel="stylesheet" href="~/css/style.css">
+	<link rel="stylesheet" href="~/css/color.css">
+	<link rel="stylesheet" href="~/css/responsive.css">
+	@* <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet"> *@
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+	<header>
+		<div class="theme-layout">
+			<div class="topbar transparent">
+				<div class="logo">
+					<a title="" href="/Index">
+						<img src="@Url.Content("~/images/logo2.png")" alt="">
+					</a>
+				</div>
+				<div class="menu-container" id="toggle">
+					<a href="#" class="canvas-menu">
+						<i class="fa fa-times fa-bars" aria-hidden="true"></i>
+						@* <i class="fa-solid fa-bars" aria-hidden="true"></i> *@
+					</a>
+				</div>
+				<div class="overlay" id="overlay">
+					<nav class="overlay-menu">
+						<ul class="offcanvas-menu">
+							<li class="menu-item-has-children">
+								<a href="#" title="">Home</a>
+								<ul>
+										<li><a asp-page="/Index" title="">Home Social</a></li>
+										@* <li><a href="index2.html" title="">Home Social 2</a></li>
+										<li><a href="index-company.html" title="">Home Company</a></li> *@
+										@if (isAuthenticated)
+										{
+											<li>
+												<i class="ti-power-off"></i>
+												<a asp-page="/Logout">Logout</a>
+											</li>
+										}
+										else
+										{
+											<li><a asp-page="/Login">Login</a></li>
+											<li><a asp-page="/Register">Register</a></li>
+										}
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Our Blog</a>
+								<ul>
+									<li><a href="blog-grid-wo-sidebar.html" title="">Our Blog</a></li>
+									<li><a href="blog-grid-right-sidebar.html" title="">Blog with R-Sidebar</a></li>
+									<li><a href="blog-grid-left-sidebar.html" title="">Blog with L-Sidebar</a></li>
+									<li><a href="blog-masonry.html" title="">Blog Masonry Style</a></li>
+									<li><a href="blog-list-wo-sidebar.html" title="">Blog List Style</a></li>
+									<li><a href="blog-list-right-sidebar.html" title="">Blog List with R-Sidebar</a></li>
+									<li><a href="blog-list-left-sidebar.html" title="">Blog List with L-Sidebar</a></li>
+									<li><a href="blog-detail.html" title="">Blog Post Detail</a></li>
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Shop Pages</a>
+								<ul>
+									<li><a href="shop.html" title="">Shop Products</a></li>
+									<li><a href="shop-masonry.html" title="">Shop Masonry Products</a></li>
+									<li><a href="shop-single.html" title="">Shop Detail Page</a></li>
+									<li><a href="shop-cart.html" title="">Shop Product Cart</a></li>
+									<li><a href="shop-checkout.html" title="">Product Checkout</a></li>
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Our Portfolio</a>
+								<ul>
+									<li><a href="portfolio-2colm.html" title="">Portfolio 2col</a></li>
+									<li><a href="portfolio-3colm.html" title="">Portfolio 3col</a></li>
+									<li><a href="portfolio-4colm.html" title="">Portfolio 4col</a></li>
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Support & Help</a>
+								<ul>
+									<li><a href="support-and-help.html" title="">Support & Help</a></li>
+									<li><a href="support-and-help-detail.html" title="">Support & Help Detail</a></li>
+									<li><a href="support-and-help-search-result.html" title="">Support & Help Search Result</a></li>
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Company Forum</a>
+								<ul>
+									<li><a href="forum.html" title="">Forum Page</a></li>
+									<li><a href="forums-category.html" title="">Fourm Category</a></li>
+									<li><a href="forum-open-topic.html" title="">Forum Open Topic</a></li>
+									<li><a href="forum-create-topic.html" title="">Forum Create Topic</a></li>
+								</ul>
+							</li>
+							<li class="menu-item-has-children">
+								<a href="#" title="">Featured Pages</a>
+								<ul>
+									<li><a href="careers.html" title="">Careers</a></li>
+									<li><a href="career-detail.html" title="">Career Detail</a></li>
+									<li><a href="logout.html" title="">Logout Page</a></li>
+									<li><a href="404-2.html" title="">404 Errro Page</a></li>
+									<li><a href="about-company.html" title="">About Us</a></li>
+									<li><a href="contact-branches.html" title="">Contact Us</a></li>
+								</ul>
+							</li>
+
+						</ul>
+					</nav>
+				</div>
+			</div><!-- topbar transparent header -->
+		</div>
+	</header>
+
+    <div class="">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-4 col-md-4">
+					<div class="widget">
+						<div class="foot-logo">
+							<div class="logo">
+								<a title="" href="/Index">
+									<img src="@Url.Content("~/images/logo.png")" alt="">
+								</a>
+							</div>
+							<p>
+								The trio took this simple idea and built it into the world’s leading carpooling platform.
+							</p>
+						</div>
+						<ul class="location">
+							<li>
+								<i class="ti-map-alt"></i>
+								<p>33 new montgomery st.750 san francisco, CA USA 94105.</p>
+							</li>
+							<li>
+								<i class="ti-mobile"></i>
+								<p>+1-56-346 345</p>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-2 col-md-4">
+					<div class="widget">
+						<div class="widget-title"><h4>follow</h4></div>
+						<ul class="list-style">
+							<li><i class="fa fa-facebook-square"></i> <a href="https://web.facebook.com/shopcircut/" title="">facebook</a></li>
+							<li><i class="fa fa-twitter-square"></i><a href="https://twitter.com/login?lang=en" title="">twitter</a></li>
+							<li><i class="fa fa-instagram"></i><a href="https://www.instagram.com/?hl=en" title="">instagram</a></li>
+							<li><i class="fa fa-google-plus-square"></i> <a href="https://plus.google.com/discover" title="">Google+</a></li>
+							<li><i class="fa fa-pinterest-square"></i> <a href="https://www.pinterest.com/" title="">Pintrest</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-2 col-md-4">
+					<div class="widget">
+						<div class="widget-title"><h4>Navigate</h4></div>
+						<ul class="list-style">
+							<li><a href="#" title="">about us</a></li>
+							<li><a href="#" title="">contact us</a></li>
+							<li><a href="#" title="">terms & Conditions</a></li>
+							<li><a href="#" title="">RSS syndication</a></li>
+							<li><a href="#" title="">Sitemap</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-2 col-md-4">
+					<div class="widget">
+						<div class="widget-title"><h4>useful links</h4></div>
+						<ul class="list-style">
+							<li><a href="#" title="">leasing</a></li>
+							<li><a href="#" title="">submit route</a></li>
+							<li><a href="#" title="">how does it work?</a></li>
+							<li><a href="#" title="">agent listings</a></li>
+							<li><a href="#" title="">view All</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-lg-2 col-md-4">
+					<div class="widget">
+						<div class="widget-title"><h4>download apps</h4></div>
+						<ul class="colla-apps">
+							<li><a href="https://play.google.com/store?hl=en" title=""><i class="fa fa-android"></i>android</a></li>
+							<li><a href="https://www.apple.com/lae/ios/app-store/" title=""><i class="ti-apple"></i>iPhone</a></li>
+							<li><a href="https://www.microsoft.com/store/apps" title=""><i class="fa fa-windows"></i>Windows</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+    </footer>
+
+    @* <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script> *@
+
+	<script src="@Url.Content("~/js/main.min.js")"></script>
+	<script src="@Url.Content("~/js/script.js")"></script>
+	<script src="@Url.Content("~/js/strip.pkgd.min.js")"></script>
+	@* <script src="~/js/map-init.js"></script> *@
+	@* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8c55_YHLvDHGACkQscgbGLtLRdxBDCfI"></script> *@
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

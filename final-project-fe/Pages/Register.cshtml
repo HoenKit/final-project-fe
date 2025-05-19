@@ -13,12 +13,12 @@
     <meta name="description" content="Register to Winku" />
     <meta name="keywords" content="social network, register, signup" />
     <title>Register - Winku Social Network</title>
-    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16">
+    <link rel="icon" href="~/images/fav.png" type="image/png" sizes="16x16">
 
-    <link rel="stylesheet" href="css/main.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/color.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="~/css/main.min.css">
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/color.css">
+    <link rel="stylesheet" href="~/css/responsive.css">
     <style>
         .back-home {
             display: flex;
@@ -36,6 +36,15 @@
             .back-home:hover {
                 color: #007bff;
             }
+
+
+        .login {
+            float: left;
+            height: 70vh;
+            position: relative;
+            width: 100%;
+            transform: scale(0.8)
+        }
     </style>
 </head>
 
@@ -56,8 +65,8 @@
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <div class="login-reg-bg show">
-                        <div class="log-reg-area reg">
+                    <div class="login show">
+                        @* <div class="log-reg-area reg"> *@
                             <h2 class="log-title">Register</h2>
                             <p>Don’t use Winku Yet? <a href="#">Take the tour</a> or <a href="#">Join now</a></p>
 
@@ -143,8 +152,8 @@
                 </div>
             </div>
         </div>
-    </div>
+@*     </div> *@
 
-    <script src="js/main.min.js"></script>
+    <script src="~/js/main.min.js"></script>
 </body>
 </html>
