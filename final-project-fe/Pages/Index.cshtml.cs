@@ -299,7 +299,7 @@ namespace final_project_fe.Pages
                 UserId = userId,
                 Title = NewPost.Title,
                 Content = NewPost.Content,
-                SubCategoryId = 3,
+                CategoryId = 3,
             };
 
             var jsonContent = JsonSerializer.Serialize(requestData);

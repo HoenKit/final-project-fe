@@ -10,19 +10,7 @@
 <html lang="en">
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="" />
-	<meta name="keywords" content="" />
-	<title>Winku Social Network Toolkit</title>
-	<link rel="icon" href="images/fav.png" type="image/png" sizes="16x16">
-
-	<link rel="stylesheet" href="css/main.min.css">
-	<link rel="stylesheet" href="css/style.css">
-	<link rel="stylesheet" href="css/color.css">
-	<link rel="stylesheet" href="css/responsive.css">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 	<!--<div class="se-pre-con"></div>-->
@@ -72,6 +60,10 @@
 													<a href="#" title="">friends</a>
 												</li>*@
 												<li>
+													<i class="fa-solid fa-graduation-cap"></i>
+													<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+												</li>
+												<li>
 													<i class="ti-image"></i>
 													<a href="#" title="">images</a>
 												</li>
@@ -110,7 +102,7 @@
 												</li>
 											</ul>
 										</div><!-- recent activites -->
-										<div class="widget stick-widget">
+										@* <div class="widget stick-widget">
 											<h4 class="widget-title">Who's follownig</h4>
 											<ul class="followers">
 												<li>
@@ -149,12 +141,12 @@
 													</div>
 												</li>
 											</ul>
-										</div><!-- who's following -->
+										</div><!-- who's following --> *@
 									</aside>
 								</div><!-- sidebar -->
 								<div class="col-lg-6">
 									<div class="loadMore">
-										<div class="central-meta item">
+										@* <div class="central-meta item"> *@
 											<div class="user-post">
 
 												@* <div class="newpst-input"> *@
@@ -178,7 +170,7 @@
 																Photos/videos
 															</div>
 															<div class="text-warning" style="cursor: pointer;">
-																<i class="fa fa-smile-o me-1"></i>
+																<i class="fa-regular fa-face-smile"></i>
 																Feelings/Activities
 															</div>
 														</div>
@@ -205,20 +197,45 @@
 																			<input asp-for="NewPost.Title" type="text" placeholder="Enter Post Title" class="form-control" required />
 																		</div>
 
-																		<div class="form-group">
-																			<textarea asp-for="NewPost.Content" rows="3" placeholder="Write something..." class="form-control" required></textarea>
+																		<div class="form-group mb-1 p-1">
+																			<textarea asp-for="NewPost.Content" rows="2" placeholder="Write something..." class="form-control" required></textarea>
 																		</div>
+
+																		@* imagePreview *@
+																		<!-- Image Preview Area -->
+																		<div id="imagePreview" class="position-relative mb-3" style="display: none;">
+																			<!-- Nút chức năng -->
+																			<div id="imageButtons" class="position-absolute top-0 start-0 z-3 d-flex gap-2 p-2" style="z-index: 10;">
+																				<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnEdit" style="cursor: pointer;">
+																					<i class="fa fa-pencil me-1"></i> Chỉnh sửa tất cả
+																					<input type="file" accept="image/*" hidden onchange="replaceImages(event)" />
+																				</label>
+
+																				<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnAddMore" style="cursor: pointer;">
+																					<i class="fa fa-plus me-1"></i> Thêm ảnh/video
+																					<input type="file" multiple accept="image/*" hidden onchange="addMoreImages(event)" />
+																				</label>
+																			</div>
+
+																			<!-- Nút xóa tất cả ảnh -->
+																			<button id="btnCloseAll" class="btn-close position-absolute top-0 end-0 m-2 z-3" style="z-index: 10;" onclick="clearAllImages()"></button>
+
+																			<!-- Container ảnh -->
+																			<div id="imageContainer" class="border rounded p-2 d-flex flex-wrap gap-2 mt-2" style="min-height: 100px;"></div>
+																		</div>
+																		<!-- Image Preview Area -->
+
 																		<div class="d-flex justify-content-around border-top pt-2">
 																			<label class="btn btn-light">
 																				<i class="fa fa-image text-success"></i> Photos/videos
-																				<input type="file" name="Images" hidden />
+																				<input type="file" name="Images" accept="image/*" hidden onchange="previewImage(event)" />
 																			</label>
 																			<label class="btn btn-light">
-																				<i class="fa fa-smile-o text-warning"></i> Feeling
+																				<i class="fa-regular fa-face-smile text-warning"></i>Feeling
 																				<input type="file" hidden />
 																			</label>
 																			<label class="btn btn-light">
-																				<i class="fa fa-map-marker text-danger"></i> Location
+																				<i class="fa-solid fa-location-dot text-danger"></i> Location
 																				<input type="file" hidden />
 																			</label>
 																		</div>
@@ -236,12 +253,15 @@
 												{
 													<h3>Search results for: "@Model.Query"</h3>
 												}
+												<!-- Posts container -->
+												<div class="posts-container">
 												@if (Model.Posts != null && Model.Posts.Items.Any())
 												{
-													<ul>
 														@foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
 														{
-															<li>
+														<!-- Single post container -->
+														<div class="card p-3 mb-3 shadow-sm rounded">
+																<!-- Post content -->
 																<div class="friend-info">
 																	<figure>
 																		<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
@@ -325,45 +345,33 @@
 																		@if (Model.CommentsByPost.ContainsKey(post.PostId))
 																		{
 																			var comments = Model.CommentsByPost[post.PostId];
-																			var parentComments = comments.Where(c => c.ParentCommentId == null);
+																			var parentComments = comments.Where(c => c.ParentCommentId == null).OrderBy(c => c.CreateAt);
 
 																			foreach (var parent in parentComments)
 																			{
+																				// Comment gốc
 																				var user = parent.User;
 																				var userMeta = user?.UserMetaData;
 																				var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar;
 																				var displayName = userMeta != null ? $"{userMeta.FirstName} {userMeta.LastName}" : user?.Email;
-																				var replies = comments.Where(c => c.ParentCommentId == parent.CommentId);
+
 																				<div class="comment" data-comment-id="@parent.CommentId">
 																					<div class="comet-avatar">
 																						<img src="@avatar" alt="User Avatar">
 																					</div>
 																					<div class="we-comment">
 																						<div class="coment-head">
-																							<h5><a href="time-line.html" title="">@displayName</a></h5>
+																							<h5><a href="#">@displayName</a></h5>
 																							<span>@parent.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 																							@if (!string.IsNullOrEmpty(token))
 																							{
-																								<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId" title="Reply">
-																									<i class="fa fa-reply"></i>
-																								</a>
-																								<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-																									<div class="dropdown">
-																										<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-																											<i class="fa fa-ellipsis-v"></i>
-																										</button>
-																										<ul class="dropdown-menu">
-																											<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
-																											<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.User.UserId">Report User</a></li>
-																										</ul>
-																									</div>
-																								</div>
+																								<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply"></i></a>
 																							}
 																						</div>
 																						<p>@parent.Content</p>
 																						@if (!string.IsNullOrEmpty(token))
 																						{
-																							<div class="reply-form" style="display: none; margin-top: 10px;">
+																							<div class="reply-form" style="display:none; margin-top: 10px;">
 																								<form class="comment-form">
 																									<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
 																									<input type="hidden" name="NewComment.ParentCommentId" value="@parent.CommentId" />
@@ -373,52 +381,83 @@
 																							</div>
 																						}
 																					</div>
+																				</div>
 
-																					<!-- Render replies -->
-																					@if (replies.Any())
-																					{
-																						<div class="replies" style="margin-left: 50px;">
-																							@foreach (var reply in replies)
+																				// Hiển thị reply cấp 1
+																				var firstLevelReplies = comments.Where(c => c.ParentCommentId == parent.CommentId).OrderBy(c => c.CreateAt);
+																				foreach (var reply in firstLevelReplies)
+																				{
+																					var replyUser = reply.User;
+																					var replyMeta = replyUser?.UserMetaData;
+																					var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
+																					var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
+
+																					<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
+																						<div class="comet-avatar">
+																							<img src="@replyAvatar" alt="User Avatar">
+																						</div>
+																						<div class="we-comment">
+																							<div class="coment-head">
+																								<h5><a href="#">@replyName</a></h5>
+																								<span>@reply.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																								@if (!string.IsNullOrEmpty(token))
+																								{
+																									<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply"></i></a>
+																								}
+																							</div>
+																							<p>@reply.Content</p>
+																							@if (!string.IsNullOrEmpty(token))
 																							{
-																								var replyUser = reply.User;
-																								var replyMeta = replyUser?.UserMetaData;
-																								var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
-																								var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
-
-																								<div class="comment reply-comment" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
-																									<div class="comet-avatar">
-																										<img src="@replyAvatar" alt="User Avatar">
-																									</div>
-																									<div class="we-comment">
-																										<div class="coment-head">
-																											<h5><a href="time-line.html" title="">@replyName</a></h5>
-																											<span>@reply.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																											@if (!string.IsNullOrEmpty(token))
-																											{
-																												<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId" title="Reply">
-																													<i class="fa fa-reply"></i>
-																												</a>
-
-																											}
-																										</div>
-																										<p>@reply.Content</p>
-																										@if (!string.IsNullOrEmpty(token))
-																										{
-																											<div class="reply-form" style="display: none; margin-top: 10px;">
-																												<form class="comment-form">
-																													<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
-																													<input type="hidden" name="NewComment.ParentCommentId" value="@reply.CommentId" />
-																													<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-																													<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-																												</form>
-																											</div>
-																										}
-																									</div>
+																								<div class="reply-form" style="display:none; margin-top: 10px;">
+																									<form class="comment-form">
+																										<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																										<input type="hidden" name="NewComment.ParentCommentId" value="@reply.CommentId" />
+																										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																										<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																									</form>
 																								</div>
 																							}
 																						</div>
+																					</div>
+
+																					// reply of reply
+																					var secondLevelReplies = comments.Where(c => c.ParentCommentId == reply.CommentId).OrderBy(c => c.CreateAt);
+																					foreach (var level2 in secondLevelReplies)
+																					{
+																						var level2User = level2.User;
+																						var level2Meta = level2User?.UserMetaData;
+																						var level2Avatar = string.IsNullOrEmpty(level2Meta?.Avatar) ? "images/resources/friend-avatar9.jpg" : level2Meta.Avatar;
+																						var level2Name = level2Meta != null ? $"{level2Meta.FirstName} {level2Meta.LastName}" : level2User?.Email;
+
+																						<div class="comment reply-comment ms-5" data-comment-id="@level2.CommentId" data-parent-id="@level2.ParentCommentId">
+																							<div class="comet-avatar">
+																								<img src="@level2Avatar" alt="User Avatar">
+																							</div>
+																							<div class="we-comment">
+																								<div class="coment-head">
+																									<h5><a href="#">@level2Name</a></h5>
+																									<span>@level2.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																									@if (!string.IsNullOrEmpty(token))
+																									{
+																										<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply"></i></a>
+																									}
+																								</div>
+																								<p>@level2.Content</p>
+																								@if (!string.IsNullOrEmpty(token))
+																								{
+																									<div class="reply-form" style="display:none; margin-top: 10px;">
+																										<form class="comment-form">
+																											<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																											<input type="hidden" name="NewComment.ParentCommentId" value="@level2.CommentId" />
+																											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																										</form>
+																									</div>
+																								}
+																							</div>
+																						</div>
 																					}
-																				</div>
+																				}
 																			}
 																		}
 																		else
@@ -451,19 +490,17 @@
 																		</div>
 																	}
 																</div>
-															</li>
+														</div>
 														}
-
-													</ul>
-
-													<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
-
+														<div class="pagination mt-3">
+															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+															<!-- Add pagination controls here if needed -->
+														</div>
 												}
 												else
 												{
-													<p>No posts available.</p>
+													<div class="alert alert-info">No posts available.</div>
 												}	
-
 											</div>
 										</div>
 									</div>
@@ -821,10 +858,10 @@
 		</div>
 	</div>
 
-	<script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+@* 	<script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 	<script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
-	<script src="js/map-init.js"></script>
+	<script src="js/map-init.js"></script> *@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 	<script>
 		currentUserId = '@Model.CurrentUserId';
@@ -1496,6 +1533,80 @@
 		}
 	</script>
 
+	<!-- Image Preview Script -->
+	<script>
+		let allImages = [];
+
+		function previewImage(event) {
+		  const files = event.target.files;
+		  if (files.length === 0) return;
+		  allImages = [files[0]];
+		  renderImages();
+		}
+
+		function replaceImages(event) {
+		  const files = Array.from(event.target.files);
+		  if (files.length === 0) return;
+		  allImages = files;
+		  renderImages();
+		}
+
+		function addMoreImages(event) {
+		  const files = Array.from(event.target.files);
+		  if (files.length === 0) return;
+		  allImages = [...allImages, ...files];
+		  renderImages();
+		}
+
+		function clearAllImages() {
+		  allImages = [];
+		  renderImages();
+		}
+
+		function renderImages() {
+		  const previewContainer = document.getElementById('imagePreview');
+		  const imageContainer = document.getElementById('imageContainer');
+		  const btnEdit = document.getElementById('btnEdit');
+		  const btnAddMore = document.getElementById('btnAddMore');
+		  const btnCloseAll = document.getElementById('btnCloseAll');
+
+		  const hasImages = allImages.length > 0;
+		  previewContainer.style.display = hasImages ? 'block' : 'none';
+		  btnEdit.style.display = btnAddMore.style.display = btnCloseAll.style.display = hasImages ? 'inline-flex' : 'none';
+
+		  imageContainer.innerHTML = '';
+		  const maxToShow = 5;
+		  const total = allImages.length;
+		  const imagesToShow = allImages.slice(0, maxToShow);
+
+		  imagesToShow.forEach((file, index) => {
+			const reader = new FileReader();
+			reader.onload = function (e) {
+			  const wrapper = document.createElement('div');
+			  wrapper.className = 'image-thumb-wrapper';
+
+			  const img = document.createElement('img');
+			  img.src = e.target.result;
+			  img.className = 'image-thumb';
+
+			  wrapper.appendChild(img);
+
+			  // Overlay nếu là ảnh cuối và có nhiều hơn 5 ảnh
+			  if (index === maxToShow - 1 && total > maxToShow) {
+				const overlay = document.createElement('div');
+				overlay.className = 'image-thumb-overlay';
+				overlay.textContent = `+${total - maxToShow}`;
+				wrapper.appendChild(overlay);
+			  }
+
+			  imageContainer.appendChild(wrapper);
+			};
+			reader.readAsDataURL(file);
+		  });
+		}
+	</script>
+
+
 	<style>
 		.comment {
 			margin-bottom: 20px;
@@ -1509,6 +1620,53 @@
 
 		.reply-comment {
 			margin-bottom: 15px;
+		}.comment {
+			margin-bottom: 20px;
+			padding-bottom: 10px;
+			border-bottom: 1px solid #eee;
+		}
+
+		.replies {
+			margin-top: 10px;
+		}
+
+		.reply-comment {
+			margin-bottom: 15px;
+		}
+
+		/* addimage */
+		.image-thumb-wrapper {
+			position: relative;
+			width: 120px;
+			height: 120px;
+			border-radius: 8px;
+			overflow: hidden;
+			z-index: 1; /* đảm bảo ảnh không đè nút */
+		}
+
+		.image-thumb {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			border-radius: 8px;
+			border: 1px solid #ddd;
+		}
+
+		.image-thumb-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.6);
+			color: white;
+			font-weight: bold;
+			font-size: 20px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-radius: 8px;
+			z-index: 2;
 		}
 	</style>
 
