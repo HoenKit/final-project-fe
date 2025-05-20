@@ -18,5 +18,6 @@ namespace final_project_fe.Dtos.Post
         public DateTime? UpdateAt { get; set; }
         public User? User { get; set; }
         public CategoryDto? Category { get; set; }
+        public int TotalCount { get; set; }
     }
 }

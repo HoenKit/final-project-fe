@@ -80,25 +80,25 @@
                             }
                             else
                             {
-                            @foreach (var post in Model.Posts.Items)
-                            {
-                                var user = Model.Users.Items.FirstOrDefault(u => u.UserId == post.UserId);
-                                var Category = Model.Categories.Items.FirstOrDefault(s => s.CategoryId == post.CategoryId);
-                                <tr class="clickable-row" data-id="@post.PostId" style="cursor:pointer;">
-                                    <td>@post.PostId</td>
-                                    <td>@user.Email</td>
-                                    <td>@(post.ParentPostId == null || post.ParentPostId == 0 ? "None" : post.ParentPostId.ToString())</td>
+                                @foreach (var post in Model.Posts.Items)
+                                {
+                                    var user = Model.Users.Items.FirstOrDefault(u => u.UserId == post.UserId);
+                                    var Category = Model.Categories.Items.FirstOrDefault(s => s.CategoryId == post.CategoryId);
+                                    <tr class="clickable-row" data-id="@post.PostId" style="cursor:pointer;">
+                                        <td>@post.PostId</td>
+                                        <td>@user.Email</td>
+                                        <td>@(post.ParentPostId == null || post.ParentPostId == 0 ? "None" : post.ParentPostId.ToString())</td>
                                         <td>@Category.Title</td>
-                                    <td class="content-cell">
-                                        <div class="text-truncate-multiline">@post.Title</div>
-                                    </td>
-                                    <td class="content-cell">
-                                        <div class="text-truncate-multiline">@post.Content</div>
-                                    </td>
-                                    <td>@post.CreateAt?.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@(post.UpdateAt?.ToString("dd/MM/yyyy HH:mm") ?? "None")</td>
-                                </tr>
-                            }
+                                        <td class="content-cell">
+                                            <div class="text-truncate-multiline">@post.Title</div>
+                                        </td>
+                                        <td class="content-cell">
+                                            <div class="text-truncate-multiline">@post.Content</div>
+                                        </td>
+                                        <td>@post.CreateAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@(post.UpdateAt?.ToString("dd/MM/yyyy HH:mm") ?? "None")</td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
