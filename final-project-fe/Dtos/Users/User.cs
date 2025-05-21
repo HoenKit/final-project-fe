@@ -11,5 +11,7 @@
 		public DateTime CreateAt { get; set; } 
 		public DateTime? UpdateAt { get; set; } 
 		public UserMetadata? UserMetaData { get; set; }
-	}
+		public int TotalCount { get; set; }
+
+    }
 }

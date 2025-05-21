@@ -71,29 +71,17 @@ namespace final_project_fe.Pages.Shared
                                 Expires = DateTime.UtcNow.AddDays(7)
                             });
 
+                            string? role = JwtHelper.GetRoleFromToken(loginResponse.Token);
+                            _logger.LogInformation($"User Role: {role}");
+
+                            if (role == "Admin")
+                            {
+                                return RedirectToPage("/Admin/Dashboard/Index");
+                            }
+
                             return RedirectToPage("/Index");
                         }
                     }
-                    else
-                    {
-                        Response.Cookies.Append("AccessToken", responseContent, new CookieOptions
-                        {
-                            HttpOnly = false,
-                            Secure = true,
-                            SameSite = SameSiteMode.Strict,
-                            Expires = DateTime.UtcNow.AddDays(7)
-                        });
-
-                        string? role = JwtHelper.GetRoleFromToken(responseContent);
-                        _logger.LogInformation($"User Role: {role}");
-
-                        if (role == "Admin")
-                        {
-                            return RedirectToPage("/Admin/UserManager/Index");
-                        }
-                        return RedirectToPage("/Index");
-                    }
-
                     ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
                 }
             }
