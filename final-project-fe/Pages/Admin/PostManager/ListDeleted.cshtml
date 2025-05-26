@@ -1,9 +1,8 @@
 ﻿@page
-@model final_project_fe.Pages.Admin.PostManager.IndexModel
+@model final_project_fe.Pages.Admin.PostManager.ListDeletedModel
 @{
-    ViewData["ActivePage"] = "PostManager.ListPost";
+    ViewData["ActivePage"] = "PostManager.ListDeleted";
 }
-
 <style>
     .text-truncate-multiline {
         display: -webkit-box;
@@ -21,7 +20,7 @@
 
 
 <div class="page-header">
-    <h3 class="fw-bold mb-3">List Post</h3>
+    <h3 class="fw-bold mb-3">List Deleted</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
             <a asp-page="/Admin/Dashboard/Index">
@@ -38,7 +37,7 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a asp-page="/Admin/PostManager/Index">List Post</a>
+            <a asp-page="/Admin/PostManager/ListDeleted">List Deleted</a>
         </li>
     </ul>
 </div>

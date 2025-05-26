@@ -1,0 +1,27 @@
+﻿@page
+@model final_project_fe.Pages.Admin.ReportManager.WorkshopsReport.IndexModel
+@{
+    ViewData["ActivePage"] = "ReportManager.Workshops";
+}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">User Manager</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-page="/Admin/Dashboard/Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a>Report Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/ReportManager/WorkshopReport/Index">Workshop Report</a>
+        </li>
+    </ul>
+</div>
