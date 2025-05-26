@@ -1,7 +1,7 @@
-﻿using final_project_fe.Dtos;
-using final_project_fe.Dtos.Category;
+﻿using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Post;
 using final_project_fe.Dtos.Users;
+using final_project_fe.Dtos;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,13 +10,13 @@ using System.Text.Json;
 
 namespace final_project_fe.Pages.Admin.PostManager
 {
-    public class IndexModel : PageModel
+    public class ListDeletedModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
+        private readonly ILogger<ListDeletedModel> _logger;
         private readonly ApiSettings _apiSettings;
         private readonly HttpClient _httpClient;
 
-        public IndexModel(ILogger<IndexModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
+        public ListDeletedModel(ILogger<ListDeletedModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
         {
             _logger = logger;
             _apiSettings = apiSettings.Value;
@@ -28,7 +28,7 @@ namespace final_project_fe.Pages.Admin.PostManager
         public PageResult<CategoryDto> Categories { get; set; }
         public int CurrentPage { get; set; }
         public int PageSize { get; set; } = 10;
-       
+
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
@@ -68,7 +68,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             CurrentPage = pageNumber;
 
-            string postApiUrl = $"{_apiSettings.BaseUrl}/Post?page={pageNumber}&pageSize={PageSize}";
+            string postApiUrl = $"{_apiSettings.BaseUrl}/Post/GetAllIsDeleted?page={pageNumber}&pageSize={PageSize}";
             string userApiUrl = $"{_apiSettings.BaseUrl}/User/";
             string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category/";
 
@@ -122,6 +122,5 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             return Page();
         }
-
     }
 }

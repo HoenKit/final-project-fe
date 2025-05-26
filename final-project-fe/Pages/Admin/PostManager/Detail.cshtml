@@ -15,7 +15,13 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a asp-page="/Admin/PostManager/Index">Post Manager</a>
+            <a>Post Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/PostManager/Index">List Post</a>
         </li>
         <li class="separator">
             <i class="icon-arrow-right"></i>
@@ -101,16 +107,27 @@
 
     <!-- Footer actions -->
     <div class="card-footer bg-transparent border-top-0">
-        <a asp-page="./Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back
-        </a>
+        <form method="post">
+            <button type="submit" asp-page-handler="Back">Back</button>
+        </form>
         <div class="float-end">
             <form method="post" asp-page="/Admin/PostManager/Delete" asp-route-id="@Model.Post.PostId" class="d-inline">
-                <button type="submit" class="btn btn-link btn-danger"
-                        onclick="return confirm('Are you sure you want to delete this post?')"
-                        title="Delete Post">
-                    <i class="fa fa-trash"></i>
-                </button>
+                @if (Model.Post.IsDeleted == false)
+                {
+                    <button type="submit" class="btn btn-link btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this post?')"
+                            title="Delete Post">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-link text-success"
+                            onclick="return confirm('Are you sure you want to restore this post?')"
+                            title="Restore Post">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                }
             </form>
         </div>
     </div>

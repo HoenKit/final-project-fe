@@ -87,22 +87,40 @@
                                 <p>User Manager</p>
                             </a>
                         </li>
-                        <li class="nav-item @(ViewData["ActivePage"] as string == "PostManager" ? "active" : "")">
-                            <a asp-page="/Admin/PostManager/Index">
+                        @{
+                            var isPostManager = (ViewData["ActivePage"] as string ?? "").StartsWith("PostManager");
+                        }
+                        <li class="nav-item @(isPostManager ? "active" : "")">
+                            <a data-bs-toggle="collapse" href="#collapsePostManager" aria-expanded="false">
                                 <i class="fas fa-clipboard"></i>
                                 <p>Post Manager</p>
+                                <span class="caret"></span>
                             </a>
+                            <div class="collapse" id="collapsePostManager">
+                                <ul class="nav nav-collapse">
+                                    <li class="@(ViewData["ActivePage"] as string == "PostManager.ListPost" ? "active" : "")">
+                                        <a asp-page="/Admin/PostManager/Index">
+                                            <span class="sub-item">List Post</span>
+                                        </a>
+                                    </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "PostManager.ListDeleted" ? "active" : "")">
+                                        <a asp-page="/Admin/PostManager/ListDeleted">
+                                            <span class="sub-item">List Deleted</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
                         @{
                             var isReportManager = (ViewData["ActivePage"] as string ?? "").StartsWith("ReportManager");
                         }
                         <li class="nav-item @(isReportManager ? "active" : "")">
-                            <a data-bs-toggle="collapse" href="#base" aria-expanded="@(isReportManager.ToString().ToLower())">
+                            <a data-bs-toggle="collapse" href="#collapseReportManager" aria-expanded="false">
                                 <i class="far fa-clipboard"></i>
                                 <p>Report Manager</p>
                                 <span class="caret"></span>
                             </a>
-                            <div class="collapse @(isReportManager ? "show" : "")" id="base">
+                            <div class="collapse" id="collapseReportManager">
                                 <ul class="nav nav-collapse">
                                     <li class="@(ViewData["ActivePage"] as string == "ReportManager.Users" ? "active" : "")">
                                         <a asp-page="/Admin/ReportManager/UsersReport/Index">
@@ -119,34 +137,9 @@
                                             <span class="sub-item">Comments</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Panels</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Notifications</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Sweet Alert</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Font Awesome Icons</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Simple Line Icons</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">
-                                            <span class="sub-item">Typography</span>
+                                    <li class="@(ViewData["ActivePage"] as string == "ReportManager.Workshops" ? "active" : "")">
+                                        <a asp-page="/Admin/ReportManager/WorkshopsReport/Index">
+                                            <span class="sub-item">Workshops</span>
                                         </a>
                                     </li>
                                 </ul>

@@ -21,7 +21,6 @@ namespace final_project_fe.Pages.Admin.UserManager
         }
 
         public User UserDetail { get; set; } = new();
-        public string ReturnUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync(Guid userId)
         {
@@ -38,12 +37,36 @@ namespace final_project_fe.Pages.Admin.UserManager
                 return RedirectToPage("/Index");
             }
 
-            ReturnUrl = Request.Headers["Referer"].ToString();
-
             if (userId == Guid.Empty)
             {
                 return BadRequest("Invalid user ID.");
             }
+
+            //Lấy trang trước đấy
+            const string sessionKey = "PageHistory";
+            var history = HttpContext.Session.GetString(sessionKey);
+            List<string> pageHistory;
+
+            if (string.IsNullOrEmpty(history))
+            {
+                pageHistory = new List<string>();
+            }
+            else
+            {
+                pageHistory = JsonSerializer.Deserialize<List<string>>(history);
+            }
+
+            // Lấy URL hiện tại
+            var currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
+
+            // Chỉ thêm nếu khác trang cuối cùng
+            if (pageHistory.Count == 0 || pageHistory.Last() != currentUrl)
+            {
+                pageHistory.Add(currentUrl);
+            }
+
+            // Lưu lại vào session
+            HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
 
             string apiUrl = $"{_apiSettings.BaseUrl}/User/{userId}";
 
@@ -82,5 +105,31 @@ namespace final_project_fe.Pages.Admin.UserManager
 
             return Page();
         }
+
+        public IActionResult OnPostBack()
+        {
+            const string sessionKey = "PageHistory";
+            var history = HttpContext.Session.GetString(sessionKey);
+            if (!string.IsNullOrEmpty(history))
+            {
+                var pageHistory = JsonSerializer.Deserialize<List<string>>(history);
+
+                if (pageHistory.Count > 1)
+                {
+                    // Xóa trang hiện tại
+                    pageHistory.RemoveAt(pageHistory.Count - 1);
+                    var previousPage = pageHistory.Last();
+
+                    // Lưu lại session sau khi back
+                    HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
+
+                    return Redirect(previousPage);
+                }
+            }
+
+            // Nếu không có lịch sử, quay về trang chủ
+            return RedirectToPage("/Admin/Dashboard/Index");
+        }
+
     }
 }
