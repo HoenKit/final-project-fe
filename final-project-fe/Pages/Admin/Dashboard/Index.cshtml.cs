@@ -145,7 +145,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
             }
 
             //Lấy TotalCount từ get user
-            var UserTotalCounturl = $"{_apiSettings.BaseUrl}/Post";
+            var UserTotalCounturl = $"{_apiSettings.BaseUrl}/User";
             var userTotalCounturlRequest = new HttpRequestMessage(HttpMethod.Get, UserTotalCounturl);
             userTotalCounturlRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
