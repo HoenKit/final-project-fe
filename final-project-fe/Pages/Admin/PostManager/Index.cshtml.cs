@@ -68,7 +68,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             CurrentPage = pageNumber;
 
-            string postApiUrl = $"{_apiSettings.BaseUrl}/Post?page={pageNumber}&pageSize={PageSize}";
+            string postApiUrl = $"{_apiSettings.BaseUrl}/Post?page={pageNumber}";
             string userApiUrl = $"{_apiSettings.BaseUrl}/User/";
             string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category/";
 

@@ -4,7 +4,7 @@
     ViewData["ActivePage"] = "ReportManager.Posts";
 }
 <div class="page-header">
-    <h3 class="fw-bold mb-3">Posts Manager</h3>
+    <h3 class="fw-bold mb-3">Report Manager - Posts</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
             <a asp-page="/Admin/Dashboard/Index">
@@ -25,3 +25,248 @@
         </li>
     </ul>
 </div>
+
+<div class="container mt-4">
+    @if (Model.GroupedReportPosts?.Items != null && Model.GroupedReportPosts.Items.Any())
+    {
+        @foreach (var group in Model.GroupedReportPosts.Items)
+        {
+            var post = Model.Posts?.Items?.FirstOrDefault(p => p.PostId == group.Id);
+            string title = post?.Title ?? $"Title #{group.Id}";
+            string collapseId = $"collapsePost{group.Id}";
+            string postDate = post?.CreateAt?.ToString("dd/MM/yyyy") ?? "N/A";
+            int reportCount = group.ReportCount;
+
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="cursor-pointer"
+                         data-bs-toggle="collapse"
+                         href="#@collapseId"
+                         role="button"
+                         aria-expanded="false"
+                         aria-controls="@collapseId">
+                        <strong>@title</strong>
+                        <small class="text-muted">(Creation: @postDate)</small>
+                        <i class="fas fa-chevron-down ms-2 collapse-icon"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-danger me-3">@reportCount Report(s)</span>
+                        <a class="btn btn-sm btn-outline-primary"
+                           asp-page="/Admin/PostManager/Detail" asp-route-id="@group.Id" >
+                            <i class="fas fa-external-link-alt"></i> Detail Post
+                        </a>
+                    </div>
+                </div>
+
+                <div class="collapse" id="@collapseId">
+                    <div class="card-body">
+                        @if (Model.DetailedReports.ContainsKey(group.Id) && Model.DetailedReports[group.Id].Any())
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Report details (@Model.DetailedReports[group.Id].Count)
+                                    </h6>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                @foreach (var detailedReport in Model.DetailedReports[group.Id])
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border-left-danger h-100">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title text-danger mb-0">
+                                                        <i class="fas fa-flag"></i> Report #@detailedReport.ReportId
+                                                    </h6>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <p class="card-text mb-1">
+                                                        <strong>Report content:</strong>
+                                                    </p>
+                                                    <div class="alert alert-light p-2 mb-0">
+                                                        @if (!string.IsNullOrEmpty(detailedReport.Content))
+                                                        {
+                                                            @detailedReport.Content
+                                                        }
+                                                        else
+                                                        {
+                                                            <em class="text-muted">No content</em>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-info-circle text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2">No report details are loaded.</p>
+                            </div>
+                        }
+
+                        <!-- Action buttons -->
+                        @* <div class="mt-3 pt-3 border-top">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm btn-warning"
+                                        onclick="handlePost(@group.Id, 'warn')">
+                                    <i class="fas fa-exclamation-triangle"></i> Cảnh báo
+                                </button>
+                                <button class="btn btn-sm btn-danger"
+                                        onclick="handlePost(@group.Id, 'remove')">
+                                    <i class="fas fa-trash"></i> Xóa bài viết
+                                </button>
+                                <button class="btn btn-sm btn-success"
+                                        onclick="handlePost(@group.Id, 'dismiss')">
+                                    <i class="fas fa-check"></i> Bỏ qua báo cáo
+                                </button>
+                            </div>
+                        </div> *@
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+            <h5 class="text-muted mt-3">No reports</h5>
+            <p class="text-muted">There are currently no reported posts.</p>
+        </div>
+    }
+</div>
+
+<!-- Phân trang -->
+@if (Model.GroupedReportPosts?.TotalPages > 1)
+{
+    <div class="card-body">
+        <div class="demo">
+            <ul class="pagination pg-primary justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.GroupedReportPosts.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.CurrentPage == Model.GroupedReportPosts.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+<style>
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .alert-light {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+        .cursor-pointer:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+    .collapse-icon {
+        transition: transform 0.2s ease;
+        font-size: 0.8rem;
+    }
+
+    .collapsed .collapse-icon {
+        transform: rotate(-90deg);
+    }
+</style>
+
+<script>
+    function handlePost(postId, action) {
+        let actionText = '';
+        let confirmMessage = '';
+
+        switch (action) {
+            case 'warn':
+                actionText = 'cảnh báo';
+                confirmMessage = `Bạn có chắc muốn gửi cảnh báo cho bài viết #${postId}?`;
+                break;
+            case 'remove':
+                actionText = 'xóa';
+                confirmMessage = `Bạn có chắc muốn xóa bài viết #${postId}? Hành động này không thể hoàn tác.`;
+                break;
+            case 'dismiss':
+                actionText = 'bỏ qua báo cáo';
+                confirmMessage = `Bạn có chắc muốn bỏ qua tất cả báo cáo cho bài viết #${postId}?`;
+                break;
+        }
+
+        if (confirm(confirmMessage)) {
+            // TODO: Implement API call
+            console.log(`${actionText} post ${postId}`);
+
+            // Example API call structure:
+            // fetch(`/api/PostManager/${action}/${postId}`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // }).then(response => {
+            //     if (response.ok) {
+            //         location.reload();
+            //     }
+            // });
+        }
+    }
+
+    // Xử lý animation cho collapse icon
+    document.addEventListener('DOMContentLoaded', function () {
+        const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+
+        collapseElements.forEach(function (element) {
+            element.addEventListener('click', function () {
+                const icon = this.querySelector('.collapse-icon');
+                if (icon) {
+                    icon.classList.toggle('collapsed');
+                }
+            });
+        });
+    });
+</script>

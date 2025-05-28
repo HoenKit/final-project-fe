@@ -142,6 +142,11 @@
                                             <span class="sub-item">Workshops</span>
                                         </a>
                                     </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "ReportManager.Events" ? "active" : "")">
+                                        <a asp-page="/Admin/ReportManager/EventsReport/Index">
+                                            <span class="sub-item">Events</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>
