@@ -81,7 +81,7 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             var postJson = await postResponse.Content.ReadAsStringAsync();
             var postRoot = JsonNode.Parse(postJson);
-            Post = postRoot?["result"]?.Deserialize<PostManagerDto>(new JsonSerializerOptions
+            Post = postRoot.Deserialize<PostManagerDto>(new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new PostManagerDto();
