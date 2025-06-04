@@ -3,8 +3,9 @@
 @{
     ViewData["ActivePage"] = "UserManager";
 }
+
 <div class="page-header">
-    <h3 class="fw-bold mb-3">Detail</h3>
+    <h3 class="fw-bold mb-3">User Detail</h3>
     <ul class="breadcrumbs mb-3">
         <li class="nav-home">
             <a asp-page="/Admin/Dashboard/Index">
@@ -21,53 +22,163 @@
             <i class="icon-arrow-right"></i>
         </li>
         <li class="nav-item">
-            <a>@(Model.UserDetail.UserMetaData.FirstName ?? "N/A") @(Model.UserDetail.UserMetaData.LastName ?? "N/A")</a>
+            <a>@(Model.UserDetail?.UserMetaData?.FirstName ?? "N/A") @(Model.UserDetail?.UserMetaData?.LastName ?? "N/A")</a>
         </li>
     </ul>
 </div>
+
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title"></h4>
+                <h4 class="card-title">User Information</h4>
             </div>
-            <div class="card-body" style="display: flex; align-items: center; gap: 20px;">
+            <div class="card-body">
                 @if (Model.UserDetail != null)
                 {
-                    <div style="flex-basis: 30%; text-align: center;">
-                        <img src="@(Model.UserDetail.UserMetaData.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg")" style="max-width: 100%; height: 200px;" />
-                        <p>
-                            @if (Model.UserDetail.IsBanned == true)
-                            {
-                                <span class="badge badge-danger"><i class="fas fa-user-alt-slash"></i> Banned</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-success"><i class="fas fa-user-alt"></i> Active</span>
-                            }
-                        </p>
-                        <p><strong>Points:</strong> @Model.UserDetail.Point</p>
+                    <div class="row">
+                        <!-- Avatar and Status Section -->
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="user-avatar mb-3">
+                                <img src="@(Model.UserDetail.UserMetaData.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg")"
+                                     class="img-fluid rounded-circle"
+                                     style="width: 180px; height: 180px; object-fit: cover;"
+                                     alt="User Avatar" />
+                            </div>
+
+                            <div class="user-status mb-3">
+                                @if (Model.UserDetail.IsBanned == true)
+                                {
+                                    <span class="badge badge-danger badge-lg">
+                                        <i class="fas fa-user-alt-slash"></i> Banned
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-success badge-lg">
+                                        <i class="fas fa-user-alt"></i> Active
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="user-points">
+                                <div class="badge badge-warning badge-lg">
+                                    <i class="fas fa-star"></i> Points: @Model.UserDetail.Point
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Information Section -->
+                        <div class="col-md-8">
+                            <div class="user-details">
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-user me-2"></i>Full Name:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @(Model.UserDetail.UserMetaData.FirstName ?? "N/A") @(Model.UserDetail.UserMetaData.LastName ?? "N/A")
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-envelope me-2"></i>Email:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @Model.UserDetail.Email
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-phone me-2"></i>Phone:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @Model.UserDetail.Phone
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-calendar-plus me-2"></i>Created At:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @Model.UserDetail.CreateAt.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-birthday-cake me-2"></i>Birthday:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @(Model.UserDetail.UserMetaData.Birthday?.ToString("dd/MM/yyyy") ?? "Not provided")
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-venus-mars me-2"></i>Gender:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @(Model.UserDetail.UserMetaData.Gender ?? "Not specified")
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-sm-3">
+                                        <strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong>
+                                    </div>
+                                    <div class="col-sm-9">
+                                        @(Model.UserDetail.UserMetaData.Address ?? "Not provided")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="flex-basis: 70%;">
-                        <p><strong>Full Name:</strong> @(Model.UserDetail.UserMetaData.FirstName ?? "N/A") @(Model.UserDetail.UserMetaData.LastName ?? "N/A")</p>
-                        <p><strong>Email:</strong> @Model.UserDetail.Email</p>
-                        <p><strong>Phone:</strong> @Model.UserDetail.Phone</p>
-                        <p><strong>Created At:</strong> @Model.UserDetail.CreateAt.ToString("dd/MM/yyyy HH:mm")</p>
-                        <p><strong>Birthday:</strong> @(Model.UserDetail.UserMetaData.Birthday?.ToString("dd/MM/yyyy") ?? "0001-01-01")</p>
-                        <p><strong>Gender:</strong> @Model.UserDetail.UserMetaData.Gender</p>
-                        <p><strong>Address:</strong> @(Model.UserDetail.UserMetaData.Address ?? "None")</p>
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <div class="btn-group" role="group">
+                                <a href="javascript:void(0);"
+                                   class="btn @(Model.UserDetail.IsBanned ? "btn-success" : "btn-danger") me-2"
+                                   data-bs-toggle="tooltip"
+                                   data-original-title="@(Model.UserDetail.IsBanned ? "Unban User" : "Ban User")"
+                                   onclick="confirmBanUnban('@Model.UserDetail.UserId', @(Model.UserDetail.IsBanned.ToString().ToLower()))">
+                                    <i class="@(Model.UserDetail.IsBanned ? "fas fa-check" : "fas fa-times") me-1"></i>
+                                    @(Model.UserDetail.IsBanned ? "Unban User" : "Ban User")
+                                </a>
+
+                                <form method="post" class="d-inline">
+                                    <button type="submit" asp-page-handler="Back" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-1"></i>
+                                        Back to List
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 }
                 else
                 {
-                    <p class="text-danger">User not found.</p>
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-times text-danger" style="font-size: 4rem; opacity: 0.5;"></i>
+                        <p class="text-danger mt-3 h5">User not found.</p>
+                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    function confirmBanUnban(userId, isBanned) {
+        let action = isBanned ? "unban" : "ban";
+        let confirmMessage = `Are you sure you want to ${action} this user?`;
 
-<form method="post">
-    <button type="submit" asp-page-handler="Back">Back</button>
-</form>
+        if (confirm(confirmMessage)) {
+            window.location.href = `/Admin/UserManager/BanUnban?userId=${userId}`;
+        }
+    }
+</script>
