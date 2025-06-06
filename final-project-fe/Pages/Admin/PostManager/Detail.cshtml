@@ -31,24 +31,39 @@
         </li>
     </ul>
 </div>
-<div class="card">
+
+<div class="card shadow-sm">
     <div class="card-body">
         <!-- Header with user info -->
-        <div class="d-flex align-items-center mb-4">
-            <div class="avatar me-3">
-                <img src=@(Model.User.UserMetaData?.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg") alt="Avatar" class="rounded-circle" width="50">
+        <!-- Header with user info - Optimized spacing -->
+        <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+            <div class="avatar me-2">
+                <img src=@(Model.User.UserMetaData?.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg")
+                     alt="Avatar" class="rounded-circle border border-2 border-white shadow-sm"
+                     width="50" height="50" style="object-fit: cover;">
             </div>
-            <div>
-                <h5 class="mb-0">
-                    <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.User.UserId">
-                        @(Model.User.UserMetaData?.LastName ?? Model.User.Email)
+            <div class="flex-grow-1" style="margin-left: 10px;">
+                <h5 class="mb-2 text-primary">
+                    <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.User.UserId" class="text-decoration-none">
+                        @{
+                            var firstName = Model.User.UserMetaData?.FirstName ?? "";
+                            var lastName = Model.User.UserMetaData?.LastName ?? "";
+                            var fullName = !string.IsNullOrEmpty(firstName) || !string.IsNullOrEmpty(lastName)
+                            ? $"{firstName} {lastName}".Trim()
+                            : Model.User.Email;
+                        }
+                        @fullName
                     </a>
                 </h5>
                 <div class="text-muted small">
+                    <i class="fas fa-calendar-plus me-1"></i>
                     <span>Created: @Model.Post.CreateAt?.ToString("dd/MM/yyyy HH:mm")</span>
                     @if (Model.Post.UpdateAt != null)
                     {
-                        <span class="ms-2">Updated: @Model.Post.UpdateAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span class="ms-2">
+                            <i class="fas fa-edit me-1"></i>
+                            Updated: @Model.Post.UpdateAt?.ToString("dd/MM/yyyy HH:mm")
+                        </span>
                     }
                 </div>
             </div>
@@ -56,19 +71,31 @@
 
         <!-- Post content -->
         <div class="post-content mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold">@Model.Post.Title</h4>
-                <span class="badge bg-primary">@Model.Category?.Title</span>
-            </div>
-            <div class="post-body bg-light p-3 rounded mb-3">
-                @Model.Post.Content
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h2 class="fw-bold text-dark mb-0">@Model.Post.Title</h2>
+                @if (!string.IsNullOrEmpty(Model.Category?.Title))
+                {
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        <i class="fas fa-tag me-1"></i>@Model.Category.Title
+                    </span>
+                }
             </div>
 
-            <div class="post-meta text-muted small">
-                <span class="me-3">Post ID: @Model.Post.PostId</span>
+            <div class="post-body bg-white border rounded p-4 mb-4 shadow-sm">
+                <div class="fs-6 lh-lg" style="white-space: pre-line;">
+                    @Model.Post.Content
+                </div>
+            </div>
+
+            <div class="post-meta text-muted small bg-light p-2 rounded">
+                <i class="fas fa-info-circle me-1"></i>
+                <span class="me-4">Post ID: <code>@Model.Post.PostId</code></span>
                 @if (Model.Post.ParentPostId != null)
                 {
-                    <span>Parent Post: @Model.Post.ParentPostId</span>
+                    <span>
+                        <i class="fas fa-link me-1"></i>
+                        Parent Post: <code>@Model.Post.ParentPostId</code>
+                    </span>
                 }
             </div>
         </div>
@@ -77,27 +104,77 @@
         @if (Model.PostFiles.Any())
         {
             <hr class="my-4">
-            <div class="row g-3">
+            <div class="mb-3">
+                <h4 class="fw-bold text-secondary">
+                    <i class="fas fa-images me-2"></i>
+                    Media Gallery (@Model.PostFiles.Count() files)
+                </h4>
+            </div>
+
+            <div class="row g-4">
                 @foreach (var file in Model.PostFiles)
                 {
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card h-100">
-                            <div class="card-body text-center">
-                                @if (file.PostFileType == "image")
-                                {
-                                    <img src="@file.FileUrl" alt="Image" class="img-fluid rounded mb-2" style="max-height: 150px;">
-                                }
-                                else if (file.PostFileType == "video")
-                                {
-                                    <video controls width="100%" style="max-height: 150px;">
-                                        <source src="@file.FileUrl" type="video/mp4">
-                                    </video>
-                                }
-                                <div>
-                                    <span class="badge bg-secondary">@file.PostFileType</span>
-                                    <a href="@file.FileUrl" target="_blank" class="d-block text-truncate small mt-1">View File</a>
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                            @if (file.PostFileType.ToLower() == "image")
+                            {
+                                <div class="position-relative">
+                                    <img src="@file.FileUrl"
+                                         alt="Post Image"
+                                         class="card-img-top img-fluid"
+                                         style="height: 250px; object-fit: cover; cursor: pointer;"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#imageModal@(Model.PostFiles.ToList().IndexOf(file))" />
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-image me-1"></i>Image
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="card-body text-center py-2">
+                                    <small class="text-muted">Click to view full size</small>
+                                </div>
+
+                                <!-- Modal for full-size image -->
+                                <div class="modal fade" id="imageModal@(Model.PostFiles.ToList().IndexOf(file))" tabindex="-1">
+                                    <div class="modal-dialog modal-xl modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-0">
+                                                <h5 class="modal-title">Image Preview</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body text-center p-0">
+                                                <img src="@file.FileUrl" alt="Full Size Image" class="img-fluid">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="position-relative bg-dark">
+                                    <iframe src="@file.FileUrl"
+                                            class="w-100 border-0"
+                                            style="height: 250px;"
+                                            webkitallowfullscreen
+                                            mozallowfullscreen
+                                            allowfullscreen>
+                                    </iframe>
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-video me-1"></i>Video
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body text-center py-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-external-link-alt me-1"></i>
+                                        <a href="@file.FileUrl" target="_blank" class="text-decoration-none">
+                                            Open in new tab
+                                        </a>
+                                    </small>
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -106,45 +183,34 @@
     </div>
 
     <!-- Footer actions -->
-    <div class="card-footer bg-transparent border-top-0">
-        <form method="post">
-            <button type="submit" asp-page-handler="Back">Back</button>
-        </form>
-        <div class="float-end">
-            <form method="post" asp-page="/Admin/PostManager/Delete" asp-route-id="@Model.Post.PostId" class="d-inline">
-                @if (Model.Post.IsDeleted == false)
-                {
-                    <button type="submit" class="btn btn-link btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this post?')"
-                            title="Delete Post">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                }
-                else
-                {
-                    <button type="submit" class="btn btn-link text-success"
-                            onclick="return confirm('Are you sure you want to restore this post?')"
-                            title="Restore Post">
-                        <i class="fa fa-undo"></i>
-                    </button>
-                }
+    <div class="card-footer bg-light border-top">
+        <div class="d-flex justify-content-between align-items-center">
+            <form method="post">
+                <button type="submit" asp-page-handler="Back" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </button>
             </form>
+
+            <div>
+                <form method="post" asp-page="/Admin/PostManager/Delete" asp-route-id="@Model.Post.PostId" class="d-inline">
+                    @if (Model.Post.IsDeleted == false)
+                    {
+                        <button type="submit" class="btn btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to delete this post?')"
+                                title="Delete Post">
+                            <i class="fas fa-trash me-2"></i>Delete Post
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-outline-success"
+                                onclick="return confirm('Are you sure you want to restore this post?')"
+                                title="Restore Post">
+                            <i class="fas fa-undo me-2"></i>Restore Post
+                        </button>
+                    }
+                </form>
+            </div>
         </div>
     </div>
 </div>
-</div>
-
-<style>
-    .avatar img {
-        object-fit: cover;
-    }
-
-    .post-body {
-        white-space: pre-line;
-    }
-
-    .card {
-        border-radius: 0.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
-    }
-</style>

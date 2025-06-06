@@ -107,7 +107,7 @@ namespace final_project_fe.Pages.Admin.PostManager
             {
                 var categoryJson = await categoryResponse.Content.ReadAsStringAsync();
                 var categoryRoot = JsonNode.Parse(categoryJson);
-                Category = categoryRoot?["result"]?.Deserialize<CategoryDto>(new JsonSerializerOptions
+                Category = categoryRoot?.Deserialize<CategoryDto>(new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 }) ?? new CategoryDto();
