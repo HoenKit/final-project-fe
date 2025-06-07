@@ -6,48 +6,41 @@
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
 }
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-	<!--<div class="se-pre-con"></div>-->
-	<div class="theme-layout">	
-		<section>
-			<div class="gap gray-bg">
-				<div class="container-fluid">
-					<div class="row">
-						<div class="col-lg-12">
-							<div class="row" id="page-contents">
-								<div class="col-lg-3">
-									<aside class="sidebar static">
-										<div class="widget">
-											<h4 class="widget-title">Shortcuts</h4>
-											<ul class="naves">
-												<form style="margin-bottom: -15px;" method="get" asp-page-handler="SearchPost" class="d-flex">
-													<div class="input-group" style="margin-bottom: 40px">
-														<input type="text" asp-for="Query" placeholder="Search by title..." class="form-control" />
-														<button type="submit" class="btn btn-primary">
-															<i class="bi bi-search"></i>
-														</button>
-													</div>
-												</form>
+<!--<div class="se-pre-con"></div>-->
+<div class="theme-layout">	
+	<section>
+		<div class="gap gray-bg">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="row" id="page-contents">
+							<div class="col-lg-3">
+								<aside class="sidebar">
+									<div class="widget">
+										<h4 class="widget-title">Shortcuts</h4>
+										<ul class="naves">
+											<form style="margin-bottom: -15px;" method="get" asp-page-handler="SearchPost" class="d-flex">
+												<div class="input-group" style="margin-bottom: 40px">
+													<input type="text" asp-for="Query" placeholder="Search by title..." class="form-control" />
+													<button type="submit" class="btn btn-primary">
+														<i class="bi bi-search"></i>
+													</button>
+												</div>
+											</form>
 												@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
-												@{
-													var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
-												}
+											@{
+												var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+											}
 
-												@if (!string.IsNullOrEmpty(userToken))
-												{
-													<li>
-														<i class="ti-files"></i>
-														<a asp-page="/UserPage" title="">My pages</a>
-													</li>
-												}
-												@* <li>
+											@if (!string.IsNullOrEmpty(userToken))
+											{
+												<li>
+													<i class="ti-files"></i>
+													<a asp-page="/UserPage" title="">My pages</a>
+												</li>
+											}
+											@* <li>
 													<i class="ti-comments-smiley"></i>
 													<a href="#" title="">Messages</a>
 												</li>
@@ -59,50 +52,50 @@
 													<i class="ti-user"></i>
 													<a href="#" title="">friends</a>
 												</li>*@
-												<li>
-													<i class="fa-solid fa-graduation-cap"></i>
-													<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-												</li>
-												<li>
-													<i class="ti-image"></i>
-													<a href="#" title="">images</a>
-												</li>
-												<li>
-													<i class="ti-video-camera"></i>
-													<a href="#" title="">videos</a>
-												</li>
-												<li>
-													<i class="ti-bell"></i>
-													<a href="#" title="">Notifications</a>
-												</li>
-											</ul>
-										</div><!-- Shortcuts -->
-										<div class="widget">
-											<h4 class="widget-title">Recent Activity</h4>
-											<ul class="activitiez">
-												<li>
-													<div class="activity-meta">
-														<i>10 hours Ago</i>
-														<span><a href="#" title="">Commented on Video posted </a></span>
-														<h6>by <a href="time-line.html">black demon.</a></h6>
-													</div>
-												</li>
-												<li>
-													<div class="activity-meta">
-														<i>30 Days Ago</i>
-														<span><a href="#" title="">Posted your status. “Hello guys, how are you?”</a></span>
-													</div>
-												</li>
-												<li>
-													<div class="activity-meta">
-														<i>2 Years Ago</i>
-														<span><a href="#" title="">Share a video on her timeline.</a></span>
-														<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-													</div>
-												</li>
-											</ul>
-										</div><!-- recent activites -->
-										@* <div class="widget stick-widget">
+											<li style="display:flex">
+												<i class="bi bi-mortarboard"></i>
+												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+											</li>
+											<li>
+												<i class="ti-image"></i>
+												<a href="#" title="">images</a>
+											</li>
+											<li>
+												<i class="ti-video-camera"></i>
+												<a href="#" title="">videos</a>
+											</li>
+											<li>
+												<i class="ti-bell"></i>
+												<a href="#" title="">Notifications</a>
+											</li>
+										</ul>
+									</div><!-- Shortcuts -->
+									<div class="widget">
+										<h4 class="widget-title">Recent Activity</h4>
+										<ul class="activitiez">
+											<li>
+												<div class="activity-meta">
+													<i>10 hours Ago</i>
+													<span><a href="#" title="">Commented on Video posted </a></span>
+													<h6>by <a href="time-line.html">black demon.</a></h6>
+												</div>
+											</li>
+											<li>
+												<div class="activity-meta">
+													<i>30 Days Ago</i>
+													<span><a href="#" title="">Posted your status. “Hello guys, how are you?”</a></span>
+												</div>
+											</li>
+											<li>
+												<div class="activity-meta">
+													<i>2 Years Ago</i>
+													<span><a href="#" title="">Share a video on her timeline.</a></span>
+													<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
+												</div>
+											</li>
+										</ul>
+									</div><!-- recent activites -->
+									@* <div class="widget stick-widget">
 											<h4 class="widget-title">Who's follownig</h4>
 											<ul class="followers">
 												<li>
@@ -142,39 +135,41 @@
 												</li>
 											</ul>
 										</div><!-- who's following --> *@
-									</aside>
-								</div><!-- sidebar -->
-								<div class="col-lg-6">
-									<div class="loadMore">
-										@* <div class="central-meta item"> *@
-											<div class="user-post">
+								</aside>
+							</div><!-- sidebar -->
+							<div class="col-lg-6">
+									@* <div class="central-meta item"> *@
+									<div class="user-post">
 
-												@* <div class="newpst-input"> *@
-													<div class="card p-3 mb-3 shadow-sm rounded">
-														<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
-															<div class="d-flex align-items-center">
-																<img src="images/resources/friend-avatar9.jpg" class="rounded-circle me-2" width="40" height="40" />
-																<span class="text-muted">what are you thinking?</span>
-															</div>
-														</button>
+										@* <div class="newpst-input"> *@
+													@if (!string.IsNullOrEmpty(userToken))
+													{
+														<div class="card p-3 mb-3 shadow-sm rounded">
+															<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
+																<div class="d-flex align-items-center">
+																	<img src="images/resources/friend-avatar9.jpg" class="rounded-circle me-2" width="40" height="40" />
+																	<span class="text-muted">what are you thinking?</span>
+																</div>
+															</button>
 
-														<hr class="my-2" />
+															<hr class="my-2" />
 
-														<div class="d-flex justify-content-between text-center">
-															<div class="text-danger" style="cursor: pointer;">
-																<i class="fa fa-video-camera me-1"></i>
-																Live video
-															</div>
-															<div class="text-success" style="cursor: pointer;">
-																<i class="fa fa-image me-1"></i>
-																Photos/videos
-															</div>
-															<div class="text-warning" style="cursor: pointer;">
-																<i class="fa-regular fa-face-smile"></i>
-																Feelings/Activities
+															<div class="d-flex justify-content-between text-center">
+																<div class="text-danger" style="cursor: pointer;">
+																	<i class="fa fa-video-camera me-1"></i>
+																	Live video
+																</div>
+																<div class="text-success" style="cursor: pointer;">
+																	<i class="fa fa-image me-1"></i>
+																	Photos/videos
+																</div>
+																<div class="text-warning" style="cursor: pointer;">
+																	<i class="bi bi-emoji-smile"></i>
+																	Feelings/Activities
+																</div>
 															</div>
 														</div>
-													</div>
+													}
 
 													<!-- Modal -->
 													<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
@@ -231,11 +226,11 @@
 																				<input type="file" name="Images" accept="image/*" hidden onchange="previewImage(event)" />
 																			</label>
 																			<label class="btn btn-light">
-																				<i class="fa-regular fa-face-smile text-warning"></i>Feeling
+																				<i class="bi bi-emoji-smile text-warning"></i>Feeling																				
 																				<input type="file" hidden />
 																			</label>
 																			<label class="btn btn-light">
-																				<i class="fa-solid fa-location-dot text-danger"></i> Location
+																				<i class="bi bi-geo-alt text-danger"></i>Location
 																				<input type="file" hidden />
 																			</label>
 																		</div>
@@ -492,10 +487,10 @@
 																</div>
 														</div>
 														}
-														<div class="pagination mt-3">
+														@* <div class="pagination mt-3">
 															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
 															<!-- Add pagination controls here if needed -->
-														</div>
+														</div> *@
 												}
 												else
 												{
@@ -503,10 +498,10 @@
 												}	
 											</div>
 										</div>
-									</div>
+									<button class="btn-view btn-load-more">Load More</button>
 								</div><!-- centerl meta -->
 								<div class="col-lg-3">
-									<aside class="sidebar static">
+									<aside class="sidebar">
 										<div class="widget">
 											<h4 class="widget-title">Your page</h4>
 											<div class="your-page">
@@ -598,170 +593,7 @@
 													<a data-ripple="" title="" href="#">start now!</a>
 												</div>
 											</div>
-										</div>
-										<div class="widget friend-list stick-widget">
-											<h4 class="widget-title">Friends</h4>
-											<div id="searchDir"></div>
-											<ul id="people-list" class="friendz-list">
-												<li>
-													<figure>
-														<img src="images/resources/friend-avatar.jpg" alt="">
-														<span class="status f-online"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">bucky barnes</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a0d7c9ced4c5d2d3cfccc4c5d2e0c7cdc1c9cc8ec3cfcd">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-													<figure>
-														<img src="images/resources/friend-avatar2.jpg" alt="">
-														<span class="status f-away"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">Sarah Loren</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b4d6d5c6dad1c7f4d3d9d5ddd89ad7dbd9">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-													<figure>
-														<img src="images/resources/friend-avatar3.jpg" alt="">
-														<span class="status f-off"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">jason borne</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1d777c6e72737f5d7a707c7471337e7270">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-													<figure>
-														<img src="images/resources/friend-avatar4.jpg" alt="">
-														<span class="status f-off"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">Cameron diaz</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bed4dfcdd1d0dcfed9d3dfd7d290ddd1d3">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-
-													<figure>
-														<img src="images/resources/friend-avatar5.jpg" alt="">
-														<span class="status f-online"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">daniel warber</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="553f34263a3b37153238343c397b363a38">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-
-													<figure>
-														<img src="images/resources/friend-avatar6.jpg" alt="">
-														<span class="status f-away"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">andrew</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5933382a36373b193e34383035773a3634">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-
-													<figure>
-														<img src="images/resources/friend-avatar7.jpg" alt="">
-														<span class="status f-off"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">amy watson</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5933382a36373b193e34383035773a3634">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-
-													<figure>
-														<img src="images/resources/friend-avatar5.jpg" alt="">
-														<span class="status f-online"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">daniel warber</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dbb1baa8b4b5b99bbcb6bab2b7f5b8b4b6">[email&#160;protected]</a></i>
-													</div>
-												</li>
-												<li>
-
-													<figure>
-														<img src="images/resources/friend-avatar2.jpg" alt="">
-														<span class="status f-away"></span>
-													</figure>
-													<div class="friendz-meta">
-														<a href="time-line.html">Sarah Loren</a>
-														<i><a href="https://wpkixx.com/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2644475448435566414b474f4a0845494b">[email&#160;protected]</a></i>
-													</div>
-												</li>
-											</ul>
-											<div class="chat-box">
-												<div class="chat-head">
-													<span class="status f-online"></span>
-													<h6>Bucky Barnes</h6>
-													<div class="more">
-														<span><i class="ti-more-alt"></i></span>
-														<span class="close-mesage"><i class="ti-close"></i></span>
-													</div>
-												</div>
-												<div class="chat-list">
-													<ul>
-														<li class="me">
-															<div class="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
-															<div class="notification-event">
-																<span class="chat-message-item">
-																	Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-																</span>
-																<span class="notification-date"><time datetime="2004-07-24T18:18" class="entry-date updated">Yesterday at 8:10pm</time></span>
-															</div>
-														</li>
-														<li class="you">
-															<div class="chat-thumb"><img src="images/resources/chatlist2.jpg" alt=""></div>
-															<div class="notification-event">
-																<span class="chat-message-item">
-																	Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-																</span>
-																<span class="notification-date"><time datetime="2004-07-24T18:18" class="entry-date updated">Yesterday at 8:10pm</time></span>
-															</div>
-														</li>
-														<li class="me">
-															<div class="chat-thumb"><img src="images/resources/chatlist1.jpg" alt=""></div>
-															<div class="notification-event">
-																<span class="chat-message-item">
-																	Hi James! Please remember to buy the food for tomorrow! I’m gonna be handling the gifts and Jake’s gonna get the drinks
-																</span>
-																<span class="notification-date"><time datetime="2004-07-24T18:18" class="entry-date updated">Yesterday at 8:10pm</time></span>
-															</div>
-														</li>
-													</ul>
-													<form class="text-box">
-														<textarea placeholder="Post enter to post..."></textarea>
-														<div class="add-smiles">
-															<span title="add icon" class="em em-expressionless"></span>
-														</div>
-														<div class="smiles-bunch">
-															<i class="em em---1"></i>
-															<i class="em em-smiley"></i>
-															<i class="em em-anguished"></i>
-															<i class="em em-laughing"></i>
-															<i class="em em-angry"></i>
-															<i class="em em-astonished"></i>
-															<i class="em em-blush"></i>
-															<i class="em em-disappointed"></i>
-															<i class="em em-worried"></i>
-															<i class="em em-kissing_heart"></i>
-															<i class="em em-rage"></i>
-															<i class="em em-stuck_out_tongue"></i>
-														</div>
-														<button type="submit"></button>
-													</form>
-												</div>
-											</div>
-										</div><!-- friends list sidebar -->
+										</div>						
 									</aside>
 								</div><!-- sidebar -->
 							</div>
@@ -770,18 +602,7 @@
 				</div>
 			</div>
 		</section>
-
-		<div class="bottombar">
-			<div class="container">
-				<div class="row">
-					<div class="col-md-12">
-						<span class="copyright"><a target="_blank" href="https://www.templateshub.net">Templates Hub</a></span>
-						<i><img src="images/credit-cards.png" alt=""></i>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+</div>
 
 	<!-- Report Post Modal -->
 	<div class="modal fade" id="reportPostModal" tabindex="-1" aria-labelledby="reportPostModalLabel" aria-hidden="true">
@@ -886,7 +707,7 @@
 			if (!id) return { avatar: defaultAvatar, name: defaultName };
 
 			try {
-			  const res = await fetch(`${BaseUrl}/UserManager/${id}`, { credentials: 'include' });
+			  const res = await fetch(`${BaseUrl}/User/${id}`, { credentials: 'include' });
 			  if (res.ok) {
 				const u = await res.json();
 				return {
@@ -1607,7 +1428,624 @@
 	</script>
 
 
+	<!-- Script để xử lý Load More -->
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			// Configuration from first script
+			const HubUrl = "@Model.HubUrl";
+			const BaseUrl = "@Model.BaseUrl";
+			const userId = currentUserId;
+			const token = "@token";
+
+			// Load More Posts Configuration
+			let currentPage = 1;
+			let isLoading = false;
+			const apiBaseUrl = `${BaseUrl}/Post`;
+
+			console.log("Initializing posts loading with SignalR integration");
+			console.log("Base API URL:", BaseUrl);
+			console.log("Current User ID:", userId);
+
+			// SignalR Connection (from first script)
+			const connection = new signalR.HubConnectionBuilder()
+				.withUrl(`${HubUrl}/postHub`)
+				.withAutomaticReconnect()
+				.build();
+
+			// Utility function to get user info (from first script)
+			async function getUserInfo(id) {
+				const defaultAvatar = "images/resources/friend-avatar9.jpg";
+				const defaultName = "Unknown User";
+				if (!id) return { avatar: defaultAvatar, name: defaultName };
+
+				try {
+					const res = await fetch(`${BaseUrl}/User/${id}`, { credentials: 'include' });
+					if (res.ok) {
+						const u = await res.json();
+						return {
+							avatar: u?.userMetaData?.avatar || defaultAvatar,
+							name: u?.userMetaData
+								? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
+								: u.email || defaultName
+						};
+					}
+				} catch (error) {
+					console.error("Error fetching user info:", error);
+				}
+				return { avatar: defaultAvatar, name: defaultName };
+			}
+
+			// Enhanced function to format date
+			function formatDate(dateString) {
+				const date = new Date(dateString);
+				return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {
+					hour: '2-digit',
+					minute: '2-digit'
+				});
+			}
+
+			// Enhanced function to create post HTML (combining both scripts)
+			async function createPostHtml(post, userInfo = null) {
+				// Get user info if not provided
+				if (!userInfo) {
+					userInfo = await getUserInfo(post.userId);
+				}
+
+				const { avatar, name } = userInfo;
+				const d = new Date(post.createAt).toLocaleString();
+
+				const hasAuth = token && token !== '' && token !== '@token';
+
+				// Handle file attachments (from first script)
+				let mediaContent = '';
+				if (post.files && post.files.length > 0) {
+					post.files.forEach(file => {
+						if (file.postFileType?.toLowerCase() === "image") {
+							mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+						} else if (file.postFileType?.toLowerCase() === "video") {
+							mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+						}
+					});
+				}
+
+				// Handle postFiles (from second script)
+				if (post.postFiles && post.postFiles.length > 0) {
+					post.postFiles.forEach(file => {
+						if (!file.isDeleted && file.postFileType && file.fileUrl !== 'string') {
+							if (file.postFileType.toLowerCase() === 'image') {
+								mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+							} else if (file.postFileType.toLowerCase() === 'video') {
+								mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+							}
+						}
+					});
+				}
+
+				// Generate comments HTML
+				let commentsHTML = '';
+				if (post.comments && post.comments.length > 0) {
+					const parentComments = post.comments.filter(c => !c.parentCommentId);
+
+					for (const comment of parentComments) {
+						const commentUserInfo = await getUserInfo(comment.userId);
+						const replyFormHTML = hasAuth ? `
+							<div class="reply-form" style="display:none; margin-top: 10px;">
+								<form class="comment-form">
+									<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+									<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+								</form>
+							</div>
+						` : '';
+
+						const commentOptionsHTML = hasAuth ? `
+							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+								<div class="dropdown">
+									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa fa-ellipsis-v"></i>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+									</ul>
+								</div>
+							</div>
+						` : '';
+
+						commentsHTML += `
+							<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+								<div class="comet-avatar">
+									<img src="${commentUserInfo.avatar}" alt="User Avatar">
+								</div>
+								<div class="we-comment">
+									<div class="coment-head">
+										<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
+										<span>${d}</span>
+										${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+										${commentOptionsHTML}
+									</div>
+									<p>${comment.content}</p>
+									${replyFormHTML}
+								</div>
+							</div>
+						`;
+
+						// Add replies
+						const replies = post.comments.filter(c => c.parentCommentId === comment.commentId);
+						if (replies.length > 0) {
+							commentsHTML += `<div class="replies" style="margin-left: 50px;">`;
+							for (const reply of replies) {
+								const replyUserInfo = await getUserInfo(reply.userId);
+								const replyFormHTML = hasAuth ? `
+									<div class="reply-form" style="display:none; margin-top: 10px;">
+										<form class="comment-form">
+											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+											<input type="hidden" name="NewComment.ParentCommentId" value="${reply.commentId}" />
+											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+										</form>
+									</div>
+								` : '';
+
+								const replyOptionsHTML = hasAuth ? `
+									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+										<div class="dropdown">
+											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+												<i class="fa fa-ellipsis-v"></i>
+											</button>
+											<ul class="dropdown-menu">
+												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
+												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
+											</ul>
+										</div>
+									</div>
+								` : '';
+
+								commentsHTML += `
+									<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
+										<div class="comet-avatar">
+											<img src="${replyUserInfo.avatar}" alt="User Avatar">
+										</div>
+										<div class="we-comment">
+											<div class="coment-head">
+												<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
+												<span>${d}</span>
+												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+												${replyOptionsHTML}
+											</div>
+											<p>${reply.content}</p>
+											${replyFormHTML}
+										</div>
+									</div>
+								`;
+							}
+							commentsHTML += `</div>`;
+						}
+					}
+				}
+
+				// Generate options menu for authenticated users
+				const optionsMenuHTML = hasAuth ? `
+					<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
+						<div class="dropdown">
+							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="fa fa-ellipsis-v"></i>
+							</button>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="${post.postId}">Report Post</a></li>
+								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${post.userId}">Report User</a></li>
+							</ul>
+						</div>
+					</div>
+				` : '';
+
+				// Generate comment form for authenticated users
+				const commentFormHTML = hasAuth ? `
+					<div class="coment-area">
+						<ul class="we-comet">
+							<li class="post-comment">
+								<div class="comet-avatar">
+									<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+								</div>
+								<div class="post-comt-box">
+									<form class="comment-form">
+										<input type="hidden" name="NewComment.PostId" value="${post.postId}">
+										<input type="hidden" name="NewComment.ParentCommentId">
+										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+										<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+									</form>
+								</div>
+							</li>
+						</ul>
+					</div>
+				` : '';
+
+				return `
+				<div id="post-${post.postId}">
+				<div class="card p-3 mb-3 shadow-sm rounded">
+					<div class="friend-info">
+						<figure>
+							<img src="${avatar}" alt="User Avatar">
+						</figure>
+						<div class="post-meta">
+							<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+								${post.title}
+							</p>
+						</div>
+						<div class="friend-name">
+							<ins><a href="time-line.html" title="">${name}</a></ins>
+							<span>${d}</span>
+							${optionsMenuHTML}
+						</div>
+						<div class="post-meta">
+							${mediaContent}
+							<div class="description">
+								<p>${post.content}</p>
+							</div>
+						</div>
+						<div class="comments-section" id="commentList-${post.postId}">
+							${commentsHTML}
+						</div>
+						${commentFormHTML}
+					</div>
+					</div>
+				</div>`;
+			}
+
+			// Function to create comment HTML (from first script)
+			function createCommentHtml(comment, avatar, name) {
+				const isReply = comment.parentCommentId != null;
+				const cls = isReply ? "comment reply-comment" : "comment";
+				const date = new Date(comment.createAt);
+				const formattedDate = date.toLocaleDateString("vi-VN");
+				const formattedTime = date.toLocaleTimeString("vi-VN", {
+					hour: "2-digit",
+					minute: "2-digit"
+				});
+				const d = new Date(post.createAt).toLocaleString();
+				const hasAuth = token && token !== '' && token !== '@token';
+
+				const optionsHTML = hasAuth ? `
+					<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+						<div class="dropdown">
+							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="fa fa-ellipsis-v"></i>
+							</button>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+							</ul>
+						</div>
+					</div>
+				` : '';
+
+				const replyFormHTML = hasAuth ? `
+					<div class="reply-form" style="display: none; margin-top: 10px;">
+						<form class="comment-form">
+							<input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
+							<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+							<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+							<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+						</form>
+					</div>
+				` : '';
+
+				return `
+				<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+					<div class="comet-avatar">
+						<img src="${avatar}" alt="User Avatar">
+					</div>
+					<div class="we-comment">
+						<div class="coment-head">
+							<h5><a href="time-line.html" title="">${name}</a></h5>
+							<span>${d}</span>
+							${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+							${optionsHTML}
+						</div>
+						<p>${comment.content}</p>
+						${replyFormHTML}
+					</div>
+				</div>`;
+			}
+
+			// Enhanced function to load more posts
+			async function loadMorePosts() {
+				if (isLoading) return;
+
+				isLoading = true;
+				const loadMoreBtn = document.querySelector('.btn-load-more');
+				const originalText = loadMoreBtn?.innerHTML || 'Load More';
+
+				// Update button to show loading state
+				if (loadMoreBtn) {
+					loadMoreBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Loading...';
+					loadMoreBtn.disabled = true;
+				}
+
+				try {
+					currentPage++;
+					const response = await fetch(`${apiBaseUrl}?page=${currentPage}`, {
+						method: 'GET',
+						credentials: 'include',
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					});
+
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`);
+					}
+
+					const data = await response.json();
+
+					// Check if there are posts to display
+					if (data.items && data.items.length > 0) {
+						const postsContainer = document.querySelector('#post-list') || document.querySelector('.posts-container');
+
+						if (postsContainer) {
+							// Add new posts to the container
+							for (const post of data.items) {
+								const postHTML = await createPostHtml(post);
+								postsContainer.insertAdjacentHTML('beforeend', postHTML);
+							}
+						}
+
+						// Update pagination info
+						const paginationInfo = document.querySelector('.pagination p');
+						if (paginationInfo) {
+							paginationInfo.textContent = `Page ${data.currentPage} / ${data.totalPages}`;
+						}
+
+						// Hide load more button if we've reached the last page
+						if (currentPage >= data.totalPages && loadMoreBtn) {
+							loadMoreBtn.style.display = 'none';
+						}
+					} else {
+						// No more posts to load
+						if (loadMoreBtn) {
+							loadMoreBtn.innerHTML = 'No more posts';
+							loadMoreBtn.disabled = true;
+							setTimeout(() => {
+								loadMoreBtn.style.display = 'none';
+							}, 2000);
+						}
+					}
+
+					console.log(`Loaded page ${currentPage} with ${data.items?.length || 0} posts`);
+
+				} catch (error) {
+					console.error('Error loading more posts:', error);
+					currentPage--; // Revert page counter on error
+
+					if (loadMoreBtn) {
+						loadMoreBtn.innerHTML = 'Error loading posts. Click to retry.';
+						loadMoreBtn.disabled = false;
+					}
+				} finally {
+					// Reset loading state if button is still visible and not permanently disabled
+					if (loadMoreBtn && loadMoreBtn.style.display !== 'none' && !loadMoreBtn.innerHTML.includes('No more posts')) {
+						loadMoreBtn.innerHTML = originalText;
+						loadMoreBtn.disabled = false;
+					}
+					isLoading = false;
+				}
+			}
+
+			// SignalR event handlers (from first script)
+			if (connection) {
+				// Receive new posts from SignalR
+				connection.on("ReceivePost", async post => {
+					console.log("Received post:", post);
+					const postHTML = await createPostHtml(post);
+					const postList = document.querySelector("#post-list");
+					if (postList) {
+						postList.insertAdjacentHTML("afterbegin", postHTML);
+						console.log("Post added to DOM at the beginning of list");
+					} else {
+						console.error("Element #post-list not found");
+					}
+				});
+
+				// Receive new comments from SignalR
+				connection.on("ReceiveComment", async comment => {
+					console.log("Received comment:", comment);
+					const { avatar, name } = await getUserInfo(comment.userId);
+
+					if (comment.parentCommentId) {
+						// This is a reply - insert into replies container
+						const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
+						if (parentComment) {
+							let repliesContainer = parentComment.querySelector('.replies');
+
+							if (repliesContainer) {
+								repliesContainer.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
+								console.log("Reply inserted into replies container");
+							} else {
+								// Create new replies container if it doesn't exist
+								const newRepliesDiv = document.createElement("div");
+								newRepliesDiv.className = "replies";
+								newRepliesDiv.style.marginLeft = "50px";
+								newRepliesDiv.innerHTML = createCommentHtml(comment, avatar, name);
+								parentComment.appendChild(newRepliesDiv);
+								console.log("Reply container created and reply added");
+							}
+						} else {
+							console.error(`Parent comment with ID ${comment.parentCommentId} not found`);
+						}
+					} else {
+						// This is a root comment - add to comment list
+						const commentList = document.querySelector(`#commentList-${comment.postId}`);
+						if (commentList) {
+							commentList.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
+							console.log("Comment added to the end of comment list");
+						} else {
+							console.error(`Element #commentList-${comment.postId} not found`);
+						}
+					}
+				});
+
+				// Start SignalR connection
+				connection.start()
+					.then(() => {
+						console.log("SignalR connected successfully");
+					})
+					.catch(err => {
+						console.error("SignalR connection error:", err);
+						setTimeout(() => connection.start(), 5000);
+					});
+
+				// Handle connection events
+				connection.onclose(error => {
+					console.log("SignalR connection closed, attempting to reconnect...");
+				});
+
+				connection.onreconnecting(error => {
+					console.log("SignalR reconnecting...", error);
+				});
+
+				connection.onreconnected(connectionId => {
+					console.log("SignalR reconnected. ConnectionId:", connectionId);
+				});
+			}
+
+			// Event handlers (from first script)
+
+			// Handle reply button clicks
+			document.body.addEventListener('click', e => {
+				const btn = e.target.closest('.we-reply');
+				if (!btn) return;
+				e.preventDefault();
+				const id = btn.getAttribute('data-reply-to');
+				const form = document.querySelector(`.comment[data-comment-id="${id}"] .reply-form`);
+				if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+			});
+
+			// Handle comment form submissions
+			document.body.addEventListener('submit', async e => {
+				const form = e.target.closest('form.comment-form');
+				const replyform = e.target.closest('.reply-form');
+				if (!form) return;
+				e.preventDefault();
+
+				const fm = new FormData(form);
+				const payload = {
+					postId: Number(fm.get('NewComment.PostId')),
+					parentCommentId: fm.get('NewComment.ParentCommentId')
+						? Number(fm.get('NewComment.ParentCommentId'))
+						: null,
+					content: fm.get('NewComment.Content').trim(),
+					userId: userId
+				};
+
+				if (!payload.content) return;
+				console.log("Submitting comment:", payload);
+
+				try {
+					const res = await fetch(`${BaseUrl}/Comment`, {
+						method: 'POST',
+						credentials: 'include',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+
+					if (!res.ok) {
+						const errorText = await res.text();
+						console.error('Post comment failed:', errorText);
+						alert('Comment could not be submitted. Please try again later.');
+						return;
+					}
+
+					console.log("Comment posted successfully");
+					form.reset();
+					if (replyform) replyform.style.display = 'none';
+				} catch (error) {
+					console.error("Error posting comment:", error);
+					alert('An error occurred while submitting the comment.');
+				}
+			});
+
+			// Handle post form submissions
+			document.body.addEventListener('submit', async e => {
+				const form = e.target.closest('form.post-form');
+				if (!form) return;
+				e.preventDefault();
+
+				const fm = new FormData(form);
+				const payload = {
+					title: fm.get('NewPost.Title').trim(),
+					content: fm.get('NewPost.Content').trim(),
+					userId: userId
+				};
+
+				if (!payload.title || !payload.content) return;
+				console.log("Submitting post:", payload);
+
+				try {
+					const res = await fetch(`${BaseUrl}/Post`, {
+						method: 'POST',
+						credentials: 'include',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+
+					if (!res.ok) {
+						const errorText = await res.text();
+						console.error('Post creation failed:', errorText);
+						alert('Could not create post. Please try again later.');
+						return;
+					}
+
+					console.log("Post created successfully");
+					form.reset();
+				} catch (error) {
+					console.error("Error creating post:", error);
+					alert('An error occurred while creating the post.');
+				}
+			});
+
+			// Initialize load more functionality
+			const loadMoreBtn = document.querySelector('.btn-load-more');
+			if (loadMoreBtn) {
+				loadMoreBtn.addEventListener('click', loadMorePosts);
+			}
+
+			// Initialize current page based on existing posts
+			const paginationInfo = document.querySelector('.pagination p');
+			if (paginationInfo) {
+				const pageMatch = paginationInfo.textContent.match(/Page (\d+)/);
+				if (pageMatch) {
+					currentPage = parseInt(pageMatch[1]);
+				}
+			}
+
+			// Optional: Infinite scroll functionality
+			function enableInfiniteScroll() {
+				window.addEventListener('scroll', function() {
+					if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) {
+						loadMorePosts();
+					}
+				});
+			}
+
+			// Uncomment to enable infinite scroll
+			// enableInfiniteScroll();
+
+			console.log("Posts loading script initialized successfully");
+		});
+	</script>
+
 	<style>
+		section {
+			margin-top: -20px;
+		}
+
+		.sidebar {
+			position: sticky;
+			top: 20px; /* khoảng cách từ đỉnh màn hình khi dính */
+			z-index: 10;
+		}
+
 		.comment {
 			margin-bottom: 20px;
 			padding-bottom: 10px;
@@ -1669,7 +2107,3 @@
 			z-index: 2;
 		}
 	</style>
-
-</body>
-
-</html>
