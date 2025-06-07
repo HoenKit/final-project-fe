@@ -736,9 +736,6 @@
 			let isLoading = false;
 			const apiBaseUrl = `${BaseUrl}/Post`;
 
-			console.log("Initializing combined posts loading with SignalR integration");
-			console.log("Base API URL:", BaseUrl);
-
 			// SignalR Connection
 			const connection = new signalR.HubConnectionBuilder()
 				.withUrl(`${HubUrl}/postHub`)
