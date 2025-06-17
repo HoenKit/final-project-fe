@@ -1,10 +1,12 @@
 ﻿@page
 @model final_project_fe.Pages.Mentor.MentorPage.IndexModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
     ViewData["Title"] = "Home Page";
     var title = Request.Query["title"];
     var categoryId = Request.Query["categoryId"];
     var sortOption = Request.Query["sortOption"];
+    var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
 }
 
 <div class="theme-layout">
@@ -41,7 +43,10 @@
                                 <ul class="naves">
                                     <li style="display: flex;"><i class="bi bi-house"></i><a href="/Index">Home</a></li>
                                     <li style="display: flex;"><i class="bi bi-mortarboard"></i><a href="/Mentor/MentorPage/Index">Coures</a></li>
-                                    <li style="display: flex;"><i class="bi bi-book"></i><a href="#" id="my-learning-link">My Learning</a></li>
+                                    @if (!string.IsNullOrEmpty(userToken))
+                                    {
+                                        <li style="display: flex;"><i class="bi bi-book"></i><a asp-page="./Index" asp-route-filterByUser="true">My Learning</a></li>
+                                    }
                                 </ul>
                             </div>
                         </aside>
@@ -93,12 +98,12 @@
 
 
                             <!-- Khóa Học Đã Mua -->
-                            <div id="learning-toggle" style="display: none;">
+                           @*  <div id="learning-toggle" style="display: none;">
                                 <button class="btn-progress active" id="btnInProgress">In Progress</button>
                                 <button class="btn-completed" id="btnCompleted">Completed</button>
-                            </div>
+                            </div> *@
 
-                            <div class="col-lg-4 col-sm-6">
+                            @* <div class="col-lg-4 col-sm-6">
                                 <div class="in-progress">
                                     <!-- Đây là khoá học đang học -->
                                     <div style="background-color: white">
@@ -118,9 +123,9 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> *@
 
-                            <div class="col-lg-4 col-sm-6">
+                            @* <div class="col-lg-4 col-sm-6">
                                 <div class="completed">
                                     <!-- Đây là khoá học đã hoàn thành -->
                                     <div style="background-color: white">
@@ -140,12 +145,14 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> *@
                             <!-- Trang Khóa Học Đã Mua -->
-
+                            @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
+                        {
                             <a asp-page="/Mentor/MentorPage/CreateCourse" class="addnewforum" title="" id="add-new-btn">
                                 <i class="fa fa-plus"></i> Add New
                             </a>
+                        }
 
                             <!-- Danh sách khóa học -->
                             <div class="row">
