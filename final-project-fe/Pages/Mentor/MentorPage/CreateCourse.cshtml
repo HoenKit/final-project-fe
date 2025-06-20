@@ -3,6 +3,7 @@
 @{
 	ViewData["Title"] = "Create New Course";
 }
+
 <div class="theme-layout">
 <section>
 	<div class="ext-gap bluesh high-opacity">
@@ -29,7 +30,7 @@
 			<div class="row">
 				<div class="col-lg-9">
 					<div class="forum-warper">
-						<div class="post-filter-sec">
+						@* <div class="post-filter-sec">
 							<form method="post" class="filter-form">
 								<input type="post" placeholder="Search post">
 								<button><i class="ti-search"></i></button>
@@ -44,49 +45,74 @@
 								</select>
 								<a href="#" title="">purify</a>
 							</div>
-						</div>
+						</div> *@
 					</div>
 					<div class="forum-form">
-						<h5 class="f-title"><i class="ti-info-alt"></i> Create favourite Topic</h5>
-						<form method="post">
-							<div class="form-group">
-								<input type="text" id="input" required="required" />
-								<label class="control-label" for="input">Topic Tittle</label><i class="mtrl-select"></i>
-							</div>
-							<div class="form-group">
-								<select>
-									<option value="category">Category</option>
-									<option value="video">Video Hive</option>
-									<option value="themeforest">Themeforest</option>
-									<option value="canyon">Code Canyon</option>
-								</select>
-							</div>
-							<div class="form-group">
-								<select>
-									<option value="category">Sub Category</option>
-									<option value="video">Popular video</option>
-									<option value="theme">New Popular Theme</option>
-									<option value="popular">Popular Plugin</option>
-								</select>
-							</div>
-							<div class="form-group">
-								<textarea rows="4" id="textarea" required="required"></textarea>
-								<label class="control-label" for="textarea">Additional Info</label><i class="mtrl-select"></i>
-							</div>
-							<div class="form-group">
-								<input type="text" id="input" required="required" />
-								<label class="control-label" for="input">Choose Optional Tags</label><i class="mtrl-select"></i>
-							</div>
-							<div class="submit-btns">
-								<button type="button" class="mtr-btn"><span>Cancel</span></button>
-								<button type="button" class="mtr-btn"><span>Post Topic</span></button>
-							</div>
-						</form>
+							<partial name="_Notification" />
+						<h5 class="f-title"><i class="ti-info-alt"></i> Create Course</h5>
+							<form method="post" enctype="multipart/form-data">
+								<div class="form-group">
+									<input type="text" asp-for="Course.CourseName" class="form-control" required />
+									<label class="control-label" asp-for="Course.CourseName">Course Name</label>
+									<span asp-validation-for="Course.CourseName" class="text-danger"></span>
+								</div>
+
+								<div class="form-group">
+									<select asp-for="Course.CategoryId" class="form-control">
+										<option value="">-- Select Category --</option>
+										@if (Model.Categories?.Items != null)
+										{
+											foreach (var category in Model.Categories.Items)
+											{
+												<option value="@category.CategoryId">@category.Title</option>
+											}
+										}
+									</select>
+									<label class="control-label" asp-for="Course.CategoryId">Category</label>
+									<span asp-validation-for="Course.CategoryId" class="text-danger"></span>
+								</div>
+
+
+								<div class="form-group">
+									<textarea asp-for="Course.CourseContent" rows="4" class="form-control" required></textarea>
+									<label class="control-label" asp-for="Course.CourseContent">Description</label>
+									<span asp-validation-for="Course.CourseContent" class="text-danger"></span>
+								</div>
+
+								<div class="form-group">
+									<textarea asp-for="Course.SkillLearn" rows="4" class="form-control" required></textarea>
+									<label class="control-label" asp-for="Course.SkillLearn">Skills Learn</label>
+									<span asp-validation-for="Course.SkillLearn" class="text-danger"></span>
+								</div>
+
+								<div class="form-group">
+									<input type="number" asp-for="Course.Cost" class="form-control" step="0.01" required />
+									<label class="control-label" asp-for="Course.Cost">Cost</label>
+									<span asp-validation-for="Course.Cost" class="text-danger"></span>
+								</div>
+
+								<div class="form-group">
+									<input type="file" asp-for="Course.CoursesImage" class="form-control" />
+									<label class="control-label" asp-for="Course.CoursesImage">Course Image</label>
+									<span asp-validation-for="Course.CoursesImage" class="text-danger"></span>
+								</div>
+
+								<div class="form-group">
+									<input type="number" asp-for="Course.CourseLength" class="form-control" step="0.1" required />
+									<label class="control-label" asp-for="Course.CourseLength">Course Length (hours)</label>
+									<span asp-validation-for="Course.CourseLength" class="text-danger"></span>
+								</div>
+
+								<div class="submit-btns">
+									<a href="/Mentor/MentorPage/MyCourses" class="mtr-btn"><span>Cancel</span></a>
+									<button type="submit" class="mtr-btn btn-primary"><span>Post Course</span></button>
+								</div>
+							</form>
 					</div>
 				</div>
 				<div class="col-lg-3">
 					<aside class="sidebar full-style">
-						<div class="widget">
+						@* <div class="widget">
 							<h4 class="widget-title">Forum Statistics</h4>
 							<ul class="forum-static">
 								<li>
@@ -110,9 +136,9 @@
 									<span>50</span>
 								</li>
 							</ul>
-						</div>
+						</div> *@
 						<div class="widget">
-							<h4 class="widget-title">Featured Topics</h4>
+							@* <h4 class="widget-title">Featured Topics</h4>
 							<ul class="feature-topics">
 								<li>
 									<i class="fa fa-star"></i>
@@ -129,7 +155,7 @@
 									<a href="#" title="">Summer is Coming! Picnic in the east boulevard park</a>
 									<span>2 hours, 16 minutes ago</span>
 								</li>
-							</ul>
+							</ul> *@
 						</div>
 					</aside>
 				</div>
