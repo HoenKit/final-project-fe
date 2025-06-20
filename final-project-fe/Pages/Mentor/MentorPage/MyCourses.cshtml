@@ -1,8 +1,8 @@
 ﻿@page
-@model final_project_fe.Pages.Mentor.MentorPage.IndexModel
+@model final_project_fe.Pages.Mentor.MentorPage.MyCoursesModel
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    ViewData["Title"] = "Course Page";
+    ViewData["Title"] = "My Course";
     var title = Request.Query["title"];
     var categoryId = Request.Query["categoryId"];
     var sortOption = Request.Query["sortOption"];
@@ -17,7 +17,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="top-banner">
-                            <h1>Courses List</h1>
+                            <h1>My Courses List</h1>
                             <nav class="breadcrumb">
                                 <a href="/Index" class="breadcrumb-item">Home</a>
                                 <span class="breadcrumb-item active">Courses</span>
@@ -34,7 +34,7 @@
             <div class="container-fluid">
                 <!-- Đổi container -> container-fluid -->
                 <div class="row" id="page-contents">
-                    
+
                     <!-- Cột trái: SHORTCUTS -->
                     <div class="col-lg-3 col-md-4">
                         <aside class="sidebar static">
@@ -99,60 +99,13 @@
 
                                 </div>
                             </form>
-
-
-                            <!-- Khóa Học Đã Mua -->
-                           @*  <div id="learning-toggle" style="display: none;">
-                                <button class="btn-progress active" id="btnInProgress">In Progress</button>
-                                <button class="btn-completed" id="btnCompleted">Completed</button>
-                            </div> *@
-
-                            @* <div class="col-lg-4 col-sm-6">
-                                <div class="in-progress">
-                                    <!-- Đây là khoá học đang học -->
-                                    <div style="background-color: white">
-                                        <figure>
-                                            <img alt="" src="~/images/resources/bloggrid-1.jpg">
-                                        </figure>
-                                        <div class="g-post-meta">
-                                            <div class="post-title">
-                                                <h4><a title="" href="/Mentor/MentorPage/CourseDetail">how to create content that get traffic</a></h4>
-                                                <p>We got really awesome shots for the new catalog, Here’s a photo from last month’s photoshoot. </p>
-                                                <span class="p-date">by <a href="#" title="">JACK Sparo</a> - 12 hours ago </span>
-                                            </div>
-                                            <div class="g-post-ranking">
-                                                <a title="" href="#" class="likes"><i class="fa fa-heart-o"></i>10 likes</a>
-                                                <a title="" href="#" class="coments"><i class="fa fa-comment-o"></i>5 comments</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> *@
-
-                            @* <div class="col-lg-4 col-sm-6">
-                                <div class="completed">
-                                    <!-- Đây là khoá học đã hoàn thành -->
-                                    <div style="background-color: white">
-                                        <figure>
-                                            <img alt="" src="~/images/resources/bloggrid-2.jpg">
-                                        </figure>
-                                        <div class="g-post-meta">
-                                            <div class="post-title">
-                                                <h4><a title="" href="/Mentor/MentorPage/CourseDetail">how to create content that get traffic</a></h4>
-                                                <p>We got really awesome shots for the new catalog, Here’s a photo from last month’s photoshoot. </p>
-                                                <span class="p-date">by <a href="#" title="">JACK Sparo</a> - 12-Sep-2018 </span>
-                                            </div>
-                                            <div class="g-post-ranking">
-                                                <a title="" href="#" class="likes"><i class="fa fa-heart-o"></i>10 likes</a>
-                                                <a title="" href="#" class="coments"><i class="fa fa-comment-o"></i>5 comments</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> *@
-                            <!-- Trang Khóa Học Đã Mua -->
-                            
-
+                            @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
+                            {
+                                <partial name="_Notification" />
+                                <a asp-page="/Mentor/MentorPage/CreateCourse" class="addnewforum" title="" id="add-new-btn">
+                                    <i class="fa fa-plus"></i> Add New
+                                </a>
+                            }
                             <!-- Danh sách khóa học -->
                             <div class="row">
                                 @foreach (var course in Model.Courses.Items)
@@ -233,13 +186,13 @@
                                 </nav>
                             }
 
-                            </div>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </div>
+</div>
     </section>
 
 </div>
@@ -272,90 +225,5 @@
                 border: none;
             }
 </style>
+                    
 
-<!--Script Khóa Học Đã Mua -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const myLearningLink = document.getElementById("my-learning-link");
-        const learningToggle = document.getElementById("learning-toggle");
-        const btnInProgress = document.getElementById("btnInProgress");
-        const btnCompleted = document.getElementById("btnCompleted");
-        const courses = document.querySelectorAll(".g-post-classic");
-
-        function filterCourses(status) {
-            courses.forEach(course => {
-                if (course.classList.contains(status)) {
-                    course.parentElement.style.display = "block";
-                } else {
-                    course.parentElement.style.display = "none";
-                }
-            });
-        }
-
-        myLearningLink.addEventListener("click", function (e) {
-            e.preventDefault();
-            learningToggle.style.display = "flex";
-
-            document.getElementById("add-new-btn").style.display = "none";
-
-            // Mặc định: hiện các khóa học "In Progress", ẩn "Completed"
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "none");
-
-            // Lọc theo mặc định: In Progress
-            filterCourses("in-progress");
-
-            // Làm nổi nút
-            btnInProgress.classList.add("btn-progress");
-            btnInProgress.classList.remove("btn-completed");
-            btnCompleted.classList.add("btn-completed");
-            btnCompleted.classList.remove("btn-progress");
-        });
-
-        btnInProgress.addEventListener("click", function () {
-            filterCourses("in-progress");
-
-            // Update style
-            btnInProgress.classList.add("btn-progress");
-            btnInProgress.classList.remove("btn-completed");
-            btnCompleted.classList.add("btn-completed");
-            btnCompleted.classList.remove("btn-progress");
-
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "none");
-        });
-
-        btnCompleted.addEventListener("click", function () {
-            filterCourses("completed");
-
-            // Update style
-            btnCompleted.classList.add("btn-progress");
-            btnCompleted.classList.remove("btn-completed");
-            btnInProgress.classList.add("btn-completed");
-            btnInProgress.classList.remove("btn-progress");
-
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "none");
-        });
-    });
-</script>
-<!--Script Khóa Học Đã Mua -->
-<!-- Chuyển đổi giữa btn-InProgress và btn-Completed  -->
-<script>
-    document.getElementById("btnInProgress").addEventListener("click", function () {
-        this.classList.add("active");
-        document.getElementById("btnCompleted").classList.remove("active");
-
-        document.querySelectorAll(".in-progress").forEach(e => e.style.display = "block");
-        document.querySelectorAll(".completed").forEach(e => e.style.display = "none");
-    });
-
-    document.getElementById("btnCompleted").addEventListener("click", function () {
-        this.classList.add("active");
-        document.getElementById("btnInProgress").classList.remove("active");
-
-        document.querySelectorAll(".in-progress").forEach(e => e.style.display = "none");
-        document.querySelectorAll(".completed").forEach(e => e.style.display = "block");
-    });
-</script>
-<!-- Chuyển đổi giữa btn-InProgress và btn-Completed  -->
