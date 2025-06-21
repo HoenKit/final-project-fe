@@ -135,7 +135,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi gọi API lấy dữ liệu Course/Category.");
+                _logger.LogError(ex, "Error while listing my courses");
             }
             return Page();
         }
