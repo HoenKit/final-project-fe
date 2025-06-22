@@ -81,7 +81,7 @@
                                                    class="btn btn-link @(user.IsBanned ? "btn-success" : "btn-danger")"
                                                    data-bs-toggle="tooltip"
                                                    data-original-title="@(user.IsBanned ? "Unban User" : "Ban User")"
-                                                   onclick="confirmBanUnban('@user.UserId', @(user.IsBanned.ToString().ToLower()))">
+                                                   onclick="confirmBanUnban('@user.UserId', @user.IsBanned.ToString().ToLower(), event)">
                                                     <i class="@(user.IsBanned ? "fas fa-check" : "fa fa-times")"></i>
                                                 </a>
                                             </div>
@@ -189,7 +189,9 @@
 </script> *@
 
 <script>
-    function confirmBanUnban(userId, isBanned) {
+    function confirmBanUnban(userId, isBanned, event) {
+        event.preventDefault(); // Prevent default action
+
         let action = isBanned ? "unban" : "ban";
         let confirmMessage = `Are you sure you want to ${action} this user?`;
 
@@ -197,7 +199,7 @@
             const button = event.target.closest('a');
             if (button) {
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                button.classList.add('disabled');
+                button.style.pointerEvents = 'none';
             }
 
             window.location.href = `/Admin/UserManager/BanUnban?userId=${userId}`;
