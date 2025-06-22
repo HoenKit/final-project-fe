@@ -12,6 +12,7 @@ using System.Security.Claims;
 using final_project_fe.Dtos.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Buffers.Text;
+using final_project_fe.Dtos.Category;
 
 namespace final_project_fe.Pages
 {
@@ -35,6 +36,7 @@ namespace final_project_fe.Pages
 
         // Use PageResult for paginated posts
         public PageResult<PostDto> Posts { get; set; }
+        public List<CategoryDto> Categories { get; set; } = new();
 
         [BindProperty]
         public CommentCreateDto NewComment { get; set; } 
@@ -61,6 +63,9 @@ namespace final_project_fe.Pages
             string userApiUrl = $"{_apiSettings.BaseUrl}/User/";
 
             string postFileApiUrl = $"{_apiSettings.BaseUrl}/PostFile";
+
+            string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category?";
+
 
             try
             {
@@ -100,6 +105,24 @@ namespace final_project_fe.Pages
                         }
                     }
                 }
+
+                var categoryResponse = await _httpClient.GetAsync(categoryApiUrl);
+                if (categoryResponse.IsSuccessStatusCode)
+                {
+                    string categoryJson = await categoryResponse.Content.ReadAsStringAsync();
+                    var categoryResult = JsonSerializer.Deserialize<PageResult<CategoryDto>>(categoryJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    Categories = categoryResult?.Items?.ToList() ?? new List<CategoryDto>();
+                }
+                else
+                {
+                    _logger.LogError("Không thể lấy danh sách Category. Status: " + categoryResponse.StatusCode);
+                    Categories = new List<CategoryDto>();
+                }
+
 
                 // 1️ Gọi API lấy danh sách Posts
                 HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
