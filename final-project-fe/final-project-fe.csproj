@@ -16,4 +16,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.7.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Admin\ReportManager\CommentsReport\" />
+  </ItemGroup>
+
 </Project>
