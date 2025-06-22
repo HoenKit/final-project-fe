@@ -60,8 +60,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 				if (UserRoles == null || !UserRoles.Contains("Mentor"))
 					return RedirectToPage("/Index");
 
-				// Gọi API lấy danh mục
-				var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy danh mục
+                var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
 				var categoryQuery = HttpUtility.ParseQueryString(string.Empty);
 				categoryQuery["page"] = "1";
 				categoryQuery["pageSize"] = "100";
@@ -114,8 +116,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 				if (UserRoles == null || !UserRoles.Contains("Mentor"))
 					return RedirectToPage("/Index");
 
-				// Gọi API lấy danh mục
-				var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy danh mục
+                var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
 				var categoryQuery = HttpUtility.ParseQueryString(string.Empty);
 				categoryQuery["page"] = "1";
 				categoryQuery["pageSize"] = "100";
