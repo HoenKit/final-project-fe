@@ -20,23 +20,27 @@
     <style>
         :root {
             --primary-color: #088dcd;
+            --primary-light: #e6f2fa;
             --secondary-color: #f8f9fa;
             --border-color: #e9ecef;
             --text-muted: #6c757d;
             --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
         }
 
         body {
             background-color: #f5f7fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
         }
 
         .top-banner {
             background: linear-gradient(135deg, var(--primary-color), #0066cc);
             color: white;
-            padding: 60px 0;
+            padding: 80px 0;
             position: relative;
             overflow: hidden;
+            margin-bottom: 30px;
         }
 
         .top-banner::before {
@@ -49,6 +53,16 @@
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
         }
 
+        a {
+            text-decoration: none !important;
+            color: inherit;
+        }
+
+            a:hover {
+                text-decoration: none !important;
+                color: inherit;
+            }
+
         .search-header {
             background: white;
             padding: 30px 0;
@@ -56,6 +70,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            margin-bottom: 30px;
         }
 
         .search-form {
@@ -74,7 +89,8 @@
             border-radius: 25px;
             padding: 12px 20px 12px 45px;
             font-size: 16px;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            height: 48px;
         }
 
         .search-input input:focus {
@@ -99,6 +115,8 @@
             border-radius: 8px;
             padding: 12px 15px;
             font-size: 14px;
+            height: 48px;
+            cursor: pointer;
         }
 
         .search-btn {
@@ -108,12 +126,16 @@
             padding: 12px 25px;
             color: white;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: var(--transition);
+            height: 48px;
+            display: flex;
+            align-items: center;
         }
 
         .search-btn:hover {
             background: #0066cc;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .sidebar {
@@ -129,6 +151,7 @@
         .filter-section {
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
         }
 
         .filter-section:last-child {
@@ -147,7 +170,7 @@
             gap: 8px;
             cursor: pointer;
             padding: 15px 0;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             user-select: none;
         }
 
@@ -162,7 +185,7 @@
         }
 
         .filter-title .toggle-icon {
-            transition: transform 0.3s ease;
+            transition: var(--transition);
             font-size: 14px;
             color: var(--text-muted);
         }
@@ -178,7 +201,7 @@
         }
 
         .filter-content.expanded {
-            max-height: 500px; /* Adjust based on content */
+            max-height: 500px;
             padding-bottom: 20px;
         }
 
@@ -194,6 +217,13 @@
             align-items: center;
             gap: 10px;
             padding: 8px 0;
+            transition: var(--transition);
+            border-radius: 6px;
+            padding: 8px 10px;
+        }
+
+        .filter-option:hover {
+            background-color: var(--primary-light);
         }
 
         .filter-option input[type="checkbox"],
@@ -201,6 +231,7 @@
             width: 18px;
             height: 18px;
             accent-color: var(--primary-color);
+            cursor: pointer;
         }
 
         .filter-option label {
@@ -208,6 +239,12 @@
             cursor: pointer;
             color: #555;
             font-size: 14px;
+            margin-bottom: 0;
+            transition: var(--transition);
+        }
+
+        .filter-option:hover label {
+            color: var(--primary-color);
         }
 
         .range-slider {
@@ -221,6 +258,11 @@
             background: var(--border-color);
             outline: none;
             -webkit-appearance: none;
+            transition: var(--transition);
+        }
+
+        .range-input:hover {
+            background: #ddd;
         }
 
         .range-input::-webkit-slider-thumb {
@@ -232,6 +274,11 @@
             background: var(--primary-color);
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+
+        .range-input::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
         }
 
         .range-input::-moz-range-thumb {
@@ -263,24 +310,31 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: var(--shadow);
-            transition: all 0.3s ease;
+            transition: var(--transition);
             height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .course-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: rgba(8, 141, 205, 0.2);
         }
 
         .course-image {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
             background: var(--secondary-color);
         }
 
         .course-content {
             padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .course-title {
@@ -289,6 +343,7 @@
             color: #333;
             margin-bottom: 10px;
             line-height: 1.4;
+            flex: 1;
         }
 
         .course-description {
@@ -296,6 +351,10 @@
             font-size: 14px;
             line-height: 1.5;
             margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .course-meta {
@@ -311,12 +370,14 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            margin-top: auto;
         }
 
         .course-price {
             font-size: 20px;
             font-weight: 700;
             color: var(--primary-color);
+            margin-left: auto;
         }
 
         .rating {
@@ -327,6 +388,7 @@
 
         .stars {
             color: #ffc107;
+            font-size: 14px;
         }
 
         .filter-header {
@@ -341,16 +403,24 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 10px;
+            border-radius: 4px;
         }
 
         .clear-filters:hover {
             text-decoration: underline;
+            background-color: var(--primary-light);
         }
 
         .results-info {
             color: var(--text-muted);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-size: 14px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
         }
 
         .pagination-wrapper {
@@ -364,6 +434,7 @@
             margin: 0 2px;
             border: 1px solid var(--border-color);
             color: var(--primary-color);
+            transition: var(--transition);
         }
 
         .page-link:hover, .page-item.active .page-link {
@@ -379,23 +450,23 @@
         }
 
         /* Style scrollbar */
-        .filter-content.category-content::-webkit-scrollbar {
+        .filter-content::-webkit-scrollbar {
             width: 6px;
         }
 
-        .filter-content.category-content::-webkit-scrollbar-track {
+        .filter-content::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 3px;
         }
 
-        .filter-content.category-content::-webkit-scrollbar-thumb {
+        .filter-content::-webkit-scrollbar-thumb {
             background: #ccc;
             border-radius: 3px;
         }
 
-            .filter-content.category-content::-webkit-scrollbar-thumb:hover {
-                background: #aaa;
-            }
+        .filter-content::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
 
         .filter-content.price-content.expanded {
             max-height: 150px;
@@ -406,52 +477,32 @@
         }
 
         .filter-content.language-content.expanded {
-            max-height: 200px; /* Giống với category */
-            overflow-y: auto; /* Thêm thanh cuộn khi cần */
+            max-height: 200px;
         }
-
-        /* Giữ nguyên style scrollbar giống category */
-        .filter-content.language-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .filter-content.language-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .filter-content.language-content::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-        }
-
-            .filter-content.language-content::-webkit-scrollbar-thumb:hover {
-                background: #aaa;
-            }
 
         .filter-content.level-content.expanded {
-            max-height: 180px; /* Có thể điều chỉnh theo nhu cầu */
-            overflow-y: auto; /* Thêm thanh cuộn khi cần */
+            max-height: 180px;
         }
 
-        /* Style thanh cuộn giống các filter khác */
-        .filter-content.level-content::-webkit-scrollbar {
-            width: 6px;
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
         }
 
-        .filter-content.level-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
+        .no-results i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 20px;
         }
 
-        .filter-content.level-content::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
+        .no-results h4 {
+            color: var(--text-muted);
+            margin-bottom: 10px;
         }
-
-            .filter-content.level-content::-webkit-scrollbar-thumb:hover {
-                background: #aaa;
-            }
 
         media (max-width: 768px) {
             .search-form {
@@ -476,6 +527,7 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
+                    <p class="lead mb-4" style="color: white;">Browse our extensive collection of courses taught by industry experts</p>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb justify-content-center">
                             <li class="breadcrumb-item"><a href="#" class="text-white-50">Home</a></li>
@@ -523,7 +575,7 @@
                     <div class="sidebar">
                         <div class="filter-header">
                             <h5 class="mb-0 fw-bold">Filters</h5>
-                            <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
+                            <a href="/Mentor/MentorPage" class="clear-filters" onclick="clearAllFilters(); return false;">Clear All</a>
                         </div>
 
                         <!-- Category Filter -->
@@ -693,7 +745,7 @@
                         {
                             @foreach (var course in Model.Courses.Items)
                             {
-                                <div class="course-card">
+                                <a href="/Mentor/MentorPage/CourseDetail?courseId=@course.CourseId" class="course-card">
                                     @if (!string.IsNullOrEmpty(course.CoursesImage))
                                     {
                                         <img src="@course.CoursesImage" alt="@course.CourseName" class="course-image">
@@ -743,14 +795,14 @@
                                             <div class="course-price">$@course.Cost.ToString("0.##")</div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             }
                         }
                         else
                         {
-                            <div class="col-12 text-center py-5">
-                                <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
-                                <h4 class="mt-3">No courses found</h4>
+                            <div class="no-results">
+                                <i class="bi bi-search"></i>
+                                <h4>No courses found</h4>
                                 <p>Try adjusting your search or filter criteria</p>
                             </div>
                         }
@@ -827,7 +879,6 @@
             return document.querySelector('input[name="category"]:checked')?.value || '';
         }
 
-
         // Get selected languages
         function getSelectedLanguage() {
             return document.querySelector('input[name="language"]:checked')?.value || '';
@@ -851,11 +902,11 @@
             const searchTerm = document.getElementById('searchInput').value;
             if (searchTerm) params.set('title', searchTerm);
 
-            // Category (now single selection)
+            // Category
             const category = getSelectedCategory();
             if (category) params.set('categoryId', category);
 
-            // Language (now single selection)
+            // Language
             const language = getSelectedLanguage();
             if (language) params.set('language', language);
 
@@ -888,86 +939,12 @@
             window.location.href = '?' + queryString;
         }
 
-        // AJAX search function (alternative)
-        function searchCoursesAjax(page = 1) {
-            const params = {
-                page: page,
-                title: $('#searchInput').val(),
-                categories: getSelectedCategories(),
-                languages: getSelectedLanguages(),
-                level: getSelectedLevel(),
-                minPrice: $('#minPrice').val(),
-                maxPrice: $('#maxPrice').val(),
-                minRating: $('#minRating').val(),
-                maxRating: $('#maxRating').val(),
-                sortOption: getSortOption()
-            };
-
-            $.get('/Mentor/MentorPage?handler=SearchCourses', params)
-                .done(function (data) {
-                    if (data.success) {
-                        // Update course grid
-                        let courseHtml = '';
-                        if (data.courses && data.courses.length > 0) {
-                            data.courses.forEach(function (course) {
-                                courseHtml += `
-                                            <div class="course-card">
-                                                ${course.coursesImage ?
-                                        `<img src="${course.coursesImage}@Model.SasToken" alt="${course.courseName}" class="course-image">` :
-                                        `<div class="course-image" style="background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
-                                                        <i class="bi bi-book" style="font-size: 3rem; color: #ccc;"></i>
-                                                    </div>`}
-                                                <div class="course-content">
-                                                    <h3 class="course-title">${course.courseName}</h3>
-                                                    <p class="course-description">${course.courseContent ?
-                                        (course.courseContent.length > 100 ? course.courseContent.substring(0, 100) + '...' : course.courseContent) : ''}</p>
-                                                    <div class="course-meta">
-                                                        <span>by ${course.mentor?.fullName || 'Unknown'}</span>
-                                                        ${course.courseLength ? `<span>${course.courseLength} hours</span>` : ''}
-                                                    </div>
-                                                    <div class="course-stats">
-                                                        ${course.averageRating ? `
-                                                            <div class="rating">
-                                                                <span class="stars">
-                                                                    ${'<i class="bi bi-star-fill"></i>'.repeat(Math.floor(course.averageRating))}
-                                                                    ${course.averageRating % 1 >= 0.5 ? '<i class="bi bi-star-half"></i>' : ''}
-                                                                    ${'<i class="bi bi-star"></i>'.repeat(5 - Math.floor(course.averageRating) - (course.averageRating % 1 >= 0.5 ? 1 : 0))}
-                                                                </span>
-                                                                <span>${course.averageRating.toFixed(1)}</span>
-                                                            </div>` : ''}
-                                                        ${course.studentCount ? `<span>${course.studentCount} students</span>` : ''}
-                                                        <div class="course-price">$${course.cost.toFixed(2)}</div>
-                                                    </div>
-                                                </div>
-                                            </div>`;
-                            });
-                        } else {
-                            courseHtml = `
-                                        <div class="col-12 text-center py-5">
-                                            <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
-                                            <h4 class="mt-3">No courses found</h4>
-                                            <p>Try adjusting your search or filter criteria</p>
-                                        </div>`;
-                        }
-                        $('#courseGrid').html(courseHtml);
-
-                        // Update results count
-                        $('#resultsCount').text(data.totalRecords);
-
-                        // Update pagination
-                        // You would need to implement pagination UI update here
-                    }
-                })
-                .fail(function () {
-                    alert('An error occurred while searching courses');
-                });
-        }
-
+        // Clear all filters
         function clearAllFilters() {
             // Clear radio buttons
             document.getElementById('cat_all').checked = true;
             document.getElementById('lang_all').checked = true;
-            document.getElementById('level_all').checked = true; // Sửa thành level_all thay vì allLevels
+            document.getElementById('level_all').checked = true;
 
             // Reset ranges
             document.getElementById('minPrice').value = 0;
@@ -983,7 +960,7 @@
             updatePriceRange();
             updateRatingRange();
 
-            // Đóng tất cả filter
+            // Close all filters
             document.querySelectorAll('.filter-content').forEach(content => {
                 content.classList.remove('expanded');
             });
@@ -991,57 +968,23 @@
                 title.classList.remove('expanded');
             });
 
-            // Mở lại category filter
+            // Reopen category filter
             toggleFilter('category');
+
+            // Perform search immediately after clearing
+            searchCourses();
         }
 
         // Initialize range displays
         updatePriceRange();
         updateRatingRange();
 
-        // Add event listeners for real-time filtering
-        document.querySelectorAll('input[name="level"]').forEach(input => {
-            input.addEventListener('click', function (e) {
-                e.stopPropagation(); // Ngăn không bị toggle khi click vào radio
-            });
-        });
-
-        // Mặc định đóng category filter khi load trang
-        document.addEventListener('DOMContentLoaded', function () {
-            // Đóng tất cả filter
-            document.querySelectorAll('.filter-content').forEach(content => {
-                content.classList.remove('expanded');
-            });
-            document.querySelectorAll('.filter-title').forEach(title => {
-                title.classList.remove('expanded');
-            });
-
-            // Chỉ mở filter đang được chọn (nếu có)
-            const currentFilters = ['categoryId', 'language', 'level'];
-            let hasActiveFilter = false;
-
-            currentFilters.forEach(filter => {
-                if (new URLSearchParams(window.location.search).has(filter)) {
-                    const filterElement = document.getElementById(`${filter}Filter`);
-                    if (filterElement) {
-                        filterElement.classList.add('expanded');
-                        filterElement.previousElementSibling.classList.add('expanded');
-                        hasActiveFilter = true;
-                    }
-                }
-            });
-
-            // Nếu không có filter nào đang active, mở category filter
-            if (!hasActiveFilter) {
-                toggleFilter('category');
-            }
-        });
-
-        document.querySelectorAll('input[name="level"]').forEach(input => {
-            input.addEventListener('change', searchCourses);
-        });
-
-        document.getElementById('sortSelect').addEventListener('change', searchCourses);
+        // Set initial sort option from query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortOption = urlParams.get('sortOption');
+        if (sortOption) {
+            document.getElementById('sortSelect').value = sortOption;
+        }
 
         // Enter key search
         document.getElementById('searchInput').addEventListener('keypress', function (e) {
@@ -1050,12 +993,57 @@
             }
         });
 
-        // Set initial sort option from query string
-        const urlParams = new URLSearchParams(window.location.search);
-        const sortOption = urlParams.get('sortOption');
-        if (sortOption) {
-            document.getElementById('sortSelect').value = sortOption;
-        }
+        // Initialize filter states based on current URL
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close all filters first
+            document.querySelectorAll('.filter-content').forEach(content => {
+                content.classList.remove('expanded');
+            });
+            document.querySelectorAll('.filter-title').forEach(title => {
+                title.classList.remove('expanded');
+            });
+
+            // Open filters that have active selections
+            const currentFilters = ['categoryId', 'language', 'level', 'minCost', 'maxCost', 'minRate', 'maxRate'];
+            let hasActiveFilter = false;
+
+            currentFilters.forEach(filter => {
+                if (urlParams.has(filter)) {
+                    let filterElement;
+                    
+                    // Map URL parameters to filter sections
+                    if (filter === 'categoryId') {
+                        filterElement = document.getElementById('categoryFilter');
+                    } else if (filter === 'language') {
+                        filterElement = document.getElementById('languageFilter');
+                    } else if (filter === 'level') {
+                        filterElement = document.getElementById('levelFilter');
+                    } else if (filter === 'minCost' || filter === 'maxCost') {
+                        filterElement = document.getElementById('priceFilter');
+                    } else if (filter === 'minRate' || filter === 'maxRate') {
+                        filterElement = document.getElementById('ratingFilter');
+                    }
+
+                    if (filterElement) {
+                        filterElement.classList.add('expanded');
+                        filterElement.previousElementSibling.classList.add('expanded');
+                        hasActiveFilter = true;
+                    }
+                }
+            });
+
+            // If no filters are active, open category filter by default
+            if (!hasActiveFilter) {
+                toggleFilter('category');
+            }
+        });
+
+        // Prevent radio buttons from toggling the filter section
+        document.querySelectorAll('.filter-option input[type="radio"]').forEach(radio => {
+            radio.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
     </script>
 </body>
 </html>
