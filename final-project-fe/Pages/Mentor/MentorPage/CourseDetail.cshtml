@@ -402,15 +402,15 @@
                     <div class="flex items-start space-x-4">
                         <!-- Instructor Avatar -->
                         <div class="flex-shrink-0">
-                            <img src="https://via.placeholder.com/80x80" alt="Instructor" class="w-20 h-20 rounded-full object-cover">
+                            <img src="@Model.MentorInfor.UserMetaData.Avatar" alt="Instructor" class="w-20 h-20 rounded-full object-cover">
                         </div>
                         
                         <!-- Instructor Details -->
                         <div class="flex-1">
                             <h3 class="text-xl font-bold text-purple-600 mb-1">
-                                <a href="#" class="hover:underline">Dr. John Smith</a>
+                                <a href="#" class="hover:underline">@Model.MentorInfor.UserMetaData.FirstName @Model.MentorInfor.UserMetaData.LastName</a>
                             </h3>
-                            <p class="text-gray-600 mb-3">Senior Software Engineer & Tech Educator</p>
+                            <p class="text-gray-600 mb-3">@Model.Mentor.JobTitle</p>
                             
                             <!-- Instructor Stats -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
@@ -418,28 +418,28 @@
                                     <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                                     </svg>
-                                    <span class="font-semibold mr-1">4.6</span>
+                                    <span class="font-semibold mr-1">@Model.Mentor.AverageRating</span>
                                     <span class="text-gray-600">Instructor Rating</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                                     </svg>
-                                    <span class="font-semibold mr-1">1,847</span>
+                                    <span class="font-semibold mr-1">@Model.Mentor.TotalReviews</span>
                                     <span class="text-gray-600">Reviews</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                                     </svg>
-                                    <span class="font-semibold mr-1">25,432</span>
+                                    <span class="font-semibold mr-1">@Model.Mentor.TotalStudents</span>
                                     <span class="text-gray-600">Students</span>
                                 </div>
                                 <div class="flex items-center">
                                     <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
-                                    <span class="font-semibold mr-1">12</span>
+                                    <span class="font-semibold mr-1">@Model.Mentor.TotalCourses</span>
                                     <span class="text-gray-600">Courses</span>
                                 </div>
                             </div>
@@ -447,11 +447,8 @@
                             <!-- Instructor Bio -->
                             <div class="expandable-bio">
                                 <p class="text-gray-700 leading-relaxed">
-                                    Dr. John Smith is a seasoned software engineer with over 10 years of experience in web development and cloud technologies. He has worked at top tech companies including Google and Microsoft, and is passionate about sharing his knowledge with aspiring developers.
-                                </p>
-                                <p class="text-gray-700 leading-relaxed mt-3">
-                                    He holds a Ph.D. in Computer Science from Stanford University and has published numerous papers on software architecture and distributed systems. His courses have helped thousands of students launch successful careers in technology.
-                                </p>
+                                   @Model.Mentor.Introduction 
+                                </p>                               
                                 <div class="expand-gradient-bio"></div>
                             </div>
                             <button class="text-purple-600 hover:text-purple-700 font-medium mt-2 show-more-bio">Show more</button>
@@ -464,7 +461,7 @@
             <section class="mb-12">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold">Student feedback</h2>
-                    <button class="text-purple-600 hover:text-purple-700 font-medium">See all reviews</button>
+                    @* <button class="text-purple-600 hover:text-purple-700 font-medium">See all reviews</button> *@
                 </div>
 
                 <!-- Rating Overview -->
@@ -596,7 +593,7 @@
                             <!-- Previous button -->
                             @if (@Model.Reviews.Page > 1)
                             {
-                                <a href="?page=@(Model.Reviews.Page - 1)" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
+                                <a href="?courseId=@Model.Course.CourseId&currentPage=@(Model.Reviews.Page - 1)" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
                                     Previous
                                 </a>
                             }
@@ -610,7 +607,7 @@
 
                             @for (int i = startPage; i <= endPage; i++)
                             {
-                                <a href="?page=@i" class="px-3 py-2 text-sm @(i == Model.Reviews.Page ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100") rounded">
+                                <a href="?courseId=@Model.Course.CourseId&currentPage=@i" class="px-3 py-2 text-sm @(i == Model.Reviews.Page ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-800 hover:bg-gray-100") rounded">
                                     @i
                                 </a>
                             }
@@ -618,7 +615,7 @@
                             <!-- Next button -->
                             @if (Model.Reviews.Page < totalPages)
                             {
-                                <a href="?page=@(Model.Reviews.Page + 1)" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
+                                <a href="?courseId=@Model.Course.CourseId&currentPage=@(Model.Reviews.Page + 1)" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded">
                                     Next
                                 </a>
                             }

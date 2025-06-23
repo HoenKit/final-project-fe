@@ -30,14 +30,16 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
         public CourseResponseDto Course { get; set; } = new CourseResponseDto();
         public User MentorInfor {  get; set; } = new User();
+        public GetMentorDto Mentor { get; set; }
         public CourseReviewPageResult Reviews { get; set; } = new(new List<ReviewResponseDto>(), 0, 1, 3, 0, 0);
         public List<ModuleWithLessonsDto> Modules { get; set; } = new List<ModuleWithLessonsDto>();
         public string BaseUrl { get; set; }
         public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
-        public async Task<IActionResult> OnGetAsync(int courseId)
+        public async Task<IActionResult> OnGetAsync(int courseId, int? currentPage)
         {
             BaseUrl = _apiSettings.BaseUrl;
+            Reviews.Page = currentPage ?? 1;
             try
             {
                 // Get Category
@@ -99,18 +101,18 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 }
 
                 var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
-                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                Mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                if (mentor == null)
+                if (Mentor == null)
                 {
                     ModelState.AddModelError("", "Mentor does not exist.");
                     return Page();
                 }
                 // Get User by ID
-                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/{mentor.UserId}");
+                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/{Mentor.UserId}");
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     _logger.LogError("Can not get Mentor.");
@@ -129,6 +131,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     ModelState.AddModelError("", "Mentor does not exist.");
                     return Page();
                 }
+
+                if (MentorInfor.UserMetaData.Avatar != null)
+                {
+                    MentorInfor.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(MentorInfor.UserMetaData.Avatar, SasToken);
+                }
+
                 // Get Review 
                 int pageSize = 3;
                 var reviewResponse = await _httpClient.GetAsync($"{BaseUrl}/Review/get-by-course/{courseId}?page={Reviews.Page}&pageSize={pageSize}");
