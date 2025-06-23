@@ -1,165 +1,819 @@
 ﻿@page
 @model final_project_fe.Pages.Mentor.MentorPage.CreateCourseModel
 @{
-	ViewData["Title"] = "Create New Course";
+    ViewData["Title"] = "Create New Course";
 }
+<style>
+    /* Modern Course Creation Styles */
+    .course-creation-container {
+        max-width: 888px;
+        margin: 0 auto;
+        padding: 150px 20px;
+        background: #fff;
+        min-height: 100vh;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: rgb(8, 141, 205);
+    }
+
+    .step-indicator {
+        font-size: 14px;
+        color: #686f7a;
+    }
+
+    .exit-btn {
+        background: none;
+        border: 1px solid #686f7a;
+        color: #686f7a;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+        .exit-btn:hover {
+            background: #f8f9fa;
+        }
+
+    /* Progress Bar */
+    .progress-bar-container {
+        width: 100%;
+        height: 4px;
+        background-color: #e0e0e0;
+        border-radius: 2px;
+        margin-bottom: 40px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: rgb(8, 141, 205);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+
+    .step-content {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .step-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1c1d1f;
+        margin-bottom: 16px;
+        line-height: 1.2;
+    }
+
+    .step-subtitle {
+        font-size: 16px;
+        color: #686f7a;
+        margin-bottom: 40px;
+    }
+
+    .step-section {
+        display: none;
+    }
+
+        .step-section.active {
+            display: block;
+        }
+
+    .form-section {
+        background: #fff;
+        border: 1px solid #d1d7dc;
+        border-radius: 8px;
+        padding: 32px;
+        margin-bottom: 24px;
+    }
+
+    .form-group-modern {
+        margin-bottom: 24px;
+        position: relative;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 16px;
+        border: 1px solid #d1d7dc;
+        border-radius: 4px;
+        font-size: 16px;
+        background: #fff;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+        .form-control-modern:focus {
+            outline: none;
+            border-color: rgb(8, 141, 205);
+            box-shadow: 0 0 0 2px rgba(164, 53, 240, 0.1);
+        }
+
+    .form-label-modern {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1c1d1f;
+        margin-bottom: 8px;
+    }
+
+    .select-modern {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 20px;
+        padding-right: 40px;
+    }
+
+    .textarea-modern {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-input-modern {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-input-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        border: 2px dashed #d1d7dc;
+        border-radius: 8px;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+        .file-input-label:hover {
+            border-color: rgb(8, 141, 205);
+            background: rgba(164, 53, 240, 0.05);
+        }
+
+    .file-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 32px;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 40px;
+    }
+
+    .btn-secondary-modern {
+        background: #fff;
+        border: 1px solid #d1d7dc;
+        color: #1c1d1f;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary-modern:hover {
+            background: #f8f9fa;
+            border-color: rgb(8, 141, 205);
+        }
+
+    .btn-primary-modern {
+        background: rgb(8, 141, 205);
+        border: 1px solid rgb(8, 141, 205);
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+        .btn-primary-modern:hover {
+            background: rgb(8, 141, 205);
+            border-color: rgb(8, 141, 205);
+        }
+
+        .btn-primary-modern:disabled {
+            background: #d1d7dc;
+            border-color: #d1d7dc;
+            cursor: not-allowed;
+        }
+
+    .form-helper-text {
+        font-size: 14px;
+        color: #686f7a;
+        margin-top: 8px;
+    }
+
+    .course-type-selector {
+       /*  display: grid; */
+        display: flex;
+        justify-content: center;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .course-type-option {
+        padding: 24px;
+        border: 2px solid #d1d7dc;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+
+        width: 50%
+    }
+
+        .course-type-option:hover {
+            border-color: rgb(8, 141, 205);
+        }
+
+        .course-type-option.selected {
+            border-color: rgb(8, 141, 205);
+        }
+
+    .course-type-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 16px;
+        opacity: 0.7;
+    }
+
+    .course-type-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1c1d1f;
+        margin-bottom: 8px;
+    }
+
+    .course-type-description {
+        font-size: 14px;
+        color: #686f7a;
+    }
+
+    .title-input-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .char-counter {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 2px 6px;
+        font-size: 12px;
+        color: #666;
+        pointer-events: none;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+        .char-counter.limit {
+            color: #dc3545;
+            font-weight: 600;
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+    @@media (max-width: 768px) {
+        .course-creation-container {
+            padding: 20px 16px;
+        }
+
+        .step-title {
+            font-size: 24px;
+        }
+
+        .form-section {
+            padding: 24px 16px;
+        }
+
+        .course-type-selector {
+            grid-template-columns: 1fr;
+        }
+
+        .navigation-buttons {
+            flex-direction: column;
+            gap: 16px;
+        }
+    }
+</style>
 
 <div class="theme-layout">
-<section>
-	<div class="ext-gap bluesh high-opacity">
-		<div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-lg-12">
-					<div class="top-banner">
-						<h1>Create Courses</h1>
-						<nav class="breadcrumb">
-							<a href="/Mentor/MentorPage/MyCourses" class="breadcrumb-item">My Courses</a>
-							<span class="breadcrumb-item active">Create Courses</span>
-						</nav>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</section><!-- top area animated -->
+    <section>
+        <div class="ext-gap bluesh high-opacity">
+            <div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="top-banner">
+                            <h1>Create Courses</h1>
+                            <nav class="breadcrumb">
+                                <a href="/Mentor/MentorPage/MyCourses" class="breadcrumb-item">My Courses</a>
+                                <span class="breadcrumb-item active">Create Courses</span>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- top area animated -->
 
-<section>
-	<div class="gap100">
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-9">
-					<div class="forum-warper">
-						@* <div class="post-filter-sec">
-							<form method="post" class="filter-form">
-								<input type="post" placeholder="Search post">
-								<button><i class="ti-search"></i></button>
-							</form>
-							<div class="purify">
-								<span>filter by</span>
-								<select>
-									<option>Assending A-Z</option>
-									<option>Desending Z-A</option>
-									<option>Desending (date)</option>
-									<option>Asending (date)</option>
-								</select>
-								<a href="#" title="">purify</a>
-							</div>
-						</div> *@
-					</div>
-					<div class="forum-form">
-							<partial name="_Notification" />
-							<form method="post" enctype="multipart/form-data">
-								<div class="form-group">
-									<input type="text" asp-for="Course.CourseName" class="form-control" required />
-									<label class="control-label" asp-for="Course.CourseName">Course Name</label>
-									<span asp-validation-for="Course.CourseName" class="text-danger"></span>
-								</div>
+    <div class="course-creation-container">
+        <!-- Progress Header -->
+        <div class="progress-header">
+            <div class="step-indicator">Step <span id="current-step">1</span> of 3</div>
+            <a href="/Mentor/MentorPage/MyCourses" class="exit-btn">Exit</a>
+        </div>
 
-								<div class="form-group">
-									<select asp-for="Course.CategoryId" class="form-control">
-										<option value="">-- Select Category --</option>
-										@if (Model.Categories?.Items != null)
-										{
-											foreach (var category in Model.Categories.Items)
-											{
-												<option value="@category.CategoryId">@category.Title</option>
-											}
-										}
-									</select>
-									<label class="control-label" asp-for="Course.CategoryId">Category</label>
-									<span asp-validation-for="Course.CategoryId" class="text-danger"></span>
-								</div>
+        <!-- Progress Bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar" style="width: 25%;"></div>
+        </div>
 
+        <!-- Form wrapper for all steps -->
+        <form method="post" enctype="multipart/form-data" id="courseForm">
+            <partial name="_Notification" />
 
-								<div class="form-group">
-									<textarea asp-for="Course.CourseContent" rows="4" class="form-control" required></textarea>
-									<label class="control-label" asp-for="Course.CourseContent">Description</label>
-									<span asp-validation-for="Course.CourseContent" class="text-danger"></span>
-								</div>
+            <!-- Hidden fields for step data -->
+            <input type="hidden" id="hidden-course-type" name="CourseType" value="course" />
+            <input type="hidden" id="hidden-course-category" name="Course.CategoryId" value="" />
 
-								<div class="form-group">
-									<textarea asp-for="Course.SkillLearn" rows="4" class="form-control" required></textarea>
-									<label class="control-label" asp-for="Course.SkillLearn">Skills Learn</label>
-									<span asp-validation-for="Course.SkillLearn" class="text-danger"></span>
-								</div>
+            <!-- Step 1: Course Type Selection -->
+            <div class="step-section active" id="step-1">
+                <div class="step-content">
+                    <h1 class="step-title">First, let's find out what type of course you're making.</h1>
+                </div>
 
-								<div class="form-group">
-									<input type="number" asp-for="Course.Cost" class="form-control" step="0.01" required />
-									<label class="control-label" asp-for="Course.Cost">Cost</label>
-									<span asp-validation-for="Course.Cost" class="text-danger"></span>
-								</div>
+                <div class="course-type-selector">
+                    <div class="course-type-option selected" data-type="course" onclick="selectCourseType(this)">
+                        <div class="course-type-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
+                            </svg>
+                        </div>
+                        <div class="course-type-title">Course</div>
+                        <div class="course-type-description">Create rich learning experiences with the help of video lectures, quizzes, coding exercises, etc.</div>
+                    </div>
 
-								<div class="form-group">
-									<input type="file" asp-for="Course.CoursesImage" class="form-control" />
-									<label class="control-label" asp-for="Course.CoursesImage">Course Image</label>
-									<span asp-validation-for="Course.CoursesImage" class="text-danger"></span>
-								</div>
+                    @* <div class="course-type-option" data-type="practice" onclick="selectCourseType(this)">
+                        <div class="course-type-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14,2 14,8 20,8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10,9 9,9 8,9" />
+                            </svg>
+                        </div>
+                        <div class="course-type-title">Practice Test</div>
+                        <div class="course-type-description">Help students prepare for certification exams by providing practice questions.</div>
+                    </div> *@
+                </div>
+            </div>
 
-								<div class="form-group">
-									<input type="number" asp-for="Course.CourseLength" class="form-control" step="0.1" required />
-									<label class="control-label" asp-for="Course.CourseLength">Course Length (hours)</label>
-									<span asp-validation-for="Course.CourseLength" class="text-danger"></span>
-								</div>
+            <!-- Step 2: Course Title -->
+            <div class="step-section" id="step-2">
+                <div class="step-content">
+                    <h1 class="step-title">How about a working title?</h1>
+                    <p class="step-subtitle">It's ok if you can't think of a good title now. You can change it later.</p>
+                </div>
 
-								<div class="submit-btns">
-									<a href="/Mentor/MentorPage/MyCourses" class="mtr-btn"><span>Cancel</span></a>
-									<button type="submit" class="mtr-btn btn-primary"><span>Post Course</span></button>
-								</div>
-							</form>
-					</div>
-				</div>
-				<div class="col-lg-3">
-					<aside class="sidebar full-style">
-						@* <div class="widget">
-							<h4 class="widget-title">Forum Statistics</h4>
-							<ul class="forum-static">
-								<li>
-									<a href="#" title="">Forums</a>
-									<span>13</span>
-								</li>
-								<li>
-									<a href="#" title="">Registered Users</a>
-									<span>50</span>
-								</li>
-								<li>
-									<a href="#" title="">Topics</a>
-									<span>14</span>
-								</li>
-								<li>
-									<a href="#" title="">Replies</a>
-									<span>32</span>
-								</li>
-								<li>
-									<a href="#" title="">Topic Tags</a>
-									<span>50</span>
-								</li>
-							</ul>
-						</div> *@
-						<div class="widget">
-							@* <h4 class="widget-title">Featured Topics</h4>
-							<ul class="feature-topics">
-								<li>
-									<i class="fa fa-star"></i>
-									<a href="#" title="">What is your favourit season in summer?</a>
-									<span>2 hours, 16 minutes ago</span>
-								</li>
-								<li>
-									<i class="fa fa-star"></i>
-									<a href="#" title="">The new Goddess of War trailer was launched at E3!</a>
-									<span>2 hours, 16 minutes ago</span>
-								</li>
-								<li>
-									<i class="fa fa-star"></i>
-									<a href="#" title="">Summer is Coming! Picnic in the east boulevard park</a>
-									<span>2 hours, 16 minutes ago</span>
-								</li>
-							</ul> *@
-						</div>
-					</aside>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
+                <div class="title-input-container">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.CourseName">Course Title</label>
+                        <span asp-validation-for="Course.CourseName" class="error-message"></span>
+                        <div class="input-wrapper">
+                            <input type="text" asp-for="Course.CourseName" class="form-control-modern"
+                                   placeholder="e.g. Learn Photoshop CS6 from Scratch" maxlength="60" required />
+                            <div class="char-counter" id="title-counter">60</div>
+                        </div>
+                        <div class="form-helper-text">Your title should be a mix of attention-grabbing, informative, and optimized for search</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Category Selection -->
+            <div class="step-section" id="step-3">
+                <div class="step-content">
+                    <h1 class="step-title">What category best fits the knowledge you'll share?</h1>
+                    <p class="step-subtitle">If you're not sure about the right category, you can change it later.</p>
+                </div>
+
+                <div class="title-input-container">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" for="course-category">Course Category</label>
+                        <select id="course-category" class="form-control-modern select-modern" name="Course.CategoryId">
+                            <option value="">Choose a category</option>
+                            @if (Model.Categories?.Items != null)
+                            {
+                                foreach (var category in Model.Categories.Items)
+                                {
+                                    <option value="@category.CategoryId">@category.Title</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-helper-text">Choose the category that best describes your course content</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Course Details -->
+           @*  <div class="step-section" id="step-4">
+                <div class="step-content">
+                    <h1 class="step-title">Tell us more about your course</h1>
+                    <p class="step-subtitle">Fill in the details to complete your course creation.</p>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.CourseContent">Course Description</label>
+                        <textarea asp-for="Course.CourseContent" class="form-control-modern textarea-modern"
+                                  placeholder="What will students learn in your course?" required></textarea>
+                        <div class="form-helper-text">A good description should be informative and engaging</div>
+                        <span asp-validation-for="Course.CourseContent" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.SkillLearn">What will students learn?</label>
+                        <textarea asp-for="Course.SkillLearn" class="form-control-modern textarea-modern"
+                                  placeholder="Enter the key skills students will gain from this course" required></textarea>
+                        <div class="form-helper-text">List the main skills and knowledge students will acquire</div>
+                        <span asp-validation-for="Course.SkillLearn" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.Cost">Course Price ($)</label>
+                        <input type="number" asp-for="Course.Cost" class="form-control-modern"
+                               step="0.01" min="0" placeholder="0.00" required />
+                        <div class="form-helper-text">Set your course price (you can always change this later)</div>
+                        <span asp-validation-for="Course.Cost" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.CourseLength">Course Duration (hours)</label>
+                        <input type="number" asp-for="Course.CourseLength" class="form-control-modern"
+                               step="0.1" min="0.1" placeholder="2.5" required />
+                        <div class="form-helper-text">Estimated total time to complete the course</div>
+                        <span asp-validation-for="Course.CourseLength" class="error-message"></span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="form-label-modern" asp-for="Course.CoursesImage">Course Image</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" asp-for="Course.CoursesImage" class="file-input-modern" accept="image/*" />
+                            <div class="file-input-label">
+                                <div>
+                                    <div class="file-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <polyline points="21,15 16,10 5,21" />
+                                        </svg>
+                                    </div>
+                                    <div><strong>Click to upload</strong> or drag and drop</div>
+                                    <div style="color: #686f7a; font-size: 14px; margin-top: 8px;">
+                                        SVG, PNG, JPG or GIF (max. 800x400px)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Course.CoursesImage" class="error-message"></span>
+                    </div>
+                </div>
+            </div> *@
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <button type="button" class="btn-secondary-modern" id="prev-btn" onclick="previousStep()" style="display: none;">Previous</button>
+                <button type="button" class="btn-primary-modern" id="next-btn" onclick="nextStep()">Continue</button>
+                <button type="submit" class="btn-primary-modern" id="submit-btn" style="display: none;">Create Course</button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 3;
+    let selectedCourseType = 'course';
+
+    function updateProgressBar() {
+        const progressPercentage = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-bar').style.width = progressPercentage + '%';
+        document.getElementById('current-step').textContent = currentStep;
+    }
+
+    function showStep(step) {
+        // Hide all steps
+        document.querySelectorAll('.step-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Show current step
+        document.getElementById(`step-${step}`).classList.add('active');
+
+        // Update navigation buttons
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+
+        if (step === 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'inline-flex';
+            submitBtn.style.display = 'none';
+        } else if (step === totalSteps) {
+            prevBtn.style.display = 'inline-flex';
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'inline-flex';
+        } else {
+            prevBtn.style.display = 'inline-flex';
+            nextBtn.style.display = 'inline-flex';
+            submitBtn.style.display = 'none';
+        }
+
+        updateProgressBar();
+    }
+
+    function nextStep() {
+        if (validateCurrentStep()) {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+
+                // Update hidden fields when moving to next step
+                updateHiddenFields();
+            }
+        }
+    }
+
+    function previousStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    }
+
+    function validateCurrentStep() {
+        switch(currentStep) {
+            case 1:
+                return document.querySelector('.course-type-option.selected') !== null;
+            case 2:
+                const courseNameInput = document.querySelector('input[name="Course.CourseName"]');
+                const title = courseNameInput ? courseNameInput.value.trim() : '';
+
+                if (title.length === 0) {
+                    showValidationError(courseNameInput, 'Course title is required');
+                    return false;
+                }
+
+                if (title.length < 10) {
+                    showValidationError(courseNameInput, 'Course title must be at least 10 characters long');
+                    return false;
+                }
+
+                clearValidationError(courseNameInput);
+                return true;
+            case 3:
+                const categorySelect = document.getElementById('course-category');
+                const category = categorySelect.value;
+
+                if (category === '') {
+                    showValidationError(categorySelect, 'Please select a category');
+                    return false;
+                }
+
+                clearValidationError(categorySelect);
+                return true;
+            case 4:
+                return true; // Form validation will handle this
+            default:
+                return true;
+        }
+    }
+
+    function showValidationError(input, message) {
+        // Remove any existing error styling
+        clearValidationError(input);
+
+        // Add error styling to input
+        input.classList.add('error');
+
+        // Find error message element
+        const formGroup = input.closest('.form-group-modern');
+        let errorSpan = formGroup ? formGroup.querySelector('.error-message') : null;
+
+        // Create error span if it doesn't exist
+        if (!errorSpan) {
+            errorSpan = document.createElement('span');
+            errorSpan.className = 'error-message';
+            const label = formGroup.querySelector('.form-label-modern');
+            if (label) {
+                label.insertAdjacentElement('afterend', errorSpan);
+            }
+        }
+
+        if (errorSpan) {
+            errorSpan.textContent = message;
+            errorSpan.style.display = 'inline-block';
+            errorSpan.style.visibility = 'visible';
+        }
+    }
+
+    function clearValidationError(input) {
+        input.classList.remove('error');
+
+        const formGroup = input.closest('.form-group-modern');
+        const errorSpan = formGroup ? formGroup.querySelector('.error-message') : null;
+
+        if (errorSpan) {
+            errorSpan.textContent = '';
+            errorSpan.style.display = 'none';
+            errorSpan.style.visibility = 'hidden';
+        }
+    }
+
+    function selectCourseType(element) {
+        document.querySelectorAll('.course-type-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        element.classList.add('selected');
+        selectedCourseType = element.getAttribute('data-type');
+
+        // Update hidden field immediately
+        document.getElementById('hidden-course-type').value = selectedCourseType;
+    }
+
+    function updateHiddenFields() {
+        // Update course type
+        document.getElementById('hidden-course-type').value = selectedCourseType;
+
+        // Update category
+        const categorySelect = document.getElementById('course-category');
+        if (categorySelect) {
+            document.getElementById('hidden-course-category').value = categorySelect.value;
+        }
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character counter for course title
+        const courseNameInput = document.querySelector('input[name="Course.CourseName"]');
+        const titleCounter = document.getElementById('title-counter');
+
+        if (courseNameInput && titleCounter) {
+            courseNameInput.addEventListener('input', function() {
+                const remaining = 60 - this.value.length;
+                titleCounter.textContent = remaining;
+                titleCounter.classList.toggle('limit', remaining < 10);
+
+                // Clear validation errors on input
+                if (this.value.trim().length > 0) {
+                    clearValidationError(this);
+                }
+            });
+
+            // Add real-time validation feedback
+            courseNameInput.addEventListener('blur', function() {
+                const title = this.value.trim();
+                if (title.length > 0 && title.length < 10) {
+                    showValidationError(this, 'Course title should be at least 10 characters for better searchability');
+                } else if (title.length >= 10) {
+                    clearValidationError(this);
+                }
+            });
+        }
+
+        // Category selection handler
+        const categorySelect = document.getElementById('course-category');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                if (this.value !== '') {
+                    clearValidationError(this);
+                }
+                updateHiddenFields();
+            });
+        }
+
+        // File input preview
+        // const fileInput = document.querySelector('.file-input-modern');
+        // const fileLabel = document.querySelector('.file-input-label');
+
+        // if (fileInput && fileLabel) {
+        //     fileInput.addEventListener('change', function(e) {
+        //         const file = e.target.files[0];
+        //         if (file) {
+        //             fileLabel.innerHTML = `
+        //                 <div>
+        //                     <div style="color: rgb(8, 141, 205); font-weight: 600; margin-bottom: 8px;">
+        //                         ✓ File selected: ${file.name}
+        //                     </div>
+        //                     <div style="color: #686f7a; font-size: 14px;">
+        //                         Click to change file
+        //                     </div>
+        //                 </div>
+        //             `;
+        //         }
+        //     });
+        // }
+
+        // Initialize first step
+        showStep(1);
+
+        // Set initial hidden field values
+        updateHiddenFields();
+    });
+
+    // Form submission handler
+    const courseForm = document.getElementById('courseForm');
+    if (courseForm) {
+        courseForm.addEventListener('submit', function(e) {
+            // Final update of hidden fields before submission
+            updateHiddenFields();
+        });
+    }
+
+    // Add CSS for error styling if not already present
+    if (!document.querySelector('#step-form-error-styles')) {
+        const style = document.createElement('style');
+        style.id = 'step-form-error-styles';
+        style.textContent = `
+            .form-control-modern.error {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+
+            .error-message {
+                color: #dc3545;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+                display: none;
+                visibility: hidden;
+            }
+
+            .error-message:not(:empty) {
+                display: inline-block;
+                visibility: visible;
+            }
+
+            .char-counter.limit {
+                color: #dc3545;
+                font-weight: 600;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+</script>

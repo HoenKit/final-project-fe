@@ -86,8 +86,8 @@ blockquote,
 {
 	color: #088dcd;	
 }
-svg{
-stroke: #fff;
+svg {
+	stroke: #000000;
 }
 path.icon{
 	fill: #fff;

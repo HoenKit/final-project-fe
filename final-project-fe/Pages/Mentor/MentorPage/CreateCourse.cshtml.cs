@@ -160,22 +160,18 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 				}
 
 				var form = new MultipartFormDataContent();
-				form.Add(new StringContent(Course.CourseName ?? ""), "CourseName");
-				form.Add(new StringContent(Course.CourseContent ?? ""), "CourseContent");
-				form.Add(new StringContent(Course.Cost.ToString()), "Cost");
-				form.Add(new StringContent(Course.SkillLearn ?? ""), "SkillLearn");
-				form.Add(new StringContent(Course.CourseLength?.ToString() ?? ""), "CourseLength");
+				form.Add(new StringContent(Course.CourseName ?? ""), "CourseName");			
 				form.Add(new StringContent(Course.CategoryId.ToString()), "CategoryId");
 				form.Add(new StringContent(mentor.MentorId.ToString()), "MentorId");
 
-				if (Course.CoursesImage != null)
+		/*		if (Course.CoursesImage != null)
 				{
 					var stream = Course.CoursesImage.OpenReadStream();
 					var fileContent = new StreamContent(stream);
 					fileContent.Headers.ContentType = new MediaTypeHeaderValue(Course.CoursesImage.ContentType);
 					form.Add(fileContent, "CoursesImage", Course.CoursesImage.FileName);
 				}
-
+*/
 				// Gửi request tạo khóa học
 				var response1 = await _httpClient.PostAsync($"{BaseUrl}/Course", form);
 
