@@ -36,7 +36,7 @@
 	<header>
 		<div class="topbar">
 			<div class="logo">
-				<a title="" asp-page="/Index"><img src="images/logo.png" alt=""></a>
+				<a title="" asp-page="/Index"><img src="@Url.Content("~/images/logo.png")" alt=""></a>
 			</div>
 
 			<div class="top-area">
@@ -248,7 +248,7 @@
 					</li>
 				</ul>
 				<div class="user-img">
-					<img src="images/resources/admin.jpg" alt="">
+					<img src="@Url.Content("~/images/resources/admin.jpg")" alt="">
 					<span class="status f-online"></span>
 					<div class="user-setting">
 						<a href="#" title=""><span class="status f-online"></span>online</a>
