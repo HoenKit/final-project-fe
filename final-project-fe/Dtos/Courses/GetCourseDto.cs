@@ -16,6 +16,9 @@ namespace final_project_fe.Dtos.Courses
         public int? StudentCount { get; set; }
         public string? CoursesImage { get; set; }
         public double? CourseLength { get; set; }
+        public string? Status { get; set; }
+        public Decimal? AverageRating { get; set; }
+        public decimal? TotalReviews { get; set; }
         public DateTime? CreateAt { get; set; }
         public MentorDto? Mentor { get; set; }
     }

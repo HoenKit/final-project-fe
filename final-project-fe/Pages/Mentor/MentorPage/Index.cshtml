@@ -9,353 +9,1053 @@
     var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
 }
 
-<div class="theme-layout">
-    <section>
-        <div class="ext-gap bluesh high-opacity">
-            <div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="top-banner">
-                            <h1>Courses List</h1>
-                            <nav class="breadcrumb">
-                                <a href="/Index" class="breadcrumb-item">Home</a>
-                                <span class="breadcrumb-item active">Courses</span>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section><!-- top area animated -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Search - Modern Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #088dcd;
+            --secondary-color: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-muted: #6c757d;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-    <section>
-        <div class="gap gray-bg">
-            <div class="container-fluid">
-                <!-- Đổi container -> container-fluid -->
-                <div class="row" id="page-contents">
-                    
-                    <!-- Cột trái: SHORTCUTS -->
-                    <div class="col-lg-3 col-md-4">
-                        <aside class="sidebar static">
-                            <div class="widget stick-widget">
-                                <h4 class="widget-title">Shortcuts</h4>
-                                <ul class="naves">
-                                    <li style="display: flex;"><i class="bi bi-house"></i><a href="/Index">Home</a></li>
-                                    <li style="display: flex;"><i class="bi bi-mortarboard"></i><a href="/Mentor/MentorPage/Index">Coures</a></li>
-                                    @if (!string.IsNullOrEmpty(userToken))
-                                    {
-                                        <li style="display: flex;"><i class="bi bi-book"></i><a asp-page="./Index" asp-route-filterByUser="true">My Learning</a></li>
-                                    }
-                                    @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
-                                    {
-                                        <li style="display: flex;"><i class="bi bi-mortarboard"></i><a asp-page="./MyCourses">My Courses</a></li>
-                                    }
-                                </ul>
-                            </div>
-                        </aside>
-                    </div>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-                    <!-- Cột phải: Nội dung -->
-                    <div class="col-lg-9 col-md-8">
-                        <div class="blog-sec">
+        .top-banner {
+            background: linear-gradient(135deg, var(--primary-color), #0066cc);
+            color: white;
+            padding: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-                            <!-- Bộ lọc tìm kiếm -->
-                            <form method="get" class="filter-form d-flex">
-                                <div class="post-filter-sec d-flex justify-content-between align-items-center mb-3">
+        .top-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+        }
 
-                                    <input type="text" name="title" placeholder="Search course" class="form-control" value="@Request.Query["title"]" />
+        .search-header {
+            background: white;
+            padding: 30px 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
+        .search-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
 
+        .search-input {
+            flex: 1;
+            position: relative;
+        }
 
-                                    <div class="purify d-flex align-items-center" style="margin-left: 15px">
-                                        <span class="me-2">Filter by</span>
+        .search-input input {
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            padding: 12px 20px 12px 45px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
 
-                                        <select name="categoryId" class="form-select">
-                                            <option value="" selected="@(string.IsNullOrEmpty(Request.Query["categoryId"]) ? "selected" : null)">All categories</option>
-                                            @foreach (var category in Model.Categories.Items)
-                                            {
-                                                var selected = Request.Query["categoryId"] == category.CategoryId.ToString() ? "selected" : null;
-                                                <option value="@category.CategoryId" selected="@selected">@category.Title</option>
-                                            }
-                                        </select>
+        .search-input input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(8, 141, 205, 0.1);
+        }
 
-                                        <select name="sortOption" class="form-select">
-                                            @{
-                                                var currentSort = Request.Query["sortOption"].ToString()?.ToLower();
-                                            }
-                                            <option value="">-- Sort by --</option>
-                                            <option value="asc_name" selected="@(currentSort == "asc_name" ? "selected" : null)">Ascending A-Z</option>
-                                            <option value="desc_name" selected="@(currentSort == "desc_name" ? "selected" : null)">Descending Z-A</option>
-                                            <option value="desc_date" selected="@(currentSort == "desc_date" ? "selected" : null)">Newest (Date ↓)</option>
-                                            <option value="asc_date" selected="@(currentSort == "asc_date" ? "selected" : null)">Oldest (Date ↑)</option>
-                                        </select>
+        .search-input i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
 
-                                        <button type="submit" class="btn btn-primary ms-2" style="margin-left: 50px">
-                                            <i class="ti-search"></i>
-                                        </button>
-                                    </div>
+        .sort-select {
+            min-width: 200px;
+        }
 
+        .sort-select select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 14px;
+        }
 
-                                </div>
-                            </form>
+        .search-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
+        .search-btn:hover {
+            background: #0066cc;
+            transform: translateY(-2px);
+        }
 
-                            <!-- Khóa Học Đã Mua -->
-                           @*  <div id="learning-toggle" style="display: none;">
-                                <button class="btn-progress active" id="btnInProgress">In Progress</button>
-                                <button class="btn-completed" id="btnCompleted">Completed</button>
-                            </div> *@
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
 
-                            @* <div class="col-lg-4 col-sm-6">
-                                <div class="in-progress">
-                                    <!-- Đây là khoá học đang học -->
-                                    <div style="background-color: white">
-                                        <figure>
-                                            <img alt="" src="~/images/resources/bloggrid-1.jpg">
-                                        </figure>
-                                        <div class="g-post-meta">
-                                            <div class="post-title">
-                                                <h4><a title="" href="/Mentor/MentorPage/CourseDetail">how to create content that get traffic</a></h4>
-                                                <p>We got really awesome shots for the new catalog, Here’s a photo from last month’s photoshoot. </p>
-                                                <span class="p-date">by <a href="#" title="">JACK Sparo</a> - 12 hours ago </span>
-                                            </div>
-                                            <div class="g-post-ranking">
-                                                <a title="" href="#" class="likes"><i class="fa fa-heart-o"></i>10 likes</a>
-                                                <a title="" href="#" class="coments"><i class="fa fa-comment-o"></i>5 comments</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> *@
+        .filter-section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-                            @* <div class="col-lg-4 col-sm-6">
-                                <div class="completed">
-                                    <!-- Đây là khoá học đã hoàn thành -->
-                                    <div style="background-color: white">
-                                        <figure>
-                                            <img alt="" src="~/images/resources/bloggrid-2.jpg">
-                                        </figure>
-                                        <div class="g-post-meta">
-                                            <div class="post-title">
-                                                <h4><a title="" href="/Mentor/MentorPage/CourseDetail">how to create content that get traffic</a></h4>
-                                                <p>We got really awesome shots for the new catalog, Here’s a photo from last month’s photoshoot. </p>
-                                                <span class="p-date">by <a href="#" title="">JACK Sparo</a> - 12-Sep-2018 </span>
-                                            </div>
-                                            <div class="g-post-ranking">
-                                                <a title="" href="#" class="likes"><i class="fa fa-heart-o"></i>10 likes</a>
-                                                <a title="" href="#" class="coments"><i class="fa fa-comment-o"></i>5 comments</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> *@
-                            <!-- Trang Khóa Học Đã Mua -->
-                            
+        .filter-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
 
-                            <!-- Danh sách khóa học -->
-                            <div class="row">
-                                @foreach (var course in Model.Courses.Items)
-                                {
-                                    <div class="col-lg-4 col-sm-6 mb-4">
-                                        <div class="g-post-classic">
-                                            <figure>
-                                                @{
-                                                    var imageWithToken = string.IsNullOrEmpty(course.CoursesImage)
-                                                    ? "~/images/resources/bloggrid-1.jpg"
-                                                    : $"{course.CoursesImage}?{Model.SasToken}";
-                                                }
-                                                <img src="@imageWithToken" alt="@course.CourseName" onerror="this.src='~/images/resources/bloggrid-1.jpg'" />
-                                            </figure>
-                                            <div class="g-post-meta">
-                                                <div class="post-title">
-                                                    <h4>
-                                                        <a title="@course.CourseName" href="/Mentor/MentorPage/CourseDetail?courseId=@course.CourseId">
-                                                            @course.CourseName
-                                                        </a>
-                                                    </h4>
-                                                    <p>@(course.CourseContent?.Length > 100 ? course.CourseContent.Substring(0, 100) + "..." : course.CourseContent)</p>
-                                                    <span class="p-date">
-                                                        by <a href="#">@course.Mentor.FirstName @course.Mentor.LastName</a>
-                                                        - @course.CreateAt?.ToString("dd/MM/yyyy")
-                                                        - @course.CourseLength hours
-                                                    </span>
-                                                </div>
-                                                <div class="g-post-ranking">
-                                                    <a title="Likes" href="#" class="likes">
-                                                        <i class="fa fa-heart-o"></i> @course.StudentCount students
-                                                    </a>
-                                                    <a title="Cost" href="#" class="coments">
-                                                        <i class="fa fa-comment-o"></i> @($"{course.Cost:C0}")
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
+        .filter-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
 
-                            <!-- Phân trang -->
-                            @if (Model.Courses.TotalPages > 1)
-                            {
-                                <nav aria-label="Pagination">
-                                    <ul class="pagination justify-content-center mt-4">
-                                        @if (Model.Courses.CurrentPage > 1)
-                                        {
-                                            <li class="page-item">
-                                                <a class="page-link"
-                                                   href="?currentPage=@(Model.Courses.CurrentPage - 1)&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    Previous
-                                                </a>
-                                            </li>
-                                        }
+        .filter-title:hover {
+            color: var(--primary-color);
+        }
 
-                                        @for (int i = 1; i <= Model.Courses.TotalPages; i++)
-                                        {
-                                            <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
-                                                <a class="page-link"
-                                                   href="?currentPage=@i&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    @i
-                                                </a>
-                                            </li>
-                                        }
+        .filter-title .filter-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-                                        @if (Model.Courses.CurrentPage < Model.Courses.TotalPages)
-                                        {
-                                            <li class="page-item">
-                                                <a class="page-link"
-                                                   href="?currentPage=@(Model.Courses.CurrentPage + 1)&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    Next
-                                                </a>
-                                            </li>
-                                        }
-                                    </ul>
-                                </nav>
-                            }
+        .filter-title .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
 
-                            </div>
-                        </div>
-                    </div>
+        .filter-title.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
 
+        .filter-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+        }
+
+        .filter-content.expanded {
+            max-height: 500px; /* Adjust based on content */
+            padding-bottom: 20px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 10px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+
+        .filter-option input[type="checkbox"],
+        .filter-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        .filter-option label {
+            flex: 1;
+            cursor: pointer;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .range-slider {
+            margin: 15px 0;
+        }
+
+        .range-input {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .range-input::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .range-values {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .course-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--secondary-color);
+        }
+
+        .course-content {
+            padding: 20px;
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .course-description {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .course-stats {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .course-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stars {
+            color: #ffc107;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .clear-filters {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .clear-filters:hover {
+            text-decoration: underline;
+        }
+
+        .results-info {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .page-link {
+            border-radius: 8px;
+            margin: 0 2px;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+        }
+
+        .page-link:hover, .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Specific max-heights for different sections */
+        .filter-content.category-content.expanded {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Style scrollbar */
+        .filter-content.category-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-content.category-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .filter-content.category-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+            .filter-content.category-content::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
+
+        .filter-content.price-content.expanded {
+            max-height: 150px;
+        }
+
+        .filter-content.rating-content.expanded {
+            max-height: 150px;
+        }
+
+        .filter-content.language-content.expanded {
+            max-height: 200px; /* Giống với category */
+            overflow-y: auto; /* Thêm thanh cuộn khi cần */
+        }
+
+        /* Giữ nguyên style scrollbar giống category */
+        .filter-content.language-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-content.language-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .filter-content.language-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+            .filter-content.language-content::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
+
+        .filter-content.level-content.expanded {
+            max-height: 180px; /* Có thể điều chỉnh theo nhu cầu */
+            overflow-y: auto; /* Thêm thanh cuộn khi cần */
+        }
+
+        /* Style thanh cuộn giống các filter khác */
+        .filter-content.level-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-content.level-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .filter-content.level-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+            .filter-content.level-content::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
+
+        media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-input, .sort-select {
+                width: 100%;
+            }
+            
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Banner -->
+    <section class="top-banner">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a href="#" class="text-white-50">Home</a></li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Courses</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
     </section>
 
-</div>
-<style>
-    .in-progress,
-    .completed {
-        display: none;
-    }
+    <!-- Search Header -->
+    <section class="search-header">
+        <div class="container">
+            <div class="search-form">
+                <div class="search-input">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control" placeholder="Search for courses..." id="searchInput" value="@title">
+                </div>
+                <div class="sort-select">
+                    <select class="form-select" id="sortSelect">
+                        <option value="">Sort by</option>
+                        <option value="asc_name">Name A-Z</option>
+                        <option value="desc_name">Name Z-A</option>
+                        <option value="desc_date">Newest First</option>
+                        <option value="asc_date">Oldest First</option>
+                        <option value="asc_price">Price Low to High</option>
+                        <option value="desc_price">Price High to Low</option>
+                        <option value="desc_rating">Highest Rated</option>
+                    </select>
+                </div>
+                <button class="btn search-btn" onclick="searchCourses()">
+                    <i class="bi bi-search me-2"></i>Search
+                </button>
+            </div>
+        </div>
+    </section>
 
-    #learning-toggle {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
+    <!-- Main Content -->
+    <section class="py-4">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <div class="sidebar">
+                        <div class="filter-header">
+                            <h5 class="mb-0 fw-bold">Filters</h5>
+                            <a href="#" class="clear-filters" onclick="clearAllFilters()">Clear All</a>
+                        </div>
 
-        #learning-toggle button {
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            border: 1px solid #ccc;
-            background-color: white;
-            color: black;
-            transition: all 0.3s ease;
-            cursor: pointer;
+                        <!-- Category Filter -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter('category')">
+                                <div class="filter-icon">
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                    <span>Category</span>
+                                </div>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="filter-content category-content" id="categoryFilter">
+                                <div class="filter-options" id="categoryFilters">
+                                    <div class="filter-option">
+                                        <input type="radio" id="cat_all" name="category" value=""
+                                        @(string.IsNullOrEmpty(Request.Query["categoryId"]) ? "checked" : "")>
+                                        <label for="cat_all">All Categories</label>
+                                    </div>
+                                    @foreach (var category in Model.Categories?.Items ?? new List<Dtos.Category.CategoryDto>())
+                                    {
+                                        <div class="filter-option">
+                                            <input type="radio" id="cat_@category.CategoryId" name="category" value="@category.CategoryId"
+                                            @(Request.Query["categoryId"].ToString() == category.CategoryId.ToString() ? "checked" : "")>
+                                            <label for="cat_@category.CategoryId">@category.Title</label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter('price')">
+                                <div class="filter-icon">
+                                    <i class="bi bi-currency-dollar"></i>
+                                    <span>Price Range</span>
+                                </div>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="filter-content price-content" id="priceFilter">
+                                <div class="range-slider">
+                                    <input type="range" class="range-input" id="minPrice" min="0" max="500"
+                                           value="@(Request.Query["minCost"].FirstOrDefault() ?? "0")" oninput="updatePriceRange()">
+                                    <input type="range" class="range-input" id="maxPrice" min="0" max="500"
+                                           value="@(Request.Query["maxCost"].FirstOrDefault() ?? "500")" oninput="updatePriceRange()">
+                                    <div class="range-values">
+                                        <span>$<span id="minPriceValue">@(Request.Query["minCost"].FirstOrDefault() ?? "0")</span></span>
+                                        <span>$<span id="maxPriceValue">@(Request.Query["maxCost"].FirstOrDefault() ?? "500")</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter('rating')">
+                                <div class="filter-icon">
+                                    <i class="bi bi-star"></i>
+                                    <span>Rating</span>
+                                </div>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="filter-content rating-content" id="ratingFilter">
+                                <div class="range-slider">
+                                    <input type="range" class="range-input" id="minRating" min="0" max="5" step="0.1"
+                                           value="@(Request.Query["minRate"].FirstOrDefault() ?? "0")" oninput="updateRatingRange()">
+                                    <input type="range" class="range-input" id="maxRating" min="0" max="5" step="0.1"
+                                           value="@(Request.Query["maxRate"].FirstOrDefault() ?? "5")" oninput="updateRatingRange()">
+                                    <div class="range-values">
+                                        <span><span id="minRatingValue">@(Request.Query["minRate"].FirstOrDefault() ?? "0")</span>★</span>
+                                        <span><span id="maxRatingValue">@(Request.Query["maxRate"].FirstOrDefault() ?? "5")</span>★</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Language Filter -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter('language')">
+                                <div class="filter-icon">
+                                    <i class="bi bi-translate"></i>
+                                    <span>Language</span>
+                                </div>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="filter-content language-content" id="languageFilter">
+                                <div class="filter-options" id="languageFilters">
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_all" name="language" value=""
+                                        @(string.IsNullOrEmpty(Request.Query["language"]) ? "checked" : "")>
+                                        <label for="lang_all">All Languages</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_en" name="language" value="English"
+                                        @(Request.Query["language"] == "English" ? "checked" : "")>
+                                        <label for="lang_en">English</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_es" name="language" value="Spanish"
+                                        @(Request.Query["language"] == "Spanish" ? "checked" : "")>
+                                        <label for="lang_es">Spanish</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_fr" name="language" value="French"
+                                        @(Request.Query["language"] == "French" ? "checked" : "")>
+                                        <label for="lang_fr">French</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_de" name="language" value="German"
+                                        @(Request.Query["language"] == "German" ? "checked" : "")>
+                                        <label for="lang_de">German</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_vi" name="language" value="Vietnamese"
+                                        @(Request.Query["language"] == "Vietnamese" ? "checked" : "")>
+                                        <label for="lang_vi">Vietnamese</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level Filter -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter('level')">
+                                <div class="filter-icon">
+                                    <i class="bi bi-graph-up"></i>
+                                    <span>Difficulty Level</span>
+                                </div>
+                                <i class="bi bi-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="filter-content level-content" id="levelFilter">
+                                <div class="filter-options">
+                                    <div class="filter-option">
+                                        <input type="radio" id="level_all" name="level" value=""
+                                        @(string.IsNullOrEmpty(Request.Query["level"]) ? "checked" : "")>
+                                        <label for="level_all">All Levels</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="beginner" name="level" value="Beginner"
+                                        @(Request.Query["level"] == "Beginner" ? "checked" : "")>
+                                        <label for="beginner">Beginner</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="intermediate" name="level" value="Intermediate"
+                                        @(Request.Query["level"] == "Intermediate" ? "checked" : "")>
+                                        <label for="intermediate">Intermediate</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="advanced" name="level" value="Advanced"
+                                        @(Request.Query["level"] == "Advanced" ? "checked" : "")>
+                                        <label for="advanced">Advanced</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Results -->
+                <div class="col-lg-9 col-md-8">
+                    <div class="results-info">
+                        <strong id="resultsCount">@(Model.Courses?.TotalCount ?? 0)</strong> courses found
+                    </div>
+
+                    <div class="course-grid" id="courseGrid">
+                        @if (Model.Courses?.Items != null && Model.Courses.Items.Any())
+                        {
+                            @foreach (var course in Model.Courses.Items)
+                            {
+                                <div class="course-card">
+                                    @if (!string.IsNullOrEmpty(course.CoursesImage))
+                                    {
+                                        <img src="@course.CoursesImage" alt="@course.CourseName" class="course-image">
+                                    }
+                                    else
+                                    {
+                                        <div class="course-image" style="background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-book" style="font-size: 3rem; color: #ccc;"></i>
+                                        </div>
+                                    }
+                                    <div class="course-content">
+                                        <h3 class="course-title">@course.CourseName</h3>
+                                        <p class="course-description">@(course.CourseContent?.Length > 100 ? course.CourseContent.Substring(0, 100) + "..." : course.CourseContent)</p>
+                                        <div class="course-meta">
+                                            <span>by @course.Mentor?.FirstName @course.Mentor?.LastName</span>
+                                            @if (course.CourseLength.HasValue)
+                                            {
+                                                <span>@course.CourseLength.Value hours</span>
+                                            }
+                                        </div>
+                                        <div class="course-stats">
+                                            @if (course.AverageRating.HasValue)
+                                            {
+                                                <div class="rating">
+                                                    @{
+                                                        var fullStars = (int)Math.Floor(course.AverageRating.Value);
+                                                        var hasHalfStar = course.AverageRating;
+                                                        var emptyStars = 5 - fullStars - hasHalfStar;
+                                                    }
+                                                    <span class="stars">
+                                                        @for (int i = 0; i < fullStars; i++)
+                                                        {
+                                                            <i class="bi bi-star-fill"></i>
+                                                        }
+                                                        @for (int i = 0; i < emptyStars; i++)
+                                                        {
+                                                            <i class="bi bi-star"></i>
+                                                        }
+                                                    </span>
+                                                    <span>@course.AverageRating.Value.ToString("0.0")</span>
+                                                </div>
+                                            }
+                                            @if (course.StudentCount.HasValue)
+                                            {
+                                                <span>@course.StudentCount.Value students</span>
+                                            }
+                                            <div class="course-price">$@course.Cost.ToString("0.##")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center py-5">
+                                <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
+                                <h4 class="mt-3">No courses found</h4>
+                                <p>Try adjusting your search or filter criteria</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.Courses?.TotalPages > 1)
+                    {
+                        <div class="pagination-wrapper">
+                            <nav aria-label="Course pagination">
+                                <ul class="pagination">
+                                    <li class="page-item @(Model.Courses.CurrentPage == 1 ? "disabled" : "")">
+                                        <a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage - 1)" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    @for (int i = 1; i <= Model.Courses.TotalPages; i++)
+                                    {
+                                        <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
+                                            <a class="page-link" href="?currentPage=@i">@i</a>
+                                        </li>
+                                    }
+                                    <li class="page-item @(Model.Courses.CurrentPage == Model.Courses.TotalPages ? "disabled" : "")">
+                                        <a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage + 1)" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Toggle filter section
+        function toggleFilter(filterType) {
+            const titleElement = document.querySelector(`#${filterType}Filter`).previousElementSibling;
+            const contentElement = document.getElementById(`${filterType}Filter`);
+            const toggleIcon = titleElement.querySelector('.toggle-icon');
+            
+            // Toggle classes
+            titleElement.classList.toggle('expanded');
+            contentElement.classList.toggle('expanded');
         }
 
-            #learning-toggle button.active {
-                background-color: #088dcd;
-                color: white;
-                border: none;
-            }
-</style>
+        // Initialize - expand Category filter by default
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleFilter('category');
+        });
 
-<!--Script Khóa Học Đã Mua -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const myLearningLink = document.getElementById("my-learning-link");
-        const learningToggle = document.getElementById("learning-toggle");
-        const btnInProgress = document.getElementById("btnInProgress");
-        const btnCompleted = document.getElementById("btnCompleted");
-        const courses = document.querySelectorAll(".g-post-classic");
+        // Update price range display
+        function updatePriceRange() {
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            document.getElementById('minPriceValue').textContent = minPrice;
+            document.getElementById('maxPriceValue').textContent = maxPrice;
+        }
 
-        function filterCourses(status) {
-            courses.forEach(course => {
-                if (course.classList.contains(status)) {
-                    course.parentElement.style.display = "block";
-                } else {
-                    course.parentElement.style.display = "none";
+        // Update rating range display
+        function updateRatingRange() {
+            const minRating = document.getElementById('minRating').value;
+            const maxRating = document.getElementById('maxRating').value;
+            document.getElementById('minRatingValue').textContent = parseFloat(minRating).toFixed(1);
+            document.getElementById('maxRatingValue').textContent = parseFloat(maxRating).toFixed(1);
+        }
+
+        // Get selected categories
+        function getSelectedCategory() {
+            return document.querySelector('input[name="category"]:checked')?.value || '';
+        }
+
+
+        // Get selected languages
+        function getSelectedLanguage() {
+            return document.querySelector('input[name="language"]:checked')?.value || '';
+        }
+
+        // Get selected level
+        function getSelectedLevel() {
+            return document.querySelector('input[name="level"]:checked')?.value || '';
+        }
+
+        // Get sort option
+        function getSortOption() {
+            return document.getElementById('sortSelect').value;
+        }
+
+        // Build query string from filters
+        function buildQueryString() {
+            const params = new URLSearchParams();
+
+            // Search term
+            const searchTerm = document.getElementById('searchInput').value;
+            if (searchTerm) params.set('title', searchTerm);
+
+            // Category (now single selection)
+            const category = getSelectedCategory();
+            if (category) params.set('categoryId', category);
+
+            // Language (now single selection)
+            const language = getSelectedLanguage();
+            if (language) params.set('language', language);
+
+            // Level
+            const level = getSelectedLevel();
+            if (level) params.set('level', level);
+
+            // Price range
+            const minPrice = document.getElementById('minPrice').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            if (minPrice != 0) params.set('minCost', minPrice);
+            if (maxPrice != 500) params.set('maxCost', maxPrice);
+
+            // Rating range
+            const minRating = document.getElementById('minRating').value;
+            const maxRating = document.getElementById('maxRating').value;
+            if (minRating != 0) params.set('minRate', minRating);
+            if (maxRating != 5) params.set('maxRate', maxRating);
+
+            // Sort option
+            const sortOption = getSortOption();
+            if (sortOption) params.set('sortOption', sortOption);
+
+            return params.toString();
+        }
+
+        // Search function
+        function searchCourses() {
+            const queryString = buildQueryString();
+            window.location.href = '?' + queryString;
+        }
+
+        // AJAX search function (alternative)
+        function searchCoursesAjax(page = 1) {
+            const params = {
+                page: page,
+                title: $('#searchInput').val(),
+                categories: getSelectedCategories(),
+                languages: getSelectedLanguages(),
+                level: getSelectedLevel(),
+                minPrice: $('#minPrice').val(),
+                maxPrice: $('#maxPrice').val(),
+                minRating: $('#minRating').val(),
+                maxRating: $('#maxRating').val(),
+                sortOption: getSortOption()
+            };
+
+            $.get('/Mentor/MentorPage?handler=SearchCourses', params)
+                .done(function (data) {
+                    if (data.success) {
+                        // Update course grid
+                        let courseHtml = '';
+                        if (data.courses && data.courses.length > 0) {
+                            data.courses.forEach(function (course) {
+                                courseHtml += `
+                                            <div class="course-card">
+                                                ${course.coursesImage ?
+                                        `<img src="${course.coursesImage}@Model.SasToken" alt="${course.courseName}" class="course-image">` :
+                                        `<div class="course-image" style="background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="bi bi-book" style="font-size: 3rem; color: #ccc;"></i>
+                                                    </div>`}
+                                                <div class="course-content">
+                                                    <h3 class="course-title">${course.courseName}</h3>
+                                                    <p class="course-description">${course.courseContent ?
+                                        (course.courseContent.length > 100 ? course.courseContent.substring(0, 100) + '...' : course.courseContent) : ''}</p>
+                                                    <div class="course-meta">
+                                                        <span>by ${course.mentor?.fullName || 'Unknown'}</span>
+                                                        ${course.courseLength ? `<span>${course.courseLength} hours</span>` : ''}
+                                                    </div>
+                                                    <div class="course-stats">
+                                                        ${course.averageRating ? `
+                                                            <div class="rating">
+                                                                <span class="stars">
+                                                                    ${'<i class="bi bi-star-fill"></i>'.repeat(Math.floor(course.averageRating))}
+                                                                    ${course.averageRating % 1 >= 0.5 ? '<i class="bi bi-star-half"></i>' : ''}
+                                                                    ${'<i class="bi bi-star"></i>'.repeat(5 - Math.floor(course.averageRating) - (course.averageRating % 1 >= 0.5 ? 1 : 0))}
+                                                                </span>
+                                                                <span>${course.averageRating.toFixed(1)}</span>
+                                                            </div>` : ''}
+                                                        ${course.studentCount ? `<span>${course.studentCount} students</span>` : ''}
+                                                        <div class="course-price">$${course.cost.toFixed(2)}</div>
+                                                    </div>
+                                                </div>
+                                            </div>`;
+                            });
+                        } else {
+                            courseHtml = `
+                                        <div class="col-12 text-center py-5">
+                                            <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
+                                            <h4 class="mt-3">No courses found</h4>
+                                            <p>Try adjusting your search or filter criteria</p>
+                                        </div>`;
+                        }
+                        $('#courseGrid').html(courseHtml);
+
+                        // Update results count
+                        $('#resultsCount').text(data.totalRecords);
+
+                        // Update pagination
+                        // You would need to implement pagination UI update here
+                    }
+                })
+                .fail(function () {
+                    alert('An error occurred while searching courses');
+                });
+        }
+
+        function clearAllFilters() {
+            // Clear radio buttons
+            document.getElementById('cat_all').checked = true;
+            document.getElementById('lang_all').checked = true;
+            document.getElementById('level_all').checked = true; // Sửa thành level_all thay vì allLevels
+
+            // Reset ranges
+            document.getElementById('minPrice').value = 0;
+            document.getElementById('maxPrice').value = 500;
+            document.getElementById('minRating').value = 0;
+            document.getElementById('maxRating').value = 5;
+
+            // Reset search and sort
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sortSelect').value = '';
+
+            // Update displays
+            updatePriceRange();
+            updateRatingRange();
+
+            // Đóng tất cả filter
+            document.querySelectorAll('.filter-content').forEach(content => {
+                content.classList.remove('expanded');
+            });
+            document.querySelectorAll('.filter-title').forEach(title => {
+                title.classList.remove('expanded');
+            });
+
+            // Mở lại category filter
+            toggleFilter('category');
+        }
+
+        // Initialize range displays
+        updatePriceRange();
+        updateRatingRange();
+
+        // Add event listeners for real-time filtering
+        document.querySelectorAll('input[name="level"]').forEach(input => {
+            input.addEventListener('click', function (e) {
+                e.stopPropagation(); // Ngăn không bị toggle khi click vào radio
+            });
+        });
+
+        // Mặc định đóng category filter khi load trang
+        document.addEventListener('DOMContentLoaded', function () {
+            // Đóng tất cả filter
+            document.querySelectorAll('.filter-content').forEach(content => {
+                content.classList.remove('expanded');
+            });
+            document.querySelectorAll('.filter-title').forEach(title => {
+                title.classList.remove('expanded');
+            });
+
+            // Chỉ mở filter đang được chọn (nếu có)
+            const currentFilters = ['categoryId', 'language', 'level'];
+            let hasActiveFilter = false;
+
+            currentFilters.forEach(filter => {
+                if (new URLSearchParams(window.location.search).has(filter)) {
+                    const filterElement = document.getElementById(`${filter}Filter`);
+                    if (filterElement) {
+                        filterElement.classList.add('expanded');
+                        filterElement.previousElementSibling.classList.add('expanded');
+                        hasActiveFilter = true;
+                    }
                 }
             });
+
+            // Nếu không có filter nào đang active, mở category filter
+            if (!hasActiveFilter) {
+                toggleFilter('category');
+            }
+        });
+
+        document.querySelectorAll('input[name="level"]').forEach(input => {
+            input.addEventListener('change', searchCourses);
+        });
+
+        document.getElementById('sortSelect').addEventListener('change', searchCourses);
+
+        // Enter key search
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchCourses();
+            }
+        });
+
+        // Set initial sort option from query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const sortOption = urlParams.get('sortOption');
+        if (sortOption) {
+            document.getElementById('sortSelect').value = sortOption;
         }
-
-        myLearningLink.addEventListener("click", function (e) {
-            e.preventDefault();
-            learningToggle.style.display = "flex";
-
-            document.getElementById("add-new-btn").style.display = "none";
-
-            // Mặc định: hiện các khóa học "In Progress", ẩn "Completed"
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "none");
-
-            // Lọc theo mặc định: In Progress
-            filterCourses("in-progress");
-
-            // Làm nổi nút
-            btnInProgress.classList.add("btn-progress");
-            btnInProgress.classList.remove("btn-completed");
-            btnCompleted.classList.add("btn-completed");
-            btnCompleted.classList.remove("btn-progress");
-        });
-
-        btnInProgress.addEventListener("click", function () {
-            filterCourses("in-progress");
-
-            // Update style
-            btnInProgress.classList.add("btn-progress");
-            btnInProgress.classList.remove("btn-completed");
-            btnCompleted.classList.add("btn-completed");
-            btnCompleted.classList.remove("btn-progress");
-
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "none");
-        });
-
-        btnCompleted.addEventListener("click", function () {
-            filterCourses("completed");
-
-            // Update style
-            btnCompleted.classList.add("btn-progress");
-            btnCompleted.classList.remove("btn-completed");
-            btnInProgress.classList.add("btn-completed");
-            btnInProgress.classList.remove("btn-progress");
-
-            document.querySelectorAll(".completed").forEach(el => el.style.display = "block");
-            document.querySelectorAll(".in-progress").forEach(el => el.style.display = "none");
-        });
-    });
-</script>
-<!--Script Khóa Học Đã Mua -->
-<!-- Chuyển đổi giữa btn-InProgress và btn-Completed  -->
-<script>
-    document.getElementById("btnInProgress").addEventListener("click", function () {
-        this.classList.add("active");
-        document.getElementById("btnCompleted").classList.remove("active");
-
-        document.querySelectorAll(".in-progress").forEach(e => e.style.display = "block");
-        document.querySelectorAll(".completed").forEach(e => e.style.display = "none");
-    });
-
-    document.getElementById("btnCompleted").addEventListener("click", function () {
-        this.classList.add("active");
-        document.getElementById("btnInProgress").classList.remove("active");
-
-        document.querySelectorAll(".in-progress").forEach(e => e.style.display = "none");
-        document.querySelectorAll(".completed").forEach(e => e.style.display = "block");
-    });
-</script>
-<!-- Chuyển đổi giữa btn-InProgress và btn-Completed  -->
+    </script>
+</body>
+</html>
