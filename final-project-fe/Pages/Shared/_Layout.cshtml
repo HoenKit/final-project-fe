@@ -282,15 +282,25 @@
 			<ul class="navbar-nav flex-grow-1">
 				@if (isAuthenticated)
 				{
+					<li style="padding-bottom: 4%;">
+						<i class="bi bi-person-vcard"></i>
+						<a asp-page="/MentorRegulations">Become a Mentor</a>
+					</li>
 					<li>
-						<i class="ti-power-off"></i>
+						<i style="font-size: 115%;" class="bi bi-box-arrow-in-left"></i>
 						<a asp-page="/Logout">Logout</a>
 					</li>
 				}
 				else
 				{
-					<li><a asp-page="/Login">Login</a></li>
-					<li><a asp-page="/Register">Register</a></li>
+					<li style="padding-bottom: 4%;">
+						<i style="font-size:118%;" class="bi bi-box-arrow-in-right"></i>
+						<a asp-page="/Login">Login</a>
+					</li>
+					<li style="padding-left: 2%;">
+						<i class="bi bi-pencil-square"></i>
+						<a asp-page="/Register">Register</a>
+					</li>
 				}
 			</ul>
 		</div><!-- side panel -->
@@ -380,6 +390,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 	@* <script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script> *@
 	<script src="~/js/main.min.js"></script>
