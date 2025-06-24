@@ -1,0 +1,481 @@
+﻿@page
+@model final_project_fe.Pages.MentorRegulationsModel
+@{
+    ViewData["Title"] = "Mentor Registration Policy";
+}
+<div class="theme-layout">
+    <div class="container">
+        <div class="header fade-in">
+            <h1>Mentor Registration Policy</h1>
+            <p>Please review the following requirements and guidelines</p>
+        </div>
+
+        <div class="policy-card fade-in">
+            <div class="policy-grid">
+                <div class="policy-item">
+                    <div class="policy-category">Eligibility</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Must be at least 21 years old</li>
+                            <li>Have at least 2 years of experience in the mentoring field or relevant industry</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Application Documents</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Completed Registration Form</li>
+                            <li>Updated CV/Resume</li>
+                            <li>Copy of ID/Passport</li>
+                            <li>Professional Certificates (if any)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Verification</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Background check</li>
+                            <li>Identity verification</li>
+                            <li>Interview and assessment</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Commitment</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Minimum availability of 5 hours per month</li>
+                            <li>Commitment to respond to mentees within 48 hours</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Code of Conduct</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Maintain professionalism and confidentiality</li>
+                            <li>Respect diversity and inclusivity</li>
+                            <li>No discrimination or harassment allowed</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Training</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Course quality assurance</li>
+                            <li>Completion of the Mentor Orientation Program (mandatory before starting)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Communication</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Use of platform's official communication channels only</li>
+                            <li>Maintain clear, respectful, and timely communication</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item">
+                    <div class="policy-category">Termination Policy</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Non-compliance with guidelines may result in suspension or termination of mentor status</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="policy-item" style="border-bottom: none;">
+                    <div class="policy-category">Benefits</div>
+                    <div class="policy-requirements">
+                        <ul>
+                            <li>Access to professional development resources</li>
+                            <li>Recognition certificates</li>
+                            <li>Networking opportunities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="agreement-section">
+                <h3 class="agreement-title">Do you agree with the above policy?</h3>
+                <form method="post" id="policyForm">
+                    <div class="radio-group">
+                        <div class="radio-option" onclick="selectOption(this, 'agree')">
+                            <input type="radio" name="action" id="agree" value="agree" required>
+                            <label for="agree">I agree to this policy</label>
+                        </div>
+                        <div class="radio-option" onclick="selectOption(this, 'disagree')">
+                            <input type="radio" name="action" id="disagree" value="disagree" required>
+                            <label for="disagree">I disagree to this policy</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    @if (Model.Status == "Success")
+                    {
+                        <div id="lottie-success" style="width: 350px; height: 150px; margin: 0 auto;"></div>
+                    }
+                    else if (Model.Status == "Warning")
+                    {
+                        <div id="lottie-warning" style="width: 350px; height: 150px; margin: 0 auto;"></div>
+                    }
+                    <p class="mt-3">@Model.SuccessMessage</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="okButton" class="btn btn-primary">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectOption(element, value) {
+        // Remove selected class from all options
+        document.querySelectorAll('.radio-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Add selected class to clicked option
+        element.classList.add('selected');
+
+        // Check the radio button
+        document.getElementById(value).checked = true;
+
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    // Add smooth scrolling and form validation
+    document.getElementById('policyForm').addEventListener('submit', function(e) {
+        const selectedValue = document.querySelector('input[name="action"]:checked');
+        if (!selectedValue) {
+            e.preventDefault();
+            alert('Please select an option before submitting.');
+            return;
+        }
+
+        // You can add form submission logic here
+        // For now, just show a confirmation
+        // if (selectedValue.value === 'agree') {
+        //     alert('Thank you for agreeing to our policy! Your application will proceed to the next step.');
+        // } else {
+        //     alert('We understand your concerns. Please contact us if you have any questions about our policy.');
+        // }
+    });
+
+    // Add fade-in animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.policy-item').forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(item);
+    });
+</script>
+<script src="https://unpkg.com/lottie-web@5.7.4/build/player/lottie.min.js"></script>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <text>
+                    var resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+                    resultModal.show();
+
+                    document.getElementById('okButton').addEventListener('click', function () {
+                        resultModal.hide();
+
+                        var redirectUrl = "@Model.RedirectUrl";
+                        if (redirectUrl && redirectUrl.length > 0) {
+                            window.location.href = redirectUrl;
+                        }
+                    });
+            </text>
+        }
+        });
+
+        lottie.loadAnimation({
+          container: document.getElementById('lottie-success'),
+          renderer: 'svg',
+          loop: false,
+          autoplay: true,
+          path: 'https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json'
+        });
+
+        lottie.loadAnimation({
+          container: document.getElementById('lottie-warning'),
+          renderer: 'svg',
+          loop: false,
+          autoplay: true,
+          path: 'https://assets9.lottiefiles.com/packages/lf20_3vbOcw.json'
+        });
+    </script>
+}
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 65px;
+        margin-top: 3%;
+        margin-bottom: 5%;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #088dcd;
+    }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+    .policy-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .policy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 0;
+    }
+
+    .policy-item {
+        padding: 30px;
+        border-bottom: 1px solid #e8f4f8;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+        .policy-item:hover {
+            background: linear-gradient(135deg, #f8fcff 0%, #e8f4f8 100%);
+            transform: translateY(-2px);
+        }
+
+        .policy-item:nth-child(odd) {
+            background: #f8fcff;
+        }
+
+        .policy-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #088dcd, #088dcd);
+        }
+
+    .policy-category {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1e3c72;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .policy-category::before {
+            content: '✓';
+            background: linear-gradient(135deg, #088dcd, #c5c9d1);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+    .policy-requirements {
+        color: #555;
+        line-height: 1.6;
+    }
+
+        .policy-requirements li {
+            margin-bottom: 8px;
+            list-style: none;
+            position: relative;
+            padding-left: 20px;
+        }
+
+            .policy-requirements li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                color: #2a5298;
+                font-weight: bold;
+            }
+
+    .agreement-section {
+        background: linear-gradient(135deg, #129ee2 0%, #c5c9d1 100%);
+        padding: 15px;
+        text-align: center;
+        color: white;
+    }
+
+    .agreement-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+    }
+
+    .radio-group {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 0px 25px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .radio-option:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 50%;
+            accent-color: white;
+        }
+
+        .radio-option.selected {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+
+        .radio-option label {
+            font-size: 90%;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 3%;
+        }
+
+    .submit-btn {
+        background: white;
+        color: #1e3c72;
+        padding: 5px 20px;
+        border: none;
+        border-radius: 50px;
+        font-size: 82%;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    @@media (max-width: 768px) {
+        .policy-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .radio-group {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .policy-item {
+        padding: 20px;
+    }
+
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>
