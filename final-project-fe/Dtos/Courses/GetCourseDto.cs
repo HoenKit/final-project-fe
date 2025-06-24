@@ -22,4 +22,19 @@ namespace final_project_fe.Dtos.Courses
         public DateTime? CreateAt { get; set; }
         public MentorDto? Mentor { get; set; }
     }
+
+    public enum StatusEnum
+    {
+        Pending,
+        Approved,
+        Rejected
+    }
+
+    public enum LevelEnum
+    {
+        Beginner,
+        Intermediate,
+        Advanced,
+        Expert
+    }
 }

@@ -122,7 +122,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 // Basic parameters
                 courseQuery["page"] = (currentPage ?? 1).ToString();
-                courseQuery["pageSize"] = "6";
+                courseQuery["pageSize"] = "15";
+                courseQuery["statuses"] = "Approved";
 
                 // Search by title
                 if (!string.IsNullOrWhiteSpace(title))
@@ -189,7 +190,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     Courses = JsonSerializer.Deserialize<PageResult<GetCourseDto>>(courseJson, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
-                    }) ?? new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 6);
+                    }) ?? new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 15);
 
                     // Gắn SAS token vào mỗi course image
                     if (Courses?.Items != null)
@@ -205,13 +206,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 }
                 else
                 {
-                    Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 6);
+                    Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 15);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading courses");
-                Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 6);
+                Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 15);
             }
         }
 

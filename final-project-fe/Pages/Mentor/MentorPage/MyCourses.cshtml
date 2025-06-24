@@ -1,229 +1,560 @@
 ﻿@page
 @model final_project_fe.Pages.Mentor.MentorPage.MyCoursesModel
-@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    ViewData["Title"] = "My Course";
-    var title = Request.Query["title"];
-    var categoryId = Request.Query["categoryId"];
-    var sortOption = Request.Query["sortOption"];
-    var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+    Layout = "/Pages/Mentor/Shared/_MentorLayout2.cshtml";
+    ViewData["Title"] = "My Courses";
 }
+<head>
+    <title>My Courses</title>
+</head>
+<!-- Page Header -->
+<div class="title-wrapper pt-30">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div class="title">
+                <h2>My Courses</h2>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="breadcrumb-wrapper">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="/Index">Home</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            My Courses
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="theme-layout">
-    <section>
-        <div class="ext-gap bluesh high-opacity">
-            <div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="top-banner">
-                            <h1>My Courses List</h1>
-                            <nav class="breadcrumb">
-                                <a href="/Index" class="breadcrumb-item">Home</a>
-                                <span class="breadcrumb-item active">Courses</span>
-                            </nav>
-                        </div>
+<!-- Filters Section -->
+<div class="card-style mb-25 filters-collapsed" id="filtersCard">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Course Filters</h6>
+        <div class="d-flex gap-2 align-items-center">
+            <!-- Add Course Button -->
+            @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
+            {
+                <a asp-page="/Mentor/MentorPage/CreateCourse" class="btn btn-success btn-sm">
+                    <i class="lni lni-plus"></i> Add Course
+                </a>
+            }
+            <!-- Show Filters Button -->
+            <button type="button" id="toggleFilters" class="btn btn-sm btn-outline-secondary">
+                <i class="lni lni-funnel"></i> Show Filters
+            </button>
+        </div>
+    </div>
+    <div class="card-body" id="filtersBody" style="display: none;">
+        <form method="get" class="row g-3">
+            <!-- Row 1: Basic Filters -->
+            <div class="col-md-3">
+                <div class="input-style-1">
+                    <label>Search Course</label>
+                    <input type="text" name="title" placeholder="Enter course name..." class="form-control" value="@Request.Query["title"]" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="select-style-1">
+                    <label>Category</label>
+                    <div class="select-position">
+                        <select name="categoryId" class="form-select">
+                            <option value="" selected="@(string.IsNullOrEmpty(Request.Query["categoryId"]) ? "selected" : null)">All Categories</option>
+                            @foreach (var category in Model.Categories.Items)
+                            {
+                                var selected = Request.Query["categoryId"] == category.CategoryId.ToString() ? "selected" : null;
+                                <option value="@category.CategoryId" selected="@selected">@category.Title</option>
+                            }
+                        </select>
                     </div>
                 </div>
             </div>
-        </div>
-    </section><!-- top area animated -->
-
-    <section>
-        <div class="gap gray-bg">
-            <div class="container-fluid">
-                <!-- Đổi container -> container-fluid -->
-                <div class="row" id="page-contents">
-
-                    <!-- Cột trái: SHORTCUTS -->
-                    <div class="col-lg-3 col-md-4">
-                        <aside class="sidebar static">
-                            <div class="widget stick-widget">
-                                <h4 class="widget-title">Shortcuts</h4>
-                                <ul class="naves">
-                                    <li style="display: flex;"><i class="bi bi-house"></i><a href="/Index">Home</a></li>
-                                    <li style="display: flex;"><i class="bi bi-mortarboard"></i><a href="/Mentor/MentorPage/Index">Coures</a></li>
-                                    @if (!string.IsNullOrEmpty(userToken))
-                                    {
-                                        <li style="display: flex;"><i class="bi bi-book"></i><a asp-page="./Index" asp-route-filterByUser="true">My Learning</a></li>
-                                    }
-                                    @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
-                                    {
-                                        <li style="display: flex;"><i class="bi bi-mortarboard"></i><a asp-page="./MyCourses">My Courses</a></li>
-                                    }
-                                </ul>
-                            </div>
-                        </aside>
-                    </div>
-
-                    <!-- Cột phải: Nội dung -->
-                    <div class="col-lg-9 col-md-8">
-                        <div class="blog-sec">
-
-                            <!-- Bộ lọc tìm kiếm -->
-                            <form method="get" class="filter-form d-flex">
-                                <div class="post-filter-sec d-flex justify-content-between align-items-center mb-3">
-
-                                    <input type="text" name="title" placeholder="Search course" class="form-control" value="@Request.Query["title"]" />
-
-
-
-                                    <div class="purify d-flex align-items-center" style="margin-left: 15px">
-                                        <span class="me-2">Filter by</span>
-
-                                        <select name="categoryId" class="form-select">
-                                            <option value="" selected="@(string.IsNullOrEmpty(Request.Query["categoryId"]) ? "selected" : null)">All categories</option>
-                                            @foreach (var category in Model.Categories.Items)
-                                            {
-                                                var selected = Request.Query["categoryId"] == category.CategoryId.ToString() ? "selected" : null;
-                                                <option value="@category.CategoryId" selected="@selected">@category.Title</option>
-                                            }
-                                        </select>
-
-                                        <select name="sortOption" class="form-select">
-                                            @{
-                                                var currentSort = Request.Query["sortOption"].ToString()?.ToLower();
-                                            }
-                                            <option value="">-- Sort by --</option>
-                                            <option value="asc_name" selected="@(currentSort == "asc_name" ? "selected" : null)">Ascending A-Z</option>
-                                            <option value="desc_name" selected="@(currentSort == "desc_name" ? "selected" : null)">Descending Z-A</option>
-                                            <option value="desc_date" selected="@(currentSort == "desc_date" ? "selected" : null)">Newest (Date ↓)</option>
-                                            <option value="asc_date" selected="@(currentSort == "asc_date" ? "selected" : null)">Oldest (Date ↑)</option>
-                                        </select>
-
-                                        <button type="submit" class="btn btn-primary ms-2" style="margin-left: 50px">
-                                            <i class="ti-search"></i>
-                                        </button>
-                                    </div>
-
-
-                                </div>
-                            </form>
-                            @if (Model.UserRoles != null && Model.UserRoles.Contains("Mentor"))
-                            {
-                                <partial name="_Notification" />
-                                <a asp-page="/Mentor/MentorPage/CreateCourse" class="addnewforum" title="" id="add-new-btn">
-                                    <i class="fa fa-plus"></i> Add New
-                                </a>
+            <div class="col-md-3">
+                <div class="select-style-1">
+                    <label>Language</label>
+                    <div class="select-position">
+                        <select name="language" class="form-select">
+                            @{
+                                var currentLanguage = Request.Query["language"].ToString();
                             }
-                            <!-- Danh sách khóa học -->
-                            <div class="row">
-                                @foreach (var course in Model.Courses.Items)
+                            <option value="">All Languages</option>
+                            <option value="English" selected="@(currentLanguage == "English" ? "selected" : null)">English</option>
+                            <option value="Vietnamese" selected="@(currentLanguage == "Vietnamese" ? "selected" : null)">Vietnamese</option>
+                            <option value="Chinese" selected="@(currentLanguage == "Chinese" ? "selected" : null)">Chinese</option>
+                            <option value="Japanese" selected="@(currentLanguage == "Japanese" ? "selected" : null)">Japanese</option>
+                            <option value="Korean" selected="@(currentLanguage == "Korean" ? "selected" : null)">Korean</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="select-style-1">
+                    <label>Level</label>
+                    <div class="select-position">
+                        <select name="level" class="form-select">
+                            @{
+                                var currentLevel = Request.Query["level"].ToString();
+                            }
+                            <option value="">All Levels</option>
+                            <option value="Beginner" selected="@(currentLevel == "Beginner" ? "selected" : null)">Beginner</option>
+                            <option value="Intermediate" selected="@(currentLevel == "Intermediate" ? "selected" : null)">Intermediate</option>
+                            <option value="Advanced" selected="@(currentLevel == "Advanced" ? "selected" : null)">Advanced</option>
+                            <option value="Expert" selected="@(currentLevel == "Expert" ? "selected" : null)">Expert</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Price Range -->
+            <div class="col-md-2">
+                <div class="input-style-1">
+                    <label>Min Cost ($)</label>
+                    <input type="number" name="minCost" placeholder="0" class="form-control" min="0" step="1" value="@Request.Query["minCost"]" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-style-1">
+                    <label>Max Cost ($)</label>
+                    <input type="number" name="maxCost" placeholder="1000" class="form-control" min="0" step="1" value="@Request.Query["maxCost"]" />
+                </div>
+            </div>
+
+            <!-- Row 3: Rating Range -->
+            <div class="col-md-2">
+                <div class="input-style-1">
+                    <label>Min Rating</label>
+                    <input type="number" name="minRate" placeholder="0" class="form-control" min="0" max="5" step="0.1" value="@Request.Query["minRate"]" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-style-1">
+                    <label>Max Rating</label>
+                    <input type="number" name="maxRate" placeholder="5" class="form-control" min="0" max="5" step="0.1" value="@Request.Query["maxRate"]" />
+                </div>
+            </div>
+
+            <!-- Row 4: Status and Sort -->
+            <div class="col-md-2">
+                <div class="select-style-1">
+                    <label>Status</label>
+                    <div class="select-position">
+                        <select name="status" class="form-select">
+                            @{
+                                var currentStatus = Request.Query["status"].ToString();
+                            }
+                            <option value="">All Status</option>
+                            <option value="Pending" selected="@(currentStatus == "Pending" ? "selected" : null)">Pending</option>
+                            <option value="Approved" selected="@(currentStatus == "Approved" ? "selected" : null)">Approved</option>
+                            <option value="Rejected" selected="@(currentStatus == "Rejected" ? "selected" : null)">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="select-style-1">
+                    <label>Sort By</label>
+                    <div class="select-position">
+                        <select name="sortOption" class="form-select">
+                            @{
+                                var currentSort = Request.Query["sortOption"].ToString()?.ToLower();
+                            }
+                            <option value="">Default</option>
+                            <option value="asc_name" selected="@(currentSort == "asc_name" ? "selected" : null)">Name (A-Z)</option>
+                            <option value="desc_name" selected="@(currentSort == "desc_name" ? "selected" : null)">Name (Z-A)</option>
+                            <option value="desc_date" selected="@(currentSort == "desc_date" ? "selected" : null)">Newest First</option>
+                            <option value="asc_date" selected="@(currentSort == "asc_date" ? "selected" : null)">Oldest First</option>
+                            <option value="desc_rate" selected="@(currentSort == "desc_rate" ? "selected" : null)">Highest Rated</option>
+                            <option value="asc_rate" selected="@(currentSort == "asc_rate" ? "selected" : null)">Lowest Rated</option>
+                            <option value="desc_cost" selected="@(currentSort == "desc_cost" ? "selected" : null)">Price: High to Low</option>
+                            <option value="asc_cost" selected="@(currentSort == "asc_cost" ? "selected" : null)">Price: Low to High</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Clear Buttons -->
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="lni lni-search-alt"></i> Search
+                    </button>
+                    <a href="?" class="btn btn-outline-secondary btn-sm">
+                        <i class="lni lni-reload"></i> Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Courses Grid -->
+<div class="row g-3">
+    @if (Model.Courses?.Items?.Any() == true)
+    {
+        @foreach (var course in Model.Courses.Items)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card-style course-card h-100">
+                    <div class="card-image position-relative">
+                        <img src="@course.CoursesImage"
+                             alt="@course.CourseName"
+                             class="course-image" />
+
+                        <!-- Status Badge -->
+                        <div class="position-absolute top-0 start-0 m-2">
+                            @{
+                                var statusClass = course.Status?.ToLower() switch
                                 {
-                                    <div class="col-lg-4 col-sm-6 mb-4">
-                                        <div class="g-post-classic">
-                                            <figure>
-                                                @{
-                                                    var imageWithToken = string.IsNullOrEmpty(course.CoursesImage)
-                                                    ? "~/images/resources/bloggrid-1.jpg"
-                                                    : $"{course.CoursesImage}?{Model.SasToken}";
-                                                }
-                                                <img src="@imageWithToken" alt="@course.CourseName" onerror="this.src='~/images/resources/bloggrid-1.jpg'" />
-                                            </figure>
-                                            <div class="g-post-meta">
-                                                <div class="post-title">
-                                                    <h4>
-                                                        <a title="@course.CourseName" href="/Mentor/MentorPage/EditCourse?courseId=@course.CourseId">
-                                                            @course.CourseName
-                                                        </a>
-                                                    </h4>
-                                                    <p>@(course.CourseContent?.Length > 100 ? course.CourseContent.Substring(0, 100) + "..." : course.CourseContent)</p>
-                                                    <span class="p-date">
-                                                        by <a href="#">@course.Mentor.FirstName @course.Mentor.LastName</a>
-                                                        - @course.CreateAt?.ToString("dd/MM/yyyy")
-                                                        - @course.CourseLength hours
-                                                    </span>
-                                                </div>
-                                                <div class="g-post-ranking">
-                                                    <a title="Likes" href="#" class="likes">
-                                                        <i class="fa fa-heart-o"></i> @course.StudentCount students
-                                                    </a>
-                                                    <a title="Cost" href="#" class="coments">
-                                                        <i class="fa fa-comment-o"></i> @($"{course.Cost:C0}")
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    "approved" => "bg-success",
+                                    "pending" => "bg-warning",
+                                    "rejected" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @statusClass">@(course.Status ?? "Unknown")</span>
+                        </div>
+
+                        <!-- Rating Badge -->
+                        @if (course.AverageRating >= 0)
+                        {
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-primary">
+                                    ★ @course.AverageRating
+                                </span>
+                            </div>
+                        }
+                        @if (course.AverageRating == null)
+                        {
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-primary">
+                                    ★ 0
+                                </span>
+                            </div>
+                        }
+
+                        <!-- Edit Button -->
+                        <div class="card-overlay d-flex justify-content-center align-items-center">
+                            <a asp-page="/Mentor/MentorPage/EditCourse" asp-route-courseId="@course.CourseId" 
+                               class="btn btn-primary btn-sm" title="Edit Course">
+                                <i class="lni lni-pencil"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content p-3 d-flex flex-column flex-grow-1">
+                        <div class="mb-3">
+                            <h6 class="mb-2">
+                                <a asp-page="/Mentor/MentorPage/CourseDetail" asp-route-courseId="@course.CourseId"
+                                   class="text-decoration-none text-dark course-title">
+                                    @course.CourseName
+                                </a>
+                            </h6>
+                            <p class="text-muted course-description">
+                                @(course.CourseContent?.Length > 80 ? course.CourseContent.Substring(0, 80) + "..." : course.CourseContent)
+                            </p>
+                        </div>
+
+                        <!-- Course Meta Info -->
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">
+                                    <i class="lni lni-calendar"></i>
+                                    @course.CreateAt?.ToString("dd/MM/yyyy")
+                                </small>
+                                @if (!string.IsNullOrEmpty(course.Language))
+                                {
+                                    <span class="badge bg-light text-dark">@course.Language</span>
                                 }
                             </div>
 
-                            <!-- Phân trang -->
-                            @if (Model.Courses.TotalPages > 1)
+                            @if (!string.IsNullOrEmpty(course.Level))
                             {
-                                <nav aria-label="Pagination">
-                                    <ul class="pagination justify-content-center mt-4">
-                                        @if (Model.Courses.CurrentPage > 1)
-                                        {
-                                            <li class="page-item">
-                                                <a class="page-link"
-                                                   href="?currentPage=@(Model.Courses.CurrentPage - 1)&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    Previous
-                                                </a>
-                                            </li>
-                                        }
-
-                                        @for (int i = 1; i <= Model.Courses.TotalPages; i++)
-                                        {
-                                            <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
-                                                <a class="page-link"
-                                                   href="?currentPage=@i&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    @i
-                                                </a>
-                                            </li>
-                                        }
-
-                                        @if (Model.Courses.CurrentPage < Model.Courses.TotalPages)
-                                        {
-                                            <li class="page-item">
-                                                <a class="page-link"
-                                                   href="?currentPage=@(Model.Courses.CurrentPage + 1)&title=@title&categoryId=@categoryId&sortOption=@sortOption">
-                                                    Next
-                                                </a>
-                                            </li>
-                                        }
-                                    </ul>
-                                </nav>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="lni lni-graduation"></i>
+                                        @course.Level
+                                    </small>
+                                </div>
                             }
 
+                            <div class="card-stats">
+                                <div class="row g-1 text-center">
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <i class="lni lni-users text-primary"></i>
+                                            <small class="d-block fw-bold">@course.StudentCount</small>
+                                            <small class="text-muted">Students</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <i class="lni lni-timer text-warning"></i>
+                                            <small class="d-block fw-bold">@course.CourseLength</small>
+                                            <small class="text-muted">Hours</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <i class="lni lni-dollar text-success"></i>
+                                            <small class="d-block fw-bold">@($"{course.Cost:C0}")</small>
+                                            <small class="text-muted">Price</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="card-style text-center">
+                <div class="card-content py-5">
+                    <div class="empty-state">
+                        <i class="lni lni-graduation" style="font-size: 48px; color: #ddd;"></i>
+                        <h5 class="mt-3 mb-2">No Courses Found</h5>
+                        <p class="text-muted">You haven't created any courses yet or no courses match your filters.</p>
+                        <div class="mt-3">
+                            <a asp-page="/Mentor/MentorPage/CreateCourse" class="btn btn-primary me-2">
+                                <i class="lni lni-plus"></i> Create Your First Course
+                            </a>
+                            <a href="?" class="btn btn-outline-secondary">
+                                <i class="lni lni-reload"></i> Clear Filters
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    }
 </div>
-    </section>
 
-</div>
+<!-- Pagination -->
+@if (Model.Courses?.TotalPages > 1)
+{
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="pagination-style-1">
+                <nav aria-label="Pagination">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.Courses.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage - 1)&title=@Request.Query["title"]&categoryId=@Request.Query["categoryId"]&sortOption=@Request.Query["sortOption"]&language=@Request.Query["language"]&level=@Request.Query["level"]&minCost=@Request.Query["minCost"]&maxCost=@Request.Query["maxCost"]&minRate=@Request.Query["minRate"]&maxRate=@Request.Query["maxRate"]&status=@Request.Query["status"]">
+                                    <i class="lni lni-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.Courses.CurrentPage - 2); i <= Math.Min(Model.Courses.TotalPages, Model.Courses.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="?currentPage=@i&title=@Request.Query["title"]&categoryId=@Request.Query["categoryId"]&sortOption=@Request.Query["sortOption"]&language=@Request.Query["language"]&level=@Request.Query["level"]&minCost=@Request.Query["minCost"]&maxCost=@Request.Query["maxCost"]&minRate=@Request.Query["minRate"]&maxRate=@Request.Query["maxRate"]&status=@Request.Query["status"]">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        @if (Model.Courses.CurrentPage < Model.Courses.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage + 1)&title=@Request.Query["title"]&categoryId=@Request.Query["categoryId"]&sortOption=@Request.Query["sortOption"]&language=@Request.Query["language"]&level=@Request.Query["level"]&minCost=@Request.Query["minCost"]&maxCost=@Request.Query["maxCost"]&minRate=@Request.Query["minRate"]&maxRate=@Request.Query["maxRate"]&status=@Request.Query["status"]">
+                                    <i class="lni lni-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Course Statistics -->
+@if (Model.Courses?.Items?.Any() == true)
+{
+    <div class="row mt-4">
+        <div class="col-xl-3 col-lg-6 col-sm-6">
+            <div class="icon-card mb-3">
+                <div class="icon primary">
+                    <i class="lni lni-graduation"></i>
+                </div>
+                <div class="content">
+                    <h6 class="mb-1">Total Courses</h6>
+                    <h4 class="text-bold">@(Model.Courses?.TotalCount ?? 0)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-sm-6">
+            <div class="icon-card mb-3">
+                <div class="icon success">
+                    <i class="lni lni-users"></i>
+                </div>
+                <div class="content">
+                    <h6 class="mb-1">Total Students</h6>
+                    <h4 class="text-bold">@Model.Courses.Items.Sum(c => c.StudentCount)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-sm-6">
+            <div class="icon-card mb-3">
+                <div class="icon orange">
+                    <i class="lni lni-timer"></i>
+                </div>
+                <div class="content">
+                    <h6 class="mb-1">Total Hours</h6>
+                    <h4 class="text-bold">@Model.Courses.Items.Sum(c => c.CourseLength)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-sm-6">
+            <div class="icon-card mb-3">
+                <div class="icon purple">
+                    <i class="lni lni-dollar"></i>
+                </div>
+                <div class="content">
+                    <h6 class="mb-1">Total Revenue</h6>
+                    <h4 class="text-bold">@($"{Model.Courses.Items.Sum(c => c.Cost * c.StudentCount):C0}")</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <style>
-    .in-progress,
-    .completed {
-        display: none;
+.course-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.course-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.course-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.course-title {
+    font-weight: 600;
+    line-height: 1.3;
+    font-size: 0.95rem;
+}
+
+.course-title:hover {
+    color: var(--primary-color) !important;
+}
+
+.course-description {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    height: 2.8rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card-image:hover .card-overlay {
+    opacity: 1;
+}
+
+.stat-item {
+    padding: 0.25rem;
+}
+
+.stat-item i {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-item small {
+    font-size: 0.75rem;
+}
+
+.filters-collapsed {
+    border: 1px dashed #dee2e6;
+}
+
+.icon-card {
+    padding: 1.25rem;
+}
+
+.icon-card .content h6 {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.icon-card .content h4 {
+    font-size: 1.5rem;
+}
+
+.media (max-width: 768px) {
+    .course-card {
+        margin-bottom: 1rem;
     }
-
-    #learning-toggle {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
+    
+    .card-stats .row {
+        font-size: 0.75rem;
     }
+    
+    .course-image {
+        height: 160px;
+    }
+}
 
-        #learning-toggle button {
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            border: 1px solid #ccc;
-            background-color: white;
-            color: black;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-            #learning-toggle button.active {
-                background-color: #088dcd;
-                color: white;
-                border: none;
-            }
+.media (min-width: 1400px) {
+    .col-xl-3 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+}
 </style>
-                    
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleFilters');
+    const filtersBody = document.getElementById('filtersBody');
+    const filtersCard = document.getElementById('filtersCard');
+    
+    toggleBtn.addEventListener('click', function() {
+        if (filtersBody.style.display === 'none') {
+            filtersBody.style.display = 'block';
+            filtersCard.classList.remove('filters-collapsed');
+            toggleBtn.innerHTML = '<i class="lni lni-funnel"></i> Hide Filters';
+            toggleBtn.classList.remove('btn-outline-secondary');
+            toggleBtn.classList.add('btn-outline-primary');
+        } else {
+            filtersBody.style.display = 'none';
+            filtersCard.classList.add('filters-collapsed');
+            toggleBtn.innerHTML = '<i class="lni lni-funnel"></i> Show Filters';
+            toggleBtn.classList.remove('btn-outline-primary');
+            toggleBtn.classList.add('btn-outline-secondary');
+        }
+    });
+});
+</script>

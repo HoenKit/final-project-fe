@@ -1,6 +1,21 @@
-﻿@{
+﻿@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@{
+	var roles = new List<string>();
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
+	if (!string.IsNullOrEmpty(token))
+	{
+		var handler = new JwtSecurityTokenHandler();
+		var jwtToken = handler.ReadJwtToken(token);
+		roles = jwtToken.Claims
+					.Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+					.Select(c => c.Value)
+					.ToList();
+	}
+
+	bool isMentor = roles.Contains("Mentor");
+	bool isAdmin = roles.Contains("Admin");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -107,6 +122,18 @@
 							<li><a href="widgets.html" title="">Widgts</a></li> *@
 						</ul>
 					</li>
+					@if (isMentor)
+					{
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
+						</li>
+					}
+					@if (isAdmin)
+					{
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
+						</li>
+					}
 				</ul>
 				<ul class="setting-area">
 					<li>
