@@ -59,7 +59,7 @@ namespace final_project_fe.Pages
                 }
 
                 // Get User by ID
-                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/{CurrentUserId}");
+                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     _logger.LogError("Can not get User.");

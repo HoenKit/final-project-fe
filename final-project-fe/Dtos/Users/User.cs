@@ -7,8 +7,9 @@
 		public string Phone { get; set; }
 		public string Password { get; set; }
 		public decimal? Point { get; set; }
-		public bool IsBanned { get; set; } = false;
-		public DateTime CreateAt { get; set; } 
+		public bool IsBanned { get; set; } 
+        public bool IsPremium { get; set; }
+        public DateTime CreateAt { get; set; } 
 		public DateTime? UpdateAt { get; set; } 
 		public UserMetadata? UserMetaData { get; set; }
 		public int TotalCount { get; set; }
