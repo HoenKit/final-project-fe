@@ -1,0 +1,660 @@
+﻿@page
+@model final_project_fe.Pages.PointTransactionModel
+@{
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Up Points - EduPlatform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .topup-form {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: #667eea;
+        }
+
+        .amount-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .amount-option {
+            position: relative;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #f8fafc, #f1f5f9);
+        }
+
+        .amount-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .amount-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .amount-option .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .amount-option .points {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .amount-option .bonus {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #f56565;
+            color: white;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .custom-amount {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .custom-amount input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .custom-amount input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .points-display {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+        }
+
+        .payment-method {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 200px;
+        }
+
+        .payment-method:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .payment-method.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .payment-method i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .payment-method .name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .checkout-btn:active {
+            transform: translateY(0);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .account-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: slideInRight 1s ease-out;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .current-points {
+            background: linear-gradient(45deg, #ffd89b, #19547b);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .points-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .benefits {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            animation: slideInRight 1s ease-out 0.2s both;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateX(5px);
+        }
+
+        .benefit-item i {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+
+        .security-info {
+            background: rgba(72, 187, 120, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #48bb78;
+            animation: slideInRight 1s ease-out 0.4s both;
+        }
+
+        .security-info i {
+            color: #48bb78;
+            margin-right: 10px;
+        }
+
+        keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .amount-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .topup-form {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-coins"></i> Phronesis Points</h1>
+            @* <p>Add points to purchase premium courses</p> *@
+        </div>
+
+        <div class="main-content">
+            <div class="topup-form">
+                <partial name="_Notification" />
+                <form id="topupForm" method="post">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Choose Top-up Amount
+                        </h3>
+                        <div class="amount-options">
+                            <div class="amount-option" data-amount="100000" data-points="100">
+                                <div class="price">100,000₫</div>
+                                <div class="points">100 Points</div>
+                            </div>
+                            <div class="amount-option" data-amount="200000" data-points="200">
+                                <div class="price">200,000₫</div>
+                                <div class="points">200 Points</div>
+                            </div>
+                            <div class="amount-option" data-amount="500000" data-points="500">
+                                <div class="price">500,000₫</div>
+                                <div class="points">500 Points</div>
+                            </div>
+                            <div class="amount-option" data-amount="1000000" data-points="1000">
+                                <div class="price">1,000,000₫</div>
+                                <div class="points">1,000 Points</div>
+                            </div>
+                            <div class="amount-option" data-amount="2000000" data-points="2000">
+                                <div class="price">2,000,000₫</div>
+                                <div class="points">2,000 Points</div>
+                            </div>
+                            <div class="amount-option" data-amount="5000000" data-points="5000">
+                                <div class="price">5,000,000₫</div>
+                                <div class="points">5,000 Points</div>
+                            </div>
+                        </div>
+                        
+                        <div class="custom-amount">
+                            <input type="number" id="customAmount" name="Amount" placeholder="Or enter custom amount" min="10000" step="10000">
+                            <div class="points-display" id="customPoints">0 Points</div>
+                            <input type="hidden" id="hiddenPoints" name="Points" value="0">
+                            <input type="hidden" id="hiddenPaymentMethod" name="PaymentMethod" value="">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-credit-card"></i>
+                            Payment Method
+                        </h3>
+                        <div class="payment-methods">
+                            <div class="payment-method" data-method="payos">
+                                <i class="fas fa-credit-card" style="color: #0068ff;"></i>
+                                <div class="name">PayOS</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="checkout-btn pulse">
+                        <i class="fas fa-shopping-cart"></i>
+                        Pay Now
+                    </button>
+                </form>
+            </div>
+
+            <div class="sidebar">
+                <div class="account-info">
+                    <div class="flex-shrink-0">
+                        <img src="@Model.UserInfo.UserMetaData.Avatar" alt="User" class="w-20 h-20 rounded-full object-cover">
+                    </div>
+                    <h3>@Model.UserInfo.UserMetaData.FirstName @Model.UserInfo.UserMetaData.LastName</h3>
+                    <p>Premium Member</p>
+                    <div class="current-points">
+                        <div class="points-value">@Model.UserInfo.Point?.ToString("0.##")</div>
+                        <div>Current Points</div>
+                    </div>
+                </div>
+
+                <div class="benefits">
+                    <h3 class="section-title">
+                        <i class="fas fa-gift"></i>
+                        Special Benefits
+                    </h3>
+                    @* <div class="benefit-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <strong>Premium Courses</strong><br>
+                            <small>Access to exclusive content</small>
+                        </div>
+                    </div> *@
+                    <div class="benefit-item">
+                        <i class="fas fa-crown"></i>
+                        <div>
+                            <strong>Priority Support</strong><br>
+                            <small>24/7 customer service</small>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-certificate"></i>
+                        <div>
+                            <strong>Certificates</strong><br>
+                            <small>Official completion certificates</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="security-info">
+                    <h4><i class="fas fa-shield-alt"></i> Maximum Security</h4>
+                    <p>All transactions are encrypted with SSL 256-bit and comply with PCI DSS standards</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAmount = 0;
+        let selectedPoints = 0;
+        let selectedPaymentMethod = '';
+
+        const amountOptions = document.querySelectorAll('.amount-option');
+        const customAmountInput = document.getElementById('customAmount');
+        const customPointsDisplay = document.getElementById('customPoints');
+        const hiddenPoints = document.getElementById('hiddenPoints');
+        const hiddenPaymentMethod = document.getElementById('hiddenPaymentMethod');
+        const paymentOptions = document.querySelectorAll('.payment-method');
+
+        // Handle amount option click
+        amountOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove 'selected' from others
+                amountOptions.forEach(o => o.classList.remove('selected'));
+
+                // Add 'selected' to current
+                option.classList.add('selected');
+
+                selectedAmount = parseInt(option.dataset.amount);
+                selectedPoints = parseInt(option.dataset.points);
+
+                customAmountInput.value = selectedAmount;
+                customPointsDisplay.innerText = `${selectedPoints} Points`;
+                hiddenPoints.value = selectedPoints;
+            });
+        });
+
+        // Handle custom input manually
+        customAmountInput.addEventListener('input', () => {
+            selectedAmount = parseInt(customAmountInput.value || 0);
+            selectedPoints = Math.floor(selectedAmount / 1000);
+
+            customPointsDisplay.innerText = `${selectedPoints} Points`;
+            hiddenPoints.value = selectedPoints;
+
+            // Unselect amount-option
+            amountOptions.forEach(o => o.classList.remove('selected'));
+        });
+
+        // Handle payment method selection
+        paymentOptions.forEach(method => {
+            method.addEventListener('click', () => {
+                paymentOptions.forEach(m => m.classList.remove('selected'));
+                method.classList.add('selected');
+
+                selectedPaymentMethod = method.dataset.method;
+                hiddenPaymentMethod.value = selectedPaymentMethod;
+            });
+        });
+    </script>
+
+    <script>
+        // Xử lý chọn gói nạp tiền
+        const amountOptions = document.querySelectorAll('.amount-option');
+        const customAmountInput = document.getElementById('customAmount');
+        const customPointsDisplay = document.getElementById('customPoints');
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        const form = document.getElementById('topupForm');
+
+        let selectedAmount = 0;
+        let selectedPoints = 0;
+        let selectedPaymentMethod = '';
+
+        // Handle preset amount selection
+        amountOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                amountOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                selectedAmount = parseInt(option.dataset.amount);
+                selectedPoints = parseInt(option.dataset.points);
+                
+                // Update form inputs
+                customAmountInput.value = selectedAmount;
+                document.getElementById('hiddenPoints').value = selectedPoints;
+                
+                customAmountInput.value = '';
+                
+                // Animation effect
+                option.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    option.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+
+        // Handle custom amount input
+        customAmountInput.addEventListener('input', (e) => {
+            const amount = parseInt(e.target.value) || 0;
+            if (amount > 0) {
+                amountOptions.forEach(opt => opt.classList.remove('selected'));
+                selectedAmount = amount;
+                // Calculate points: 100,000₫ = 100 points
+                selectedPoints = Math.floor(amount / 1000);
+                customPointsDisplay.textContent = `${selectedPoints.toLocaleString()} Points`;
+                
+                // Update hidden input
+                document.getElementById('hiddenPoints').value = selectedPoints;
+            } else {
+                selectedAmount = 0;
+                selectedPoints = 0;
+                customPointsDisplay.textContent = '0 Points';
+                document.getElementById('hiddenPoints').value = 0;
+            }
+        });
+
+        // Handle payment method selection
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', () => {
+                paymentMethods.forEach(m => m.classList.remove('selected'));
+                method.classList.add('selected');
+                selectedPaymentMethod = method.dataset.method;
+                
+                // Update hidden input
+                document.getElementById('hiddenPaymentMethod').value = selectedPaymentMethod;
+                
+                // Animation effect
+                method.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    method.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (selectedAmount === 0) {
+                alert('Please select an amount to top up!');
+                return;
+            }
+
+            if (!selectedPaymentMethod) {
+                alert('Please select a payment method!');
+                return;
+            }
+
+            // Loading effect
+            const btn = document.querySelector('.checkout-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            // Submit form sau khi xử lý xong
+            form.submit();
+        });
+
+
+        // Hiệu ứng parallax nhẹ
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            document.body.style.background = `linear-gradient(${135 + mouseX * 10}deg, #667eea 0%, #764ba2 100%)`;
+        });
+    </script>
+</body>
+</html>

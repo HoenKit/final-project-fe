@@ -2,6 +2,8 @@ using Serilog.Formatting.Json;
 using Serilog;
 using final_project_fe.Utils;
 using Microsoft.Extensions.Options;
+using final_project_fe.Dtos.Comment;
+using final_project_fe.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,13 @@ builder.Host.UseSerilog();
 
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+builder.Services.AddScoped<PayOSService>();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
 
 //Config SignalR
 builder.Services.Configure<SignalrSetting>(builder.Configuration.GetSection("SignalrSetting"));
