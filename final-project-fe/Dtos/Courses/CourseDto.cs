@@ -3,6 +3,7 @@
 	public class CourseDto
 	{
         public int MentorId { get; set; }
+        public int CourseId { get; set; }
         public int CategoryId { get; set; }
         public string? CourseName { get; set; }
         public string? CourseContent { get; set; }

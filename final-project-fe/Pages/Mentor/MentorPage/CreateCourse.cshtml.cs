@@ -175,12 +175,18 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 				// Gửi request tạo khóa học
 				var response1 = await _httpClient.PostAsync($"{BaseUrl}/Course", form);
 
-				if (response1.IsSuccessStatusCode)
-				{
-					TempData["SuccessMessage"] = "Create Course success!";
-					return RedirectToPage("/Mentor/MentorPage/MyCourses");
-				}
-				else
+                var createdCourseJson = await response1.Content.ReadAsStringAsync();
+                var createdCourse = JsonSerializer.Deserialize<CourseDto>(createdCourseJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (createdCourse != null && createdCourse.CourseId > 0)
+                {
+                    TempData["SuccessMessage"] = "Course created successfully! Continue editing your course.";
+                    return RedirectToPage("/Mentor/MentorPage/EditCourse", new { id = createdCourse.CourseId });
+                }
+                else
 				{
 					_logger.LogError("Create Course failed!. Status: " + response1.StatusCode);
 					ModelState.AddModelError("", "Create Course failed!");
