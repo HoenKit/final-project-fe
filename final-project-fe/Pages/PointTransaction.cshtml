@@ -453,7 +453,7 @@
                         <img src="@Model.UserInfo.UserMetaData.Avatar" alt="User" class="w-20 h-20 rounded-full object-cover">
                     </div>
                     <h3>@Model.UserInfo.UserMetaData.FirstName @Model.UserInfo.UserMetaData.LastName</h3>
-                    <p>Premium Member</p>
+                    <p>@(Model.UserInfo.IsPremium ? "Premium Member" : "Member")</p>
                     <div class="current-points">
                         <div class="points-value">@Model.UserInfo.Point?.ToString("0.##")</div>
                         <div>Current Points</div>
