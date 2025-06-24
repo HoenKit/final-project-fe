@@ -1,6 +1,21 @@
-﻿@{
+﻿@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@{
+	var roles = new List<string>();
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
+	if (!string.IsNullOrEmpty(token))
+	{
+		var handler = new JwtSecurityTokenHandler();
+		var jwtToken = handler.ReadJwtToken(token);
+		roles = jwtToken.Claims
+					.Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+					.Select(c => c.Value)
+					.ToList();
+	}
+
+	bool isMentor = roles.Contains("Mentor");
+	bool isAdmin = roles.Contains("Admin");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -95,6 +110,18 @@
 							<li><a href="widgets.html" title="">Widgts</a></li> *@
 						</ul>
 					</li>
+					@if (isMentor)
+					{
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
+						</li>
+					}
+					@if (isAdmin)
+					{
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
+						</li>
+					}
 				</ul>
 				<ul class="setting-area">
 					<li>
@@ -270,15 +297,25 @@
 			<ul class="navbar-nav flex-grow-1">
 				@if (isAuthenticated)
 				{
+					<li style="padding-bottom: 4%;">
+						<i class="bi bi-person-vcard"></i>
+						<a asp-page="/MentorRegulations">Become a Mentor</a>
+					</li>
 					<li>
-						<i class="ti-power-off"></i>
+						<i style="font-size: 115%;" class="bi bi-box-arrow-in-left"></i>
 						<a asp-page="/Logout">Logout</a>
 					</li>
 				}
 				else
 				{
-					<li><a asp-page="/Login">Login</a></li>
-					<li><a asp-page="/Register">Register</a></li>
+					<li style="padding-bottom: 4%;">
+						<i style="font-size:118%;" class="bi bi-box-arrow-in-right"></i>
+						<a asp-page="/Login">Login</a>
+					</li>
+					<li style="padding-left: 2%;">
+						<i class="bi bi-pencil-square"></i>
+						<a asp-page="/Register">Register</a>
+					</li>
 				}
 			</ul>
 		</div><!-- side panel -->

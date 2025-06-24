@@ -24,7 +24,7 @@ namespace final_project_fe.Pages.Admin.UserManager
 
         public PageResult<User> Users { get; set; }
         public int CurrentPage { get; set; }
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 6;
 
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1)
         {

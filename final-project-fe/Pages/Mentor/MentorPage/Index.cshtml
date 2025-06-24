@@ -35,7 +35,6 @@
         }
 
         .top-banner {
-            background: linear-gradient(135deg, var(--primary-color), #0066cc);
             color: white;
             padding: 80px 0;
             position: relative;
@@ -521,23 +520,28 @@
     </style>
 </head>
 <body>
-    <!-- Top Banner -->
-    <section class="top-banner">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
-                    <p class="lead mb-4" style="color: white;">Browse our extensive collection of courses taught by industry experts</p>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb justify-content-center">
-                            <li class="breadcrumb-item"><a href="#" class="text-white-50">Home</a></li>
-                            <li class="breadcrumb-item active text-white" aria-current="page">Courses</li>
-                        </ol>
-                    </nav>
+    <div class="theme-layout">
+        <section>
+            <div class="ext-gap bluesh high-opacity">
+                <div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="top-banner">
+                                <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
+                                <p class="lead mb-4" style="color: white;">Browse our extensive collection of courses taught by industry experts</p>
+                                <nav class="breadcrumb">
+                                    <ol class="breadcrumb justify-content-center">
+                                        <li class="breadcrumb-item"><a asp-area="" asp-page="/Index" class="text-white-50">Home</a></li>
+                                        <li class="breadcrumb-item active text-white" aria-current="page">Courses</li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section><!-- top area animated -->
 
     <!-- Search Header -->
     <section class="search-header">
