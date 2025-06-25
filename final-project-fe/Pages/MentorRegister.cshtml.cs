@@ -31,8 +31,30 @@ namespace final_project_fe.Pages
 
         [BindProperty]
         public CreateMentorDto Mentor { get; set; } = new CreateMentorDto();
-        public void OnGet()
+        public async Task<IActionResult> OnGet()
         {
+            var token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                ModelState.AddModelError("", "Bạn chưa đăng nhập.");
+                return RedirectToPage("/Login");
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // 🔍 Lấy Role từ token
+            var roleClaims = jwtToken.Claims
+                .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
+
+            if (roleClaims.Contains("Mentor"))
+            {
+                return RedirectToPage("/Index");
+            }
+            return RedirectToPage("/Index");
+
         }
 
         public async Task<IActionResult> OnPostAsync()
