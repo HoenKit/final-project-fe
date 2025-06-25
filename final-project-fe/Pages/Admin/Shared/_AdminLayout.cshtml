@@ -150,6 +150,30 @@
                                 </ul>
                             </div>
                         </li>
+                        @{
+                            var isConrseManager = (ViewData["ActivePage"] as string ?? "").StartsWith("CourseManager");
+                        }
+                        <li class="nav-item @(isConrseManager ? "active" : "")">
+                            <a data-bs-toggle="collapse" href="#collapseConrseManager" aria-expanded="false">
+                                <i class="fas fa-clipboard"></i>
+                                <p>Conrse Manager</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="collapseConrseManager">
+                                <ul class="nav nav-collapse">
+                                    <li class="@(ViewData["ActivePage"] as string == "CourseManager.ListConrse" ? "active" : "")">
+                                        <a asp-page="/Admin/CourseManager/Index">
+                                            <span class="sub-item">List Conrse</span>
+                                        </a>
+                                    </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "CourseManager.ListPending" ? "active" : "")">
+                                        <a asp-page="/Admin/CourseManager/ListPending">
+                                            <span class="sub-item">List Pending</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -186,23 +210,6 @@
                     <div class="container-fluid">
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                             <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-                                <a class="nav-link dropdown-toggle"
-                                   data-bs-toggle="dropdown"
-                                   href="#"
-                                   role="button"
-                                   aria-expanded="false"
-                                   aria-haspopup="true">
-                                    <i class="fa fa-search"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-search animated fadeIn">
-                                    <form class="navbar-left navbar-form nav-search">
-                                        <div class="input-group">
-                                            <input type="text"
-                                                   placeholder="Search ..."
-                                                   class="form-control" />
-                                        </div>
-                                    </form>
-                                </ul>
                             </li>
 
                             <li class="nav-item topbar-user dropdown hidden-caret">

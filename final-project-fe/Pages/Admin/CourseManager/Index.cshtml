@@ -1,0 +1,194 @@
+﻿@page
+@model final_project_fe.Pages.Admin.CourseManager.IndexModel
+@{
+    ViewData["ActivePage"] = "CourseManager.ListCourse";
+}
+
+<style>
+    .text-truncate-multiline {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Number of lines to show */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-height: 3.6em; /* Adjust based on line height */
+    }
+
+    .content-cell {
+        max-width: 300px;
+    }
+
+    .status-approved {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .status-pending {
+        color: #ffc107;
+        font-weight: bold;
+    }
+
+    .status-rejected {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .course-image {
+        width: 80px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Courses Manager</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-page="/Admin/Dashboard/Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a>Course Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/CourseManager/Index">Courses Manager</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="basic-datatables"
+                           class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Mentor</th>
+                                <th>Cost</th>
+                                <th>Rating</th>
+                                <th>Students</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Image</th>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Mentor</th>
+                                <th>Cost</th>
+                                <th>Rating</th>
+                                <th>Students</th>
+                                <th>Created At</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @if (Model.Courses == null || !Model.Courses.Items.Any())
+                            {
+                                <tr>
+                                    <td colspan="11" class="text-center">No courses found</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var course in Model.Courses.Items)
+                                {
+                                    <tr class="clickable-row" data-id="@course.CourseId" style="cursor:pointer;">
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(course.CoursesImage))
+                                            {
+                                                <img src="@course.CoursesImage" class="course-image" alt="Course image">
+                                            }
+                                            else
+                                            {
+                                                <div class="course-image bg-light d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>@course.CourseId</td>
+                                        <td class="content-cell">
+                                            <div class="text-truncate-multiline">@course.CourseName</div>
+                                        </td>
+                                        <td>@($"{course.Mentor?.FirstName} {course.Mentor?.LastName}")</td>
+                                        <td>@course.Cost.ToString("0")</td>
+                                        <td>
+                                            @if (course.AverageRating > 0)
+                                            {
+                                                <span class="badge bg-success">@course.AverageRating?.ToString("N1")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">No ratings</span>
+                                            }
+                                        </td>
+                                        <td>@course.StudentCount</td>
+                                        <td>@course.CreateAt?.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <!-- Pagination -->
+                    <div class="card-body">
+                        <div class="demo">
+                            <ul class="pagination pg-primary">
+                                <li class="page-item @(Model.Courses.CurrentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.Courses.CurrentPage - 1)" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                </li>
+
+                                @for (int i = 1; i <= Model.Courses.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-page="Index" asp-route-currentPage="@i">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(Model.Courses.CurrentPage == Model.Courses.TotalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.Courses.CurrentPage + 1)" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const rows = document.querySelectorAll(".clickable-row");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                const courseId = row.getAttribute("data-id");
+                if (courseId) {
+                    window.location.href = `/Mentor/MentorPage/CourseDetail?courseId=${courseId}`;
+                }
+            });
+        });
+    });
+</script>

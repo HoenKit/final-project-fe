@@ -1,0 +1,261 @@
+﻿@page
+@model final_project_fe.Pages.Admin.CourseManager.ListPendingModel
+@{
+    ViewData["ActivePage"] = "CourseManager.ListPending";
+}
+
+<style>
+    .text-truncate-multiline {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Number of lines to show */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-height: 3.6em; /* Adjust based on line height */
+    }
+
+    .content-cell {
+        max-width: 300px;
+    }
+
+    .status-approved {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .status-pending {
+        color: #ffc107;
+        font-weight: bold;
+    }
+
+    .status-rejected {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .course-image {
+        width: 80px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    /* Add notification styles */
+    .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-success {
+        color: #3c763d;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+
+    .alert-danger {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+    }
+</style>
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Course Approval</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-page="/Admin/Dashboard/Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a>Course Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/CourseManager/ListPending">Course Approval</a>
+        </li>
+    </ul>
+</div>
+
+<!-- Add notification display at the top of the content -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="basic-datatables"
+                           class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Mentor</th>
+                                <th>Cost</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Image</th>
+                                <th>ID</th>
+                                <th>Course Name</th>
+                                <th>Mentor</th>
+                                <th>Cost</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            @if (Model.Courses == null || !Model.Courses.Items.Any())
+                            {
+                                <tr>
+                                    <td colspan="11" class="text-center">No courses found</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var course in Model.Courses.Items)
+                                {
+                                    <tr class="clickable-row" data-id="@course.CourseId" style="cursor:pointer;">
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(course.CoursesImage))
+                                            {
+                                                <img src="@course.CoursesImage" class="course-image" alt="Course image">
+                                            }
+                                            else
+                                            {
+                                                <div class="course-image bg-light d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-book"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>@course.CourseId</td>
+                                        <td class="content-cell">
+                                            <div class="text-truncate-multiline">@course.CourseName</div>
+                                        </td>
+                                        <td>@($"{course.Mentor?.FirstName} {course.Mentor?.LastName}")</td>
+                                        <td>@course.Cost.ToString("0")</td>
+                                        <td>@course.CreateAt?.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <div class="form-button-action">
+                                                <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@course.CourseId" asp-route-status="Approved">
+                                                    <button type="submit" class="btn btn-link btn-success btn-sm">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@course.CourseId" asp-route-status="Rejected">
+                                                    <button type="submit" class="btn btn-link btn-danger btn-sm">
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <!-- Pagination -->
+                    <div class="card-body">
+                        <div class="demo">
+                            <ul class="pagination pg-primary">
+                                <li class="page-item @(Model.Courses.CurrentPage == 1 ? "disabled" : "")">
+                                    <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.Courses.CurrentPage - 1)" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                </li>
+
+                                @for (int i = 1; i <= Model.Courses.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-page="Index" asp-route-currentPage="@i">@i</a>
+                                    </li>
+                                }
+
+                                <li class="page-item @(Model.Courses.CurrentPage == Model.Courses.TotalPages ? "disabled" : "")">
+                                    <a class="page-link" asp-page="Index" asp-route-currentPage="@(Model.Courses.CurrentPage + 1)" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Your existing row click handler
+        const rows = document.querySelectorAll(".clickable-row");
+        rows.forEach(row => {
+            row.addEventListener("click", (e) => {
+                // Prevent clicking when interacting with form buttons
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    return;
+                }
+                const courseId = row.getAttribute("data-id");
+                if (courseId) {
+                    window.location.href = `/Mentor/MentorPage/CourseDetail?courseId=${courseId}`;
+                }
+            });
+        });
+
+        // Improved notification auto-hide
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            alerts.forEach(alert => {
+                // Add close button
+                const closeButton = document.createElement('button');
+                closeButton.innerHTML = '&times;';
+                closeButton.className = 'close';
+                closeButton.style.cssText = 'background: none; border: none; font-size: 1.5rem; cursor: pointer; float: right; line-height: 1;';
+                closeButton.addEventListener('click', () => {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+                alert.prepend(closeButton);
+
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }, 5000);
+            });
+        }
+    });
+</script>

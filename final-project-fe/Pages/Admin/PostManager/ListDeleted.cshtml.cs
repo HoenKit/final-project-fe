@@ -27,7 +27,7 @@ namespace final_project_fe.Pages.Admin.PostManager
         public PageResult<User> Users { get; set; }
         public PageResult<CategoryDto> Categories { get; set; }
         public int CurrentPage { get; set; }
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 100;
 
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1)
         {
@@ -117,7 +117,7 @@ namespace final_project_fe.Pages.Admin.PostManager
             }
 
             Posts ??= new PageResult<PostManagerDto>(Enumerable.Empty<PostManagerDto>(), 0, CurrentPage, PageSize);
-            Users ??= new PageResult<User>(Enumerable.Empty<User>(), 0, 1, 10);
+            Users ??= new PageResult<User>(Enumerable.Empty<User>(), 0, 1, 100);
             Categories ??= new PageResult<CategoryDto>(Enumerable.Empty<CategoryDto>(), 0, 1, 10);
 
             return Page();

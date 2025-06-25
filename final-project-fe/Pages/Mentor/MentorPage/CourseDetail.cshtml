@@ -1,9 +1,30 @@
 ﻿@page
 @model final_project_fe.Pages.Mentor.MentorPage.CourseDetailModel
+@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
     Layout = null;
     ViewData["Title"] = Model.Course.CourseName;
+
+        var roles = new List<string>();
+        var token = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+        bool isAuthenticated = !string.IsNullOrEmpty(token);
+        if (!string.IsNullOrEmpty(token))
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            roles = jwtToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                        .Select(c => c.Value)
+                        .ToList();
+        }
+
+        bool isMentor = roles.Contains("Mentor");
+        bool isUser = roles.Contains("User");
+        bool isAdmin = roles.Contains("Admin");
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,7 +212,7 @@
                 <div class="lg:hidden mt-8">
                     <div class="bg-white text-gray-900 rounded-lg p-6 course-sidebar">
                         <img src="@Model.Course.CoursesImage" alt="Course preview" class="w-full rounded-lg mb-4">
-                        <div class="text-3xl font-bold text-green-600 mb-2">$@((int)Model.Course.Cost)</div>
+                        <div class="text-3xl font-bold text-green-600 mb-2">@((int)Model.Course.Cost)</div>
                         @* <button class="w-full bg-purple-600 text-white font-bold py-4 px-6 rounded hover:bg-purple-700 transition-colors mb-3">
                             Add to cart
                         </button> *@
@@ -222,24 +243,35 @@
             <div class="p-6">
                 <!-- Price -->
                 <div class="mb-4">
-                    <span class="text-3xl font-bold">$@((int)Model.Course.Cost)</span>
+                    <span class="text-3xl font-bold">
+                        <svg class="w-6 h-6 inline" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Đồng xu (màu vàng kim) -->
+                            <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#D4AF37" stroke-width="1.5" />
+                            <!-- Chữ P in đậm, màu tối -->
+                            <text x="12" y="16" text-anchor="middle" font-weight="bold" font-size="12" fill="#000000">P</text>
+                        </svg>
+                        @((int)Model.Course.Cost)
+                    </span>
                     @* <span class="text-gray-500 line-through ml-2">$199.99</span>
                     <span class="text-red-600 text-sm ml-2">75% off</span> *@
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="space-y-3 mb-4">
-                    @* <button class="w-full bg-purple-600 text-white font-bold py-4 px-6 rounded hover:bg-purple-700 transition-colors">
+                @if (isUser && isMentor && Model.Course.Status == "Approved")
+                {
+                    <!-- Action Buttons -->
+                    <div class="space-y-3 mb-4">
+                        @* <button class="w-full bg-purple-600 text-white font-bold py-4 px-6 rounded hover:bg-purple-700 transition-colors">
                         Add to cart
-                    </button> *@
-                    <button class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
-                        Buy now
-                    </button>
-                </div>
+                        </button> *@
+                        <button class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
+                            Buy now
+                        </button>
+                    </div>
 
-                <!-- Money-back guarantee -->
-                <p class="text-center text-sm text-gray-600 mb-6">30-Day Money-Back Guarantee</p>
-
+                    <!-- Money-back guarantee -->
+                    <p class="text-center text-sm text-gray-600 mb-6">30-Day Money-Back Guarantee</p>
+                }
+                
                 <!-- Course includes -->
                 <div>
                     <h3 class="font-semibold mb-3">This course includes:</h3>
@@ -277,14 +309,129 @@
                     </ul>
                 </div>
 
-                <!-- Share and Gift -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <div class="flex items-center justify-between text-sm">
-                        @* <button class="text-purple-600 hover:text-purple-700 font-medium">Share</button>
+                @if (isUser && isMentor && Model.Course.Status == "Approved")
+                {
+                    <!-- Share and Gift -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="flex items-center justify-between text-sm">
+                            @* <button class="text-purple-600 hover:text-purple-700 font-medium">Share</button>
                         <button class="text-purple-600 hover:text-purple-700 font-medium">Gift this course</button> *@
-                        <button class="text-purple-600 hover:text-purple-700 font-medium">Apply Coupon</button>
+                            <button class="text-purple-600 hover:text-purple-700 font-medium">Apply Coupon</button>
+                        </div>
                     </div>
-                </div>
+                }
+
+                @if (Model.Course.Status == "Pending")
+                {
+                    @if (isAdmin)
+                    {
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="space-y-3">
+                                <h4 class="font-semibold text-gray-900 mb-3">Course Approval</h4>
+                                <div class="flex space-x-3">
+                                    <!-- Approved Button -->
+                                    <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@Model.Course.CourseId" asp-route-status="Approved" class="flex-1">
+                                        <button type="submit" class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Approve
+                                        </button>
+                                    </form>
+
+                                    <!-- Rejected Button -->
+                                    <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@Model.Course.CourseId" asp-route-status="Rejected" class="flex-1">
+                                        <button type="submit" class="w-full bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Current Status Display -->
+                                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center">
+                                        <span class="text-sm font-medium text-gray-700 mr-2">Current Status:</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        @(Model.Course.Status == "Approved" ? "bg-green-100 text-green-800" :
+                          Model.Course.Status == "Rejected" ? "bg-red-100 text-red-800" :
+                          "bg-yellow-100 text-yellow-800")">
+                                            @Model.Course.Status
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isMentor)
+                    {
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <svg class="w-6 h-6 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <h4 class="font-semibold text-yellow-800 mb-1">Course pending approval</h4>
+                                        <p class="text-sm text-yellow-700">
+                                            Your course is being reviewed and approved by the administrator.
+                                            Please wait for notification from the system.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @if (Model.Course.Status == "Rejected")
+                {
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="space-y-3">
+                            @if (isAdmin)
+                            {
+                                <!-- Admin view for rejected course -->
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div class="flex items-center mb-3">
+                                        <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <h4 class="font-semibold text-red-800">Course Status</h4>
+                                    </div>
+                                    <p class="text-red-700 text-sm mb-3">This course has been rejected and is not visible to students.</p>
+                                </div>
+                            }
+
+                            @if (isMentor)
+                            {
+                                <!-- Mentor view for rejected course -->
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div class="flex items-center mb-3">
+                                        <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <h4 class="font-semibold text-red-800">Course Rejected</h4>
+                                    </div>
+                                    <p class="text-red-700 text-sm mb-4">Your course has been rejected. Please review and edit your course content, then resubmit for approval.</p>
+
+                                    <!-- Edit Course Button -->
+                                    <div class="flex space-x-3">
+                                        <a asp-page="/Mentor/MentorPage/EditCourse" asp-route-courseId="@Model.Course.CourseId"
+                                           class="flex-1 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center text-sm">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Edit Course
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>

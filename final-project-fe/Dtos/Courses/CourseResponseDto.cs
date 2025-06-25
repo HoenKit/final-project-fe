@@ -16,6 +16,7 @@
         public int? StudentCount { get; set; }
         public string? CoursesImage { get; set; }
         public double? CourseLength { get; set; }
+        public string? Status { get; set; }
         public DateTime? UpdateAt { get; set; }
         public int CountModule { get; set; }
         public int CountLesson { get; set; }
