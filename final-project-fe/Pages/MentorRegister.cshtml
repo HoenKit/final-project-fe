@@ -101,16 +101,20 @@
         <button type="button" onclick="closePopup()">❌ Close</button>
     </div>
 
-    <script>
-        function showPopup() {
+<script>
+    let signaturePad;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // QR popup functions
+        window.showPopup = function () {
             document.getElementById('qrPopup').style.display = 'block';
-        }
+        };
 
-        function closePopup() {
+        window.closePopup = function () {
             document.getElementById('qrPopup').style.display = 'none';
-        }
+        };
 
-        async function scanQRCode() {
+        window.scanQRCode = async function () {
             const fileInput = document.getElementById("qrImage");
             const file = fileInput.files[0];
             if (!file) return alert("Please select an image of the ID");
@@ -147,16 +151,18 @@
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-        }
+        };
 
+        // Initialize signature pad
         const canvas = document.getElementById('signatureCanvas');
-        const signaturePad = new SignaturePad(canvas);
+        signaturePad = new SignaturePad(canvas);
 
-        function clearSignature() {
-            signaturePad.clear();
-        }
+        // Signature actions
+        window.clearSignature = function () {
+            if (signaturePad) signaturePad.clear();
+        };
 
-        function convertSignatureToFile() {
+        window.convertSignatureToFile = function () {
             if (signaturePad.isEmpty()) {
                 alert("You have not signed yet!");
                 return;
@@ -171,23 +177,26 @@
 
                 alert("✅ Signature saved.");
             }, "image/png");
-        }
+        };
 
-        document.getElementById("mentorForm").addEventListener("submit", function (e) {
-            if (!document.getElementById("signatureFile").files.length && !signaturePad.isEmpty()) {
+        // Ensure signature is saved before submit
+        const form = document.getElementById("mentorForm");
+        form.addEventListener("submit", function (e) {
+            const signatureInput = document.getElementById("signatureFile");
+            if (!signatureInput.files.length && !signaturePad.isEmpty()) {
                 e.preventDefault();
                 convertSignatureToFile();
-                setTimeout(() => this.submit(), 300);
+                setTimeout(() => form.submit(), 300); // allow time for file to be set
             }
         });
-    </script>
+    });
+</script>
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #f9faff;
-            padding: 40px;
             color: #333;
         }
 
