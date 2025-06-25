@@ -20,7 +20,7 @@ namespace final_project_fe.Pages
             if (action == "agree")
             {
                 SuccessMessage = "Thank you for agreeing to our policy! Your application will proceed to the next step.";
-                RedirectUrl = "/Index";
+                RedirectUrl = "/MentorRegister";
                 Status = "Success";
             }
             else if (action == "disagree")
