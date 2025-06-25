@@ -25,4 +25,36 @@
         public int TotalReviews { get; set; } = 0;
         public decimal AverageRating { get; set; } = 0;
     }
+    public class CreateMentorDto
+    {
+        public Guid UserId { get; set; }
+        public string? Introduction { get; set; }
+        public string? JobTitle { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? StudyLevel { get; set; }
+        public string? CitizenID { get; set; }
+        public IFormFile? Signature { get; set; }
+        public string? IssuePlace { get; set; }
+        public DateTime? ExpiredDate { get; set; }
+        public DateTime? IssueDate { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdateAt { get; set; } = DateTime.UtcNow;
+        public List<MentorCertificateDto>? MentorCertificates { get; set; }
+    }
+    public class CtzResultDto
+    {
+        public string? CitizenId { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public DateTime? IssueDate { get; set; }
+    }
+    public class MentorCertificateDto
+    {
+        public int MentorCertificateId { get; set; }
+        public int MentorId { get; set; }
+        public string? FileUrl { get; set; }
+        public string? CertificateName { get; set; }
+    }
+
 }
