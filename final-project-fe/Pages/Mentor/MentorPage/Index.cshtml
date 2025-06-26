@@ -35,7 +35,6 @@
         }
 
         .top-banner {
-            background: linear-gradient(135deg, var(--primary-color), #0066cc);
             color: white;
             padding: 80px 0;
             position: relative;
@@ -50,7 +49,6 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
         }
 
         a {
@@ -443,13 +441,11 @@
             color: white;
         }
 
-        /* Specific max-heights for different sections */
         .filter-content.category-content.expanded {
             max-height: 300px;
             overflow-y: auto;
         }
 
-        /* Style scrollbar */
         .filter-content::-webkit-scrollbar {
             width: 6px;
         }
@@ -478,11 +474,31 @@
 
         .filter-content.language-content.expanded {
             max-height: 200px;
+            overflow-y: auto;
         }
 
         .filter-content.level-content.expanded {
             max-height: 180px;
+            overflow-y: auto;
         }
+
+        .filter-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .filter-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+            .filter-content::-webkit-scrollbar-thumb:hover {
+                background: #aaa;
+            }
 
         .no-results {
             grid-column: 1 / -1;
@@ -523,22 +539,27 @@
 <body>
 <div class="theme-layout">
     <!-- Top Banner -->
-    <section class="top-banner">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
-                    <p class="lead mb-4" style="color: white;">Browse our extensive collection of courses taught by industry experts</p>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb justify-content-center">
-                            <li class="breadcrumb-item"><a href="#" class="text-white-50">Home</a></li>
-                            <li class="breadcrumb-item active text-white" aria-current="page">Courses</li>
-                        </ol>
-                    </nav>
+     <section>
+        <div class="ext-gap bluesh high-opacity">
+            <div class="content-bg-wrap" style="background: url('@Url.Content("~/images/resources/animated-bg2.png")')"></div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="top-banner">
+                            <h1 class="display-4 fw-bold mb-3">Find Your Perfect Course</h1>
+                            <p class="lead mb-4" style="color: white;">Browse our extensive collection of courses taught by industry experts</p>
+                            <nav class="breadcrumb">
+                               <ol class="breadcrumb justify-content-center">
+                                    <li class="breadcrumb-item"><a href="#" class="text-white-50">Home</a></li>
+                                    <li class="breadcrumb-item active text-white" aria-current="page">Courses</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </section><!-- top area animated -->
 
     <!-- Search Header -->
     <section class="search-header">
@@ -611,20 +632,20 @@
                         <div class="filter-section">
                             <div class="filter-title" onclick="toggleFilter('price')">
                                 <div class="filter-icon">
-                                    <i class="bi bi-currency-dollar"></i>
+                                        <i class="bi bi-p-circle"></i>
                                     <span>Price Range</span>
                                 </div>
                                 <i class="bi bi-chevron-down toggle-icon"></i>
                             </div>
                             <div class="filter-content price-content" id="priceFilter">
                                 <div class="range-slider">
-                                    <input type="range" class="range-input" id="minPrice" min="0" max="500"
+                                    <input type="range" class="range-input" id="minPrice" min="0" max="10000"
                                            value="@(Request.Query["minCost"].FirstOrDefault() ?? "0")" oninput="updatePriceRange()">
-                                    <input type="range" class="range-input" id="maxPrice" min="0" max="500"
-                                           value="@(Request.Query["maxCost"].FirstOrDefault() ?? "500")" oninput="updatePriceRange()">
+                                    <input type="range" class="range-input" id="maxPrice" min="0" max="10000"
+                                           value="@(Request.Query["maxCost"].FirstOrDefault() ?? "10000")" oninput="updatePriceRange()">
                                     <div class="range-values">
-                                        <span>$<span id="minPriceValue">@(Request.Query["minCost"].FirstOrDefault() ?? "0")</span></span>
-                                        <span>$<span id="maxPriceValue">@(Request.Query["maxCost"].FirstOrDefault() ?? "500")</span></span>
+                                        <span><span id="minPriceValue">@(Request.Query["minCost"].FirstOrDefault() ?? "0")</span></span>
+                                        <span><span id="maxPriceValue">@(Request.Query["maxCost"].FirstOrDefault() ?? "10000")</span></span>
                                     </div>
                                 </div>
                             </div>
@@ -653,16 +674,16 @@
                             </div>
                         </div>
 
-                        <!-- Language Filter -->
-                        <div class="filter-section">
-                            <div class="filter-title" onclick="toggleFilter('language')">
-                                <div class="filter-icon">
-                                    <i class="bi bi-translate"></i>
-                                    <span>Language</span>
+                            <!-- Language Filter -->
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter('language')">
+                                    <div class="filter-icon">
+                                        <i class="bi bi-translate"></i>
+                                        <span>Language</span>
+                                    </div>
+                                    <i class="bi bi-chevron-down toggle-icon"></i>
                                 </div>
-                                <i class="bi bi-chevron-down toggle-icon"></i>
-                            </div>
-                            <div class="filter-content language-content" id="languageFilter">
+                                <div class="filter-content language-content" id="languageFilter">
                                 <div class="filter-options" id="languageFilters">
                                     <div class="filter-option">
                                         <input type="radio" id="lang_all" name="language" value=""
@@ -694,20 +715,35 @@
                                         @(Request.Query["language"] == "Vietnamese" ? "checked" : "")>
                                         <label for="lang_vi">Vietnamese</label>
                                     </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_vi" name="language" value="Chinese"
+                                        @(Request.Query["language"] == "Chinese" ? "checked" : "")>
+                                        <label for="lang_vi">Chinese</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_vi" name="language" value="Japanese"
+                                        @(Request.Query["language"] == "Japanese" ? "checked" : "")>
+                                        <label for="lang_vi">Japanese</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="lang_vi" name="language" value="Korean"
+                                        @(Request.Query["language"] == "Korean" ? "checked" : "")>
+                                        <label for="lang_vi">Korean</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Level Filter -->
-                        <div class="filter-section">
-                            <div class="filter-title" onclick="toggleFilter('level')">
-                                <div class="filter-icon">
-                                    <i class="bi bi-graph-up"></i>
-                                    <span>Difficulty Level</span>
+                            <!-- Level Filter -->
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter('level')">
+                                    <div class="filter-icon">
+                                        <i class="bi bi-graph-up"></i>
+                                        <span>Difficulty Level</span>
+                                    </div>
+                                    <i class="bi bi-chevron-down toggle-icon"></i>
                                 </div>
-                                <i class="bi bi-chevron-down toggle-icon"></i>
-                            </div>
-                            <div class="filter-content level-content" id="levelFilter">
+                                <div class="filter-content level-content" id="levelFilter">
                                 <div class="filter-options">
                                     <div class="filter-option">
                                         <input type="radio" id="level_all" name="level" value=""
@@ -728,6 +764,11 @@
                                         <input type="radio" id="advanced" name="level" value="Advanced"
                                         @(Request.Query["level"] == "Advanced" ? "checked" : "")>
                                         <label for="advanced">Advanced</label>
+                                    </div>
+                                    <div class="filter-option">
+                                        <input type="radio" id="expert" name="level" value="Expert"
+                                        @(Request.Query["level"] == "Expert" ? "checked" : "")>
+                                        <label for="expert">Expert</label>
                                     </div>
                                 </div>
                             </div>
@@ -793,7 +834,7 @@
                                             {
                                                 <span>@course.StudentCount.Value students</span>
                                             }
-                                            <div class="course-price">$@course.Cost.ToString("0.##")</div>
+                                                <div class="course-price"><i class="bi bi-p-circle"></i>@course.Cost.ToString("0.##")</div>
                                         </div>
                                     </div>
                                 </a>
@@ -995,50 +1036,50 @@
             }
         });
 
-        // Initialize filter states based on current URL
-        document.addEventListener('DOMContentLoaded', function () {
-            // Close all filters first
-            document.querySelectorAll('.filter-content').forEach(content => {
-                content.classList.remove('expanded');
-            });
-            document.querySelectorAll('.filter-title').forEach(title => {
-                title.classList.remove('expanded');
-            });
+            // Initialize filter states based on current URL
+            document.addEventListener('DOMContentLoaded', function () {
+                // Close all filters first
+                document.querySelectorAll('.filter-content').forEach(content => {
+                    content.classList.remove('expanded');
+                });
+                document.querySelectorAll('.filter-title').forEach(title => {
+                    title.classList.remove('expanded');
+                });
 
-            // Open filters that have active selections
-            const currentFilters = ['categoryId', 'language', 'level', 'minCost', 'maxCost', 'minRate', 'maxRate'];
-            let hasActiveFilter = false;
+                // Open filters that have active selections
+                const currentFilters = ['categoryId', 'language', 'level', 'minCost', 'maxCost', 'minRate', 'maxRate'];
+                let hasActiveFilter = false;
 
-            currentFilters.forEach(filter => {
-                if (urlParams.has(filter)) {
-                    let filterElement;
-                    
-                    // Map URL parameters to filter sections
-                    if (filter === 'categoryId') {
-                        filterElement = document.getElementById('categoryFilter');
-                    } else if (filter === 'language') {
-                        filterElement = document.getElementById('languageFilter');
-                    } else if (filter === 'level') {
-                        filterElement = document.getElementById('levelFilter');
-                    } else if (filter === 'minCost' || filter === 'maxCost') {
-                        filterElement = document.getElementById('priceFilter');
-                    } else if (filter === 'minRate' || filter === 'maxRate') {
-                        filterElement = document.getElementById('ratingFilter');
+                currentFilters.forEach(filter => {
+                    if (urlParams.has(filter)) {
+                        let filterElement;
+
+                        // Map URL parameters to filter sections
+                        if (filter === 'categoryId') {
+                            filterElement = document.getElementById('categoryFilter');
+                        } else if (filter === 'language') {
+                            filterElement = document.getElementById('languageFilter');
+                        } else if (filter === 'level') {
+                            filterElement = document.getElementById('levelFilter');
+                        } else if (filter === 'minCost' || filter === 'maxCost') {
+                            filterElement = document.getElementById('priceFilter');
+                        } else if (filter === 'minRate' || filter === 'maxRate') {
+                            filterElement = document.getElementById('ratingFilter');
+                        }
+
+                        if (filterElement) {
+                            filterElement.classList.add('expanded');
+                            filterElement.previousElementSibling.classList.add('expanded');
+                            hasActiveFilter = true;
+                        }
                     }
+                });
 
-                    if (filterElement) {
-                        filterElement.classList.add('expanded');
-                        filterElement.previousElementSibling.classList.add('expanded');
-                        hasActiveFilter = true;
-                    }
+                // If no filters are active, open category filter by default
+                if (!hasActiveFilter) {
+                    toggleFilter('category');
                 }
             });
-
-            // If no filters are active, open category filter by default
-            if (!hasActiveFilter) {
-                toggleFilter('category');
-            }
-        });
 
         // Prevent radio buttons from toggling the filter section
         document.querySelectorAll('.filter-option input[type="radio"]').forEach(radio => {
