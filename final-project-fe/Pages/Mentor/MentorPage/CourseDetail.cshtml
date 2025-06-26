@@ -278,6 +278,17 @@
                         <p class="text-center text-sm text-gray-600 mb-6">30-Day Money-Back Guarantee</p>
                     }
                 }
+
+                @if ((isAdmin || (isMentor && Guid.Parse(userIdToken) == Model.MentorInfor.UserId)) && Model.Course.Status == "Approved")
+                {
+                    <div class="space-y-3 mb-4">
+                        <form method="post" asp-page="/Mentor/MentorPage/DeleteCourse" asp-route-id="@Model.Course.CourseId">
+                            <button type="submit" class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
+                                Delete Course
+                            </button>
+                        </form>
+                    </div>
+                }
                 
                 <!-- Course includes -->
                 <div>
@@ -364,9 +375,9 @@
                                     <div class="flex items-center">
                                         <span class="text-sm font-medium text-gray-700 mr-2">Current Status:</span>
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        @(Model.Course.Status == "Approved" ? "bg-green-100 text-green-800" :
-                          Model.Course.Status == "Rejected" ? "bg-red-100 text-red-800" :
-                          "bg-yellow-100 text-yellow-800")">
+                                            @(Model.Course.Status == "Approved" ? "bg-green-100 text-green-800" :
+                                            Model.Course.Status == "Rejected" ? "bg-red-100 text-red-800" :
+                                            "bg-yellow-100 text-yellow-800")">
                                             @Model.Course.Status
                                         </span>
                                     </div>
