@@ -260,9 +260,9 @@
                     @* <span class="text-gray-500 line-through ml-2">$199.99</span>
                     <span class="text-red-600 text-sm ml-2">75% off</span> *@
                 </div>
-                @if (Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
+                @if (userIdToken == null || Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
                 {
-                    @if (isUser ||isMentor && Model.Course.Status == "Approved")
+                    @if (userIdToken == null || isUser || isMentor && Model.Course.Status == "Approved")
                     {
                         <!-- Action Buttons -->
                         <div class="space-y-3 mb-4">
@@ -315,9 +315,9 @@
                         </li>
                     </ul>
                 </div>
-                @if (Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
+                @if (userIdToken == null || Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
                 {
-                    @if (isUser || isMentor && Model.Course.Status == "Approved")
+                    @if (userIdToken == null || isUser || isMentor && Model.Course.Status == "Approved")
                     {
                         <!-- Share and Gift -->
                         <div class="mt-6 pt-6 border-t border-gray-200">
