@@ -78,8 +78,9 @@
                                         Category & Description
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link step-link" href="#" data-step="intended-learners">
+                                    <a class="nav-link step-link" href="#" data-step="skill-learn">
                                         <span class="step-number" data-step="3">
                                             @if (!string.IsNullOrEmpty(Model.Course.SkillLearn))
                                             {
@@ -90,9 +91,10 @@
                                                 <span>3</span>
                                             }
                                         </span>
-                                        Intended Learners
+                                        Skill Learn
                                     </a>
                                 </li>
+
                             </ul>
 
                             <h5 class="mt-4">Create your content</h5>
@@ -127,16 +129,85 @@
                                         Course Image
                                     </a>
                                 </li>
+
                                 <li class="nav-item">
-                                    <a class="nav-link step-link" href="#" data-step="curriculum">
+                                    <a class="nav-link step-link" href="#" data-step="requirement">
                                         <span class="step-number" data-step="6">
-                                            @if (Model.Modules != null && Model.Modules.Any())
+                                            @if (!string.IsNullOrEmpty(Model.Course.Requirement))
                                             {
                                                 <i class="fa fa-check"></i>
                                             }
                                             else
                                             {
                                                 <span>6</span>
+                                            }
+                                        </span>
+                                        Requirement
+                                    </a>
+                                </li>
+
+                               @*  <li class="nav-item">
+                                    <a class="nav-link step-link" href="#" data-step="language">
+                                        <span class="step-number" data-step="9">
+                                            @if (!string.IsNullOrEmpty(Model.Course.Language))
+                                            {
+                                                <i class="fa fa-check"></i>
+                                            }
+                                            else
+                                            {
+                                                <span>9</span>
+                                            }
+                                        </span>
+                                        Language
+                                    </a>
+                                </li> *@
+                            </ul>
+
+                            <h5 class="mt-4">Publish your course</h5>
+                            <ul class="nav nav-pills flex-column">
+
+                                <li class="nav-item">
+                                    <a class="nav-link step-link" href="#" data-step="level-language">
+                                        <span class="step-number" data-step="7">
+                                            @if (!string.IsNullOrEmpty(Model.Course.Level) && !string.IsNullOrEmpty(Model.Course.Language))
+                                            {
+                                                <i class="fa fa-check"></i>
+                                            }
+                                            else
+                                            {
+                                                <span>7</span>
+                                            }
+                                        </span>
+                                        Level & Language
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link step-link" href="#" data-step="intended-learners">
+                                        <span class="step-number" data-step="8">
+                                            @if (!string.IsNullOrEmpty(Model.Course.IntendedLearner))
+                                            {
+                                                <i class="fa fa-check"></i>
+                                            }
+                                            else
+                                            {
+                                                <span>8</span>
+                                            }
+                                        </span>
+                                        Intended Learners
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link step-link" href="#" data-step="curriculum">
+                                        <span class="step-number" data-step="9">
+                                            @if (Model.Modules != null && Model.Modules.Any())
+                                            {
+                                                <i class="fa fa-check"></i>
+                                            }
+                                            else
+                                            {
+                                                <span>9</span>
                                             }
                                         </span>
                                         Curriculum
@@ -229,30 +300,30 @@
                                         <button type="button" class="btn btn-secondary prev-step" data-prev="course-info">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
-                                        <button type="button" class="btn btn-primary next-step" data-next="intended-learners">
-                                            Next: Intended Learners <i class="fa fa-arrow-right"></i>
+                                        <button type="button" class="btn btn-primary next-step" data-next="skill-learn">
+                                            Next: Skill Learn <i class="fa fa-arrow-right"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- Step 3: Intended Learners -->
-                                <div id="intended-learners" class="content-section" style="display: none;">
+                                <!-- Step 3:  Skill Learn -->
+                                <div id="skill-learn" class="content-section" style="display: none;">
                                     <div class="step-header">
-                                        <h2><span class="step-badge">3</span> Intended Learners</h2>
+                                        <h2><span class="step-badge">3</span> Skill Learn</h2>
                                         <p class="step-description">
-                                            Define what students will learn, the prerequisites, and who your target audience is.
-                                            This information helps students understand if your course is right for them.
+                                            Identify the Skills students will learn.
+                                            This information helps students understand whether your course is right for them.
                                         </p>
                                     </div>
 
                                     <div class="form-section">
                                         <!-- What will students learn -->
                                         <div class="form-group mb-4">
-                                            <label class="form-label"><strong>What will students learn in your course?</strong></label>
-                                            <p class="form-text">You must enter at least 1 learning objectives that learners can expect to achieve.</p>
+                                            <label class="form-label"><strong>What skills will students learn in your course?</strong></label>
 
                                             <div id="learningObjectives">
-                                                <textarea asp-for="Course.SkillLearn" rows="4" class="form-control" required></textarea>
+                                                <textarea asp-for="Course.SkillLearn" rows="4" class="form-control" required
+                                                placeholder="You must enter the Skills that users can learn in this course."></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -281,7 +352,7 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group mb-3">
-                                                    <label asp-for="Course.Cost" class="form-label"><strong>Course Price (USD):</strong></label>
+                                                    <label asp-for="Course.Cost" class="form-label"><strong>Course Price (Point):</strong></label>
                                                     <input asp-for="Course.Cost" class="form-control" type="number" min="0" step="0.01"
                                                            placeholder="29.99" />
                                                     <small class="form-text text-muted">Set to 0 for free courses</small>
@@ -293,7 +364,7 @@
                                                     <input asp-for="Course.CourseLength" class="form-control"
                                                            placeholder="2 hours 30 minutes" />
                                                     <small class="form-text text-muted">Please fill in the total time to complete as follows: </small>
-                                                    <small class="form-text text-muted">Ex: "6 hours 30 minutes = 6.30" </small>
+                                                    <small class="form-text text-muted">Ex: "2 hours 30 minutes = 2.30" </small>
                                                    
                                                 </div>
                                             </div>
@@ -301,7 +372,7 @@
                                     </div>
 
                                     <div class="step-navigation mt-4">
-                                        <button type="button" class="btn btn-secondary prev-step" data-prev="intended-learners">
+                                        <button type="button" class="btn btn-secondary prev-step" data-prev="skill-learn">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
                                         <button type="button" class="btn btn-primary next-step" data-next="course-image">
@@ -349,16 +420,125 @@
                                         <button type="button" class="btn btn-secondary prev-step" data-prev="pricing-duration">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
-                                        <button type="button" class="btn btn-primary next-step" data-next="curriculum">
-                                            Next: Curriculum <i class="fa fa-arrow-right"></i>
+                                        <button type="button" class="btn btn-primary next-step" data-next="requirement">
+                                            Next: Requirement <i class="fa fa-arrow-right"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <!-- Step 6: Curriculum -->
+                                <!-- Step 6: Requirement -->
+                                <div id="requirement" class="content-section" style="display: none;">
+                                    <div class="step-header">
+                                        <h2><span class="step-badge">6</span>Requirement</h2>
+                                        <p class="step-description">
+                                            List the knowledge, skills, or tools that students should have before taking this course.
+                                            Clear requirements help students decide if the course is suitable for them.
+                                        </p>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <!-- What Requirement -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label"><strong>What should students know or do before taking this course?</strong></label>
+
+                                            <div id="learningObjectives">
+                                                <textarea asp-for="Course.Requirement" rows="4" class="form-control" required
+                                                placeholder="E.g. Basic HTML & CSS knowledge, Visual Studio Code installed, or No prior experience required."></textarea>
+                                                <small class="form-text text-muted mt-1">
+                                                    Use short bullet points. If there are no specific requirements, write: <em>No prior knowledge required. Suitable for beginners.</em>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-navigation mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-prev="course-image">
+                                            <i class="fa fa-arrow-left"></i> Previous
+                                        </button>
+                                        <button type="button" class="btn btn-primary next-step" data-next="level-language">
+                                            Next: Level & Language  <i class="fa fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 7: Level & Language -->
+                                <div id="level-language" class="content-section" style="display: none;">
+                                    <div class="step-header">
+                                        <h2>
+                                            <span class="step-badge">7</span> Level & Language </h2>
+                                        <p class="step-description">
+                                            Set your course price and estimated duration. Consider the value you're providing
+                                            and research similar courses to price competitively. Duration helps students plan their learning.
+                                        </p>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label asp-for="Course.Level" class="form-label"><strong>Course Level:</strong></label>
+                                                    <input asp-for="Course.Level" class="form-control"
+                                                           placeholder="Beginner" />
+                                                    <small class="form-text text-muted">Set level for this Course</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label asp-for="Course.Language" class="form-label"><strong>Course Language:</strong></label>
+                                                    <input asp-for="Course.Language" class="form-control"
+                                                           placeholder="English" />
+                                                    <small class="form-text text-muted">Please set language for this Course</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-navigation mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-prev="requirement">
+                                            <i class="fa fa-arrow-left"></i> Previous
+                                        </button>
+                                        <button type="button" class="btn btn-primary next-step" data-next="intended-learners">
+                                            Next: Intended Learners <i class="fa fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 8: Intended Learners -->
+                                <div id="intended-learners" class="content-section" style="display: none;">
+                                    <div class="step-header">
+                                        <h2><span class="step-badge">8</span>Intended Learners</h2>
+                                        <p class="step-description">
+                                            Define who your target audience is.
+                                            This information helps students understand if your course is right for them.
+                                        </p>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <!-- Who is the target audience -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label"><strong>Who is the target audience for your course?</strong></label>
+
+                                            <div id="learningObjectives">
+                                                <textarea asp-for="Course.IntendedLearner" rows="4" class="form-control" required
+                                                placeholder="You must enter the target audience you are aiming for in this course."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="step-navigation mt-4">
+                                        <button type="button" class="btn btn-secondary prev-step" data-prev="intended-learners">
+                                            <i class="fa fa-arrow-left"></i> Previous
+                                        </button>
+                                        <button type="button" class="btn btn-primary next-step" data-next="curriculum">
+                                            Next: Curriculum  <i class="fa fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 9: Curriculum -->
                                 <div id="curriculum" class="content-section" style="display: none;">
                                     <div class="step-header">
-                                        <h2><span class="step-badge">6</span> Curriculum</h2>
+                                        <h2><span class="step-badge">9</span> Curriculum</h2>
                                         <p class="step-description">
                                             Organize your course content into modules and lessons. Start with an outline of major topics,
                                             then break each topic into digestible lessons. This helps students follow your course structure.
@@ -563,7 +743,7 @@
     .step-header {
         margin-bottom: 30px;
         padding: 20px;
-        background: linear-gradient(135deg, #338cff 0%, #afb4d6 100%);
+        background: linear-gradient(135deg, #088dcd 0%, #152b3f 100%);
         border-radius: 10px;
         color: white;
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -614,7 +794,7 @@
         .form-section .form-control {
             border-radius: 6px;
             border: 1px solid #ddd;
-            padding: 10px 12px;
+            padding: 4px 4px;
             transition: border-color 0.2s ease;
         }
 
@@ -773,6 +953,13 @@
         font-size: 12px;
         padding: 4px 8px;
     }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #088dcd;
+        border-color: #088dcd;
+    }
+
 
     /* Responsive Design */
     @@media (max-width: 768px) {
@@ -998,12 +1185,20 @@
                     return validateCourseInfo();
                 case 'category-description':
                     return validateCategoryDescription();
-                case 'intended-learners':
-                    return validateIntendedLearners();
+                case 'skill-learn':
+                    return validateSkillLearn();
                 case 'pricing-duration':
                     return validatePricingDuration();
                 case 'course-image':
                     return validateCourseImage();
+                case 'requirement':
+                    return validateRequirement();
+                case 'level-language':
+                    return validateLevelLanguage();
+                case 'intended-learners':
+                    return validateIntendedLearners();
+                // case 'language':
+                //     return validateLanguage();
                 case 'curriculum':
                     return validateCurriculum();
                 default:
@@ -1038,14 +1233,14 @@
             return true;
         }
 
-       function validateIntendedLearners() {
+       function validateSkillLearn() {
             const skillTextArea = document.querySelector('textarea[name="Course.SkillLearn"]');
-            if (!skillTextArea || skillTextArea.value.trim() === "") {
-                showNotification('Please enter at least 1 learning objective.', 'error');
+            if (!skillTextArea || skillTextArea.value.trim().length < 50) {
+                showNotification('Please enter at least 50 characters.', 'error');
                 return false;
             }
             return true;
-        }
+       }
 
 
         function validatePricingDuration() {
@@ -1079,6 +1274,43 @@
             return true;
         }
 
+        function validateRequirement() {
+            const skillTextArea = document.querySelector('textarea[name="Course.Requirement"]');
+             if (!skillTextArea || skillTextArea.value.trim().length < 50) {
+                showNotification('Please enter at least 50 characters.', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function validateLevelLanguage() {
+            const level = document.querySelector('input[name="Course.Level"]');
+            const language = document.querySelector('input[name="Course.Language"]');
+
+            if (!level || !level.value.trim()) {
+                showNotification('Please enter course level.', 'error');
+                level.focus();
+                return false;
+            }
+
+            if (!language || !language.value.trim()) {
+                showNotification('Please enter course language.', 'error');
+                language.focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateIntendedLearners() {
+            const skillTextArea = document.querySelector('textarea[name="Course.IntendedLearner"]');
+             if (!skillTextArea || skillTextArea.value.trim().length < 50) {
+                showNotification('Please enter at least 50 characters.', 'error');
+                return false;
+            }
+            return true;
+        }
+
         function validateCurriculum() {
             const moduleCards = document.querySelectorAll('.module-card');
             if (moduleCards.length === 0) {
@@ -1090,7 +1322,7 @@
         }
 
         function isStepAccessible(stepId) {
-            const stepOrder = ['course-info', 'category-description', 'intended-learners', 'pricing-duration', 'course-image', 'curriculum'];
+            const stepOrder = ['course-info', 'category-description', 'skill-learn', 'pricing-duration', 'course-image', 'requirement', 'level-language', 'intended-learners', 'curriculum'];
             const targetIndex = stepOrder.indexOf(stepId);
 
             // Allow access to first step or if previous steps are completed
@@ -1285,7 +1517,7 @@
 
         // Progress tracking
         function updateProgress() {
-            const totalSteps = 5;
+            const totalSteps = 8;
             const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
             const progressPercentage = (completedSteps / totalSteps) * 100;
 

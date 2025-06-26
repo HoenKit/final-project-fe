@@ -89,7 +89,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 {
                     _logger.LogError("Can not get Course. Status: " + courseResponse.StatusCode);
                     TempData["ErrorMessage"] = "Can not get Course!";
-                    return RedirectToPage("/Mentor/MentorPage/Index");
+                    return RedirectToPage("/Mentor/MentorPage/MyCourses");
                 }
 
                 var courseJson = await courseResponse.Content.ReadAsStringAsync();
@@ -102,7 +102,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 {
                     ModelState.AddModelError("", "Can not find Course.");
                     TempData["ErrorMessage"] = "Can not find Course!";
-                    return RedirectToPage("/Mentor/MentorPage/Index");
+                    return RedirectToPage("/Mentor/MentorPage/MyCourses");
                 }
 
                 Course.CourseId = courseId;
@@ -198,6 +198,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 form.Add(new StringContent(Course.SkillLearn ?? ""), "SkillLearn");
                 form.Add(new StringContent(Course.CourseLength?.ToString() ?? ""), "CourseLength");
                 form.Add(new StringContent(Course.CategoryId.ToString()), "CategoryId");
+                form.Add(new StringContent(Course.IntendedLearner ?? ""), "IntendedLearner");
+                form.Add(new StringContent(Course.Language ?? ""), "Language");
+                form.Add(new StringContent(Course.Level ?? ""), "Level");
+                form.Add(new StringContent(Course.Requirement ?? ""), "Requirement");
                 form.Add(new StringContent(mentor.MentorId.ToString()), "MentorId");
 
                 if (NewImage != null)
