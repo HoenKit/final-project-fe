@@ -7,8 +7,9 @@
     Layout = null;
     ViewData["Title"] = Model.Course.CourseName;
 
-        var roles = new List<string>();
-        var token = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+    var roles = new List<string>();
+    String userIdToken = null;
+    var token = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
         bool isAuthenticated = !string.IsNullOrEmpty(token);
         if (!string.IsNullOrEmpty(token))
         {
@@ -18,6 +19,10 @@
                         .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
                         .Select(c => c.Value)
                         .ToList();
+
+            userIdToken = jwtToken.Claims
+                        .FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
+                        ?.Value;
         }
 
         bool isMentor = roles.Contains("Mentor");
@@ -255,21 +260,23 @@
                     @* <span class="text-gray-500 line-through ml-2">$199.99</span>
                     <span class="text-red-600 text-sm ml-2">75% off</span> *@
                 </div>
-
-                @if (isUser && isMentor && Model.Course.Status == "Approved")
+                @if (Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
                 {
-                    <!-- Action Buttons -->
-                    <div class="space-y-3 mb-4">
-                        @* <button class="w-full bg-purple-600 text-white font-bold py-4 px-6 rounded hover:bg-purple-700 transition-colors">
-                        Add to cart
-                        </button> *@
-                        <button class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
-                            Buy now
-                        </button>
-                    </div>
+                    @if (isUser ||isMentor && Model.Course.Status == "Approved")
+                    {
+                        <!-- Action Buttons -->
+                        <div class="space-y-3 mb-4">
+                            @* <button class="w-full bg-purple-600 text-white font-bold py-4 px-6 rounded hover:bg-purple-700 transition-colors">
+                            Add to cart
+                            </button> *@
+                            <button class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
+                                Buy now
+                            </button>
+                        </div>
 
-                    <!-- Money-back guarantee -->
-                    <p class="text-center text-sm text-gray-600 mb-6">30-Day Money-Back Guarantee</p>
+                        <!-- Money-back guarantee -->
+                        <p class="text-center text-sm text-gray-600 mb-6">30-Day Money-Back Guarantee</p>
+                    }
                 }
                 
                 <!-- Course includes -->
@@ -308,18 +315,20 @@
                         </li>
                     </ul>
                 </div>
-
-                @if (isUser && isMentor && Model.Course.Status == "Approved")
+                @if (Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
                 {
-                    <!-- Share and Gift -->
-                    <div class="mt-6 pt-6 border-t border-gray-200">
-                        <div class="flex items-center justify-between text-sm">
-                            @* <button class="text-purple-600 hover:text-purple-700 font-medium">Share</button>
+                    @if (isUser || isMentor && Model.Course.Status == "Approved")
+                    {
+                        <!-- Share and Gift -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <div class="flex items-center justify-between text-sm">
+                                @* <button class="text-purple-600 hover:text-purple-700 font-medium">Share</button>
                         <button class="text-purple-600 hover:text-purple-700 font-medium">Gift this course</button> *@
-                            <button class="text-purple-600 hover:text-purple-700 font-medium">Apply Coupon</button>
+                                <button class="text-purple-600 hover:text-purple-700 font-medium">Apply Coupon</button>
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                }  
 
                 @if (Model.Course.Status == "Pending")
                 {
