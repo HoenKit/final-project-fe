@@ -183,5 +183,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             return Page();
         }
+
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+
+        }
     }
 }
