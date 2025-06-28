@@ -53,7 +53,7 @@ namespace final_project_fe.Pages
             {
                 return RedirectToPage("/Index");
             }
-            return Page();
+            return RedirectToPage("/Index");
 
         }
 

@@ -5,5 +5,22 @@
         public int LessonId { get; set; }
         public int ModuleId { get; set; }
         public string Title { get; set; } = string.Empty;
+
+    }
+    public class LessonbyModuleDto
+    {
+        public int LessonId { get; set; }
+        public int ModuleId { get; set; }
+        public bool Ispassed { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+    }
+    public class LessonCompletionDto
+    {
+        public Guid UserId { get; set; }
+        public int LessonId { get; set; }
+        public DateTime CompletedAt { get; set; }
+        public float? Mark { get; set; }
+        public bool IsPassed { get; set; }
     }
 }

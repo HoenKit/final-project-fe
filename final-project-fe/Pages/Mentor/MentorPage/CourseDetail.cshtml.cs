@@ -1,19 +1,20 @@
-﻿using final_project_fe.Dtos.Category;
-using final_project_fe.Dtos;
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Courses;
+using final_project_fe.Dtos.Lesson;
+using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.Module;
+using final_project_fe.Dtos.Payment;
+using final_project_fe.Dtos.Reviews;
+using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using final_project_fe.Dtos.Lesson;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Web;
-using final_project_fe.Dtos.Mentors;
-using final_project_fe.Dtos.Users;
-using final_project_fe.Dtos.Reviews;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -30,6 +31,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
         public CourseResponseDto Course { get; set; } = new CourseResponseDto();
         public User MentorInfor {  get; set; } = new User();
+        [BindProperty]
+        public int? SelectedCouponId { get; set; }
+
+        [BindProperty]
+        public int? CourseId { get; set; }
+        public List<CouponDto> AvailableCoupons { get; set; } = new();
         public GetMentorDto Mentor { get; set; }
         public CourseReviewPageResult Reviews { get; set; } = new(new List<ReviewResponseDto>(), 0, 1, 3, 0, 0);
         public List<ModuleWithLessonsDto> Modules { get; set; } = new List<ModuleWithLessonsDto>();
@@ -174,6 +181,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                         Modules = modules;
                     }
+
+                }
+
+                string couponapiUrl = $"{_apiSettings.BaseUrl}/Coupon/by-course/{courseId}";
+                var responses = await _httpClient.GetAsync(couponapiUrl);
+
+                if (responses.IsSuccessStatusCode)
+                {
+                    var json = await responses.Content.ReadAsStringAsync();
+
+                    if (!string.IsNullOrWhiteSpace(json))
+                    {
+                        AvailableCoupons = JsonSerializer.Deserialize<List<CouponDto>>(json,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    }
                 }
             }
             catch (Exception ex)
@@ -185,9 +207,61 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
 
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int? courseId)
         {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
 
+            try
+            {
+                string token = Request.Cookies["AccessToken"];
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+                var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    ModelState.AddModelError("", "Please login before purchasing.");
+                    return RedirectToPage("/Login");
+                }
+
+                int finalCouponId = (SelectedCouponId.HasValue && SelectedCouponId.Value != 0) ? SelectedCouponId.Value : 11;
+
+                var request = new BuyCourseRequest
+                {
+                    UserId = userId,
+                    CourseId = CourseId ?? 0,
+                    CouponId = finalCouponId
+                };
+
+                var api = $"{_apiSettings.BaseUrl}/Payment/buy-course";
+                var res = await _httpClient.PostAsJsonAsync(api, request);
+
+                if (res.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Purchase successful!";
+                    return RedirectToPage("/UserCourse");
+                }
+
+                var errorContent = await res.Content.ReadAsStringAsync();
+
+                if (errorContent.Contains("NotEnoughPoint", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "You do not have enough points. Please recharge.";
+                    return RedirectToPage("/Transaction/Index");
+                }
+
+                ModelState.AddModelError("", "Purchase failed. Please try again.");
+                return RedirectToPage("/UserCourse");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during course purchase");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
+                return Page();
+            }
         }
     }
 }
