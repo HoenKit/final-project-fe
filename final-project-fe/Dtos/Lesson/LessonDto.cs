@@ -2,9 +2,11 @@
 {
     public class LessonDto
     {
+        public int LessonId { get; set; }
         public int ModuleId { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
+        public IFormFile? Document { get; set; }
         public IFormFile? Video { get; set; }
     }
 }
