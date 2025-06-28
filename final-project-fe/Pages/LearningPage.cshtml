@@ -1,0 +1,638 @@
+﻿@page
+@model final_project_fe.Pages.Mentor.LearningPageModel
+@{
+}
+
+@using Newtonsoft.Json
+@using final_project_fe.Dtos.Lesson
+@{
+    var modulesData = new Dictionary<int, object>();
+    int idx = 1;
+
+    string ExtractMinutes(string title)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(title ?? "", @"(\d+)\s*min");
+        return match.Success ? match.Groups[1].Value : "10";
+    }
+
+    foreach (var module in Model.Modules)
+    {
+        modulesData[idx] = new
+        {
+            title = module.Title,
+            percentage = module.Percentage,
+            lessons = (module.Lessons ?? new List<LessonbyModuleDto>())
+                .Select(l => new
+                {
+                    lessonId = l.LessonId,
+                    text = $"{l.Title} ({ExtractMinutes(l.Title)} min)",
+                    completed = l.Ispassed
+                }).ToArray()
+        };
+        idx++;
+    }
+
+    string modulesJson = JsonConvert.SerializeObject(modulesData);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Learning</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f8;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background-color: #fff;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px;
+        }
+
+        .sidebar img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .course-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .course-provider {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .sidebar h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            background-color: transparent;
+            transition: background 0.2s;
+        }
+
+        .sidebar li:hover {
+            background-color: #f3f4f6;
+        }
+
+        .sidebar li.active {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .right-container {
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .duration {
+            font-size: 16px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .section h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .lessons {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .lesson {
+            all: unset;
+            display: block;
+            width: 100%;
+            padding: 6px 8px;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #4b5563;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        .lesson:hover {
+            background-color: #f3f4f6;
+        }
+
+        .lesson.completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Popup Styles */
+        #lessonPopup {
+            position: fixed;
+            inset: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        #lessonPopup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 750px;
+            width: 90%;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: fadeInUp 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .popup-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .popup-content p {
+            font-size: 1rem;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .popup-content video {
+            width: 100%;
+            margin-top: 1rem;
+            border-radius: 8px;
+        }
+
+        .popup-content a {
+            display: inline-block;
+            margin-top: 10px;
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .popup-content button {
+            margin-top: 20px;
+            background-color: #10b981;
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .popup-content button:hover {
+            background-color: #059669;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+
+        .close-btn:hover {
+            color: #111827;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .quiz-form {
+            margin-top: 20px;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .quiz-question p {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .quiz-answer {
+            margin-bottom: 8px;
+        }
+
+        .quiz-answer label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .quiz-answer input {
+            margin-right: 8px;
+        }
+
+        .submit-btn {
+            background-color: #3b82f6 !important;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .submit-btn:hover {
+            background-color: #2563eb !important;
+        }
+
+        .back-btn {
+            margin: 20px;
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <a href="/UserCourse" class="back-btn">← Back</a>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <img src="https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg" alt="Course Image" />
+            <div class="course-title">Introduction to User Experience Principles and Processes</div>
+            <div class="course-provider">University of Michigan</div>
+            <h2>Course Material</h2>
+            <ul>
+                @for (int i = 0; i < Model.Modules.Count; i++)
+                {
+                    <li class="@(i == 0 ? "active" : "")" onclick="loadModule(@(i + 1))">Module @(i + 1)</li>
+                }
+            </ul>
+        </div>
+
+        <div class="right-container">
+            <div class="header-bar">
+                <div id="durationDisplay" class="duration">Total duration: 0 minutes</div>
+            </div>
+            <div id="courseContent"></div>
+        </div>
+    </div>
+
+    <div id="lessonPopup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closePopup()">&times;</span>
+            <div id="lessonContent">
+                <!-- Lesson content will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BaseUrl = "@Model.BaseUrl";
+        const modules = @Html.Raw(modulesJson);
+        const userId = "@Model.UserId";
+
+        function extractMinutes(text) {
+            const match = text.match(/(\d+)\s*min/);
+            return match ? parseInt(match[1]) : 10;
+        }
+
+        function loadModule(moduleNumber) {
+            const content = document.getElementById("courseContent");
+            content.innerHTML = "";
+
+            let totalMinutes = 0;
+            const section = modules[moduleNumber];
+
+            if (!section) {
+                content.innerHTML = "<p>Module not found.</p>";
+                return;
+            }
+
+            const sectionEl = document.createElement("div");
+            sectionEl.className = "section";
+
+            const title = document.createElement("h3");
+            title.innerHTML = "▼ " + section.title + ` (${Math.round(section.percentage)}%)`;
+
+            const lessonsContainer = document.createElement("div");
+            lessonsContainer.className = "lessons";
+
+            section.lessons.forEach(lesson => {
+                const lessonEl = document.createElement("button");
+                lessonEl.className = "lesson";
+                lessonEl.type = "button";
+                lessonEl.textContent = lesson.text;
+
+                lessonEl.onclick = () => openLesson(lesson.lessonId);
+
+                if (lesson.completed) {
+                    lessonEl.classList.add("completed");
+                    lessonEl.innerHTML += ' ✅';
+                }
+
+                lessonsContainer.appendChild(lessonEl);
+                totalMinutes += extractMinutes(lesson.text);
+            });
+
+            title.addEventListener("click", () => {
+                lessonsContainer.classList.toggle("hidden");
+                title.innerHTML = (lessonsContainer.classList.contains("hidden") ? "▶ " : "▼ ") + section.title + ` (${Math.round(section.percentage)}%)`;
+            });
+
+            sectionEl.appendChild(title);
+            sectionEl.appendChild(lessonsContainer);
+            content.appendChild(sectionEl);
+
+            document.getElementById("durationDisplay").textContent = `Total duration: ${totalMinutes} minutes`;
+
+            // Update active sidebar item
+            document.querySelectorAll(".sidebar li").forEach((li, idx) => {
+                li.classList.toggle("active", idx + 1 === moduleNumber);
+            });
+        }
+
+        async function openLesson(lessonId) {
+            const popup = document.getElementById("lessonPopup");
+            const content = document.getElementById("lessonContent");
+            content.innerHTML = "<p>Loading...</p>";
+            popup.classList.add("show");
+
+            try {
+                // Call the OnGetLessonAsync method using the correct handler name
+                const response = await fetch(`?handler=Lesson&lessonId=${lessonId}`, {
+                    method: 'GET',
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Check if it's quiz data (array of questions) or lesson data (single object)
+                if (Array.isArray(data) && data.length > 0 && data[0].questionText) {
+                    renderQuiz(data, lessonId);
+                } else if (data && (data.title || data.videoLink || data.documentLink)) {
+                    renderDocOrVideo(data, lessonId);
+                } else {
+                    content.innerHTML = "<p>No content available for this lesson.</p>";
+                }
+            } catch (error) {
+                console.error('Error loading lesson:', error);
+                content.innerHTML = `<p style="color: red;">Failed to load lesson: ${error.message}</p>`;
+            }
+        }
+
+        function renderQuiz(questions, lessonId) {
+            const content = document.getElementById("lessonContent");
+            content.innerHTML = `<h2>Quiz</h2>`;
+            
+            const form = document.createElement("form");
+            form.className = "quiz-form";
+
+            questions.forEach((question, qIdx) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.className = "quiz-question";
+
+                const questionText = document.createElement("p");
+                questionText.textContent = `${qIdx + 1}. ${question.questionText}`;
+                questionDiv.appendChild(questionText);
+
+                const inputType = question.questionType === "MultipleChoice" ? "checkbox" : "radio";
+                const nameAttr = inputType === "checkbox" ? `q${qIdx}[]` : `q${qIdx}`;
+
+                question.answers.forEach((answer, aIdx) => {
+                    const answerDiv = document.createElement("div");
+                    answerDiv.className = "quiz-answer";
+
+                    const label = document.createElement("label");
+                    const input = document.createElement("input");
+                    input.type = inputType;
+                    input.name = nameAttr;
+                    input.value = answer.answerId;
+
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(answer.text));
+                    answerDiv.appendChild(label);
+                    questionDiv.appendChild(answerDiv);
+                });
+
+                form.appendChild(questionDiv);
+            });
+
+            const submitBtn = document.createElement("button");
+            submitBtn.type = "submit";
+            submitBtn.textContent = "Submit Quiz";
+            submitBtn.className = "submit-btn";
+            form.appendChild(submitBtn);
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await submitQuiz(form, lessonId);
+            });
+
+            content.appendChild(form);
+        }
+
+        async function submitQuiz(form, lessonId) {
+            try {
+                const selectedInputs = Array.from(form.querySelectorAll("input:checked"));
+                const answerIds = selectedInputs.map(input => parseInt(input.value));
+
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                const response = await fetch(`?handler=SubmitQuiz`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": token
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        lessonId: lessonId,
+                        answerIds: answerIds
+                    })
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert("Quiz submitted successfully!");
+                    closePopup();
+                    location.reload();
+                } else {
+                    alert("Failed to submit quiz: " + (result.error || "Unknown error"));
+                }
+
+            } catch (error) {
+                console.error("Error submitting quiz:", error);
+                alert("Failed to submit quiz: " + error.message);
+            }
+        }
+
+        function renderDocOrVideo(lesson, lessonId) {
+            const content = document.getElementById("lessonContent");
+            let html = `<h2>${lesson.title || 'Lesson'}</h2>`;
+
+            if (lesson.description) {
+                html += `<p>${lesson.description}</p>`;
+            }
+
+            if (lesson.videoLink) {
+                html += `<video src="${lesson.videoLink}" controls></video>`;
+            }
+
+            if (lesson.documentLink) {
+                html += `<a href="${lesson.documentLink}" target="_blank">View Document</a>`;
+            }
+
+            html += `<button onclick="markLessonCompleted(${lessonId})" class="submit-btn">
+                        Mark as Completed
+                     </button>`;
+
+            content.innerHTML = html;
+        }
+
+        async function markLessonCompleted(lessonId) {
+            try {
+                const payload = {
+                    userId: userId,
+                    lessonId: lessonId,
+                    completedAt: new Date().toISOString(),
+                    mark: 100,
+                    isPassed: true
+                };
+
+                const response = await fetch(`?handler=CompleteLesson`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert("Lesson marked as completed!");
+                    closePopup();
+                    // Refresh the page to update completion status
+                    location.reload();
+                } else {
+                    alert("Failed to mark lesson as completed: " + (result.error || "Unknown error"));
+                }
+            } catch (error) {
+                console.error('Error completing lesson:', error);
+                alert("Failed to complete lesson: " + error.message);
+            }
+        }
+
+        function closePopup() {
+            document.getElementById("lessonPopup").classList.remove("show");
+            document.getElementById("lessonContent").innerHTML = "";
+        }
+
+        // Initialize the page
+        document.addEventListener("DOMContentLoaded", function () {
+            // Add CSRF token for POST requests if not already present
+            if (!document.querySelector('input[name="__RequestVerificationToken"]')) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = '@Html.AntiForgeryToken()';
+                document.body.appendChild(tokenInput);
+            }
+            
+            loadModule(1);
+        });
+
+        // Close popup when clicking outside
+        document.getElementById("lessonPopup").addEventListener("click", function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+    </script>
+
+    @Html.AntiForgeryToken()
+</body>
+</html>

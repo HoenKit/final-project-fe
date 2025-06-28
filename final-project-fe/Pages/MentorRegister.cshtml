@@ -102,83 +102,93 @@
     </div>
 
     <script>
-        function showPopup() {
-            document.getElementById('qrPopup').style.display = 'block';
-        }
+        let signaturePad;
 
-        function closePopup() {
-            document.getElementById('qrPopup').style.display = 'none';
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            // QR popup functions
+            window.showPopup = function () {
+                document.getElementById('qrPopup').style.display = 'block';
+            };
 
-        async function scanQRCode() {
-            const fileInput = document.getElementById("qrImage");
-            const file = fileInput.files[0];
-            if (!file) return alert("Please select an image of the ID");
+            window.closePopup = function () {
+                document.getElementById('qrPopup').style.display = 'none';
+            };
 
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, canvas.width, canvas.height);
-                if (code) {
-                    const [citizenId, , fullName, , , , issueDateStr] = code.data.split("|");
-                    const nameParts = fullName.trim().split(" ");
-                    const lastName = nameParts.pop();
-                    const firstName = nameParts.join(" ");
-                    const formattedDate = issueDateStr.replace(/(..)(..)(....)/, "$3-$2-$1");
+            window.scanQRCode = async function () {
+                const fileInput = document.getElementById("qrImage");
+                const file = fileInput.files[0];
+                if (!file) return alert("Please select an image of the ID");
 
-                    document.querySelector('[name="Mentor.FirstName"]').value = firstName;
-                    document.querySelector('[name="Mentor.LastName"]').value = lastName;
-                    document.querySelector('[name="Mentor.CitizenID"]').value = citizenId;
-                    document.querySelector('[name="Mentor.IssueDate"]').value = formattedDate;
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, canvas.width, canvas.height);
+                    if (code) {
+                        const [citizenId, , fullName, , , , issueDateStr] = code.data.split("|");
+                        const nameParts = fullName.trim().split(" ");
+                        const lastName = nameParts.pop();
+                        const firstName = nameParts.join(" ");
+                        const formattedDate = issueDateStr.replace(/(..)(..)(....)/, "$3-$2-$1");
 
-                    closePopup();
-                } else {
-                    alert("❌ QR code not detected");
+                        document.querySelector('[name="Mentor.FirstName"]').value = firstName;
+                        document.querySelector('[name="Mentor.LastName"]').value = lastName;
+                        document.querySelector('[name="Mentor.CitizenID"]').value = citizenId;
+                        document.querySelector('[name="Mentor.IssueDate"]').value = formattedDate;
+
+                        closePopup();
+                    } else {
+                        alert("❌ QR code not detected");
+                    }
+                };
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Initialize signature pad
+            const canvas = document.getElementById('signatureCanvas');
+            signaturePad = new SignaturePad(canvas);
+
+            // Signature actions
+            window.clearSignature = function () {
+                if (signaturePad) signaturePad.clear();
+            };
+
+            window.convertSignatureToFile = function () {
+                if (signaturePad.isEmpty()) {
+                    alert("You have not signed yet!");
+                    return;
                 }
+
+                canvas.toBlob(function (blob) {
+                    const uniqueFileName = `signature_${Date.now()}.png`;
+                    const file = new File([blob], uniqueFileName, { type: "image/png" });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    document.getElementById("signatureFile").files = dataTransfer.files;
+
+                    alert("✅ Signature saved.");
+                }, "image/png");
             };
 
-            const reader = new FileReader();
-            reader.onload = e => {
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        const canvas = document.getElementById('signatureCanvas');
-        const signaturePad = new SignaturePad(canvas);
-
-        function clearSignature() {
-            signaturePad.clear();
-        }
-
-        function convertSignatureToFile() {
-            if (signaturePad.isEmpty()) {
-                alert("You have not signed yet!");
-                return;
-            }
-
-            canvas.toBlob(function (blob) {
-                const uniqueFileName = `signature_${Date.now()}.png`;
-                const file = new File([blob], uniqueFileName, { type: "image/png" });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                document.getElementById("signatureFile").files = dataTransfer.files;
-
-                alert("✅ Signature saved.");
-            }, "image/png");
-        }
-
-        document.getElementById("mentorForm").addEventListener("submit", function (e) {
-            if (!document.getElementById("signatureFile").files.length && !signaturePad.isEmpty()) {
-                e.preventDefault();
-                convertSignatureToFile();
-                setTimeout(() => this.submit(), 300);
-            }
+            // Ensure signature is saved before submit
+            const form = document.getElementById("mentorForm");
+            form.addEventListener("submit", function (e) {
+                const signatureInput = document.getElementById("signatureFile");
+                if (!signatureInput.files.length && !signaturePad.isEmpty()) {
+                    e.preventDefault();
+                    convertSignatureToFile();
+                    setTimeout(() => form.submit(), 300); // allow time for file to be set
+                }
+            });
         });
     </script>
     <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
@@ -187,7 +197,6 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: #f9faff;
-            padding: 40px;
             color: #333;
         }
 
