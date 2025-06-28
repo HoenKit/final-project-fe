@@ -15,6 +15,8 @@ using System.Text.Json;
 using System.Web;
 using System.Net.Http.Headers;
 using final_project_fe.Dtos.Mentors;
+using System.Text;
+using System.Net.Http.Json;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -31,6 +33,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
         [BindProperty]
         public CourseResponseDto Course { get; set; } = new CourseResponseDto();
+
+        [BindProperty]
+        public ModuleResponseDto Module { get; set; } = new ModuleResponseDto();
+
+        [BindProperty]
+        public UpdateLessonDto Lesson { get; set; } = new UpdateLessonDto();
+
         public List<ModuleWithLessonsDto> Modules { get; set; } = new List<ModuleWithLessonsDto>();
         public string CurrentUserId { get; set; }
         public string BaseUrl { get; set; }
@@ -214,6 +223,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var response = await _httpClient.PutAsync($"{BaseUrl}/Course", form);
 
+                // DEBUG: Log detailed response information
+                _logger.LogInformation($"Update Course Response Status: {response.StatusCode}");
+                _logger.LogInformation($"Update Course IsSuccessStatusCode: {response.IsSuccessStatusCode}");
+
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "Update course successfully!";
@@ -283,5 +296,414 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
         }
 
+
+        // Handler Create Module
+        public async Task<IActionResult> OnPostAddModuleAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+
+                // Lấy dữ liệu từ form
+                /* var moduleDto = new ModuleDto
+                 {
+                     CourseId = int.Parse(Request.Form["courseId"].ToString()),
+                     Title = Request.Form["title"].ToString(),
+                     Description = Request.Form["description"].ToString() ?? "",
+                     IsPremium = Request.Form["isPremium"].ToString().Contains("true") ||
+                                Request.Form["isPremium"].ToString().Contains("on"),
+                 };*/            
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(Module),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Gọi API tạo module
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Module", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var createdModule = JsonSerializer.Deserialize<ModuleResponseDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Module created successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Create Module failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to create module: " + errorContent;
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating module");
+                TempData["ErrorMessage"] = "An error occurred while creating the module: " + ex.Message;
+                return Page();
+            }
+        }
+
+        // Handler Update Module
+        public async Task<IActionResult> OnPostEditModuleAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(Module),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Gọi API tạo module
+                var response = await _httpClient.PutAsync($"{BaseUrl}/Module", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var updateModule = JsonSerializer.Deserialize<ModuleResponseDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Module update successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Update Module failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to update module: " + errorContent;
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while update module");
+                TempData["ErrorMessage"] = "An error occurred while update the module: " + ex.Message;
+                return Page();
+            }
+        }
+
+        //Handler Delete Module
+        public async Task<IActionResult> OnPostDeleteModuleAsync(int id)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.DeleteAsync($"{BaseUrl}/Module/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Module deleted successfully.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Failed to delete module. Status: {response.StatusCode}, Error: {error}");
+                    TempData["ErrorMessage"] = "Failed to delete module.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while deleting module.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while deleting the module.";
+            }
+
+            // Redirect lại trang hiện tại và giữ lại courseId nếu có
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
+        
+
+
+        //Handler Create Lesson
+        public async Task<IActionResult> OnPostAddLessonAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+
+                var form = new MultipartFormDataContent();
+                form.Add(new StringContent(Lesson.Title ?? ""), "Title");
+                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
+
+                // Gọi API tạo Lesson
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Lesson", form);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var createdLesson = JsonSerializer.Deserialize<UpdateLessonDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Lesson created successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Create lesson failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to create lesson: " + errorContent;
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating lesson");
+                TempData["ErrorMessage"] = "An error occurred while creating the lesson: " + ex.Message;
+                return Page();
+            }
+        }
+
+        //Handler Update Lesson
+        public async Task<IActionResult> OnPostEditLessonAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+
+                var form = new MultipartFormDataContent();
+                form.Add(new StringContent(Lesson.Title ?? ""), "Title");
+                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
+                form.Add(new StringContent(Lesson.LessonId.ToString()), "LessonId");
+
+                // Gọi API tạo Lesson
+                var response = await _httpClient.PutAsync($"{BaseUrl}/Lesson", form);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var updateLesson = JsonSerializer.Deserialize<UpdateLessonDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Lesson update successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Update lesson failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to update lesson: " + errorContent;
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating lesson");
+                TempData["ErrorMessage"] = "An error occurred while updating the lesson: " + ex.Message;
+                return Page();
+            }
+        }
+
+        //Handler Delete Lesson
+        public async Task<IActionResult> OnPostDeleteLessonAsync(int id)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.DeleteAsync($"{BaseUrl}/Lesson/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Lesson deleted successfully.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Failed to delete Lesson. Status: {response.StatusCode}, Error: {error}");
+                    TempData["ErrorMessage"] = "Failed to delete Lesson.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while deleting Lesson.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while deleting the Lesson.";
+            }
+
+            // Redirect lại trang hiện tại và giữ lại courseId nếu có
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
     }
 }

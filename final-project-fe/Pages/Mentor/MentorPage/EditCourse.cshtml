@@ -1,4 +1,5 @@
 ﻿@page
+@using System.Text.Encodings.Web
 @model final_project_fe.Pages.Mentor.MentorPage.EditCourseModel
 @{
     ViewData["Title"] = "Edit Course";
@@ -216,8 +217,11 @@
                             </ul>
 
                             <div class="mt-4">
-                                <button class="btn btn-primary w-100">Submit for Review</button>
+                                <button type="submit" form="editCourseForm" class="btn btn-primary w-100">Submit for Review</button>
                             </div>
+                           @*  <button type="submit" class="btn btn-success" form="editCourseForm">
+                                <i class="fa fa-check"></i> Complete Setup
+                            </button> *@
                         </div>
                     </div>
 
@@ -409,7 +413,7 @@
                                                     <p class="text-muted mt-2">No image uploaded yet</p>
                                                 </div>
                                             }
-                                            <input asp-for="NewImage" type="file" class="form-control" accept="image/*" />
+                                            <input asp-for="NewImage" type="file" class="form-control" accept="image" />
                                             <small class="form-text text-muted">
                                                 Recommended: 1280x720 pixels, JPG or PNG format, max 5MB
                                             </small>
@@ -534,6 +538,7 @@
                                         </button>
                                     </div>
                                 </div>
+                                </form>
 
                                 <!-- Step 9: Curriculum -->
                                 <div id="curriculum" class="content-section" style="display: none;">
@@ -546,73 +551,233 @@
                                     </div>
 
                                     <div class="form-section">
+                                        <!-- Create Module Form (Hidden by default) -->
+                                        <div id="create-module-form" class="card mb-3" style="display: none;">
+                                            <div class="card-body">
+                                                <div class="form-section">
+                                                    <form id="moduleForm" method="post" asp-page-handler="AddModule">
+                                                        <!-- Đảm bảo form có đúng asp-for -->
+                                                        <input asp-for="Module.CourseId" type="hidden" value="@Model.Course.CourseId" />
+                                                        <div class="mb-3">
+                                                            <label asp-for="Module.Title" class="form-label">Module Title *</label>
+                                                            <input asp-for="Module.Title" type="text" class="form-control" id="moduleTitle" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label asp-for="Module.Description" class="form-label">Description</label>
+                                                            <textarea asp-for="Module.Description" class="form-control" id="moduleDescription" rows="3"></textarea>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <div class="form-check">
+                                                                <input asp-for="Module.IsPremium" style="margin-top: 10px;" class="form-check-input" type="checkbox" id="moduleIsPremium">
+                                                                <label class="form-check-label" asp-for="Module.IsPremium">Premium Module</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-primary">
+                                                                <i class="fa fa-save me-1"></i>Save Module
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary" onclick="cancelCreateModule()">
+                                                                <i class="fa fa-times me-1"></i>Cancel
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         @if (Model.Modules != null && Model.Modules.Any())
                                         {
                                             @foreach (var module in Model.Modules)
                                             {
                                                 <div class="card mb-3 module-card">
-                                                    <div class="card-header">
-                                                        <div class="row align-items-center">
-                                                            <div class="col">
-                                                                <h5 class="mb-0">@module.Title</h5>
-                                                                <small class="text-muted">@module.CountLesson lessons</small>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <div class="btn-group">
-                                                                    <a asp-page="/Mentor/MentorPage/AddLesson" asp-route-moduleId="@module.ModuleId"
-                                                                       class="btn btn-sm btn-outline-primary">+ Add Lesson</a>
-                                                                    <a asp-page="/Mentor/MentorPage/EditModule" asp-route-id="@module.ModuleId"
-                                                                       class="btn btn-sm btn-outline-secondary">Edit</a>
-                                                                    <form method="post" asp-page-handler="DeleteModule" asp-route-id="@module.ModuleId" class="d-inline">
-                                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                                                onclick="return confirm('Delete this module?')">
-                                                                            Delete
-                                                                        </button>
-                                                                    </form>
+                                                    <div id="module-display-@module.ModuleId">
+                                                        <div class="card-header">
+                                                            <div class="row align-items-center">
+                                                                <div class="col">
+                                                                    <h5 class="mb-0">@module.Title</h5>
+                                                                    <small class="text-muted">@module.CountLesson lessons</small>
                                                                 </div>
+                                                                <div class="col-auto">
+                                                                    <div class="btn-group">
+                                                                        <button type="button" class="btn-sm btn-outline-secondary"
+                                                                                onclick="editModule(@module.ModuleId,
+                                                                                    '@Html.Raw(JavaScriptEncoder.Default.Encode(module.Title))',
+                                                                                    '@Html.Raw(JavaScriptEncoder.Default.Encode(module.Description ?? ""))',
+                                                                                    @(module.IsPremium.ToString().ToLowerInvariant())
+                                                                                )">
+                                                                            <i class="fa fa-edit"></i> Edit
+                                                                        </button>
+                                                                        <form method="post" asp-page-handler="DeleteModule"
+                                                                              asp-route-id="@module.ModuleId"
+                                                                              asp-route-courseId="@Model.Course.CourseId"
+                                                                              class="d-inline">
+                                                                        <button style="font-size: 95%;" type="submit" class="btn btn-sm btn-outline-danger"
+                                                                                    onclick="return confirm('Delete this module?')">
+                                                                                Delete
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <p class="text-muted">@module.Description</p>
+                                                            <div class="mb-3">
+                                                                <span class="badge @(module.IsPremium ? "bg-warning" : "bg-success")">
+                                                                    @(module.IsPremium ? "Premium" : "Free")
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div class="card-body">
-                                                        <p class="text-muted">@module.Description</p>
-                                                        <div class="mb-3">
-                                                            <span class="badge @(module.IsPremium ? "bg-warning" : "bg-success")">
-                                                                @(module.IsPremium ? "Premium" : "Free")
-                                                            </span>
+                                                    <!-- Form Edit Module -->
+                                                    <div id="edit-module-form-@module.ModuleId" class="card mb-3" style="display: none;">
+                                                        <div class="card-body">
+                                                            <form method="post" asp-page-handler="EditModule">
+                                                                <input type="hidden" asp-for="Module.ModuleId" value="@module.ModuleId" />
+                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Module Title *</label>
+                                                                    <input  asp-for="Module.Title" type="text" class="form-control" id="editTitle-@module.ModuleId" required />
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Description</label>
+                                                                    <textarea  asp-for="Module.Description" class="form-control" id="editDescription-@module.ModuleId" rows="3"></textarea>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <div class="form-check">
+                                                                        <input asp-for="Module.IsPremium" type="checkbox" style="margin-top: 10px;" class="form-check-input" id="editIsPremium-@module.ModuleId" />
+                                                                        <label class="form-check-label">Premium Module</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="d-flex gap-2">
+                                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                                        <i class="fa fa-save me-1"></i>Save Changes
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditModule(@module.ModuleId)">
+                                                                        <i class="fa fa-times me-1"></i>Cancel
+                                                                    </button>
+                                                                </div>
+                                                            </form>
                                                         </div>
+                                                    </div>
 
+                                                    <div class="card-body">                                             
+                                                        <!-- Create Lesson Form for this Module (Hidden by default) -->
+                                                        <div id="create-lesson-form-@module.ModuleId" class="card mb-3" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                                            <div class="card-body">
+                                                                <h6 class="card-title">Add New Lesson to "@module.Title"</h6>
+                                                                <div class="form-section">
+                                                                    <form id="lessonForm-@module.ModuleId" method="post" asp-page-handler="AddLesson">
+                                                                        <input type="hidden" asp-for="Lesson.ModuleId" value="@module.ModuleId" />
+                                                                        <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                        <div class="mb-3">
+                                                                            <label asp-for="Lesson.Title" class="form-label">Lesson Title *</label>
+                                                                            <input asp-for="Lesson.Title" type="text" class="form-control" id="lessonTitle-@module.ModuleId" required>
+                                                                        </div>
+                                                                        @* <div class="mb-3">
+                                                                            <label asp-for="Lesson.Description" class="form-label">Description</label>
+                                                                            <textarea asp-for="Lesson.Description" class="form-control" id="lessonDescription-@module.ModuleId" rows="3"></textarea>
+                                                                        </div> *@
+                                                                        <div class="d-flex gap-2">
+                                                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                                                <i class="fa fa-save me-1"></i>Save Lesson
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateLesson(@module.ModuleId)">
+                                                                                <i class="fa fa-times me-1"></i>Cancel
+                                                                            </button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                         @if (module.Lessons != null && module.Lessons.Any())
                                                         {
                                                             <div class="lessons-list">
-                                                                <h6>Lessons:</h6>
-                                                                <div class="list-group">
-                                                                    @foreach (var lesson in module.Lessons)
-                                                                    {
-                                                                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                                            <div>
-                                                                                <i class="fa fa-play-circle text-primary me-2"></i>
-                                                                                @lesson.Title
-                                                                            </div>
-                                                                            <div class="btn-group">
-                                                                                <a asp-page="/Mentor/MentorPage/EditLesson" asp-route-id="@lesson.LessonId"
-                                                                                   class="btn btn-sm btn-outline-secondary">Edit</a>
-                                                                                <form method="post" asp-page-handler="DeleteLesson" asp-route-id="@lesson.LessonId" class="d-inline">
-                                                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                                                            onclick="return confirm('Delete this lesson?')">
-                                                                                        Delete
+                                                                
+                                                                    <h6>Lessons:</h6>
+                                                                    <div class="list-group">
+                                                                        @foreach (var lesson in module.Lessons)
+                                                                        {
+                                                                        <div id="lesson-display-@lesson.LessonId">
+                                                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                                                <div>
+                                                                                    <i class="fa fa-play-circle text-primary me-2"></i>
+                                                                                    @lesson.Title
+                                                                                </div>
+                                                                                <div class="btn-group">
+                                                                                    <button type="button" class="btn-sm btn-outline-secondary"
+                                                                                            onclick="editLesson(@lesson.LessonId,
+                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',
+                                                                                           )">
+                                                                                        <i class="fa fa-edit"></i> Edit
                                                                                     </button>
+                                                                                    <form method="post" asp-page-handler="DeleteLesson"
+                                                                                          asp-route-id="@lesson.LessonId"
+                                                                                          asp-route-courseId="@Model.Course.CourseId"
+                                                                                          class="d-inline">
+                                                                                        <button style="font-size: 100%;" type="submit" class="btn btn-sm btn-outline-danger"
+                                                                                            onclick="return confirm('Delete this Lesson?')">
+                                                                                            Delete
+                                                                                        </button>
+                                                                                    </form>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- Form Edit Lesson -->
+                                                                        <div id="edit-lesson-form-@lesson.LessonId" class="card mb-3" style="display: none;">
+                                                                            <div class="card-body">
+                                                                                <form method="post" asp-page-handler="EditLesson" enctype="multipart/form-data">
+                                                                                    <input type="hidden" asp-for="Lesson.LessonId" value="@lesson.LessonId" />
+                                                                                    <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
+                                                                                    <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+
+                                                                                    <div class="mb-3">
+                                                                                        <label class="form-label">Lesson Title *</label>
+                                                                                        <input asp-for="Lesson.Title" type="text" class="form-control" value="@lesson.Title" required />
+                                                                                    </div>
+
+                                                                                    @* <div class="mb-3">
+                                                                                        <label class="form-label">Description</label>
+                                                                                        <textarea asp-for="Lesson.Description" class="form-control" id="editLessonDescription-@lesson.LessonId" rows="3">@lesson.Description</textarea>
+                                                                                    </div>
+
+                                                                                     <div class="mb-3">
+                                                                                          <label class="form-label">Document (optional)</label>
+                                                                                          <input name="Lesson.Document" type="file" class="form-control" />
+                                                                                     </div>
+
+                                                                                     <div class="mb-3">
+                                                                                          <label class="form-label">Video (optional)</label>
+                                                                                          <input name="Lesson.Video" type="file" class="form-control" />
+                                                                                     </div> *@
+
+                                                                                    <div class="d-flex gap-2">
+                                                                                        <button type="submit" class="btn btn-primary btn-sm">
+                                                                                            <i class="fa fa-save me-1"></i>Save Changes
+                                                                                        </button>
+                                                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditLesson(@lesson.LessonId)">
+                                                                                            <i class="fa fa-times me-1"></i>Cancel
+                                                                                        </button>
+                                                                                    </div>
                                                                                 </form>
                                                                             </div>
                                                                         </div>
                                                                     }
                                                                 </div>
-                                                            </div>
+                                                            </div>                                                       
                                                         }
                                                         else
                                                         {
-                                                            <p class="text-muted">No lessons available.</p>
+                                                            <p class="text-muted">No lessons available in this module.</p>
                                                         }
+
+                                                        <!-- Add New Lesson Button for this Module -->
+                                                        <div class="mt-3">
+                                                            <button class="btn btn-outline-primary btn-sm" onclick="showCreateLessonForm(@module.ModuleId)">
+                                                                <i class="fa fa-plus me-1"></i>Add New Lesson
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             }
@@ -625,9 +790,11 @@
                                             </div>
                                         }
 
+                                        <!-- Add New Module Button -->
                                         <div class="text-center mt-4">
-                                            <a asp-page="/Mentor/MentorPage/AddModule" asp-route-courseId="@Model.Course.CourseId"
-                                               class="btn btn-primary btn-lg">+ Add New Module</a>
+                                            <button style="width: 15%; font-size: 65%;" class="btn btn-primary btn-lg" onclick="showCreateModuleForm()">
+                                                <i class="fa fa-plus me-1"></i>Add New Module
+                                            </button>
                                         </div>
                                     </div>
 
@@ -635,9 +802,13 @@
                                         <button type="button" class="btn btn-secondary prev-step" data-prev="course-image">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
-                                        <button type="submit" class="btn btn-success">
-                                            <i class="fa fa-check"></i> Complete Setup
-                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Loading Spinner -->
+                                <div id="loading-spinner" class="text-center" style="display: none;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
 
@@ -655,7 +826,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -664,929 +834,1232 @@
     </section>
 </div>
 
-<style>
-    /* Course Sidebar Styles */
-    .course-sidebar {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        position: sticky;
-        top: 20px;
-    }
-
-        .course-sidebar h5 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            text-transform: uppercase;
+    <style>
+        .lesson-form {
+            animation: slideDown 0.3s ease-out;
         }
 
-        .course-sidebar .nav-link {
-            color: #666;
-            padding: 8px 0;
-            border: none;
-            border-radius: 0;
-            background: none;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
+        @@keyframes slideDown {
+            from
 
-            .course-sidebar .nav-link:hover {
-                color: #007bff;
-            }
-
-            .course-sidebar .nav-link.active {
-                color: #007bff;
-                background: none;
-                font-weight: 500;
-            }
-
-    /* Step Number Styles */
-    .step-number {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #e9ecef;
-        color: #666;
-        font-size: 12px;
-        margin-right: 10px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-
-        .step-number i {
-            color: #28a745;
-            font-size: 10px;
-        }
-
-    .nav-link.active .step-number {
-        background: #cbcddb;
-        color: white;
-    }
-
-    .step-number.completed {
-        /* background: #28a745; */
-        color: white;
-    }
-
-    /* Content Section Styles */
-    .content-section {
-        padding: 20px;
-    }
-
-    .step-header {
-        margin-bottom: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #088dcd 0%, #152b3f 100%);
-        border-radius: 10px;
-        color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-        .step-header h2 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-    .step-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 50%;
-        margin-right: 10px;
-        font-weight: bold;
-        font-size: 16px;
-    }
-
-    .step-description {
-        margin: 10px 0 0 0;
-        font-size: 14px;
-        opacity: 0.9;
-        line-height: 1.5;
-    }
-
-    /* Form Section Styles */
-    .form-section {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-        border: 1px solid #e9ecef;
-    }
-
-        .form-section .form-label {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .form-section .form-control {
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            padding: 4px 4px;
-            transition: border-color 0.2s ease;
-        }
-
-            .form-section .form-control:focus {
-                border-color: #007bff;
-                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-            }
-
-    /* Step Navigation Styles */
-    .step-navigation {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-        border-top: 1px solid #e9ecef;
-        background: #f8f9fa;
-        border-radius: 0 0 10px 10px;
-    }
-
-        .step-navigation .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-    p {
-        color: white;
-    }
-
-
-    /* Learning Objectives Styles */
-    .learning-objectives .input-group {
-        margin-bottom: 10px;
-    }
-
-    .learning-objectives .input-group-text {
-        background: #f8f9fa;
-        border: 1px solid #ddd;
-        color: #666;
-        font-size: 12px;
-        min-width: 40px;
-        justify-content: center;
-    }
-
-    .add-more-btn {
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        color: #007bff;
-        transition: color 0.2s ease;
-    }
-
-        .add-more-btn:hover {
-            text-decoration: underline;
-            color: #0056b3;
-        }
-
-    /* Module Card Styles */
-    .module-card {
-        border: 1px solid #dee2e6;
-        transition: all 0.15s ease-in-out;
-        overflow: hidden;
-    }
-
-        .module-card:hover {
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
-            transform: translateY(-1px);
-        }
-
-        .module-card .card-header {
-            background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-            padding: 15px 20px;
-        }
-
-            .module-card .card-header h5 {
-                color: #333;
-                font-weight: 600;
-                margin: 0;
-            }
-
-        .module-card .card-body {
-            padding: 20px;
-        }
-
-    /* Lessons List Styles */
-    .lessons-list {
-        margin-top: 15px;
-    }
-
-        .lessons-list h6 {
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .lessons-list .list-group-item {
-            padding: 12px 15px;
-            border: 1px solid #e9ecef;
-            background: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.2s ease;
-        }
-
-            .lessons-list .list-group-item:hover {
-                background: #f8f9fa;
-            }
-
-            .lessons-list .list-group-item i {
-                margin-right: 8px;
-            }
-
-    /* Course Stats Styles */
-    .course-stats {
-        background: #f8f9fa !important;
-        border: 1px solid #e9ecef;
-        margin-bottom: 20px;
-    }
-
-        .course-stats strong {
-            color: #333;
-            font-weight: 600;
-        }
-
-    /* Upload Placeholder Styles */
-    .upload-placeholder {
-        text-align: center;
-        padding: 40px;
-        border: 2px dashed #dee2e6;
-        border-radius: 8px;
-        background: #f8f9fa;
-    }
-
-        .upload-placeholder i {
-            color: #adb5bd;
-            margin-bottom: 10px;
-        }
-
-        .upload-placeholder p {
-            color: #6c757d;
-            margin: 0;
-        }
-
-    /* Badge Styles */
-    .badge {
-        font-size: 11px;
-        padding: 4px 8px;
-        font-weight: 500;
-    }
-
-    /* Button Group Styles */
-    .btn-group .btn {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
-
-    .btn-primary {
-        color: #fff;
-        background-color: #088dcd;
-        border-color: #088dcd;
-    }
-
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .course-sidebar {
-            position: static;
-            margin-bottom: 20px;
-        }
-
-        .step-navigation {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-            .step-navigation .btn {
-                width: 100%;
-            }
-
-        .module-card .card-header .row {
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-group {
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .course-stats .row {
-            text-align: center;
-        }
-
-        .course-stats .col-md-4 {
-            margin-bottom: 10px;
-        }
-    }
-
-    /* Form Validation Styles */
-    .form-control.is-invalid {
-        border-color: #dc3545;
-    }
-
-    .form-control.is-valid {
-        border-color: #28a745;
-    }
-
-    .invalid-feedback {
-        color: #dc3545;
-        font-size: 12px;
-        margin-top: 5px;
-    }
-
-    .valid-feedback {
-        color: #28a745;
-        font-size: 12px;
-        margin-top: 5px;
-    }
-
-    /* Animation for step transitions */
-    .content-section {
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @@keyframes fadeIn {
-        from {
+        {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(-10px);
         }
 
         to {
             opacity: 1;
             transform: translateY(0);
         }
-    }
 
-    /* Loading states */
-    .btn.loading {
-        position: relative;
-        color: transparent;
-    }
+        }
 
-        .btn.loading::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid #ffffff;
+        .module-card {
+            transition: box-shadow 0.3s ease;
+        }
+
+            .module-card:hover {
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+
+        .btn-group .btn {
+            margin-left: 2px;
+        }
+
+        .spinner-border {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        /* Course Sidebar Styles
+        .course-sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            position: sticky;
+            top: 20px;
+        }
+
+            .course-sidebar h5 {
+                font-size: 14px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 15px;
+                text-transform: uppercase;
+            }
+
+            .course-sidebar .nav-link {
+                color: #666;
+                padding: 8px 0;
+                border: none;
+                border-radius: 0;
+                background: none;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                transition: color 0.2s ease;
+            }
+
+                .course-sidebar .nav-link:hover {
+                    color: #007bff;
+                }
+
+                .course-sidebar .nav-link.active {
+                    color: #007bff;
+                    background: none;
+                    font-weight: 500;
+                }
+
+        /* Step Number Styles */
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
+            background: #e9ecef;
+            color: #666;
+            font-size: 12px;
+            margin-right: 10px;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
-    @@keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-</style>
+            .step-number i {
+                color: #28a745;
+                font-size: 10px;
+            }
 
-<script>
-            // Course Editor Step Navigation Script
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // Initialize step navigation
-        initializeStepNavigation();
-
-        function initializeStepNavigation() {
-            // Show first step by default
-            showStep('course-info');
-            updateActiveStepInSidebar('course-info');
-
-            // Add event listeners for sidebar navigation
-            addSidebarEventListeners();
-
-            // Add event listeners for next/previous buttons
-            addNavigationButtonListeners();
-
-            // Add event listeners for learning objectives
-            addLearningObjectivesListeners();
-
-            // Add form validation
-            addFormValidation();
-
-            // Add auto-save functionality
-            addAutoSave();
+        .nav-link.active .step-number {
+            background: #cbcddb;
+            color: white;
         }
 
-        function addSidebarEventListeners() {
-            const stepLinks = document.querySelectorAll('.step-link');
+        .step-number.completed {
+            /* background: #28a745; */
+            color: white;
+        }
 
-            stepLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetStep = this.getAttribute('data-step');
+        /* Content Section Styles */
+        .content-section {
+            padding: 20px;
+        }
 
-                    // Check if step is accessible (previous steps should be completed)
-                    if (isStepAccessible(targetStep)) {
+        .step-header {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #088dcd 0%, #152b3f 100%);
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+            .step-header h2 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .step-description {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Form Section Styles */
+        .form-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+            .form-section .form-label {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+            }
+
+            .form-section .form-control {
+                border-radius: 6px;
+                border: 1px solid #ddd;
+                padding: 4px 4px;
+                transition: border-color 0.2s ease;
+            }
+
+                .form-section .form-control:focus {
+                    border-color: #007bff;
+                    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+                }
+
+        /* Step Navigation Styles */
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 0 0 10px 10px;
+        }
+
+            .step-navigation .btn {
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: 500;
+            }
+
+        p {
+            color: white;
+        }
+
+
+        /* Learning Objectives Styles */
+        .learning-objectives .input-group {
+            margin-bottom: 10px;
+        }
+
+        .learning-objectives .input-group-text {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #666;
+            font-size: 12px;
+            min-width: 40px;
+            justify-content: center;
+        }
+
+        .add-more-btn {
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #007bff;
+            transition: color 0.2s ease;
+        }
+
+            .add-more-btn:hover {
+                text-decoration: underline;
+                color: #0056b3;
+            }
+
+        /* Module Card Styles */
+        .module-card {
+            border: 1px solid #dee2e6;
+            transition: all 0.15s ease-in-out;
+            overflow: hidden;
+        }
+
+            .module-card:hover {
+                box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+                transform: translateY(-1px);
+            }
+
+            .module-card .card-header {
+                background: #f8f9fa;
+                border-bottom: 1px solid #dee2e6;
+                padding: 15px 20px;
+            }
+
+                .module-card .card-header h5 {
+                    color: #333;
+                    font-weight: 600;
+                    margin: 0;
+                }
+
+            .module-card .card-body {
+                padding: 20px;
+            }
+
+        /* Lessons List Styles */
+        .lessons-list {
+            margin-top: -15px;
+        }
+
+            .lessons-list h6 {
+                color: #333;
+                font-weight: 600;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+
+            .lessons-list .list-group-item {
+                padding: 12px 15px;
+                border: 1px solid #e9ecef;
+                background: #fff;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: background-color 0.2s ease;
+            }
+
+                .lessons-list .list-group-item:hover {
+                    background: #f8f9fa;
+                }
+
+                .lessons-list .list-group-item i {
+                    margin-right: 8px;
+                }
+
+        /* Course Stats Styles */
+        .course-stats {
+            background: #f8f9fa !important;
+            border: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+            .course-stats strong {
+                color: #333;
+                font-weight: 600;
+            }
+
+        /* Upload Placeholder Styles */
+        .upload-placeholder {
+            text-align: center;
+            padding: 40px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+            .upload-placeholder i {
+                color: #adb5bd;
+                margin-bottom: 10px;
+            }
+
+            .upload-placeholder p {
+                color: #6c757d;
+                margin: 0;
+            }
+
+        /* Badge Styles */
+        .badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            font-weight: 500;
+        }
+
+        /* Button Group Styles */
+        .btn-group .btn {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #088dcd;
+            border-color: #088dcd;
+        }
+
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .course-sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+
+            .step-navigation {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+                .step-navigation .btn {
+                    width: 100%;
+                }
+
+            .module-card .card-header .row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-group {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .course-stats .row {
+                text-align: center;
+            }
+
+            .course-stats .col-md-4 {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Form Validation Styles */
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid {
+            border-color: #28a745;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .valid-feedback {
+            color: #28a745;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Animation for step transitions */
+        .content-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading states */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+
+            .btn.loading::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                top: 50%;
+                left: 50%;
+                margin-left: -8px;
+                margin-top: -8px;
+                border: 2px solid #ffffff;
+                border-radius: 50%;
+                border-top-color: transparent;
+                animation: spin 1s linear infinite;
+            }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <script>
+        // Course Editor Step Navigation Script - Fixed Version
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Initialize step navigation
+            initializeStepNavigation();
+
+            function initializeStepNavigation() {
+                // Show first step by default
+                showStep('course-info');
+                updateActiveStepInSidebar('course-info');
+
+                // Add event listeners for sidebar navigation
+                addSidebarEventListeners();
+
+                // Add event listeners for next/previous buttons
+                addNavigationButtonListeners();
+
+                // Add event listeners for learning objectives
+                addLearningObjectivesListeners();
+
+                // Add form validation
+                addFormValidation();
+
+                // Add auto-save functionality
+                addAutoSave();
+
+                // Update progress on page load
+                updateProgress();
+            }
+
+            function addSidebarEventListeners() {
+                const stepLinks = document.querySelectorAll('.step-link');
+
+                stepLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetStep = this.getAttribute('data-step');
+
+                        // Allow free navigation to any step
                         showStep(targetStep);
                         updateActiveStepInSidebar(targetStep);
-                    } else {
-                        showNotification('Please complete the previous steps first.', 'warning');
-                    }
-                });
-            });
-        }
-
-        function addNavigationButtonListeners() {
-            // Next step buttons
-            const nextButtons = document.querySelectorAll('.next-step');
-            nextButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const currentStep = getCurrentStep();
-                    const nextStep = this.getAttribute('data-next');
-
-                    if (validateCurrentStep(currentStep)) {
-                        showStep(nextStep);
-                        updateActiveStepInSidebar(nextStep);
-                        updateStepCompletion(currentStep);
-                    }
-                });
-            });
-
-            // Previous step buttons
-            const prevButtons = document.querySelectorAll('.prev-step');
-            prevButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const prevStep = this.getAttribute('data-prev');
-                    showStep(prevStep);
-                    updateActiveStepInSidebar(prevStep);
-                });
-            });
-        }
-
-        function showStep(stepId) {
-            // Hide all content sections
-            const allSections = document.querySelectorAll('.content-section');
-            allSections.forEach(section => {
-                section.style.display = 'none';
-            });
-
-            // Show target section with animation
-            const targetSection = document.getElementById(stepId);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-                targetSection.style.opacity = '0';
-
-                // Animate fade in
-                setTimeout(() => {
-                    targetSection.style.transition = 'opacity 0.3s ease-in-out';
-                    targetSection.style.opacity = '1';
-                }, 10);
-
-                // Scroll to top of form
-                targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-
-        function updateActiveStepInSidebar(stepId) {
-            // Remove active class from all nav links
-            const allNavLinks = document.querySelectorAll('.step-link');
-            allNavLinks.forEach(link => {
-                link.classList.remove('active');
-            });
-
-            // Add active class to current step
-            const currentNavLink = document.querySelector(`[data-step="${stepId}"]`);
-            if (currentNavLink) {
-                currentNavLink.classList.add('active');
-            }
-        }
-
-        function getCurrentStep() {
-            const visibleSection = document.querySelector('.content-section[style*="display: block"], .content-section:not([style*="display: none"])');
-            return visibleSection ? visibleSection.id : 'course-info';
-        }
-
-        function validateCurrentStep(stepId) {
-            switch(stepId) {
-                case 'course-info':
-                    return validateCourseInfo();
-                case 'category-description':
-                    return validateCategoryDescription();
-                case 'skill-learn':
-                    return validateSkillLearn();
-                case 'pricing-duration':
-                    return validatePricingDuration();
-                case 'course-image':
-                    return validateCourseImage();
-                case 'requirement':
-                    return validateRequirement();
-                case 'level-language':
-                    return validateLevelLanguage();
-                case 'intended-learners':
-                    return validateIntendedLearners();
-                // case 'language':
-                //     return validateLanguage();
-                case 'curriculum':
-                    return validateCurriculum();
-                default:
-                    return true;
-            }
-        }
-
-        function validateCourseInfo() {
-            const courseName = document.querySelector('input[name="Course.CourseName"]');
-            if (!courseName || !courseName.value.trim()) {
-                showNotification('Course name is required.', 'error');
-                return false;
-            }
-            return true;
-        }
-
-        function validateCategoryDescription() {
-            const categoryId = document.querySelector('select[name="Course.CategoryId"]');
-            const courseContent = document.querySelector('textarea[name="Course.CourseContent"]');
-
-            if (!categoryId || categoryId.value <= 0) {
-                showNotification('Please select a category.', 'error');
-                return false;
-            }
-
-            if (!courseContent || courseContent.value.trim().length < 100) {
-                showNotification('Course description must be at least 100 characters.', 'error');
-                courseContent.focus();
-                return false;
-            }
-
-            return true;
-        }
-
-       function validateSkillLearn() {
-            const skillTextArea = document.querySelector('textarea[name="Course.SkillLearn"]');
-            if (!skillTextArea || skillTextArea.value.trim().length < 50) {
-                showNotification('Please enter at least 50 characters.', 'error');
-                return false;
-            }
-            return true;
-       }
-
-
-        function validatePricingDuration() {
-            const cost = document.querySelector('input[name="Course.Cost"]');
-            const duration = document.querySelector('input[name="Course.CourseLength"]');
-
-            if (!cost || cost.value < 0) {
-                showNotification('Please enter a valid price.', 'error');
-                cost.focus();
-                return false;
-            }
-
-            if (!duration || !duration.value.trim()) {
-                showNotification('Please enter course duration.', 'error');
-                duration.focus();
-                return false;
-            }
-
-            return true;
-        }
-
-        function validateCourseImage() {
-            const existingImage = document.querySelector('img[alt="Course Image"]');
-            const newImageInput = document.querySelector('input[name="NewImage"]');
-
-            if (!existingImage && (!newImageInput || !newImageInput.files.length)) {
-                showNotification('Please upload a course image.', 'error');
-                return false;
-            }
-
-            return true;
-        }
-
-        function validateRequirement() {
-            const skillTextArea = document.querySelector('textarea[name="Course.Requirement"]');
-             if (!skillTextArea || skillTextArea.value.trim().length < 50) {
-                showNotification('Please enter at least 50 characters.', 'error');
-                return false;
-            }
-            return true;
-        }
-
-        function validateLevelLanguage() {
-            const level = document.querySelector('input[name="Course.Level"]');
-            const language = document.querySelector('input[name="Course.Language"]');
-
-            if (!level || !level.value.trim()) {
-                showNotification('Please enter course level.', 'error');
-                level.focus();
-                return false;
-            }
-
-            if (!language || !language.value.trim()) {
-                showNotification('Please enter course language.', 'error');
-                language.focus();
-                return false;
-            }
-
-            return true;
-        }
-
-        function validateIntendedLearners() {
-            const skillTextArea = document.querySelector('textarea[name="Course.IntendedLearner"]');
-             if (!skillTextArea || skillTextArea.value.trim().length < 50) {
-                showNotification('Please enter at least 50 characters.', 'error');
-                return false;
-            }
-            return true;
-        }
-
-        function validateCurriculum() {
-            const moduleCards = document.querySelectorAll('.module-card');
-            if (moduleCards.length === 0) {
-                showNotification('Please add at least one module to your course.', 'error');
-                return false;
-            }
-
-            return true;
-        }
-
-        function isStepAccessible(stepId) {
-            const stepOrder = ['course-info', 'category-description', 'skill-learn', 'pricing-duration', 'course-image', 'requirement', 'level-language', 'intended-learners', 'curriculum'];
-            const targetIndex = stepOrder.indexOf(stepId);
-
-            // Allow access to first step or if previous steps are completed
-            if (targetIndex === 0) return true;
-
-            for (let i = 0; i < targetIndex; i++) {
-                const stepElement = document.querySelector(`[data-step="${stepOrder[i]}"]`);
-                const stepNumber = stepElement?.querySelector('.step-number');
-
-                if (!stepNumber?.querySelector('i.fa-check')) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        function updateStepCompletion(stepId) {
-            const stepLink = document.querySelector(`[data-step="${stepId}"]`);
-            if (stepLink) {
-                const stepNumber = stepLink.querySelector('.step-number');
-                const stepValue = stepNumber.getAttribute('data-step');
-
-                // Add check icon if step is completed
-                if (validateCurrentStep(stepId)) {
-                    stepNumber.innerHTML = '<i class="fa fa-check"></i>';
-                    stepNumber.classList.add('completed');
-                }
-            }
-        }
-
-        function addLearningObjectivesListeners() {
-            const addMoreBtn = document.querySelector('.add-more-btn');
-            if (addMoreBtn) {
-                addMoreBtn.addEventListener('click', function() {
-                    addLearningObjective();
-                });
-            }
-        }
-
-
-        function addFormValidation() {
-            // Real-time validation for form fields
-            const inputs = document.querySelectorAll('input, textarea, select');
-
-            inputs.forEach(input => {
-                input.addEventListener('blur', function() {
-                    validateField(this);
-                });
-
-                input.addEventListener('input', function() {
-                    clearFieldError(this);
-                });
-            });
-        }
-
-        function validateField(field) {
-            const value = field.value.trim();
-            const fieldName = field.name;
-
-            // Remove existing validation classes
-            field.classList.remove('is-valid', 'is-invalid');
-
-            // Add validation based on field type
-            if (field.hasAttribute('required') && !value) {
-                field.classList.add('is-invalid');
-                return false;
-            }
-
-            if (fieldName === 'Course.CourseContent' && value.length < 100) {
-                field.classList.add('is-invalid');
-                return false;
-            }
-
-            if (field.type === 'number' && value < 0) {
-                field.classList.add('is-invalid');
-                return false;
-            }
-
-            field.classList.add('is-valid');
-            return true;
-        }
-
-        function clearFieldError(field) {
-            field.classList.remove('is-invalid');
-        }
-
-        function addAutoSave() {
-            let autoSaveTimer;
-            const form = document.getElementById('editCourseForm');
-
-            if (form) {
-                const inputs = form.querySelectorAll('input, textarea, select');
-
-                inputs.forEach(input => {
-                    input.addEventListener('input', function() {
-                        clearTimeout(autoSaveTimer);
-                        autoSaveTimer = setTimeout(() => {
-                            autoSaveForm();
-                        }, 3000); // Auto-save after 3 seconds of inactivity
                     });
                 });
             }
-        }
 
-        function autoSaveForm() {
+            function addNavigationButtonListeners() {
+                // Next step buttons
+                const nextButtons = document.querySelectorAll('.next-step');
+                nextButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const currentStep = getCurrentStep();
+                        const nextStep = this.getAttribute('data-next');
+
+                        // Validate current step but don't prevent navigation
+                        if (validateCurrentStep(currentStep)) {
+                            updateStepCompletion(currentStep);
+                            showNotification('Step completed successfully!', 'success', 2000);
+                        } else {
+                            showNotification('Some fields may need attention, but you can continue.', 'warning', 3000);
+                        }
+
+                        showStep(nextStep);
+                        updateActiveStepInSidebar(nextStep);
+                    });
+                });
+
+                // Previous step buttons
+                const prevButtons = document.querySelectorAll('.prev-step');
+                prevButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        const prevStep = this.getAttribute('data-prev');
+                        showStep(prevStep);
+                        updateActiveStepInSidebar(prevStep);
+                    });
+                });
+            }
+
+            function showStep(stepId) {
+                // Hide all content sections
+                const allSections = document.querySelectorAll('.content-section');
+                allSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Show target section with animation
+                const targetSection = document.getElementById(stepId);
+                if (targetSection) {
+                    targetSection.style.display = 'block';
+                    targetSection.style.opacity = '0';
+
+                    // Animate fade in
+                    setTimeout(() => {
+                        targetSection.style.transition = 'opacity 0.3s ease-in-out';
+                        targetSection.style.opacity = '1';
+                    }, 10);
+
+                    // Scroll to top of form
+                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            function updateActiveStepInSidebar(stepId) {
+                // Remove active class from all nav links
+                const allNavLinks = document.querySelectorAll('.step-link');
+                allNavLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                // Add active class to current step
+                const currentNavLink = document.querySelector(`[data-step="${stepId}"]`);
+                if (currentNavLink) {
+                    currentNavLink.classList.add('active');
+                }
+            }
+
+            function getCurrentStep() {
+                const visibleSection = document.querySelector('.content-section[style*="display: block"], .content-section:not([style*="display: none"])');
+                return visibleSection ? visibleSection.id : 'course-info';
+            }
+
+            function validateCurrentStep(stepId) {
+                switch(stepId) {
+                    case 'course-info':
+                        return validateCourseInfo();
+                    case 'category-description':
+                        return validateCategoryDescription();
+                    case 'skill-learn':
+                        return validateSkillLearn();
+                    case 'pricing-duration':
+                        return validatePricingDuration();
+                    case 'course-image':
+                        return validateCourseImage();
+                    case 'requirement':
+                        return validateRequirement();
+                    case 'level-language':
+                        return validateLevelLanguage();
+                    case 'intended-learners':
+                        return validateIntendedLearners();
+                    case 'curriculum':
+                        return validateCurriculum();
+                    default:
+                        return true;
+                }
+            }
+
+            function validateCourseInfo() {
+                const courseName = document.querySelector('input[name="Course.CourseName"]');
+                return courseName && courseName.value.trim().length > 0;
+            }
+
+            function validateCategoryDescription() {
+                const categoryId = document.querySelector('select[name="Course.CategoryId"]');
+                const courseContent = document.querySelector('textarea[name="Course.CourseContent"]');
+
+                return (categoryId && categoryId.value > 0) &&
+                       (courseContent && courseContent.value.trim().length >= 100);
+            }
+
+           function validateSkillLearn() {
+                const skillTextArea = document.querySelector('textarea[name="Course.SkillLearn"]');
+                return skillTextArea && skillTextArea.value.trim().length >= 50;
+           }
+
+            function validatePricingDuration() {
+                const cost = document.querySelector('input[name="Course.Cost"]');
+                const duration = document.querySelector('input[name="Course.CourseLength"]');
+
+                return (cost && cost.value >= 0) && (duration && duration.value.trim().length > 0);
+            }
+
+            function validateCourseImage() {
+                const existingImage = document.querySelector('img[alt="Course Image"]');
+                const newImageInput = document.querySelector('input[name="NewImage"]');
+
+                return existingImage || (newImageInput && newImageInput.files.length > 0);
+            }
+
+            function validateRequirement() {
+                const skillTextArea = document.querySelector('textarea[name="Course.Requirement"]');
+                return skillTextArea && skillTextArea.value.trim().length >= 50;
+            }
+
+            function validateLevelLanguage() {
+                const level = document.querySelector('input[name="Course.Level"]');
+                const language = document.querySelector('input[name="Course.Language"]');
+
+                return (level && level.value.trim().length > 0) &&
+                       (language && language.value.trim().length > 0);
+            }
+
+            function validateIntendedLearners() {
+                const skillTextArea = document.querySelector('textarea[name="Course.IntendedLearner"]');
+                return skillTextArea && skillTextArea.value.trim().length >= 50;
+            }
+
+            function validateCurriculum() {
+                const moduleCards = document.querySelectorAll('.module-card');
+                return moduleCards.length > 0;
+            }
+
+            function updateStepCompletion(stepId) {
+                const stepLink = document.querySelector(`[data-step="${stepId}"]`);
+                if (stepLink) {
+                    const stepNumber = stepLink.querySelector('.step-number');
+
+                    // Add check icon if step is completed
+                    if (validateCurrentStep(stepId)) {
+                        stepNumber.innerHTML = '<i class="fa fa-check"></i>';
+                        stepNumber.classList.add('completed');
+                    }
+                }
+            }
+
+            function addLearningObjectivesListeners() {
+                const addMoreBtn = document.querySelector('.add-more-btn');
+                if (addMoreBtn) {
+                    addMoreBtn.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent form submission
+                        addLearningObjective();
+                    });
+                }
+            }
+
+            function addFormValidation() {
+                // Real-time validation for form fields (non-blocking)
+                const inputs = document.querySelectorAll('input, textarea, select');
+
+                inputs.forEach(input => {
+                    input.addEventListener('blur', function() {
+                        validateField(this);
+                    });
+
+                    input.addEventListener('input', function() {
+                        clearFieldError(this);
+                        // Update step completion status when fields change
+                        const currentStep = getCurrentStep();
+                        if (validateCurrentStep(currentStep)) {
+                            updateStepCompletion(currentStep);
+                        }
+                    });
+                });
+            }
+
+            function validateField(field) {
+                const value = field.value.trim();
+                const fieldName = field.name;
+
+                // Remove existing validation classes
+                field.classList.remove('is-valid', 'is-invalid');
+
+                // Add validation based on field type (visual feedback only)
+                if (field.hasAttribute('required') && !value) {
+                    field.classList.add('is-invalid');
+                    return false;
+                }
+
+                if (fieldName === 'Course.CourseContent' && value.length < 100) {
+                    field.classList.add('is-invalid');
+                    return false;
+                }
+
+                if (field.type === 'number' && value < 0) {
+                    field.classList.add('is-invalid');
+                    return false;
+                }
+
+                field.classList.add('is-valid');
+                return true;
+            }
+
+            function clearFieldError(field) {
+                field.classList.remove('is-invalid');
+            }
+
+            function addAutoSave() {
+                let autoSaveTimer;
+                const form = document.getElementById('editCourseForm');
+
+                if (form) {
+                    const inputs = form.querySelectorAll('input, textarea, select');
+
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function() {
+                            clearTimeout(autoSaveTimer);
+                            autoSaveTimer = setTimeout(() => {
+                                autoSaveForm();
+                            }, 3000); // Auto-save after 3 seconds of inactivity
+                        });
+                    });
+                }
+            }
+
+            function autoSaveForm() {
+                const form = document.getElementById('editCourseForm');
+                if (form) {
+                    const formData = new FormData(form);
+
+                    // Show auto-save indicator
+                    showNotification('Auto-saving...', 'info', 2000);
+
+                    // Here you would typically send the data to server
+                    // fetch('/auto-save-endpoint', { method: 'POST', body: formData })
+                    //     .then(response => response.json())
+                    //     .then(data => {
+                    //         if (data.success) {
+                    //             showNotification('Changes saved automatically', 'success', 2000);
+                    //         }
+                    //     })
+                    //     .catch(error => {
+                    //         console.error('Auto-save failed:', error);
+                    //     });
+                }
+            }
+
+            function showNotification(message, type = 'info', duration = 5000) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification-toast');
+                existingNotifications.forEach(notification => notification.remove());
+
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification-toast alert alert-${getBootstrapAlertClass(type)} alert-dismissible fade show`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    min-width: 300px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                `;
+
+                notification.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fa ${getNotificationIcon(type)} me-2"></i>
+                        <span>${message}</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Auto-remove notification
+                if (duration > 0) {
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.classList.remove('show');
+                            setTimeout(() => notification.remove(), 150);
+                        }
+                    }, duration);
+                }
+            }
+
+            function getBootstrapAlertClass(type) {
+                const typeMap = {
+                    'success': 'success',
+                    'error': 'danger',
+                    'warning': 'warning',
+                    'info': 'info'
+                };
+                return typeMap[type] || 'info';
+            }
+
+            function getNotificationIcon(type) {
+                const iconMap = {
+                    'success': 'fa-check-circle',
+                    'error': 'fa-exclamation-circle',
+                    'warning': 'fa-exclamation-triangle',
+                    'info': 'fa-info-circle'
+                };
+                return iconMap[type] || 'fa-info-circle';
+            }
+
+            // Delete course confirmation
+            window.submitDeleteForm = function() {
+                if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
+                    document.getElementById('deleteCourseForm').submit();
+                }
+            };
+
+            // Progress tracking - Updated to show completion status without blocking
+            function updateProgress() {
+                const totalSteps = 9;
+                const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
+                const progressPercentage = (completedSteps / totalSteps) * 100;
+
+                // Update progress bar if exists
+                const progressBar = document.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = progressPercentage + '%';
+                    progressBar.setAttribute('aria-valuenow', progressPercentage);
+                }
+
+                // Update submit button state - Always enabled
+                const submitButton = document.querySelector('.btn-primary.w-100, .btn-success');
+                if (submitButton) {
+                    submitButton.disabled = false;
+
+                    if (completedSteps === totalSteps) {
+                        submitButton.textContent = 'Complete Setup - All steps completed!';
+                        submitButton.classList.remove('btn-secondary');
+                        submitButton.classList.add('btn-success');
+                    } else {
+                        submitButton.textContent = `Complete Setup (${completedSteps}/${totalSteps} steps completed)`;
+                        submitButton.classList.remove('btn-secondary');
+                        submitButton.classList.add('btn-primary');
+                    }
+                }
+            }
+
+            // Update progress when steps are completed
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                        updateProgress();
+                    }
+                });
+            });
+
+            // Observe step numbers for changes
+            const stepNumbers = document.querySelectorAll('.step-number');
+            stepNumbers.forEach(stepNumber => {
+                observer.observe(stepNumber, {
+                    childList: true,
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            });
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            const nextBtn = document.querySelector('.next-step:visible');
+                            if (nextBtn) nextBtn.click();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            const prevBtn = document.querySelector('.prev-step:visible');
+                            if (prevBtn) prevBtn.click();
+                            break;
+                    }
+                }
+            });
+
+            // FIXED: Form submit handler - Allow form submission
             const form = document.getElementById('editCourseForm');
             if (form) {
-                const formData = new FormData(form);
+                // Remove any existing submit event listeners that might be preventing submission
+                form.addEventListener('submit', function(e) {
+                    // Don't prevent default submission - let the form submit normally
+                    const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
+                    const totalSteps = 9;
 
-                // Show auto-save indicator
-                showNotification('Auto-saving...', 'info', 2000);
+                    // Only show confirmation if steps are incomplete, but don't prevent submission
+                    if (completedSteps < totalSteps) {
+                        const confirmSubmit = confirm(
+                            `You have completed ${completedSteps} out of ${totalSteps} steps. ` +
+                            'Are you sure you want to submit the course with incomplete information?'
+                        );
 
-                // Here you would typically send the data to server
-                // fetch('/auto-save-endpoint', { method: 'POST', body: formData })
-                //     .then(response => response.json())
-                //     .then(data => {
-                //         if (data.success) {
-                //             showNotification('Changes saved automatically', 'success', 2000);
-                //         }
-                //     })
-                //     .catch(error => {
-                //         console.error('Auto-save failed:', error);
-                //     });
+                        if (!confirmSubmit) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+
+                    // Show submitting notification but allow form to submit
+                    showNotification('Submitting course...', 'info', 1000);
+
+                    // Don't prevent default - let form submit naturally
+                    return true;
+                });
+            }
+
+            // Ensure submit buttons are not disabled
+            const submitButtons = document.querySelectorAll('button[type="submit"], input[type="submit"]');
+            submitButtons.forEach(button => {
+                button.disabled = false;
+                button.style.pointerEvents = 'auto';
+            });
+
+            console.log('Course Editor Step Navigation initialized successfully - Submit button enabled');
+        });
+    </script>
+
+    <script>
+        // JavaScript functions for handling forms
+        function showCreateModuleForm() {
+            document.getElementById('create-module-form').style.display = 'block';
+        }
+
+        function cancelCreateModule() {
+            document.getElementById('create-module-form').style.display = 'none';
+            // Reset form
+            document.getElementById('moduleForm').reset();
+        }
+
+        function showCreateLessonForm(moduleId) {
+            document.getElementById('create-lesson-form-' + moduleId).style.display = 'block';
+        }
+
+        function cancelCreateLesson(moduleId) {
+            document.getElementById('create-lesson-form-' + moduleId).style.display = 'none';
+            // Reset form
+            document.getElementById('lessonForm-' + moduleId).reset();
+        }
+
+        function editModule(moduleId, title, description, isPremium) {
+            // Ẩn phần hiển thị thông tin module
+            const displayDiv = document.getElementById(`module-display-${moduleId}`);
+            const editForm = document.getElementById(`edit-module-form-${moduleId}`);
+            if (displayDiv && editForm) {
+                displayDiv.style.display = "none";
+                editForm.style.display = "block";
+
+                // Gán dữ liệu
+                document.getElementById(`editTitle-${moduleId}`).value = title;
+                document.getElementById(`editDescription-${moduleId}`).value = description;
+                document.getElementById(`editIsPremium-${moduleId}`).checked = (isPremium === "true" || isPremium === true);
             }
         }
 
-        function showNotification(message, type = 'info', duration = 5000) {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification-toast');
-            existingNotifications.forEach(notification => notification.remove());
+        function cancelEditModule(moduleId) {
+            // Hiện lại phần display
+            const displayDiv = document.getElementById(`module-display-${moduleId}`);
+            const editForm = document.getElementById(`edit-module-form-${moduleId}`);
+            if (displayDiv && editForm) {
+                displayDiv.style.display = "block";
+                editForm.style.display = "none";
+            }
+        }
+        
+        function editLesson(lessonId, title) {
+            const displayDiv = document.getElementById(`lesson-display-${lessonId}`);
+            const titleInput = document.getElementById(`editLessonTitle-${lessonId}`);
+            const form = document.getElementById(`edit-lesson-form-${lessonId}`);
+            const createForm = document.getElementById(`create-lesson-form-${lessonId}`);
 
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification-toast alert alert-${getBootstrapAlertClass(type)} alert-dismissible fade show`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                min-width: 300px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            if (displayDiv) displayDiv.style.display = 'none';
+            if (titleInput) titleInput.value = title;
+            if (form) form.style.display = 'block';
+            if (createForm) createForm.style.display = 'none';
+        }
+
+        function cancelEditLesson(lessonId) {
+            const displayDiv = document.getElementById(`lesson-display-${lessonId}`);
+            const form = document.getElementById(`edit-lesson-form-${lessonId}`);
+
+            if (displayDiv) displayDiv.style.display = 'block';
+            if (form) form.style.display = 'none';
+        }
+
+        // Show/hide loading spinner
+        function showLoading() {
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = 'block';
+            }
+        }
+
+        function hideLoading() {
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Handle module form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const moduleForm = document.getElementById('moduleForm');
+            if (moduleForm) {
+                moduleForm.addEventListener('submit', function(e) {
+                    // Validate form before submission
+                    const title = document.getElementById('moduleTitle').value.trim();
+
+                    if (!title) {
+                        e.preventDefault();
+                        showErrorMessage('Module title is required!');
+                        document.getElementById('moduleTitle').focus();
+                        return false;
+                    }
+
+                    // Show loading khi form được submit
+                    showLoading();
+
+                    // Disable submit button để tránh double-click
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Creating...';
+                    }
+
+                    // Let the form submit normally to server
+                    return true;
+                });
+            }
+        });
+    </script>
+
+@* <script>
+    // Show create module form
+    function showCreateModuleForm() {
+        document.getElementById('create-module-form').style.display = 'block';
+        document.getElementById('moduleTitle').focus();
+    }
+
+    // Cancel create module
+    function cancelCreateModule() {
+        document.getElementById('create-module-form').style.display = 'none';
+        document.getElementById('moduleForm').reset();
+    }
+
+    // Show create lesson form
+    function showCreateLessonForm(moduleId) {
+        document.getElementById('create-lesson-form-' + moduleId).style.display = 'block';
+        document.querySelector('#create-lesson-form-' + moduleId + ' .lesson-title').focus();
+    }
+
+    // Cancel create lesson
+    function cancelCreateLesson(moduleId) {
+        document.getElementById('create-lesson-form-' + moduleId).style.display = 'none';
+        document.querySelector('#create-lesson-form-' + moduleId + ' .lessonForm').reset();
+    }
+
+    // Show/hide loading spinner
+    function showLoading() {
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'block';
+        }
+    }
+
+    function hideLoading() {
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
+
+    // Handle module form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const moduleForm = document.getElementById('moduleForm');
+        if (moduleForm) {
+            moduleForm.addEventListener('submit', function(e) {
+                // Validate form before submission
+                const title = document.getElementById('moduleTitle').value.trim();
+
+                if (!title) {
+                    e.preventDefault();
+                    showErrorMessage('Module title is required!');
+                    document.getElementById('moduleTitle').focus();
+                    return false;
+                }
+
+                // Show loading khi form được submit
+                showLoading();
+
+                // Disable submit button để tránh double-click
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Creating...';
+                }
+
+                // Let the form submit normally to server
+                return true;
+            });
+        }
+    });
+
+    // Handle lesson form submissions - AJAX approach for lessons
+    /*document.addEventListener('submit', async function(e) {
+        if (e.target.classList.contains('lessonForm')) {
+            e.preventDefault();
+
+            const moduleId = e.target.getAttribute('data-module-id');
+            const formData = new FormData(e.target);
+
+            // Validate lesson form
+            const title = formData.get('title').trim();
+            if (!title) {
+                showErrorMessage('Lesson title is required!');
+                e.target.querySelector('.lesson-title').focus();
+                return;
+            }
+
+            // Create FormData for lesson
+            const lessonFormData = new FormData();
+            lessonFormData.append('title', title);
+            lessonFormData.append('description', formData.get('description') || '');
+            lessonFormData.append('moduleId', moduleId);
+
+            try {
+                showLoading();
+
+                const response = await fetch('/api/Lesson', {
+                    method: 'POST',
+                    body: lessonFormData
+                });
+
+                if (response.ok) {
+                    const newLesson = await response.json();
+
+                    // Add new lesson to the DOM
+                    addLessonToDOM(moduleId, newLesson);
+
+                    // Reset and hide form
+                    e.target.reset();
+                    cancelCreateLesson(moduleId);
+
+                    // Update lesson count
+                    updateLessonCount(moduleId);
+
+                    // Show success message
+                    showSuccessMessage('Lesson created successfully!');
+                } else {
+                    const errorText = await response.text();
+                    console.error('Lesson creation failed:', errorText);
+                    showErrorMessage('Error creating lesson: ' + response.status);
+                }
+            } catch (error) {
+                console.error('Error creating lesson:', error);
+                showErrorMessage('Network error while creating lesson. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+    });*/
+
+    // Add new lesson to DOM
+    /* function addLessonToDOM(moduleId, lesson) {
+        const lessonsContainer = document.querySelector(`.lessons-container[data-module-id="${moduleId}"]`);
+
+        if (!lessonsContainer) {
+            console.error('Lessons container not found for module:', moduleId);
+            return;
+        }
+
+        // Check if this is the first lesson
+        const noLessonsMessage = lessonsContainer.querySelector('.text-muted');
+        if (noLessonsMessage && noLessonsMessage.textContent.includes('No lessons available')) {
+            lessonsContainer.innerHTML = `
+                <div class="lessons-list">
+                    <h6>Lessons:</h6>
+                    <div class="list-group lessons-list-group" data-module-id="${moduleId}">
+                    </div>
+                </div>
             `;
+        }
 
-            notification.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="fa ${getNotificationIcon(type)} me-2"></i>
-                    <span>${message}</span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        const listGroup = lessonsContainer.querySelector('.list-group') || lessonsContainer.querySelector('.lessons-list-group');
+        if (listGroup) {
+            const lessonHTML = `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fa fa-play-circle text-primary me-2"></i>
+                        ${escapeHtml(lesson.title)}
+                    </div>
+                    <div class="btn-group">
+                        <a href="/Mentor/MentorPage/EditLesson?id=${lesson.lessonId}"
+                           class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form method="post" action="?handler=DeleteLesson&id=${lesson.lessonId}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete this lesson?')">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
                 </div>
             `;
 
-            document.body.appendChild(notification);
+            listGroup.insertAdjacentHTML('beforeend', lessonHTML);
+        }
+    }
 
-            // Auto-remove notification
-            if (duration > 0) {
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.classList.remove('show');
-                        setTimeout(() => notification.remove(), 150);
-                    }
-                }, duration);
+    // Update lesson count
+    function updateLessonCount(moduleId) {
+        const moduleCard = document.querySelector(`[data-module-id="${moduleId}"]`);
+        if (moduleCard) {
+            const lessonCountElement = moduleCard.querySelector('.text-muted');
+            const lessonsContainer = moduleCard.querySelector('.lessons-container .list-group');
+
+            if (lessonsContainer && lessonCountElement) {
+                const lessonCount = lessonsContainer.children.length;
+                lessonCountElement.textContent = `${lessonCount} lesson${lessonCount !== 1 ? 's' : ''}`;
             }
         }
-
-        function getBootstrapAlertClass(type) {
-            const typeMap = {
-                'success': 'success',
-                'error': 'danger',
-                'warning': 'warning',
-                'info': 'info'
-            };
-            return typeMap[type] || 'info';
-        }
-
-        function getNotificationIcon(type) {
-            const iconMap = {
-                'success': 'fa-check-circle',
-                'error': 'fa-exclamation-circle',
-                'warning': 'fa-exclamation-triangle',
-                'info': 'fa-info-circle'
-            };
-            return iconMap[type] || 'fa-info-circle';
-        }
-
-        // Delete course confirmation
-        window.submitDeleteForm = function() {
-            if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
-                document.getElementById('deleteCourseForm').submit();
-            }
-        };
-
-        // Progress tracking
-        function updateProgress() {
-            const totalSteps = 8;
-            const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
-            const progressPercentage = (completedSteps / totalSteps) * 100;
-
-            // Update progress bar if exists
-            const progressBar = document.querySelector('.progress-bar');
-            if (progressBar) {
-                progressBar.style.width = progressPercentage + '%';
-                progressBar.setAttribute('aria-valuenow', progressPercentage);
-            }
-
-            // Update submit button state
-            const submitButton = document.querySelector('.btn-primary.w-100');
-            if (submitButton) {
-                if (completedSteps === totalSteps) {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Complete Review';
-                    submitButton.classList.remove('btn-secondary');
-                    submitButton.classList.add('btn-primary');
-                } else {
-                    submitButton.disabled = true;
-                    submitButton.textContent = `Complete ${totalSteps - completedSteps} more steps`;
-                    submitButton.classList.remove('btn-primary');
-                    submitButton.classList.add('btn-secondary');
-                }
-            }
-        }
-
-        // Initialize progress on page load
-        updateProgress();
-
-        // Update progress when steps are completed
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                    updateProgress();
-                }
-            });
-        });
-
-        // Observe step numbers for changes
-        const stepNumbers = document.querySelectorAll('.step-number');
-        stepNumbers.forEach(stepNumber => {
-            observer.observe(stepNumber, {
-                childList: true,
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        });
-
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        const nextBtn = document.querySelector('.next-step:visible');
-                        if (nextBtn) nextBtn.click();
-                        break;
-                    case 'ArrowLeft':
-                        e.preventDefault();
-                        const prevBtn = document.querySelector('.prev-step:visible');
-                        if (prevBtn) prevBtn.click();
-                        break;
-                }
-            }
-        });
-
-        console.log('Course Editor Step Navigation initialized successfully');
-    });
-
-</script>
+    }*/
+</script> *@
 
