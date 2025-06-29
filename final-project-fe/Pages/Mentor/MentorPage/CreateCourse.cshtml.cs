@@ -184,7 +184,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (createdCourse != null && createdCourse.CourseId > 0)
                 {
                     TempData["SuccessMessage"] = "Course created successfully! Continue editing your course.";
-                    return RedirectToPage("/Mentor/MentorPage/EditCourse", new { id = createdCourse.CourseId });
+                    return RedirectToPage("/Mentor/MentorPage/EditCourse", new { courseId = createdCourse.CourseId });
                 }
                 else
 				{
