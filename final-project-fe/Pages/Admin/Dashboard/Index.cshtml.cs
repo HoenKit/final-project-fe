@@ -7,6 +7,14 @@ using final_project_fe.Dtos.Users;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using final_project_fe.Dtos.Post;
+using final_project_fe.Dtos.Category;
+using final_project_fe.Dtos.Courses;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Web;
+using final_project_fe.Dtos.Transaction;
+using System.Buffers.Text;
+using System.Reflection.Emit;
 
 namespace final_project_fe.Pages.Admin.Dashboard
 {
@@ -23,19 +31,29 @@ namespace final_project_fe.Pages.Admin.Dashboard
             _httpClient = httpClient;
         }
 
-        // Add these properties to your model
+        // Chart and statistics properties
         public List<string> ChartLabels { get; set; } = new();
-        public List<int> MembershipsData { get; set; }
+        public List<int> MembershipsData { get; set; } = new();
         public List<int> ArticlesData { get; set; } = new();
         public List<int> UsersData { get; set; } = new();
-        public string SalesPeriod { get; set; }
-        public decimal TotalSales { get; set; }
-        public List<decimal> DailySalesData { get; set; }
-        public List<string> DailySalesLabels { get; set; }
+
+        // Dashboard summary properties
+        public string CurrentUserId { get; set; }
         public int TotalUsers { get; set; }
         public int TotalArticles { get; set; }
+        public int TotalMemberships { get; set; } = 576;
+        public decimal TotalSales { get; set; }
+        public decimal TotalSalesOneMonth { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        // Sales chart properties
+        public string SalesPeriod { get; set; }
+        public List<decimal> DailySalesData { get; set; } = new();
+        public List<string> DailySalesLabels { get; set; } = new();
+
+        // Transaction properties
+        public PageResult<GetTransactionDto> Transactions { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(string? status = null, string? email = null)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
                 return RedirectToPage("/Login");
@@ -43,12 +61,168 @@ namespace final_project_fe.Pages.Admin.Dashboard
             string token = Request.Cookies["AccessToken"];
             string? role = JwtHelper.GetRoleFromToken(token);
 
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                CurrentUserId = jsonToken?.Claims
+                                       .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            }
+
             if (role != "Admin")
                 return RedirectToPage("/Index");
 
-            //Gọi API thống kê user theo tháng
-            var Userurl = $"{_apiSettings.BaseUrl}/User/monthly-stats";
-            var userRequest = new HttpRequestMessage(HttpMethod.Get, Userurl);
+            // Load all dashboard data - simplified parameters
+            await LoadDashboardData(token, status);
+
+            return Page();
+        }
+
+        private async Task LoadDashboardData(string token, string? status)
+        {
+            // Load transactions for current month only (for display)
+            await LoadTransactions(null, null, null, false, status, token);
+
+            // Load user statistics
+            await LoadUserStatistics(token);
+
+            // Load article statistics
+            await LoadArticleStatistics(token);
+
+            // Load total counts
+            await LoadTotalCounts(token);
+
+            // Load sales data (this will also calculate TotalSales)
+            await LoadSalesData(token);
+
+            // Load chart data
+            LoadChartData();
+        }
+
+        private async Task LoadTransactions(int? currentPage, Guid? userId, string? sortOption, bool filterByUser, string? status, string token)
+        {
+            try
+            {
+                var transactionUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Transaction");
+                var transactionQuery = HttpUtility.ParseQueryString(string.Empty);
+
+                transactionQuery["page"] = "1";
+                transactionQuery["pageSize"] = "1000";
+                transactionQuery["sortOption"] = "desc_date";
+
+                // Filter by single user
+                if (userId.HasValue)
+                    transactionQuery["userId"] = userId.Value.ToString();
+
+                // Filter by user (only transactions of current user)
+                if (filterByUser && !string.IsNullOrWhiteSpace(CurrentUserId))
+                    transactionQuery["userId"] = CurrentUserId;
+
+                // Status filter
+                if (!string.IsNullOrWhiteSpace(status) && status != "all")
+                {
+                    var statusList = new List<string>();
+                    if (status.Contains("Completed"))
+                        statusList.Add("Completed");
+                    if (status.Contains("Cancel"))
+                        statusList.Add("Cancel");
+
+                    foreach (var s in statusList)
+                    {
+                        transactionQuery.Add("statuses", s);
+                    }
+                }
+
+                transactionUrl.Query = transactionQuery.ToString();
+
+                var transactionRequest = new HttpRequestMessage(HttpMethod.Get, transactionUrl.ToString());
+                transactionRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var transactionResponse = await _httpClient.SendAsync(transactionRequest);
+                if (transactionResponse.IsSuccessStatusCode)
+                {
+                    var transactionJson = await transactionResponse.Content.ReadAsStringAsync();
+                    var allTransactions = JsonSerializer.Deserialize<PageResult<GetTransactionDto>>(transactionJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 1000);
+
+                    var currentMonth = DateTime.Now.Month;
+                    var currentYear = DateTime.Now.Year;
+
+                    var currentMonthTransactions = allTransactions.Items
+                        .Where(t => t.CreateAt.Month == currentMonth && t.CreateAt.Year == currentYear)
+                        .OrderByDescending(t => t.CreateAt)
+                        .ToList();
+
+                    Transactions = new PageResult<GetTransactionDto>(
+                        currentMonthTransactions,
+                        currentMonthTransactions.Count,
+                        1,
+                        currentMonthTransactions.Count
+                    );
+                }
+                else
+                {
+                    Transactions = new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading transactions for current month");
+                Transactions = new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 0);
+            }
+        }
+
+        // Separate method to load total sales from ALL transactions
+        private async Task LoadTotalSales(string token)
+        {
+            try
+            {
+                var transactionUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Transaction");
+                var transactionQuery = HttpUtility.ParseQueryString(string.Empty);
+
+                transactionQuery["page"] = "1";
+                transactionQuery["pageSize"] = "10000";
+                transactionQuery["sortOption"] = "desc_date";
+
+                transactionUrl.Query = transactionQuery.ToString();
+
+                var transactionRequest = new HttpRequestMessage(HttpMethod.Get, transactionUrl.ToString());
+                transactionRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var transactionResponse = await _httpClient.SendAsync(transactionRequest);
+                if (transactionResponse.IsSuccessStatusCode)
+                {
+                    var transactionJson = await transactionResponse.Content.ReadAsStringAsync();
+                    var allTransactions = JsonSerializer.Deserialize<PageResult<GetTransactionDto>>(transactionJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 10000);
+
+                    TotalSales = allTransactions.Items
+                        .Where(t => t.Status == "Completed" && t.Amount.HasValue)
+                        .Sum(t => t.Amount.Value);
+
+                    _logger.LogInformation($"Total sales calculated from {allTransactions.Items.Count(t => t.Status == "Completed")} completed transactions: {TotalSales:N0}₫");
+                }
+                else
+                {
+                    TotalSales = 0;
+                    _logger.LogWarning("Failed to load transactions for total sales calculation");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading total sales from all transactions");
+                TotalSales = 0;
+            }
+        }
+
+        private async Task LoadUserStatistics(string token)
+        {
+            var userUrl = $"{_apiSettings.BaseUrl}/User/monthly-stats";
+            var userRequest = new HttpRequestMessage(HttpMethod.Get, userUrl);
             userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
@@ -61,18 +235,14 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     var stats = JsonSerializer.Deserialize<List<MonthlyStatDto>>(json, options)
                                 ?? new List<MonthlyStatDto>();
 
-                    var statsDict = stats.ToDictionary(
-                        s => s.Month,
-                        s => s.Total
-                    );
-
+                    var statsDict = stats.ToDictionary(s => s.Month, s => s.Total);
                     int currentYear = DateTime.Now.Year;
                     int currentMonth = DateTime.Now.Month;
 
+                    UsersData.Clear();
                     for (int month = 1; month <= currentMonth; month++)
                     {
                         var key = month.ToString("D2") + "/" + currentYear;
-                        ChartLabels.Add(new DateTime(currentYear, month, 1).ToString("MMMM"));
                         UsersData.Add(statsDict.ContainsKey(key) ? statsDict[key] : 0);
                     }
                 }
@@ -81,10 +251,12 @@ namespace final_project_fe.Pages.Admin.Dashboard
             {
                 _logger.LogError(ex, "Error when calling monthly-stats of user API");
             }
+        }
 
-            //Gọi API thống kê post theo tháng
-            var Posturl = $"{_apiSettings.BaseUrl}/Post/monthly-stats";
-            var postRequest = new HttpRequestMessage(HttpMethod.Get, Posturl);
+        private async Task LoadArticleStatistics(string token)
+        {
+            var postUrl = $"{_apiSettings.BaseUrl}/Post/monthly-stats";
+            var postRequest = new HttpRequestMessage(HttpMethod.Get, postUrl);
             postRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
@@ -97,18 +269,14 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     var stats = JsonSerializer.Deserialize<List<MonthlyStatDto>>(json, options)
                                 ?? new List<MonthlyStatDto>();
 
-                    var statsDict = stats.ToDictionary(
-                        s => s.Month,
-                        s => s.Total
-                    );
-
+                    var statsDict = stats.ToDictionary(s => s.Month, s => s.Total);
                     int currentYear = DateTime.Now.Year;
                     int currentMonth = DateTime.Now.Month;
 
+                    ArticlesData.Clear();
                     for (int month = 1; month <= currentMonth; month++)
                     {
                         var key = month.ToString("D2") + "/" + currentYear;
-                        ChartLabels.Add(new DateTime(currentYear, month, 1).ToString("MMMM"));
                         ArticlesData.Add(statsDict.ContainsKey(key) ? statsDict[key] : 0);
                     }
                 }
@@ -117,20 +285,22 @@ namespace final_project_fe.Pages.Admin.Dashboard
             {
                 _logger.LogError(ex, "Error when calling monthly-stats of post API");
             }
+        }
 
-            //Lấy TotalCount từ get post
-            var PostTotalCounturl = $"{_apiSettings.BaseUrl}/Post";
-            var postTotalCounturlRequest = new HttpRequestMessage(HttpMethod.Get, PostTotalCounturl);
-            postTotalCounturlRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        private async Task LoadTotalCounts(string token)
+        {
+            // Load total articles
+            var postTotalCountUrl = $"{_apiSettings.BaseUrl}/Post";
+            var postTotalCountRequest = new HttpRequestMessage(HttpMethod.Get, postTotalCountUrl);
+            postTotalCountRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
             {
-                var postResponse = await _httpClient.SendAsync(postTotalCounturlRequest);
+                var postResponse = await _httpClient.SendAsync(postTotalCountRequest);
                 if (postResponse.IsSuccessStatusCode)
                 {
                     var json = await postResponse.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
                     var apiResponse = JsonSerializer.Deserialize<PostManagerDto>(json, options);
 
                     if (apiResponse != null)
@@ -144,19 +314,18 @@ namespace final_project_fe.Pages.Admin.Dashboard
                 _logger.LogError(ex, "Error when calling Post API");
             }
 
-            //Lấy TotalCount từ get user
-            var UserTotalCounturl = $"{_apiSettings.BaseUrl}/User";
-            var userTotalCounturlRequest = new HttpRequestMessage(HttpMethod.Get, UserTotalCounturl);
-            userTotalCounturlRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            // Load total users
+            var userTotalCountUrl = $"{_apiSettings.BaseUrl}/User";
+            var userTotalCountRequest = new HttpRequestMessage(HttpMethod.Get, userTotalCountUrl);
+            userTotalCountRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
             {
-                var userResponse = await _httpClient.SendAsync(userTotalCounturlRequest);
+                var userResponse = await _httpClient.SendAsync(userTotalCountRequest);
                 if (userResponse.IsSuccessStatusCode)
                 {
                     var json = await userResponse.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
                     var apiResponse = JsonSerializer.Deserialize<User>(json, options);
 
                     if (apiResponse != null)
@@ -169,24 +338,193 @@ namespace final_project_fe.Pages.Admin.Dashboard
             {
                 _logger.LogError(ex, "Error when calling User API");
             }
+        }
 
-            // Daily Sales data
-            SalesPeriod = $"{DateTime.Now.AddMonths(-1):MMMM dd} - {DateTime.Now:MMMM dd}";
-            TotalSales = 4578.58m;
+        private async Task LoadSalesData(string token)
+        {
+            try
+            {
+                // Get all transactions for sales calculation
+                var transactionUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Transaction");
+                var transactionQuery = HttpUtility.ParseQueryString(string.Empty);
 
-            // Example data - replace with your actual data source
-            DailySalesData = new List<decimal> { 65, 59, 80, 81, 56, 55, 40, 35, 30 };
-            DailySalesLabels = new List<string> { "Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7", "Day 8", "Day 9" };
+                transactionQuery["page"] = "1";
+                transactionQuery["pageSize"] = "10000"; // Get all transactions
+                transactionQuery["sortOption"] = "desc_date";
 
-            // Example data - replace with your actual data source
-            ChartLabels = new List<string> { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+                transactionUrl.Query = transactionQuery.ToString();
 
-            MembershipsData = new List<int> { 154, 184, 175, 203, 210, 231, 240, 278, 252, 312, 320, 374 };
-            //UsersData = new List<int> { 256, 230, 245, 287, 240, 250, 230, 295, 331, 431, 456, 521 };
-            //ArticlesData = new List<int> { 542, 480, 430, 550, 530, 453, 380, 434, 568, 610, 700, 900 };
+                var transactionRequest = new HttpRequestMessage(HttpMethod.Get, transactionUrl.ToString());
+                transactionRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            // In a real app, you would get this data from a service/database
-            return Page();
+                var transactionResponse = await _httpClient.SendAsync(transactionRequest);
+
+                if (transactionResponse.IsSuccessStatusCode)
+                {
+                    var transactionJson = await transactionResponse.Content.ReadAsStringAsync();
+                    var allTransactions = JsonSerializer.Deserialize<PageResult<GetTransactionDto>>(transactionJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 10000);
+
+                    // Calculate TotalSales from ALL completed transactions (all time)
+                    TotalSales = allTransactions.Items
+                        .Where(t => t.Status == "Completed" && t.Amount.HasValue)
+                        .Sum(t => t.Amount.Value);
+
+                    // Calculate date range for Daily Money chart: from same day last month to today
+                    var currentDate = DateTime.Now;
+                    var startDate = currentDate.AddMonths(-1); // Same day last month
+                    var endDate = currentDate; // Today
+
+                    // Set sales period
+                    SalesPeriod = $"{startDate:MMMM dd} - {endDate:MMMM dd}";
+
+                    // Filter completed transactions for the specified date range (for Daily Money chart)
+                    var rangeTransactions = allTransactions.Items
+                        .Where(t => t.Status == "Completed"
+                                   && t.CreateAt.Date >= startDate.Date
+                                   && t.CreateAt.Date <= endDate.Date
+                                   && t.Amount.HasValue)
+                        .ToList();
+
+                    // Group transactions by date and calculate daily sales
+                    var dailySales = rangeTransactions
+                        .GroupBy(t => t.CreateAt.Date)
+                        .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount.Value));
+
+                    // Initialize data arrays
+                    DailySalesData.Clear();
+                    DailySalesLabels.Clear();
+
+                    // Create data for each day in the range
+                    var currentDateIter = startDate.Date;
+                    while (currentDateIter <= endDate.Date)
+                    {
+                        // Add sales data (0 if no transactions on that day)
+                        decimal dailySale = dailySales.ContainsKey(currentDateIter) ? dailySales[currentDateIter] : 0;
+                        DailySalesData.Add(dailySale);
+
+                        // Add label with day and month
+                        DailySalesLabels.Add($"{currentDateIter:dd/MM}");
+
+                        currentDateIter = currentDateIter.AddDays(1);
+                    }
+
+                    // Calculate TotalSalesOneMonth from the daily sales data
+                    TotalSalesOneMonth = DailySalesData.Sum();
+
+                    _logger.LogInformation($"Total Sales (All time): {TotalSales:N0}₫");
+                    _logger.LogInformation($"Total Sales (One month period): {TotalSalesOneMonth:N0}₫");
+                    _logger.LogInformation($"Loaded daily sales data from {startDate:dd/MM/yyyy} to {endDate:dd/MM/yyyy}");
+                }
+                else
+                {
+                    // Fallback: create empty data for the date range
+                    var currentDate = DateTime.Now;
+                    var startDate = currentDate.AddMonths(-1);
+                    var endDate = currentDate;
+
+                    SalesPeriod = $"{startDate:MMMM dd} - {endDate:MMMM dd}";
+
+                    DailySalesData.Clear();
+                    DailySalesLabels.Clear();
+
+                    var currentDateIter = startDate.Date;
+                    while (currentDateIter <= endDate.Date)
+                    {
+                        DailySalesData.Add(0);
+                        DailySalesLabels.Add($"{currentDateIter:dd/MM}");
+                        currentDateIter = currentDateIter.AddDays(1);
+                    }
+
+                    TotalSales = 0;
+                    TotalSalesOneMonth = 0;
+
+                    _logger.LogWarning("Failed to load transactions for daily sales, using empty data");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading daily sales data");
+
+                // Fallback: create empty data for the date range
+                var currentDate = DateTime.Now;
+                var startDate = currentDate.AddMonths(-1);
+                var endDate = currentDate;
+
+                SalesPeriod = $"{startDate:MMMM dd} - {endDate:MMMM dd}";
+
+                DailySalesData.Clear();
+                DailySalesLabels.Clear();
+
+                var currentDateIter = startDate.Date;
+                while (currentDateIter <= endDate.Date)
+                {
+                    DailySalesData.Add(0);
+                    DailySalesLabels.Add($"{currentDateIter:dd/MM}");
+                    currentDateIter = currentDateIter.AddDays(1);
+                }
+
+                TotalSales = 0;
+                TotalSalesOneMonth = 0;
+            }
+        }
+
+        private void LoadChartData()
+        {
+            ChartLabels.Clear();
+            int currentYear = DateTime.Now.Year;
+            int currentMonth = DateTime.Now.Month;
+
+            for (int month = 1; month <= currentMonth; month++)
+            {
+                ChartLabels.Add(new DateTime(currentYear, month, 1).ToString("MMMM"));
+            }
+
+            // Sample membership data - you can make this dynamic later
+            MembershipsData = new List<int> { 154, 184, 175, 203, 210, 231, 240, 278, 252, 312, 320, 374 }
+                .Take(currentMonth).ToList();
+        }
+
+        // API endpoint to handle AJAX requests from frontend
+        public async Task<IActionResult> OnGetFilterTransactionsAsync(string? status = null, string? email = null)
+        {
+            try
+            {
+                if (!Request.Cookies.ContainsKey("AccessToken"))
+                    return new JsonResult(new { success = false, message = "Unauthorized" });
+
+                string token = Request.Cookies["AccessToken"];
+                await LoadTransactions(null, null, null, false, status, token);
+
+                var filteredTransactions = Transactions.Items.AsQueryable();
+
+                // Filter by email if provided
+                if (!string.IsNullOrWhiteSpace(email))
+                {
+                    filteredTransactions = filteredTransactions.Where(t =>
+                        t.User != null &&
+                        t.User.Email.ToLower().Contains(email.ToLower())
+                    );
+                }
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    transactions = filteredTransactions.ToList(),
+                    totalCount = filteredTransactions.Count()
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error filtering transactions");
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "An error occurred while filtering transactions"
+                });
+            }
         }
     }
 }

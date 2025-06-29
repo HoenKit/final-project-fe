@@ -3,6 +3,53 @@
 @{
     ViewData["ActivePage"] = "Dashboard";
 }
+<style>
+    /* Additional CSS for enhanced styling */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+        transition: background-color 0.2s ease;
+    }
+
+    .badge-light-info {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+
+    .empty-state {
+        padding: 2rem;
+    }
+
+    #transactionTableBody tr {
+        transition: all 0.2s ease;
+    }
+
+        #transactionTableBody tr:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+    .card-tools .btn {
+        border-radius: 6px;
+    }
+
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    code {
+        font-size: 0.85em;
+    }
+</style>
 
 <div class="page-header">
     <h3 class="fw-bold mb-3">Dashboard</h3>
@@ -47,7 +94,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                             <p class="card-category">Memberships</p>
-                            <h4 class="card-title">576</h4>
+                            <h4 class="card-title">@Model.TotalMemberships</h4>
                         </div>
                     </div>
                 </div>
@@ -66,7 +113,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                             <p class="card-category">Sales</p>
-                            <h4 class="card-title">$ 1,345</h4>
+                            <h4 class="card-title">@Model.TotalSales.ToString("N0")₫</h4>
                         </div>
                     </div>
                 </div>
@@ -93,6 +140,7 @@
         </div>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card card-round">
@@ -113,13 +161,13 @@
         <div class="card card-primary card-round">
             <div class="card-header">
                 <div class="card-head-row">
-                    <div class="card-title">Daily Sales</div>
+                    <div class="card-title">Daily Money</div>
                 </div>
                 <div class="card-category">@Model.SalesPeriod</div>
             </div>
             <div class="card-body pb-0">
                 <div class="mb-4 mt-2">
-                    <h1>$@Model.TotalSales.ToString("N2")</h1>
+                    <h1>@Model.TotalSalesOneMonth.ToString("N0")₫</h1>
                 </div>
                 <div class="pull-in">
                     <canvas id="dailySalesChart" height="200"></canvas>
@@ -127,6 +175,151 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Recent Transaction History -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-round">
+            <div class="card-header">
+                <div class="card-head-row card-tools-still-right">
+                    <div class="card-title">
+                        <h4 class="fw-bold mb-0">Transaction History This Month</h4>
+                        <p class="text-muted mb-0 small">Recent payment transactions and activities</p>
+                    </div>
+                    <div class="card-tools d-flex align-items-center gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-filter me-1"></i>Filter Status
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="filterTransactionsByStatus('all')">
+                                    <i class="fas fa-list me-2"></i>All Status
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="filterTransactionsByStatus('Completed')">
+                                    <i class="fas fa-check-circle me-2 text-success"></i>Completed
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="filterTransactionsByStatus('Cancel')">
+                                    <i class="fas fa-times-circle me-2 text-danger"></i>Cancelled
+                                </a>
+                            </div>
+                        </div>
+                        <div class="input-group" style="width: 280px;">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="emailSearchInput"
+                                   placeholder="Search by email address..." onkeyup="searchTransactionsByEmail(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-hover align-items-center mb-0">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th scope="col" class="border-0 ps-4">
+                                    <span class="text-dark fw-bold">Payment User</span>
+                                </th>
+                                <th scope="col" class="border-0 text-center">
+                                    <span class="text-dark fw-bold">Points</span>
+                                </th>
+                                <th scope="col" class="border-0 text-center">
+                                    <span class="text-dark fw-bold">Date & Time</span>
+                                </th>
+                                <th scope="col" class="border-0 text-center">
+                                    <span class="text-dark fw-bold">Amount</span>
+                                </th>
+                                <th scope="col" class="border-0 text-center">
+                                    <span class="text-dark fw-bold">Payment Method</span>
+                                </th>
+                                <th scope="col" class="border-0 text-center pe-4">
+                                    <span class="text-dark fw-bold">Order Code</span>
+                                </th>f
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            @if (Model.Transactions?.Items != null && Model.Transactions.Items.Any())
+                            {
+                                @foreach (var transaction in Model.Transactions.Items)
+                                {
+                                    <tr data-email="@(transaction.User?.Email?.ToLower() ?? "")" data-status="@transaction.Status" class="border-bottom">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <span class="badge @(transaction.Status == "Completed" ? "badge-success" : "badge-danger") p-2">
+                                                        <i class="@(transaction.Status == "Completed" ? "fa fa-check" : "fas fa-times")"></i>
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@transaction.UserId"
+                                                       class="text-decoration-none text-dark fw-medium">
+                                                        @(transaction.User?.Email ?? "Unknown User")
+                                                    </a>
+                                                    <div class="small text-muted">
+                                                        Status: <span class="@(transaction.Status == "Completed" ? "text-success" : "text-danger")">
+                                                            @transaction.Status
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-bold text-primary">@(transaction.Points?.ToString("N0") ?? "N/A")</span>
+                                            <div class="small text-muted">points</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="fw-medium">@transaction.CreateAt.ToString("MMM dd, yyyy")</div>
+                                            <div class="small text-muted">@transaction.CreateAt.ToString("h:mm tt")</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-bold text-success">@(transaction.Amount?.ToString("N0") ?? "0")₫</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-light-info px-3 py-2">
+                                                @(transaction.PaymentMethod ?? "N/A")
+                                            </span>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <code class="bg-light px-2 py-1 rounded">@(transaction.OrderCode ?? "N/A")</code>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No transactions found this month</h5>
+                                            <p class="text-muted small">Transactions will appear here when users make payments</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light border-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Total transactions this month: <span class="fw-bold">@(Model.Transactions?.TotalCount ?? 0)</span>
+                    </small>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="refreshTransactions()">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     @section Scripts {
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -263,7 +456,7 @@
             data: {
                 labels: @Html.Raw(Json.Serialize(Model.DailySalesLabels)),
                 datasets: [{
-                    label: "Sales Analytics",
+                    label: "Total Money",
                     fill: true,
                     backgroundColor: "rgba(255,255,255,0.2)",
                     borderColor: "#fff",
@@ -322,3 +515,146 @@
         </script>
     }
 </div>
+
+<script>
+    // Enhanced JavaScript functions
+    function filterTransactionsByStatus(status) {
+        const rows = document.querySelectorAll('#transactionTableBody tr[data-status]');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            if (status === 'all' || row.getAttribute('data-status') === status) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        updateTransactionCount(visibleCount);
+
+        // Update dropdown button text
+        const filterBtn = document.querySelector('.dropdown-toggle');
+        if (status === 'all') {
+            filterBtn.innerHTML = '<i class="fas fa-filter me-1"></i>Filter Status';
+        } else {
+            filterBtn.innerHTML = `<i class="fas fa-filter me-1"></i>${status}`;
+        }
+    }
+
+    function searchTransactionsByEmail(event) {
+        if (!event || event.key === 'Enter') {
+            const searchTerm = document.getElementById('emailSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionTableBody tr[data-email]');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const email = row.getAttribute('data-email');
+                if (email.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateTransactionCount(visibleCount);
+        }
+    }
+
+    function updateTransactionCount(count = null) {
+        if (count === null) {
+            const visibleRows = document.querySelectorAll('#transactionTableBody tr[data-email]:not([style*="display: none"])');
+            count = visibleRows.length;
+        }
+
+        const countElement = document.querySelector('.card-footer small span.fw-bold');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    function exportTransactions() {
+        // Placeholder for export functionality
+        alert('Export functionality would be implemented here');
+    }
+
+    function refreshTransactions() {
+        // Placeholder for refresh functionality
+        location.reload();
+    }
+
+    // Auto-refresh every 30 seconds (optional)
+    // setInterval(refreshTransactions, 30000);
+</script>
+<script>
+    // Enhanced JavaScript functions
+    function filterTransactionsByStatus(status) {
+        const rows = document.querySelectorAll('#transactionTableBody tr[data-status]');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            if (status === 'all' || row.getAttribute('data-status') === status) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        updateTransactionCount(visibleCount);
+
+        // Update dropdown button text
+        const filterBtn = document.querySelector('.dropdown-toggle');
+        if (status === 'all') {
+            filterBtn.innerHTML = '<i class="fas fa-filter me-1"></i>Filter Status';
+        } else {
+            filterBtn.innerHTML = `<i class="fas fa-filter me-1"></i>${status}`;
+        }
+    }
+
+    function searchTransactionsByEmail(event) {
+        if (!event || event.key === 'Enter') {
+            const searchTerm = document.getElementById('emailSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionTableBody tr[data-email]');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const email = row.getAttribute('data-email');
+                if (email.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateTransactionCount(visibleCount);
+        }
+    }
+
+    function updateTransactionCount(count = null) {
+        if (count === null) {
+            const visibleRows = document.querySelectorAll('#transactionTableBody tr[data-email]:not([style*="display: none"])');
+            count = visibleRows.length;
+        }
+
+        const countElement = document.querySelector('.card-footer small span.fw-bold');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    function exportTransactions() {
+        // Placeholder for export functionality
+        alert('Export functionality would be implemented here');
+    }
+
+    function refreshTransactions() {
+        // Placeholder for refresh functionality
+        location.reload();
+    }
+
+    // Auto-refresh every 30 seconds (optional)
+    // setInterval(refreshTransactions, 30000);
+</script>
