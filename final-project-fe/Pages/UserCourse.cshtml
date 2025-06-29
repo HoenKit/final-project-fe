@@ -341,9 +341,22 @@
                                         <div class="progress-fill @progressClass" style="width: @percentage%"></div>
                                     </div>
                                 </div>
-
                                 <div class="course-action">
-                                    <a asp-page="/LearningPage" asp-route-courseId="@course.CourseId">@actionText</a>
+                                    @if (course.Status == "Completed")
+                                    {
+                                        <a asp-page="/GenerateCertificate"
+                                           asp-route-userId="@Model.UserId"
+                                           asp-route-courseId="@course.CourseId">
+                                             Get Certificate
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-page="/LearningPage"
+                                           asp-route-courseId="@course.CourseId">
+                                            @actionText
+                                        </a>
+                                    }
                                 </div>
                             </div>
                         </div>
