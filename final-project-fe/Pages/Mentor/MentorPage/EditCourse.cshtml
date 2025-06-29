@@ -1552,8 +1552,30 @@
                 const categoryId = document.querySelector('select[name="Course.CategoryId"]');
                 const courseContent = document.querySelector('textarea[name="Course.CourseContent"]');
 
-                return (categoryId && categoryId.value > 0) &&
-                       (courseContent && courseContent.value.trim().length >= 100);
+                const categoryValid = categoryId && categoryId.value && categoryId.value !== "";
+                const contentValid = courseContent && courseContent.value.trim().length >= 100;
+
+                // Update visual feedback for category select
+                if (categoryId) {
+                    categoryId.classList.remove('is-valid', 'is-invalid');
+                    if (categoryValid) {
+                        categoryId.classList.add('is-valid');
+                    } else {
+                        categoryId.classList.add('is-invalid');
+                    }
+                }
+
+                // Update visual feedback for course content
+                if (courseContent) {
+                    courseContent.classList.remove('is-valid', 'is-invalid');
+                    if (contentValid) {
+                        courseContent.classList.add('is-valid');
+                    } else {
+                        courseContent.classList.add('is-invalid');
+                    }
+                }
+
+                return categoryValid && contentValid;
             }
 
            function validateSkillLearn() {
@@ -1581,11 +1603,16 @@
             }
 
             function validateLevelLanguage() {
-                const level = document.querySelector('input[name="Course.Level"]');
+                const level = document.querySelector('select[name="Course.Level"]'); // Changed from input to select
                 const language = document.querySelector('input[name="Course.Language"]');
 
-                return (level && level.value.trim().length > 0) &&
-                       (language && language.value.trim().length > 0);
+                // Check if level is selected (not empty or default value)
+                const levelValid = level && level.value && level.value.trim().length > 0;
+
+                // Check if language is filled
+                const languageValid = language && language.value.trim().length > 0;
+
+                return levelValid && languageValid;
             }
 
             function validateIntendedLearners() {
@@ -1652,6 +1679,16 @@
                 if (field.hasAttribute('required') && !value) {
                     field.classList.add('is-invalid');
                     return false;
+                }
+
+                // Special handling for Course.Level select
+                if (fieldName === 'Course.Level') {
+                    if (!value || value === '') {
+                        field.classList.add('is-invalid');
+                        return false;
+                    }
+                    field.classList.add('is-valid');
+                    return true;
                 }
 
                 if (fieldName === 'Course.CourseContent' && value.length < 100) {
