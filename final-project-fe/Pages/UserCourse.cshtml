@@ -349,6 +349,13 @@
                                            asp-route-courseId="@course.CourseId">
                                              Get Certificate
                                         </a>
+                                        <br />
+
+                                        <a asp-page="/CreateReview"
+                                           asp-route-userId="@Model.UserId"
+                                           asp-route-courseId="@course.CourseId">
+                                            @actionText
+                                        </a>
                                     }
                                     else
                                     {
@@ -356,6 +363,7 @@
                                            asp-route-courseId="@course.CourseId">
                                             @actionText
                                         </a>
+
                                     }
                                 </div>
                             </div>
