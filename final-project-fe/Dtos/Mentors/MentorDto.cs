@@ -5,7 +5,14 @@
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
 	}
-	public class GetMentorDto
+    public class MentorInforDto
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Signature { get; set; }
+        public string JobTile { get; set; }
+    }
+    public class GetMentorDto
 	{
 		public int MentorId { get; set; }
 		public Guid UserId { get; set; }

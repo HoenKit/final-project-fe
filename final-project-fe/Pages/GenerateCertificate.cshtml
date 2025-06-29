@@ -1,0 +1,136 @@
+﻿@page
+@model final_project_fe.Pages.GenerateCertificateModel
+@{
+    ViewData["Title"] = "Generate Certificate";
+}
+
+<div id="certificate">
+    <div class="cert-title">CERTIFICATE OF PARTICIPATION</div>
+    <div class="cert-subtitle">This certificate is proudly presented to</div>
+    <div class="cert-name">@Model.UserFullName</div>
+    <div class="cert-course">For successfully completing the course:</div>
+    <div class="cert-course-title">@Model.CourseName</div>
+
+    <div class="cert-footer">
+        <div class="cert-org">
+            <hr />
+            Phronesis Learning
+        </div>
+        <div class="cert-mentor">
+            <hr />
+            @Model.MentorSignature<br />Mentor
+        </div>
+    </div>
+</div>
+
+<style>
+    #certificate {
+        width: 1123px;
+        height: 794px;
+        background-image: url('@Url.Content("~/images/certificate-bg.png")');
+        background-size: cover;
+        background-repeat: no-repeat;
+        font-family: 'Georgia', serif;
+        position: relative;
+        margin: 0 auto;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        padding: 60px;
+        color: #fff;
+    }
+
+    .cert-title {
+        font-size: 36px;
+        font-weight: bold;
+        color: gold;
+        text-align: center;
+        margin-top: 100px;
+    }
+
+    .cert-subtitle {
+        text-align: center;
+        font-size: 18px;
+        margin-top: 20px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .cert-name {
+        font-size: 48px;
+        font-weight: bold;
+        color: #f8d776;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .cert-course {
+        font-size: 20px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .cert-course-title {
+        font-size: 24px;
+        text-align: center;
+        font-weight: bold;
+        color: #ffffff;
+        margin-top: 10px;
+    }
+
+    .cert-footer {
+        position: absolute;
+        bottom: 80px;
+        left: 60px;
+        right: 60px;
+        display: flex;
+        justify-content: space-between;
+        color: gold;
+        font-size: 14px;
+    }
+
+    .cert-org, .cert-mentor {
+        text-align: center;
+        margin-left: 90px;
+        margin-right: 200px;
+    }
+
+        .cert-org hr, .cert-mentor hr {
+            width: 150px;
+            border: 1px solid gold;
+            margin-bottom: 5px;
+        }
+</style>
+
+<!-- Upload Form -->
+@* <form id="uploadForm" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+    <input type="hidden" name="CourseId" value="@Model.CourseId" />
+    <input type="file" name="CertificateFile" id="certificateInput" hidden />
+    <button type="button" id="generateButton" onclick="generateAndSubmit()">📄 Generate & Upload</button>
+</form> *@
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        async function generateAndSubmit() {
+            const { jsPDF } = window.jspdf;
+            const certificate = document.getElementById("certificate");
+
+            const canvas = await html2canvas(certificate, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL("image/png");
+
+            const pdf = new jsPDF("landscape", "pt", [canvas.width, canvas.height]);
+            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+
+            const blob = pdf.output("blob");
+
+            const file = new File([blob], "certificate.pdf", { type: "application/pdf" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            const fileInput = document.getElementById("certificateInput");
+            fileInput.files = dataTransfer.files;
+
+            document.getElementById("uploadForm").submit();
+        }
+    </script>
+}
