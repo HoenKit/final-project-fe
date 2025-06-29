@@ -556,9 +556,10 @@
                 html += `<p>${lesson.description}</p>`;
             }
 
-            if (lesson.videoLink) {
-                html += `<video src="${lesson.videoLink}" controls></video>`;
-            }
+        if (lesson.videoLink) {
+            let embedUrl = lesson.videoLink.replace("watch?v=", "embed/");
+            html += `<iframe width="560" height="315" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+        }
 
             if (lesson.documentLink) {
                 html += `<a href="${lesson.documentLink}" target="_blank">View Document</a>`;
