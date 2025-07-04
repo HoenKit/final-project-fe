@@ -1,0 +1,699 @@
+﻿@page
+@model final_project_fe.Pages.CourseRecommendModel
+@{
+    ViewData["Title"] = "Recommended Courses For You";
+}
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Courses For You</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        a {
+            text-decoration: none !important;
+            color: inherit;
+        }
+
+            a:hover {
+                text-decoration: none !important;
+                color: inherit;
+            }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #2c3e50;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .user-profile {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: inline-block;
+            animation: slideInUp 1s ease-out 0.5s both;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .user-profile h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .user-info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .user-info-item strong {
+            min-width: 140px;
+            color: #495057;
+        }
+
+        .user-info-item span {
+            color: #6c757d;
+        }
+
+        .main-content {
+            padding: 40px 0;
+            background: #ffffff;
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            border: 1px solid #f1f3f4;
+        }
+
+        .filter-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #495057;
+            color: white;
+            border-color: #495057;
+            transform: translateY(-2px);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+            max-width: 1200px;
+            justify-items: center;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            border: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out;
+            width: 100%;
+            max-width: 380px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recommendation-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+
+        .top-pick-badge {
+            background: linear-gradient(45deg, #ffa500, #ffcd3c);
+        }
+
+        .match-percentage {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-color: #dee2e6;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .course-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .course-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .course-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            line-height: 1.3;
+        }
+
+        .course-description {
+            color: #6c757d;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .course-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stars {
+            color: #ffc107;
+        }
+
+        .course-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .currency-symbol {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .enroll-btn {
+            width: 100%;
+            background: #495057;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: auto;
+            min-height: 50px;
+        }
+
+        .enroll-btn:hover {
+            background: #343a40;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(73, 80, 87, 0.2);
+        }
+
+        .no-courses {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .alert {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            animation: slideInDown 0.5s ease-out;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #b8daff;
+            color: #0c5460;
+        }
+
+        @@keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .courses-grid {
+                grid-template-columns: 1fr;
+                justify-items: stretch;
+            }
+            
+            .course-card {
+                max-width: none;
+            }
+            
+            .filters {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .filter-btn {
+                white-space: nowrap;
+            }
+
+            .user-info {
+                text-align: center;
+            }
+
+            .user-info-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-info-item strong {
+                min-width: auto;
+            }
+
+            .course-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @@media (min-width: 769px) {
+            .courses-grid:has(.course-card:nth-child(1):nth-last-child(1)) {
+                justify-content: center;
+            }
+            
+            .courses-grid:has(.course-card:nth-child(2):nth-last-child(1)) {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(TempData["WarningMessage"] as string))
+    {
+        <div class="alert alert-warning">
+            @TempData["WarningMessage"]
+        </div>
+    }
+
+    <!-- Header -->
+    <header class="header" style="background: #111827;">
+        <div class="container">
+            <h1 style="    color: white;">
+                🎯 Courses Recommended For You
+            </h1>
+            <p class="subtitle">Based on your survey results</p>
+            
+            @if (Model.UserInfo != null)
+            {
+                <div class="user-profile">
+                    <h3>Your Profile</h3>
+                    <div class="user-info">
+                        <div class="user-info-item">
+                            <strong>Level:</strong>
+                            <span>@(Model.UserInfo.UserMetaData?.Level ?? "Not specified")</span>
+                        </div>
+                        <div class="user-info-item">
+                            <strong>Goals:</strong>
+                            <span>@(Model.UserInfo.UserMetaData?.Goals ?? "Not specified")</span>
+                        </div>
+                        <div class="user-info-item">
+                            <strong>Favorite Subject:</strong>
+                            <span>@(Model.UserInfo.UserMetaData?.FavouriteSubject ?? "Not specified")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            @if (!Model.HasCompleteProfile)
+            {
+                <div class="alert alert-info">
+                    <p>🔍 Please complete your profile to get personalized recommendations.</p>
+                    <a asp-page="/Profile/Edit" class="btn btn-primary">Update Profile</a>
+                </div>
+            }
+            else if (Model.RecommendedCourses.Any())
+            {
+                var hasHighMatch = Model.RecommendedCourses.Any(c => (c.Score ?? 0) >= 90);
+                var hasRecommended = Model.RecommendedCourses.Any(c => (c.Score ?? 0) >= 80);
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <h2 class="filter-title">🔍 Filter suitable courses</h2>
+                    <div class="filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        @if (hasHighMatch)
+                        {
+                            <button class="filter-btn" data-filter="high-match">Best Match</button>
+                        }
+                        @if (hasRecommended)
+                        {
+                            <button class="filter-btn" data-filter="recommended">Recommended</button>
+                        }
+                        <button class="filter-btn" data-filter="price-low">Price: Low to High</button>
+                        <button class="filter-btn" data-filter="price-high">Price: High to Low</button>
+                    </div>
+                </div>
+
+                <!-- Courses Grid -->
+                <div class="courses-grid" id="coursesGrid">
+                    @foreach (var course in Model.RecommendedCourses)
+                    {
+                        var matchPercentage = (int)(course.Score ?? 0);
+                        var isHighMatch = matchPercentage >= 90;
+                        var isRecommended = matchPercentage >= 80;
+                        var categories = new List<string> { "all" };
+                        
+                        if (isHighMatch) categories.Add("high-match");
+                        if (isRecommended) categories.Add("recommended");
+
+                        <a href="/Mentor/MentorPage/CourseDetail?courseId=@course.CourseId" class="course-card" data-categories="@string.Join(" ", categories)" data-price="@course.Cost">
+                            @if (isHighMatch)
+                            {
+                                <div class="recommendation-badge">🔥 RECOMMENDED</div>
+                            }
+                            else if (isRecommended)
+                            {
+                                <div class="recommendation-badge top-pick-badge">⭐ TOP PICK</div>
+                            }
+                            
+                            <div class="match-percentage">@matchPercentage% match</div>
+                            
+                            <img src="@(course.CoursesImage ?? "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/11/tai-hinh-nen-dep-mien-phi.jpg")" 
+                                 class="course-image" 
+                                 alt="@course.CourseName"
+                                 onerror="this.src='https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/11/tai-hinh-nen-dep-mien-phi.jpg'">
+                            
+                            <div class="course-content">
+                                <h3 class="course-title">@course.CourseName</h3>
+                                <p class="course-description">@(course.CourseContent ?? "Discover new skills and enhance your knowledge with this comprehensive course.")</p>
+                                
+                                <div class="course-meta">
+                                    <span>by @course.Mentor?.FirstName @course.Mentor.LastName</span>
+                                    <span>@(course.CourseLength?.ToString("0") ?? "N/A") hours</span>
+                                </div>
+                                
+                                <div class="course-stats">
+                                    <div class="rating">
+                                        <span class="stars">
+                                            @{
+                                                var rating = course.AverageRating ?? 0;
+                                            }
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= rating)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+                                        </span>
+                                        <span>@(course.AverageRating?.ToString("0.0") ?? "N/A")</span>
+                                    </div>
+                                    <span>@(course.StudentCount ?? 0) students</span>
+                                    <div class="course-price">
+                                        <i class="bi bi-p-circle"></i>
+                                        <span>@course.Cost.ToString("N0")</span>
+                                    </div>
+                                </div>
+                                <form method="post" class="space-y-3 mb-4">
+                                    <input type="hidden" name="CourseId" value="@course.CourseId" />
+                                    <input type="hidden" name="SelectedCouponId" id="SelectedCouponId" value="0" />
+                                    <button type="submit" class="enroll-btn">
+                                        Buy Course Now
+                                    </button>
+                                </form>
+                            </div>
+                        </a>
+                    }
+                </div>
+
+                <div class="no-courses" id="noCourses" style="display: none;">
+                    <p>😔 No courses found matching these filters.</p>
+                    <p>Try removing some filter criteria or contact us for more recommendations!</p>
+                </div>
+            }
+            else
+            {
+                <div class="no-courses">
+                    <p>😔 No recommended courses found for your profile.</p>
+                    <p>Please update your profile or contact us for personalized recommendations!</p>
+                </div>
+            }
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const courseCards = document.querySelectorAll('.course-card');
+            const noCourses = document.getElementById('noCourses');
+            const coursesGrid = document.getElementById('coursesGrid');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+
+                    const filter = btn.dataset.filter;
+                    let visibleCards = [];
+
+                    // Lọc theo categories
+                    if (filter === 'all' || filter === 'high-match' || filter === 'recommended') {
+                        courseCards.forEach(card => {
+                            const categories = card.dataset.categories;
+                            if (filter === 'all' || categories.includes(filter)) {
+                                visibleCards.push(card);
+                            }
+                        });
+                    }
+                    // Lọc theo giá
+                    else if (filter === 'price-low' || filter === 'price-high') {
+                        visibleCards = Array.from(courseCards).sort((a, b) => {
+                            const priceA = parseFloat(a.dataset.price) || 0;
+                            const priceB = parseFloat(b.dataset.price) || 0;
+                            return filter === 'price-low' ? priceA - priceB : priceB - priceA;
+                        });
+                    }
+
+                    // Ẩn tất cả cards trước
+                    courseCards.forEach(card => {
+                        card.style.display = 'none';
+                    });
+
+                    // Hiển thị các cards được lọc
+                    if (visibleCards.length > 0) {
+                        visibleCards.forEach((card, index) => {
+                            card.style.display = 'flex';
+                            card.style.animation = 'fadeInUp 0.6s ease-out';
+                            card.style.animationDelay = `${index * 0.1}s`;
+                        });
+
+                        // Sắp xếp lại trong DOM nếu là filter theo giá
+                        if (filter === 'price-low' || filter === 'price-high') {
+                            visibleCards.forEach(card => {
+                                coursesGrid.appendChild(card);
+                            });
+                        }
+                    }
+
+                    // Show/hide no courses message
+                    if (visibleCards.length === 0 && noCourses) {
+                        noCourses.style.display = 'block';
+                    } else if (noCourses) {
+                        noCourses.style.display = 'none';
+                    }
+                });
+            });
+
+            // Add animation delay to course cards
+            courseCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Smooth scroll for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
