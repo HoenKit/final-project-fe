@@ -19,6 +19,8 @@ using System.Text;
 using System.Net.Http.Json;
 using final_project_fe.Dtos.Question;
 using System.Reflection;
+using final_project_fe.Dtos.Answer;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -43,8 +45,22 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public UpdateLessonDto Lesson { get; set; } = new UpdateLessonDto();
 
         [BindProperty]
+        public string Topic { get; set; } = string.Empty;
+
+        [BindProperty]
+        public int LessonId { get; set; }
+
+        [BindProperty]
+        public int Number { get; set; }
+
+
+        [BindProperty]
         public QuestionResponseDto Question { get; set; } = new QuestionResponseDto();
         public List<QuestionResponseDto> Questions { get; set; } = new();
+
+        [BindProperty]
+        public AnswerResponseDto Answer { get; set; } = new AnswerResponseDto();
+        public List<AnswerResponseDto> Answers { get; set; } = new();
         public List<ModuleWithLessonsDto> Modules { get; set; } = new List<ModuleWithLessonsDto>();
         public string CurrentUserId { get; set; }
         public string BaseUrl { get; set; }
@@ -171,6 +187,30 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                                     if (questions != null)
                                     {
                                         lesson.Questions = questions;
+
+                                        // Get Answers for each question
+                                        foreach (var question in questions)
+                                        {
+                                            var answerResponse = await _httpClient.GetAsync($"{BaseUrl}/Answer/get-all-answer-by-question/{question.QuestionId}");
+                                            if (answerResponse.IsSuccessStatusCode)
+                                            {
+                                                var answerJson = await answerResponse.Content.ReadAsStringAsync();
+                                                var answers = JsonSerializer.Deserialize<List<AnswerResponseDto>>(answerJson, new JsonSerializerOptions
+                                                {
+                                                    PropertyNameCaseInsensitive = true
+                                                });
+
+                                                if (answers != null)
+                                                {
+                                                    question.Answers = answers;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                _logger.LogWarning($"Could not load answers for question {question.QuestionId}. Status: {answerResponse.StatusCode}");
+                                                question.Answers = new(); // Khởi tạo trống để tránh null
+                                            }
+                                        }
                                     }
                                 }
                                 else
@@ -938,6 +978,209 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             {
                 _logger.LogError(ex, "Exception while deleting question.");
                 TempData["ErrorMessage"] = "An unexpected error occurred while deleting the question.";
+            }
+
+            // Redirect lại trang hiện tại và giữ lại courseId nếu có
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
+
+
+
+        //Handler Generate Question and Answer by Upload Excel
+        public async Task<IActionResult> OnPostUploadExcel(IFormFile excelFile, int lessonId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            // Validate input
+            if (excelFile == null || excelFile.Length == 0)
+            {
+                TempData["ErrorMessage"] = "Please select Excel file to upload.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            // Validate file extension
+            var allowedExtensions = new[] { ".xlsx", ".xls" };
+            var fileExtension = Path.GetExtension(excelFile.FileName).ToLower();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                TempData["ErrorMessage"] = "Only Excel files (.xlsx, .xls) are accepted.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            // Validate file size (limit 10MB)
+            if (excelFile.Length > 10 * 1024 * 1024)
+            {
+                TempData["ErrorMessage"] = "File must not exceed 10MB.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            // Validate lessonId
+            if (lessonId <= 0)
+            {
+                TempData["ErrorMessage"] = "Invalid lesson ID.";
+                return Page();
+            }
+
+            try
+            {
+                using var httpClient = new HttpClient();
+
+                // Prepare multipart form data
+                using var formData = new MultipartFormDataContent();
+
+                // Add file to form data
+                using var fileStream = excelFile.OpenReadStream();
+                using var streamContent = new StreamContent(fileStream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                formData.Add(streamContent, "file", excelFile.FileName);
+
+                // Add lessonId to form data
+                formData.Add(new StringContent(lessonId.ToString()), "lessonId");
+                
+                // Call API endpoint
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Question/upload-excel", formData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Import Questions Success";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("API call failed with status: {StatusCode}, Content: {Content}",
+                        response.StatusCode, errorContent);
+
+                    TempData["ErrorMessage"] = "An error occurred while importing the Excel file. Please try again.";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error when calling import API");
+                TempData["ErrorMessage"] = "Unable to connect to server. Please try again.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading Excel file: {FileName}", excelFile.FileName);
+                TempData["ErrorMessage"] = "An error occurred while uploading the file. Please try again.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+        }
+
+        //Handler Generate Question and Answer by AI
+        public async Task<IActionResult> OnPostGenerateAIAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            // Validate input
+            if (string.IsNullOrWhiteSpace(Topic))
+            {
+                TempData["ErrorMessage"] = "Topic cannot be left blank.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            if (LessonId <= 0)
+            {
+                TempData["ErrorMessage"] = "LessonId is invalid.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            if (Number <= 0)
+            {
+                TempData["ErrorMessage"] = "Number of questions must be greater than 0.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            try
+            {
+                // Tạo request object
+                var request = new QuizImportRequest
+                {
+                    Topic = Topic,
+                    LessonId = LessonId,
+                    Number = Number
+                };
+
+                // Gọi API Backend
+                var json = JsonSerializer.Serialize(request);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Question/import-AI", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<dynamic>(responseContent);
+
+                    TempData["SuccessMessage"] = "Quiz successfully generated from AI!";
+
+                    // Redirect về trang danh sách câu hỏi hoặc trang hiện tại
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResult = JsonSerializer.Deserialize<JsonElement>(errorContent);
+
+                    string errorMessage = "An error occurred while generating quiz from AI.";
+                    if (errorResult.TryGetProperty("message", out var messageElement))
+                    {
+                        errorMessage = messageElement.GetString() ?? errorMessage;
+                    }
+
+                    TempData["ErrorMessage"] = errorMessage;
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger?.LogError(ex, "Network error while calling AI import API");
+                TempData["ErrorMessage"] = "Error connecting to server. Please try again later.";
+            }
+            catch (JsonException ex)
+            {
+                _logger?.LogError(ex, "JSON serialization error while calling AI import API");
+                TempData["ErrorMessage"] = "Error processing data. Please try again later.";
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Unexpected error while calling AI import API");
+                TempData["ErrorMessage"] = "An unexpected error occurred. Please try again later.";
+            }
+
+            return Page();
+        }
+
+
+        //Handler Delete Answer
+        public async Task<IActionResult> OnPostDeleteAnswerAsync(int id)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.DeleteAsync($"{BaseUrl}/Answer/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Answer deleted successfully.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Failed to delete answer. Status: {response.StatusCode}, Error: {error}");
+                    TempData["ErrorMessage"] = "Failed to delete answer.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while deleting answer.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while deleting the answer.";
             }
 
             // Redirect lại trang hiện tại và giữ lại courseId nếu có
