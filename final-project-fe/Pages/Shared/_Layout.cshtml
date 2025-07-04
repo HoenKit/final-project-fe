@@ -17,6 +17,14 @@
 	bool isMentor = roles.Contains("Mentor");
 	bool isAdmin = roles.Contains("Admin");
 }
+@section Scripts {
+	<script>
+		if (document.cookie.includes("AccessToken") && !sessionStorage.getItem("reloaded")) {
+			sessionStorage.setItem("reloaded", "true");
+			location.reload();
+		}
+	</script>
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>

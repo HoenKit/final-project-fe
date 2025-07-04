@@ -1,14 +1,14 @@
-﻿using final_project_fe.Utils;
+﻿using final_project_fe.Dtos.Users;
+using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using final_project_fe.Dtos.Users;
-using System.Security.Claims;
 
 
 namespace final_project_fe.Pages.Shared
@@ -18,24 +18,35 @@ namespace final_project_fe.Pages.Shared
         private readonly ILogger<LoginModel> _logger;
         private readonly ApiSettings _apiSettings;
         private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public LoginModel(ILogger<LoginModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient)
+
+        public LoginModel(ILogger<LoginModel> logger, IOptions<ApiSettings> apiSettings, HttpClient httpClient, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _apiSettings = apiSettings.Value;
             _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         [BindProperty]
         public LoginDto LoginData { get; set; } = new LoginDto();
 
-        public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync(string? redirectTo)
+    {
+        var token = Request.Cookies["AccessToken"];
+        if (!string.IsNullOrEmpty(token))
         {
-            if (Request.Cookies.ContainsKey("AccessToken"))
-            {
-                Response.Redirect("/Index");
-            }
+            // Có token rồi => người dùng đã đăng nhập => chuyển trang
+            if (!string.IsNullOrEmpty(redirectTo))
+                return RedirectToPage($"/{redirectTo}");
+
+            return RedirectToPage("/Index");
         }
+
+        // Nếu chưa có token thì render form đăng nhập
+        return Page();
+    }
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -91,6 +102,29 @@ namespace final_project_fe.Pages.Shared
                 ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập.");
             }
 
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostGoogleLoginAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("", "Cannot connect to Google login API.");
+                return Page();
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (result?.Url != null)
+            {
+                return Redirect(result.Url); // Redirect to Google login
+            }
+
+            ModelState.AddModelError("", "Google login URL is invalid.");
             return Page();
         }
     }
