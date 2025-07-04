@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "Edit Course";
 }
-
 <div class="theme-layout">
     <!-- Header Section -->
     <section>
@@ -41,7 +40,7 @@
 
     <!-- Main Content -->
     <section>
-        <div class="gap100">
+        <div style="padding-top:5%; padding-bottom: 5%;" class="gap100">
             <div class="container-fluid">
                 <div class="row">
                     <!-- Sidebar -->
@@ -147,7 +146,7 @@
                                     </a>
                                 </li>
 
-                               @*  <li class="nav-item">
+                                @*  <li class="nav-item">
                                     <a class="nav-link step-link" href="#" data-step="language">
                                         <span class="step-number" data-step="9">
                                             @if (!string.IsNullOrEmpty(Model.Course.Language))
@@ -219,7 +218,7 @@
                             <div class="mt-4">
                                 <button type="submit" form="editCourseForm" class="btn btn-primary w-100">Submit for Review</button>
                             </div>
-                           @*  <button type="submit" class="btn btn-success" form="editCourseForm">
+                            @*  <button type="submit" class="btn btn-success" form="editCourseForm">
                                 <i class="fa fa-check"></i> Complete Setup
                             </button> *@
                         </div>
@@ -283,7 +282,7 @@
                                                     foreach (var category in Model.Categories.Items)
                                                     {
                                                         <option value="@category.CategoryId"
-                                                                selected="@(category.CategoryId == Model.Course.CategoryId ? "selected" : null)">
+                                                        selected="@(category.CategoryId == Model.Course.CategoryId ? "selected" : null)">
                                                             @category.Title
                                                         </option>
                                                     }
@@ -295,7 +294,7 @@
                                         <div class="form-group mb-3">
                                             <label asp-for="Course.CourseContent" class="form-label"><strong>Course Description:</strong></label>
                                             <textarea asp-for="Course.CourseContent" rows="4" class="form-control" required
-                                                      placeholder="Write a detailed description of your course. What will students learn? What makes your course unique?"></textarea>
+                                            placeholder="Write a detailed description of your course. What will students learn? What makes your course unique?"></textarea>
                                             <small class="form-text text-muted">Minimum 100 characters recommended</small>
                                         </div>
                                     </div>
@@ -358,7 +357,7 @@
                                                 <div class="form-group mb-3">
                                                     <label asp-for="Course.Cost" class="form-label"><strong>Course Price (Point):</strong></label>
                                                     <input asp-for="Course.Cost" class="form-control" type="number" min="0" step="0.01"
-                                                           placeholder="29.99" />
+                                                    placeholder="29.99" />
                                                     <small class="form-text text-muted">Set to 0 for free courses</small>
                                                 </div>
                                             </div>
@@ -366,10 +365,10 @@
                                                 <div class="form-group mb-3">
                                                     <label asp-for="Course.CourseLength" class="form-label"><strong>Course Duration:</strong></label>
                                                     <input asp-for="Course.CourseLength" class="form-control"
-                                                           placeholder="2 hours 30 minutes" />
+                                                    placeholder="2 hours 30 minutes" />
                                                     <small class="form-text text-muted">Please fill in the total time to complete as follows: </small>
                                                     <small class="form-text text-muted">Ex: "2 hours 30 minutes = 2.30" </small>
-                                                   
+
                                                 </div>
                                             </div>
                                         </div>
@@ -402,7 +401,7 @@
                                             {
                                                 <div class="mb-3">
                                                     <img src="@Model.Course.CoursesImage" alt="Course Image"
-                                                         style="max-width: 300px; max-height: 200px;" class="img-thumbnail" />
+                                                    style="max-width: 300px; max-height: 200px;" class="img-thumbnail" />
                                                     <p class="text-success mt-2"><i class="fa fa-check-circle"></i> Current image uploaded</p>
                                                 </div>
                                             }
@@ -541,249 +540,540 @@
                                         </button>
                                     </div>
                                 </div>
-                                </form>
+                            </form>
 
-                                <!-- Step 9: Curriculum -->
-                                <div id="curriculum" class="content-section" style="display: none;">
-                                    <div class="step-header">
-                                        <h2><span class="step-badge">9</span> Curriculum</h2>
-                                        <p class="step-description">
-                                            Organize your course content into modules and lessons. Start with an outline of major topics,
-                                            then break each topic into digestible lessons. This helps students follow your course structure.
-                                        </p>
-                                    </div>
+                            <!-- Step 9: Curriculum -->
+                            <div id="curriculum" class="content-section" style="display: none;">
+                                <div class="step-header">
+                                    <h2><span class="step-badge">9</span> Curriculum</h2>
+                                    <p class="step-description">
+                                        Organize your course content into modules and lessons. Start with an outline of major topics,
+                                        then break each topic into digestible lessons. This helps students follow your course structure.
+                                    </p>
+                                </div>
 
-                                    <div class="form-section">
-                                       
-                                        @if (Model.Modules != null && Model.Modules.Any())
+                                <div class="form-section">
+
+                                    @if (Model.Modules != null && Model.Modules.Any())
+                                    {
+                                        @foreach (var module in Model.Modules)
                                         {
-                                            @foreach (var module in Model.Modules)
-                                            {
-                                                <div class="card mb-3 module-card">
-                                                    <div id="module-display-@module.ModuleId">
-                                                        <div class="card-header">
-                                                            <div class="row align-items-center">
-                                                                <div class="col">
-                                                                    <h5 class="mb-0">@module.Title</h5>
-                                                                    <small class="text-muted">@module.CountLesson lessons</small>
-                                                                </div>
-                                                                <div class="col-auto">
+                                            <div class="card mb-3 module-card">
+                                                <div id="module-display-@module.ModuleId">
+                                                    <div class="card-header">
+                                                        <div class="row align-items-center">
+                                                            <div class="col">
+                                                                <h5 class="mb-0">@module.Title</h5>
+                                                                <small class="text-muted">@module.CountLesson lessons</small>
+                                                            </div>
+                                                            <div class="col-auto">
                                                                 <div class="btn-group">
-                                                                        <button type="button" class="btn-sm btn-outline-secondary"
-                                                                                onclick="editModule(@module.ModuleId,
+                                                                    <button type="button" class="btn-sm btn-outline-secondary"
+                                                                    onclick="editModule(@module.ModuleId,
                                                                                     '@Html.Raw(JavaScriptEncoder.Default.Encode(module.Title))',
                                                                                     '@Html.Raw(JavaScriptEncoder.Default.Encode(module.Description ?? ""))',
                                                                                     @(module.IsPremium.ToString().ToLowerInvariant())
                                                                                 )">
-                                                                            <i class="fa fa-edit"></i> Edit
+                                                                        <i class="fa fa-edit"></i> Update
+                                                                    </button>
+                                                                    <form method="post" asp-page-handler="DeleteModule"
+                                                                    asp-route-id="@module.ModuleId"
+                                                                    asp-route-courseId="@Model.Course.CourseId"
+                                                                    class="d-inline">
+                                                                        <button style="font-size: 95%;" type="submit" class="btn-sm btn-outline-danger"
+                                                                        onclick="return confirm('Delete this module?')">
+                                                                            <i class="fa fa-trash me-1"></i>Delete
                                                                         </button>
-                                                                        <form method="post" asp-page-handler="DeleteModule"
-                                                                              asp-route-id="@module.ModuleId"
-                                                                              asp-route-courseId="@Model.Course.CourseId"
-                                                                              class="d-inline">
-                                                                            <button style="font-size: 95%;" type="submit" class="btn btn-sm btn-outline-danger"
-                                                                                    onclick="return confirm('Delete this module?')">
-                                                                                    <i class="fa fa-trash me-1"></i>Delete
-                                                                            </button>
-                                                                        </form>
-                                                                    </div>
+                                                                    </form>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <p class="text-muted">@module.Description</p>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="text-muted">@module.Description</p>
+                                                        <div class="mb-3">
+                                                            <span class="badge @(module.IsPremium ? "bg-warning" : "bg-success")">
+                                                                @(module.IsPremium ? "Premium" : "Free")
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Form Edit Module -->
+                                                <div id="edit-module-form-@module.ModuleId" class="card mb-3" style="display: none;">
+                                                    <div class="card-body">
+                                                        <form method="post" asp-page-handler="EditModule">
+                                                            <input type="hidden" asp-for="Module.ModuleId" value="@module.ModuleId" />
+                                                            <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
                                                             <div class="mb-3">
-                                                                <span class="badge @(module.IsPremium ? "bg-warning" : "bg-success")">
-                                                                    @(module.IsPremium ? "Premium" : "Free")
-                                                                </span>
+                                                                <label class="form-label">Module Title *</label>
+                                                                <input  asp-for="Module.Title" type="text" class="form-control" id="editTitle-@module.ModuleId" required />
                                                             </div>
-                                                        </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Description</label>
+                                                                <textarea  asp-for="Module.Description" class="form-control" id="editDescription-@module.ModuleId" rows="3"></textarea>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <div class="form-check">
+                                                                    <input asp-for="Module.IsPremium" type="checkbox" style="margin-top: 10px;" class="form-check-input" id="editIsPremium-@module.ModuleId" />
+                                                                    <label class="form-check-label">Premium Module</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex gap-2">
+                                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                                    <i class="fa fa-save me-1"></i>Save Changes
+                                                                </button>
+                                                                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditModule(@module.ModuleId)">
+                                                                    <i class="fa fa-times me-1"></i>Cancel
+                                                                </button>
+                                                            </div>
+                                                        </form>
                                                     </div>
+                                                </div>
+                                                <!-- Lesson List -->
+                                                <div class="card-body">                                                                                                  
+                                                    @if (module.Lessons != null && module.Lessons.Any())
+                                                    {
+                                                        <div class="lessons-list">
+                                                            <h6>Lessons:</h6>
+                                                            <div class="list-group">
+                                                                @foreach (var lesson in module.Lessons)
+                                                                {
+                                                                    <div id="lesson-display-@lesson.LessonId">
+                                                                        <div class="list-group-item d-flex flex-column">
+                                                                            <div class="d-flex justify-content-between align-items-center w-100">
+                                                                                <div>
+                                                                                    <i class="fa fa-play-circle text-primary me-2"></i>
+                                                                                    @lesson.Title
+                                                                                </div>
+                                                                                <div class="btn-group">                                      
+                                                                                    <button type="button" class="btn-sm btn-outline-secondary"
+                                                                                            onclick="editLesson(@lesson.LessonId,
+                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',)"
+                                                                                            title="Update">
+                                                                                        <i class="fa fa-edit" style="padding-left: 20%;"></i>
+                                                                                    </button>
+                                                                                    <form method="post" asp-page-handler="DeleteLesson"
+                                                                                        asp-route-id="@lesson.LessonId"
+                                                                                        asp-route-courseId="@Model.Course.CourseId"
+                                                                                        class="d-inline">
+                                                                                        <button style="font-size: 100%;" type="submit" class="btn-sm btn-outline-danger"
+                                                                                                onclick="return confirm('Delete this Lesson?')"
+                                                                                                title="Delete">
+                                                                                            <i class="fa fa-trash me-1" style="padding-left: 15%;"></i>
+                                                                                        </button>
+                                                                                    </form>
+                                                                                </div>
+                                                                            </div>
 
-                                                    <!-- Form Edit Module -->
-                                                    <div id="edit-module-form-@module.ModuleId" class="card mb-3" style="display: none;">
-                                                        <div class="card-body">
-                                                            <form method="post" asp-page-handler="EditModule">
-                                                                <input type="hidden" asp-for="Module.ModuleId" value="@module.ModuleId" />
-                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Module Title *</label>
-                                                                    <input  asp-for="Module.Title" type="text" class="form-control" id="editTitle-@module.ModuleId" required />
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Description</label>
-                                                                    <textarea  asp-for="Module.Description" class="form-control" id="editDescription-@module.ModuleId" rows="3"></textarea>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <div class="form-check">
-                                                                        <input asp-for="Module.IsPremium" type="checkbox" style="margin-top: 10px;" class="form-check-input" id="editIsPremium-@module.ModuleId" />
-                                                                        <label class="form-check-label">Premium Module</label>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="d-flex gap-2">
-                                                                    <button type="submit" class="btn btn-primary btn-sm">
-                                                                        <i class="fa fa-save me-1"></i>Save Changes
-                                                                    </button>
-                                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditModule(@module.ModuleId)">
-                                                                        <i class="fa fa-times me-1"></i>Cancel
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="card-body">                                                                                                  
-                                                        @if (module.Lessons != null && module.Lessons.Any())
-                                                        {
-                                                            <div class="lessons-list">
-                                                                    <h6>Lessons:</h6>
-                                                                        <div class="list-group">
-                                                                            @foreach (var lesson in module.Lessons)
+                                                                            <!-- Questions List -->
+                                                                            @if (lesson.Questions != null && lesson.Questions.Any())
                                                                             {
-                                                                                <div id="lesson-display-@lesson.LessonId">
-                                                                                    <div class="list-group-item d-flex flex-column">
-                                                                                        <div class="d-flex justify-content-between align-items-center w-100">
-                                                                                            <div>
-                                                                                                <i class="fa fa-play-circle text-primary me-2"></i>
-                                                                                                 @lesson.Title
-                                                                                            </div>
-                                                                                            <div class="btn-group">                                      
-                                                                                                <button type="button" class="btn-sm btn-outline-secondary"
-                                                                                                       onclick="editLesson(@lesson.LessonId,
-                                                                                                       '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',
-                                                                                                            )">
-                                                                                                        <i class="fa fa-edit"></i> Edit
-                                                                                                </button>
-                                                                                                <form method="post" asp-page-handler="DeleteLesson"
-                                                                                                    asp-route-id="@lesson.LessonId"
-                                                                                                    asp-route-courseId="@Model.Course.CourseId"
-                                                                                                    class="d-inline">
-                                                                                                    <button style="font-size: 100%;" type="submit" class="btn btn-sm btn-outline-danger"
-                                                                                                           onclick="return confirm('Delete this Lesson?')">
-                                                                                                        <i class="fa fa-trash me-1"></i>Delete
-                                                                                                    </button>
-                                                                                                </form>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                
-                                                                                        <!-- Questions List -->
-                                                                                        @if (lesson.Questions != null && lesson.Questions.Any())
+                                                                                <div class="mt-2 ps-4 w-100">
+                                                                                    @* <h6>Questions:</h6> *@
+                                                                                    <div class="list-group">
+                                                                                        @foreach (var question in lesson.Questions)
                                                                                         {
-                                                                                            <div class="mt-2 ps-4 w-100">
-                                                                                                @* <h6>Questions:</h6> *@
-                                                                                                <div class="list-group">
-                                                                                                    @foreach (var question in lesson.Questions)
-                                                                                                    {
-                                                                                                        <div id="question-display-@question.QuestionId" class="list-group-item d-flex justify-content-between align-items-center">
-                                                                                                            <div>
-                                                                                                                <i class="bi bi-chat-left-text"></i>
-                                                                                                                @question.Question_text
-                                                                                                            </div>
-                                                                                                            <div class="btn-group">
-                                                                                                                @* <button style="font-size: 70%;" class="btn-outline-primary btn-sm" onclick="showCreateQuestionForm(@lesson.LessonId)">
-                                                                                                                    <i class="fa fa-plus me-1"></i>Add New Question
-                                                                                                                </button> *@
-                                                                                                                <button class="btn-sm btn-outline-secondary"
-                                                                                                                        onclick="editQuestion(@question.QuestionId,
-                                                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(question.Question_text))',
-                                                                                                                            '@question.QuestionType')">
-                                                                                                                        <i class="fa fa-edit"></i> Edit
-                                                                                                                </button>
-                                                                                                                <form method="post" asp-page-handler="DeleteQuestion"
-                                                                                                                      asp-route-id="@question.QuestionId"
-                                                                                                                      asp-route-lessonId="@lesson.LessonId"
-                                                                                                                      asp-route-courseId="@Model.Course.CourseId"
-                                                                                                                      class="d-inline">
-                                                                                                                    <button style="font-size: 100%;" type="submit" class="btn btn-sm btn-outline-danger"
-                                                                                                                            onclick="return confirm('Delete this question?')">
-                                                                                                                            <i class="fa fa-trash me-1"></i>Delete
-                                                                                                                    </button>
-                                                                                                                </form>
-                                                                                                            </div>
+                                                                                            <div id="question-display-@question.QuestionId" class="list-group-item">
+                                                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                                                    <div>
+                                                                                                        <i class="bi bi-chat-left-text"></i>
+                                                                                                        @question.Question_text
+                                                                                                    </div>
+                                                                                                    <div class="btn-group">
+                                                                                                        @* <button style="font-size: 70%;" class="btn-outline-primary btn-sm" onclick="showCreateQuestionForm(@lesson.LessonId)">
+                                                                                                            <i class="fa fa-plus me-1"></i>Add New Question
+                                                                                                        </button> *@
+                                                                                                        <button class="btn-sm btn-outline-secondary"
+                                                                                                                onclick="editQuestion(@question.QuestionId,
+                                                                                                                '@Html.Raw(JavaScriptEncoder.Default.Encode(question.Question_text))',
+                                                                                                                '@question.QuestionType')"
+                                                                                                                title="Update">
+                                                                                                            <i class="fa fa-edit" style="padding-left: 20%;"></i>
+                                                                                                        </button>
+                                                                                                        <form method="post" asp-page-handler="DeleteQuestion"
+                                                                                                              asp-route-id="@question.QuestionId"
+                                                                                                              asp-route-lessonId="@lesson.LessonId"
+                                                                                                              asp-route-courseId="@Model.Course.CourseId"
+                                                                                                              class="d-inline">
+                                                                                                            <button style="font-size: 100%;" type="submit" class="btn-sm btn-outline-danger"
+                                                                                                                    onclick="return confirm('Delete this question?')"
+                                                                                                                    title="Delete">
+                                                                                                                <i class="fa fa-trash me-1" style="padding-left: 15%;"></i>
+                                                                                                            </button>
+                                                                                                        </form>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <!-- Answers List -->
+                                                                                                @if (question.Answers != null && question.Answers.Any())
+                                                                                                {
+                                                                                                    <div class="mt-3 ps-4">
+                                                                                                        <h6 class="text-muted mb-2">
+                                                                                                            <i class="bi bi-list-check"></i> Answers:
+                                                                                                        </h6>
+                                                                                                        <div class="list-group">
+                                                                                                            @foreach (var answer in question.Answers)
+                                                                                                            {
+                                                                                                                <div id="answer-display-@answer.AnswerId" class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                                                                                                    <div class="d-flex align-items-center">
+                                                                                                                        @if (answer.Is_correct)
+                                                                                                                        {
+                                                                                                                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                                                                                        }
+                                                                                                                        else
+                                                                                                                        {
+                                                                                                                            <i class="bi bi-x-circle text-danger me-2"></i>
+                                                                                                                        }
+                                                                                                                        <span class="@(answer.Is_correct ? "fw-bold text-success" : "text-danger")">
+                                                                                                                            @answer.Text
+                                                                                                                        </span>
+                                                                                                                    </div>
+                                                                                                                    <div class="btn-group">
+                                                                                                                        @* <button class="btn-sm btn-outline-secondary"
+                                                                                                                                onclick="editAnswer(@answer.AnswerId,
+                                                                                                                                 '@Html.Raw(JavaScriptEncoder.Default.Encode(answer.Text))',
+                                                                                                                                 @answer.Is_correct.ToString().ToLower())"
+                                                                                                                                title="Update">
+                                                                                                                            <i class="fa fa-edit" style="padding-left: 20%;"></i>
+                                                                                                                        </button> *@
+                                                                                                                       @*  <form method="post" asp-page-handler="DeleteAnswer"
+                                                                                                                              asp-route-id="@answer.AnswerId"
+                                                                                                                              asp-route-questionId="@question.QuestionId"
+                                                                                                                              asp-route-courseId="@Model.Course.CourseId"
+                                                                                                                              class="d-inline">
+                                                                                                                            <button style="font-size: 100%;" type="submit" class="btn-sm btn-outline-danger"
+                                                                                                                                    onclick="return confirm('Delete this answer?')"
+                                                                                                                                    title="Delete">
+                                                                                                                                <i class="fa fa-trash" style="padding-left: 15%;"></i>
+                                                                                                                            </button>
+                                                                                                                        </form> *@
+                                                                                                                    </div>
+                                                                                                                </div>
+
+                                                                                                                <!-- Edit Answer Form -->
+                                                                                                                <div id="edit-answer-form-@answer.AnswerId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                                                                                                    <div class="card-body">
+                                                                                                                        <h6 class="card-title">Edit Answer</h6>
+                                                                                                                        <form method="post" asp-page-handler="EditAnswer">
+                                                                                                                            <input type="hidden" asp-for="Answer.AnswerId" value="@answer.AnswerId" />
+                                                                                                                            <input type="hidden" asp-for="Answer.QuestionId" value="@answer.QuestionId" />
+                                                                                                                            <input type="hidden" asp-for="Question.LessonId" value="@question.LessonId" />
+                                                                                                                            <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+
+                                                                                                                            <div class="mb-3">
+                                                                                                                                <label asp-for="Answer.Text" class="form-label">Answer Text *</label>
+                                                                                                                                <textarea asp-for="Answer.Text" class="form-control" id="editAnswerText-@answer.AnswerId" rows="2" required placeholder="Enter your answer here..."></textarea>
+                                                                                                                            </div>
+
+                                                                                                                            <div class="mb-3">
+                                                                                                                                <div class="form-check">
+                                                                                                                                    <input class="form-check-input" style="margin-top: 10px;" type="checkbox" asp-for="Answer.Is_correct" id="editIsCorrect-@answer.AnswerId" />
+                                                                                                                                    <label class="form-check-label" for="editIsCorrect-@answer.AnswerId">
+                                                                                                                                        Is Correct Answer
+                                                                                                                                    </label>
+                                                                                                                                </div>
+                                                                                                                            </div>
+
+                                                                                                                            <div class="d-flex gap-2">
+                                                                                                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                                                                                                    <i class="fa fa-save me-1"></i>Save Changes
+                                                                                                                                </button>
+                                                                                                                                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditAnswer(@answer.AnswerId)">
+                                                                                                                                    <i class="fa fa-times me-1"></i>Cancel
+                                                                                                                                </button>
+                                                                                                                            </div>
+                                                                                                                        </form>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                            }
                                                                                                         </div>
-                                                                                                        <!-- Edit Question Form -->
-                                                                                                        <div id="edit-question-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+
+                                                                                                        <!-- Add New Answer Button -->
+                                                                                                        @* <div class="mt-2">
+                                                                                                            <button class="btn btn-sm btn-outline-primary" onclick="showCreateAnswerForm(@question.QuestionId)">
+                                                                                                                <i class="fa fa-plus me-1"></i>Add New Answer
+                                                                                                            </button>
+                                                                                                        </div> *@
+
+                                                                                                        <!-- Create Answer Form -->
+                                                                                                        <div id="create-answer-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
                                                                                                             <div class="card-body">
-                                                                                                                <h6 class="card-title">Edit Question</h6>
-                                                                                                                <form method="post" asp-page-handler="EditQuestion">
-                                                                                                                    <input type="hidden" asp-for="Question.QuestionId" value="@question.QuestionId" />
+                                                                                                                <h6 class="card-title">Add New Answer</h6>
+                                                                                                                <form method="post" asp-page-handler="CreateAnswer">
+                                                                                                                    <input type="hidden" asp-for="Answer.QuestionId" value="@question.QuestionId" />
                                                                                                                     <input type="hidden" asp-for="Question.LessonId" value="@question.LessonId" />
-                                                                                                                    <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
                                                                                                                     <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
 
                                                                                                                     <div class="mb-3">
-                                                                                                                        <label asp-for="Question.Question_text" class="form-label">Question Text *</label>
-                                                                                                                        <textarea asp-for="Question.Question_text" class="form-control" id="editQuestionText-@question.QuestionId" rows="3" required placeholder="Enter your question here..."></textarea>
+                                                                                                                        <label asp-for="Answer.Text" class="form-label">Answer Text *</label>
+                                                                                                                        <textarea asp-for="Answer.Text" class="form-control" rows="2" required placeholder="Enter your answer here..."></textarea>
                                                                                                                     </div>
 
                                                                                                                     <div class="mb-3">
-                                                                                                                        <label class="form-label">Question Type</label>
-                                                                                                                        <select asp-for="Question.QuestionType" class="form-select" id="editQuestionType-@question.QuestionId">
-                                                                                                                            <option value="MultipleChoice">Multiple Choice</option>
-                                                                                                                            <option value="SingleChoice">Single Choice</option>
-                                                                                                                            <option value="TrueFalse">True/False</option>
-                                                                                                                        </select>
+                                                                                                                        <div class="form-check">
+                                                                                                                            <input style="margin-top: 10px;" class="form-check-input" type="checkbox" asp-for="Answer.Is_correct" />
+                                                                                                                            <label class="form-check-label" asp-for="Answer.Is_correct">
+                                                                                                                                Is Correct Answer
+                                                                                                                            </label>
+                                                                                                                        </div>
                                                                                                                     </div>
 
                                                                                                                     <div class="d-flex gap-2">
                                                                                                                         <button type="submit" class="btn btn-primary btn-sm">
-                                                                                                                            <i class="fa fa-save me-1"></i>Save Changes
+                                                                                                                            <i class="fa fa-save me-1"></i>Save Answer
                                                                                                                         </button>
-                                                                                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditQuestion(@question.QuestionId)">
+                                                                                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateAnswer(@question.QuestionId)">
                                                                                                                             <i class="fa fa-times me-1"></i>Cancel
                                                                                                                         </button>
                                                                                                                     </div>
                                                                                                                 </form>
                                                                                                             </div>
                                                                                                         </div>
-                                                                                                    }
-                                                                                                </div>
+                                                                                                    </div>
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    <div class="mt-3 ps-4">
+                                                                                                        <p class="text-muted mb-2">No answers for this question.</p>
+                                                                                                        <button class="btn btn-sm btn-outline-primary" onclick="showCreateAnswerForm(@question.QuestionId)">
+                                                                                                            <i class="fa fa-plus me-1"></i>Add New Answer
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                }
                                                                                             </div>
-                                                                                        }
-                                                                                        else
-                                                                                        {
-                                                                                            <p class="text-muted">No questions in this lesson.</p>
-                                                                                        }
 
-                                                                                        <!-- Create Question Form for this Lesson (Hidden by default) -->
-                                                                                        <div id="create-question-form-@lesson.LessonId" class="card mt-3 mb-3" style="display: none;">
-                                                                                            <div class="card-body">
-                                                                                                <h6 class="card-title">Add New Question to "@lesson.Title"</h6>
-                                                                                                <div class="form-section">
-                                                                                                    <form id="questionForm-@lesson.LessonId" method="post" asp-page-handler="AddQuestion">
-                                                                                                        <input type="hidden" asp-for="Question.LessonId" value="@lesson.LessonId" />
+                                                                                            <!-- Edit Question Form -->
+                                                                                            <div id="edit-question-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                                                                                <div class="card-body">
+                                                                                                    <h6 class="card-title">Edit Question</h6>
+                                                                                                    <form method="post" asp-page-handler="EditQuestion">
+                                                                                                        <input type="hidden" asp-for="Question.QuestionId" value="@question.QuestionId" />
+                                                                                                        <input type="hidden" asp-for="Question.LessonId" value="@question.LessonId" />
                                                                                                         <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
                                                                                                         <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
 
                                                                                                         <div class="mb-3">
                                                                                                             <label asp-for="Question.Question_text" class="form-label">Question Text *</label>
-                                                                                                            <textarea asp-for="Question.Question_text" class="form-control" id="questionText-@lesson.LessonId" rows="3" required placeholder="Enter your question here..."></textarea>
+                                                                                                            <textarea asp-for="Question.Question_text" class="form-control" id="editQuestionText-@question.QuestionId" rows="3" required placeholder="Enter your question here..."></textarea>
                                                                                                         </div>
 
                                                                                                         <div class="mb-3">
                                                                                                             <label class="form-label">Question Type</label>
-                                                                                                            <select asp-for="Question.QuestionType" class="form-select" id="questionType-@lesson.LessonId">
+                                                                                                            <select asp-for="Question.QuestionType" class="form-select" id="editQuestionType-@question.QuestionId">
                                                                                                                 <option value="MultipleChoice">Multiple Choice</option>
-                                                                                                                <option value="SingleChoice">SingleChoice</option>
-                                                                                                                <option value="TrueFalse">True/False</option>
+                                                                                                                <option value="SingleChoice">Single Choice</option>
                                                                                                             </select>
                                                                                                         </div>
 
                                                                                                         <div class="d-flex gap-2">
                                                                                                             <button type="submit" class="btn btn-primary btn-sm">
-                                                                                                                <i class="fa fa-save me-1"></i>Save Question
+                                                                                                                <i class="fa fa-save me-1"></i>Save Changes
                                                                                                             </button>
-                                                                                                            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateQuestion(@lesson.LessonId)">
+                                                                                                            <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEditQuestion(@question.QuestionId)">
                                                                                                                 <i class="fa fa-times me-1"></i>Cancel
                                                                                                             </button>
                                                                                                         </div>
                                                                                                     </form>
                                                                                                 </div>
                                                                                             </div>
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <p class="text-muted">No questions in this lesson.</p>
+                                                                            }
+
+
+                                                                                <!-- Create Question Form for this Lesson (Hidden by default) -->
+                                                                                <div id="create-question-form-@lesson.LessonId" class="card mt-3 mb-3" style="display: none;">
+                                                                                    <div class="card-body">
+                                                                                        <h6 class="card-title">Add New Question to "@lesson.Title"</h6>
+
+                                                                                        <!-- Question Creation Options -->
+                                                                                        <div class="tab-container">
+                                                                                            <div class="tab-nav">
+                                                                                                <button type="button" class="tab-button active" id="manual-@lesson.LessonId" onclick="toggleQuestionForms(@lesson.LessonId, 'manual', this)">
+                                                                                                    <i class="fa fa-edit tab-icon"></i>
+                                                                                                    Manual Entry
+                                                                                                </button>
+                                                                                                <button type="button" class="tab-button" id="excel-@lesson.LessonId" onclick="toggleQuestionForms(@lesson.LessonId, 'excel', this)">
+                                                                                                <i class="bi bi-file-earmark-excel"></i>
+                                                                                                    From Excel
+                                                                                                </button>
+                                                                                                <button type="button" class="tab-button" id="ai-@lesson.LessonId" onclick="toggleQuestionForms(@lesson.LessonId, 'ai', this)">
+                                                                                                <i class="bi bi-robot"></i>
+                                                                                                    AI Generate
+                                                                                                </button>
+                                                                                            </div>
                                                                                         </div>
 
-                                                                                        <!-- Add New Question Button for this Lesson -->
-                                                                                        <div class="mt-2">
+                                                                                        <!-- Manual Entry Form -->
+                                                                                        <div id="manual-form-@lesson.LessonId" class="form-section">
+                                                                                            <form id="questionForm-@lesson.LessonId" method="post" asp-page-handler="AddQuestion">
+                                                                                                <input type="hidden" asp-for="Question.LessonId" value="@lesson.LessonId" />
+                                                                                                <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
+                                                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                                                <div class="mb-3">
+                                                                                                    <label asp-for="Question.Question_text" class="form-label">Question Text *</label>
+                                                                                                    <textarea asp-for="Question.Question_text" class="form-control" id="questionText-@lesson.LessonId" rows="3" required placeholder="Enter your question here..."></textarea>
+                                                                                                </div>
+                                                                                                <div class="mb-3">
+                                                                                                    <label class="form-label">Question Type</label>
+                                                                                                    <select asp-for="Question.QuestionType" class="form-select" id="questionType-@lesson.LessonId">
+                                                                                                        <option value="MultipleChoice">Multiple Choice</option>
+                                                                                                        <option value="SingleChoice">Single Choice</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                                <div class="d-flex gap-2">
+                                                                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                                                                        <i class="fa fa-save me-1"></i>Save Question
+                                                                                                    </button>
+                                                                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateQuestion(@lesson.LessonId)">
+                                                                                                        <i class="fa fa-times me-1"></i>Cancel
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </form>
+                                                                                        </div>
+
+                                                                                        <!-- Excel Upload Form -->
+                                                                                        <div id="excel-form-@lesson.LessonId" class="form-section" style="display: none;">
+                                                                                            <form id="excelForm-@lesson.LessonId" method="post" asp-page-handler="UploadExcel" enctype="multipart/form-data">
+                                                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId"/>
+                                                                                                <input type="hidden" name="lessonId" value="@lesson.LessonId" />
+
+                                                                                                <!-- Progress indicator -->
+                                                                                                <div id="upload-progress-@lesson.LessonId" class="progress mb-3" style="display: none;">
+                                                                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%">
+                                                                                                        <span class="sr-only">0% Complete</span>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label class="form-label">Upload Excel File *</label>
+                                                                                                    <input type="file" class="form-control" name="excelFile" id="excelFile-@lesson.LessonId" accept=".xlsx,.xls" required>
+                                                                                                    <div class="form-text">
+                                                                                                        <i class="fa fa-info-circle me-1"></i>
+                                                                                                        Upload an Excel file containing questions and answers. (Max size: 10MB)
+                                                                                                        <a href="#" onclick="showExcelFormat(event)">View format requirements</a>
+                                                                                                    </div>
+                                                                                                    <!-- File validation feedback -->
+                                                                                                    <div id="file-feedback-@lesson.LessonId" class="invalid-feedback"></div>
+                                                                                                </div>
+
+                                                                                                <!-- Excel Format Info (Hidden by default) -->
+                                                                                                <div id="excel-format-info" class="alert alert-info" style="display: none;">
+                                                                                                    <h6><i class="fa fa-file-excel me-1"></i> Excel Format Requirements:</h6>
+                                                                                                    <ul class="mb-0">
+                                                                                                        <li><strong>Column A:</strong> QuestionText</li>
+                                                                                                        <li><strong>Column B:</strong> AnswerText</li>
+                                                                                                        <li><strong>Column C:</strong> IsCorrect (True/False)</li>
+                                                                                                        <li><strong>Column D:</strong> QuestionType (MultipleChoice, SingleChoice)</li>
+                                                                                                        <li><strong>Note:</strong> Create Questions, Answers, Correct answer (True or False), and Question Type along the columns described above.</li>
+                                                                                                        <li>
+                                                                                                            <strong>Example:</strong>
+                                                                                                            <div class="table-responsive mt-2">
+                                                                                                                <table class="table table-bordered table-sm mb-0">
+                                                                                                                    <thead class="table-light">
+                                                                                                                        <tr>
+                                                                                                                            <th>A</th>
+                                                                                                                            <th>B</th>
+                                                                                                                            <th>C</th>
+                                                                                                                            <th>D</th>
+                                                                                                                        </tr>
+                                                                                                                    </thead>
+                                                                                                                    <tbody>
+                                                                                                                        <tr>
+                                                                                                                            <th>QuestionText</th>
+                                                                                                                            <th>AnswerText</th>
+                                                                                                                            <th>IsCorrect</th>
+                                                                                                                            <th>QuestionType</th>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td>What is 2+2?</td>
+                                                                                                                            <td>4</td>
+                                                                                                                            <td>True</td>
+                                                                                                                            <td>SingleChoice</td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td>What is 2+2?</td>
+                                                                                                                            <td>3</td>
+                                                                                                                            <td>False</td>
+                                                                                                                            <td>SingleChoice</td>
+                                                                                                                        </tr>
+                                                                                                                        <tr>
+                                                                                                                            <td>What is 2+2?</td>
+                                                                                                                            <td>5</td>
+                                                                                                                            <td>False</td>
+                                                                                                                            <td>SingleChoice</td>
+                                                                                                                        </tr>
+                                                                                                                    </tbody>
+                                                                                                                </table>
+                                                                                                            </div>
+                                                                                                        </li>
+                                                                                                    </ul>
+                                                                                                </div>
+
+                                                                                                <div class="d-flex gap-2">
+                                                                                                    <button type="submit" class="btn btn-success btn-sm" id="uploadBtn-@lesson.LessonId">
+                                                                                                        <i class="fa fa-upload me-1"></i>Upload & Import
+                                                                                                    </button>
+                                                                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateQuestion(@lesson.LessonId)">
+                                                                                                        <i class="fa fa-times me-1"></i>Cancel
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </form>
+                                                                                        </div>
+
+                                                                                        <!-- AI Generate Form -->
+                                                                                        <div id="ai-form-@lesson.LessonId" class="form-section" style="display: none;">
+                                                                                            <form id="aiForm-@lesson.LessonId" method="post" asp-page-handler="GenerateAI">
+                                                                                                <!-- Hidden field cho LessonId -->
+                                                                                                <input type="hidden" asp-for="LessonId" value="@lesson.LessonId" />
+                                                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label class="form-label">Topic/Content for AI Generation *</label>
+                                                                                                    <textarea class="form-control" asp-for="Topic" rows="3" required
+                                                                                                              placeholder="Enter the topic or content you want AI to generate questions about..."></textarea>
+                                                                                                    <span asp-validation-for="Topic" class="text-danger"></span>
+                                                                                                </div>
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label class="form-label">Number of Questions</label>
+                                                                                                    <select class="form-select" asp-for="Number">
+                                                                                                        <option value="3">3 Questions</option>
+                                                                                                        <option value="5" selected>5 Questions</option>
+                                                                                                        <option value="10">10 Questions</option>
+                                                                                                    </select>
+                                                                                                    <span asp-validation-for="Number" class="text-danger"></span>
+                                                                                                </div>
+
+                                                                                                <div class="d-flex gap-2">
+                                                                                                    <button type="submit" class="btn btn-info btn-sm">
+                                                                                                        <i class="fa fa-magic me-1"></i>Generate Questions
+                                                                                                    </button>
+                                                                                                    <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateQuestion(@lesson.LessonId)">
+                                                                                                        <i class="fa fa-times me-1"></i>Cancel
+                                                                                                    </button>
+                                                                                                </div>
+                                                                                            </form>
+                                                                                        </div>
+
+                                                                                        <!-- Loading Spinner -->
+                                                                                        <div id="loading-@lesson.LessonId" class="text-center" style="display: none;">
+                                                                                            <div class="spinner-border text-primary" role="status">
+                                                                                                <span class="visually-hidden">Loading...</span>
+                                                                                            </div>
+                                                                                            <p class="mt-2">Processing your request...</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                    <!-- Add New Question Button for this Lesson -->
+                                                                                    <div class="mt-2">
                                                                                             <button class="btn btn-outline-primary btn-sm" onclick="showCreateQuestionForm(@lesson.LessonId)">
                                                                                                 <i class="fa fa-plus me-1"></i>Add New Question
                                                                                             </button>
@@ -915,9 +1205,10 @@
                                                 </div>
                                             </div>
                                         </div>
+
                                         <!-- Add New Module Button -->
                                         <div class="text-center mt-4">
-                                            <button style="width: 23%; font-size: 82%;" class="btn btn-primary btn-lg" onclick="showCreateModuleForm()">
+                                            <button class="btn btn-primary btn-lg" onclick="showCreateModuleForm()">
                                                 <i class="fa fa-plus me-1"></i>Add New Module
                                             </button>
                                         </div>
@@ -929,8 +1220,6 @@
                                         </button>
                                     </div>
                                 </div>
-
-                         
 
                                 <!-- Loading Spinner -->
                                 <div id="loading-spinner" class="text-center" style="display: none;">
@@ -962,6 +1251,252 @@
 </div>
 
     <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .card-body {
+        padding: 24px;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: #1a73e8;
+    }
+
+    .tab-container {
+        position: relative;
+        margin-bottom: 32px;
+    }
+
+    .tab-nav {
+        display: flex;
+        border-bottom: 1px solid #e8eaed;
+        position: relative;
+    }
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 16px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #5f6368;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 120px;
+        justify-content: center;
+    }
+
+        .tab-button:hover {
+            color: #1a73e8;
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+
+        .tab-button.active {
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+            .tab-button.active::after {
+                content: '';
+                position: absolute;
+                bottom: -1px;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background-color: #1a73e8;
+                border-radius: 3px 3px 0 0;
+            }
+
+    .tab-icon {
+        font-size: 16px;
+    }
+    /* Form Sections */
+    .form-section {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+        .form-section.hidden {
+            display: none;
+        }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: #1a73e8;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: #1557b0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+    .btn-success {
+        background-color: #34a853;
+        color: white;
+    }
+
+        .btn-success:hover {
+            background-color: #2d8f47;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+        }
+
+    .btn-info {
+        background-color: #4285f4;
+        color: white;
+    }
+
+        .btn-info:hover {
+            background-color: #3367d6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+
+    .btn-secondary {
+        background-color: #f8f9fa;
+        color: #5f6368;
+        border: 1px solid #e8eaed;
+    }
+
+        .btn-secondary:hover {
+            background-color: #e8eaed;
+            transform: translateY(-1px);
+        }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .gap-2 {
+        gap: 12px;
+    }
+
+    /* Alert Styling */
+    .alert {
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #4285f4;
+    }
+
+    .alert-info {
+        background-color: #e8f0fe;
+        color: #1a73e8;
+    }
+
+    .alert h6 {
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .alert ul {
+        margin-left: 20px;
+    }
+
+    .alert li {
+        margin-bottom: 4px;
+    }
+
+    /* Form Text */
+    .form-text {
+        font-size: 13px;
+        color: #5f6368;
+        margin-top: 8px;
+    }
+
+        .form-text a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+            .form-text a:hover {
+                text-decoration: underline;
+            }
+
+    /* Loading Spinner */
+    .loading {
+        text-align: center;
+        padding: 40px;
+    }
+
+    .spinner-border {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e8eaed;
+        border-top: 3px solid #1a73e8;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .loading p {
+        margin-top: 16px;
+        color: #5f6368;
+        font-size: 14px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+
         .lesson-form {
             animation: slideDown 0.3s ease-out;
         }
@@ -1229,7 +1764,7 @@
                 padding: 12px 15px;
                 border: 1px solid #e9ecef;
                 background: #fff;
-                display: flex;
+                /* display: flex; */
                 justify-content: space-between;
                 align-items: center;
                 transition: background-color 0.2s ease;
@@ -1989,27 +2524,42 @@
             if (form) form.style.display = 'none';
         }
 
+        // Show/Hide forms based on selected option
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners for radio buttons
+            const lessons = document.querySelectorAll('[id^="create-question-form-"]');
+            lessons.forEach(function(lessonForm) {
+                const lessonId = lessonForm.id.replace('create-question-form-', '');
+                const radios = lessonForm.querySelectorAll(`input[name="questionOption-${lessonId}"]`);
+                radios.forEach(function(radio) {
+                    radio.addEventListener('change', function() {
+                        toggleQuestionForms(lessonId, this.value);
+                    });
+                });
+            });
+        });
+
         function showCreateQuestionForm(lessonId) {
             // Hide all other create question forms first
             document.querySelectorAll('[id^="create-question-form-"]').forEach(form => {
                 form.style.display = 'none';
             });
-
             // Show all "Add New Question" buttons first
             document.querySelectorAll('[onclick^="showCreateQuestionForm"]').forEach(btn => {
                 btn.style.display = 'inline-block';
             });
-
             // Hide the specific "Add New Question" button for this lesson
             const button = document.querySelector(`[onclick="showCreateQuestionForm(${lessonId})"]`);
             if (button) {
                 button.style.display = 'none';
             }
-
             // Show the specific form for this lesson
             const form = document.getElementById('create-question-form-' + lessonId);
             if (form) {
                 form.style.display = 'block';
+                // Reset to manual form by default
+                document.getElementById(`manual-${lessonId}`).checked = true;
+                toggleQuestionForms(lessonId, 'manual');
                 // Focus on the question text area
                 const textArea = document.getElementById('questionText-' + lessonId);
                 if (textArea) {
@@ -2018,16 +2568,86 @@
             }
         }
 
+        function switchTab(tabName, clickedButton) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to clicked tab button
+            clickedButton.classList.add('active');
+
+            // Hide all form sections
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected form section
+            document.getElementById(tabName + '-form').classList.remove('hidden');
+        }
+
+        function showExcelFormat(event) {
+            // Prevent default behavior and stop propagation
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            const formatInfo = document.getElementById('excel-format-info');
+            formatInfo.style.display = formatInfo.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleQuestionForms(lessonId, selectedOption, clickedButton) {
+            // Remove active class from all tab buttons in this lesson
+            const tabButtons = document.querySelectorAll(`[id*="${lessonId}"].tab-button`);
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to clicked tab button
+            clickedButton.classList.add('active');
+
+            // Hide all forms for this lesson
+            document.getElementById(`manual-form-${lessonId}`).style.display = 'none';
+            document.getElementById(`excel-form-${lessonId}`).style.display = 'none';
+            document.getElementById(`ai-form-${lessonId}`).style.display = 'none';
+
+            // Show selected form
+            document.getElementById(`${selectedOption}-form-${lessonId}`).style.display = 'block';
+        }
+
+        
+
         function cancelCreateQuestion(lessonId) {
             // Hide the form
             const form = document.getElementById('create-question-form-' + lessonId);
             if (form) {
                 form.style.display = 'none';
-                // Reset the form
+                // Reset all forms
                 const questionForm = document.getElementById('questionForm-' + lessonId);
                 if (questionForm) {
                     questionForm.reset();
                 }
+                const excelForm = document.getElementById('excelForm-' + lessonId);
+                if (excelForm) {
+                    excelForm.reset();
+                }
+                const aiForm = document.getElementById('aiForm-' + lessonId);
+                if (aiForm) {
+                    aiForm.reset();
+                }
+            }
+
+            // Hide loading
+            const loading = document.getElementById(`loading-${lessonId}`);
+            if (loading) {
+                loading.style.display = 'none';
+            }
+
+            // Hide format info
+            const formatInfo = document.getElementById('excel-format-info');
+            if (formatInfo) {
+                formatInfo.style.display = 'none';
             }
 
             // Show the "Add New Question" button again
@@ -2099,196 +2719,27 @@
                 });
             }
         });
+
+        // JavaScript functions for Answer management
+        function showCreateAnswerForm(questionId) {
+            document.getElementById('create-answer-form-' + questionId).style.display = 'block';
+        }
+
+        function cancelCreateAnswer(questionId) {
+            document.getElementById('create-answer-form-' + questionId).style.display = 'none';
+        }
+
+        function editAnswer(answerId, answerText, isCorrect) {
+            document.getElementById('edit-answer-form-' + answerId).style.display = 'block';
+            document.getElementById('editAnswerText-' + answerId).value = answerText;
+            document.getElementById('editIsCorrect-' + answerId).checked = isCorrect;
+        }
+
+        function cancelEditAnswer(answerId) {
+            document.getElementById('edit-answer-form-' + answerId).style.display = 'none';
+        }
+
+   
+
     </script>
-
-@* <script>
-    // Show create module form
-    function showCreateModuleForm() {
-        document.getElementById('create-module-form').style.display = 'block';
-        document.getElementById('moduleTitle').focus();
-    }
-
-    // Cancel create module
-    function cancelCreateModule() {
-        document.getElementById('create-module-form').style.display = 'none';
-        document.getElementById('moduleForm').reset();
-    }
-
-    // Show create lesson form
-    function showCreateLessonForm(moduleId) {
-        document.getElementById('create-lesson-form-' + moduleId).style.display = 'block';
-        document.querySelector('#create-lesson-form-' + moduleId + ' .lesson-title').focus();
-    }
-
-    // Cancel create lesson
-    function cancelCreateLesson(moduleId) {
-        document.getElementById('create-lesson-form-' + moduleId).style.display = 'none';
-        document.querySelector('#create-lesson-form-' + moduleId + ' .lessonForm').reset();
-    }
-
-    // Show/hide loading spinner
-    function showLoading() {
-        const spinner = document.getElementById('loading-spinner');
-        if (spinner) {
-            spinner.style.display = 'block';
-        }
-    }
-
-    function hideLoading() {
-        const spinner = document.getElementById('loading-spinner');
-        if (spinner) {
-            spinner.style.display = 'none';
-        }
-    }
-
-    // Handle module form submission
-    document.addEventListener('DOMContentLoaded', function() {
-        const moduleForm = document.getElementById('moduleForm');
-        if (moduleForm) {
-            moduleForm.addEventListener('submit', function(e) {
-                // Validate form before submission
-                const title = document.getElementById('moduleTitle').value.trim();
-
-                if (!title) {
-                    e.preventDefault();
-                    showErrorMessage('Module title is required!');
-                    document.getElementById('moduleTitle').focus();
-                    return false;
-                }
-
-                // Show loading khi form được submit
-                showLoading();
-
-                // Disable submit button để tránh double-click
-                const submitBtn = this.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Creating...';
-                }
-
-                // Let the form submit normally to server
-                return true;
-            });
-        }
-    });
-
-    // Handle lesson form submissions - AJAX approach for lessons
-    /*document.addEventListener('submit', async function(e) {
-        if (e.target.classList.contains('lessonForm')) {
-            e.preventDefault();
-
-            const moduleId = e.target.getAttribute('data-module-id');
-            const formData = new FormData(e.target);
-
-            // Validate lesson form
-            const title = formData.get('title').trim();
-            if (!title) {
-                showErrorMessage('Lesson title is required!');
-                e.target.querySelector('.lesson-title').focus();
-                return;
-            }
-
-            // Create FormData for lesson
-            const lessonFormData = new FormData();
-            lessonFormData.append('title', title);
-            lessonFormData.append('description', formData.get('description') || '');
-            lessonFormData.append('moduleId', moduleId);
-
-            try {
-                showLoading();
-
-                const response = await fetch('/api/Lesson', {
-                    method: 'POST',
-                    body: lessonFormData
-                });
-
-                if (response.ok) {
-                    const newLesson = await response.json();
-
-                    // Add new lesson to the DOM
-                    addLessonToDOM(moduleId, newLesson);
-
-                    // Reset and hide form
-                    e.target.reset();
-                    cancelCreateLesson(moduleId);
-
-                    // Update lesson count
-                    updateLessonCount(moduleId);
-
-                    // Show success message
-                    showSuccessMessage('Lesson created successfully!');
-                } else {
-                    const errorText = await response.text();
-                    console.error('Lesson creation failed:', errorText);
-                    showErrorMessage('Error creating lesson: ' + response.status);
-                }
-            } catch (error) {
-                console.error('Error creating lesson:', error);
-                showErrorMessage('Network error while creating lesson. Please try again.');
-            } finally {
-                hideLoading();
-            }
-        }
-    });*/
-
-    // Add new lesson to DOM
-    /* function addLessonToDOM(moduleId, lesson) {
-        const lessonsContainer = document.querySelector(`.lessons-container[data-module-id="${moduleId}"]`);
-
-        if (!lessonsContainer) {
-            console.error('Lessons container not found for module:', moduleId);
-            return;
-        }
-
-        // Check if this is the first lesson
-        const noLessonsMessage = lessonsContainer.querySelector('.text-muted');
-        if (noLessonsMessage && noLessonsMessage.textContent.includes('No lessons available')) {
-            lessonsContainer.innerHTML = `
-                <div class="lessons-list">
-                    <h6>Lessons:</h6>
-                    <div class="list-group lessons-list-group" data-module-id="${moduleId}">
-                    </div>
-                </div>
-            `;
-        }
-
-        const listGroup = lessonsContainer.querySelector('.list-group') || lessonsContainer.querySelector('.lessons-list-group');
-        if (listGroup) {
-            const lessonHTML = `
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fa fa-play-circle text-primary me-2"></i>
-                        ${escapeHtml(lesson.title)}
-                    </div>
-                    <div class="btn-group">
-                        <a href="/Mentor/MentorPage/EditLesson?id=${lesson.lessonId}"
-                           class="btn btn-sm btn-outline-secondary">Edit</a>
-                        <form method="post" action="?handler=DeleteLesson&id=${lesson.lessonId}" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Delete this lesson?')">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            `;
-
-            listGroup.insertAdjacentHTML('beforeend', lessonHTML);
-        }
-    }
-
-    // Update lesson count
-    function updateLessonCount(moduleId) {
-        const moduleCard = document.querySelector(`[data-module-id="${moduleId}"]`);
-        if (moduleCard) {
-            const lessonCountElement = moduleCard.querySelector('.text-muted');
-            const lessonsContainer = moduleCard.querySelector('.lessons-container .list-group');
-
-            if (lessonsContainer && lessonCountElement) {
-                const lessonCount = lessonsContainer.children.length;
-                lessonCountElement.textContent = `${lessonCount} lesson${lessonCount !== 1 ? 's' : ''}`;
-            }
-        }
-    }*/
-</script> *@
 
