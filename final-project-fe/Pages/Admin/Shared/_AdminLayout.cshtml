@@ -320,6 +320,20 @@
     <!-- Kaiadmin JS -->
     <script src="~/AdminAssets/js/kaiadmin.min.js"></script>
 
+    <script>
+    // Reset loading session khi có token mới
+    document.addEventListener('DOMContentLoaded', function() {
+        // Kiểm tra nếu có token và chưa reset trong session này
+        const hasToken = document.cookie.includes('AccessToken=');
+        const hasResetThisSession = sessionStorage.getItem('hasResetLoadingToday');
+        
+        if (hasToken && !hasResetThisSession) {
+            sessionStorage.removeItem('courseRecommendLoadingShown');
+            sessionStorage.setItem('hasResetLoadingToday', 'true');
+        }
+    });
+</script>
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>

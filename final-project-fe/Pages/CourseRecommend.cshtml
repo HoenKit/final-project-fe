@@ -21,10 +21,10 @@
             color: inherit;
         }
 
-            a:hover {
-                text-decoration: none !important;
-                color: inherit;
-            }
+        a:hover {
+            text-decoration: none !important;
+            color: inherit;
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,6 +32,160 @@
             color: #333;
             background: #ffffff;
             min-height: 100vh;
+        }
+
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #111827;
+            background-size: 300% 300%;
+            animation: gradientShift 8s ease infinite;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        body.loading {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .loading-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 40px 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+        }
+
+        .loading-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ffa500, #4ecdc4, #45b7d1);
+            background-size: 300% 100%;
+            border-radius: 4px;
+            animation: progressLoad 20s ease-in-out infinite, progressGradient 3s ease infinite;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        @@keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @@keyframes progressGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @@keyframes progressLoad {
+            0% { width: 0%; }
+            50% { width: 75%; }
+            100% { width: 100%; }
+        }
+
+        @@keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .header {
@@ -343,51 +497,7 @@
             color: #0c5460;
         }
 
-        @@keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .media (max-width: 768px) {
+        @@media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
             }
@@ -428,6 +538,15 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
+
+            .loading-content {
+                max-width: 320px;
+                padding: 20px;
+            }
+
+            .loading-title {
+                font-size: 1.5rem;
+            }
         }
 
         @@media (min-width: 769px) {
@@ -442,6 +561,18 @@
     </style>
 </head>
 <body>
+    <div id="loadingScreen" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h2 class="loading-title">🤖 AI is analyzing your profile</h2>
+            <p class="loading-subtitle">Finding the perfect courses for you</p>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <p class="progress-text">Processing your learning preferences...</p>
+        </div>
+    </div>
+
     @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
     {
         <div class="alert alert-danger">
@@ -455,10 +586,9 @@
         </div>
     }
 
-    <!-- Header -->
     <header class="header" style="background: #111827;">
         <div class="container">
-            <h1 style="    color: white;">
+            <h1 style="color: white;">
                 🎯 Courses Recommended For You
             </h1>
             <p class="subtitle">Based on your survey results</p>
@@ -486,7 +616,6 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
         <div class="container">
             @if (!Model.HasCompleteProfile)
@@ -501,7 +630,6 @@
                 var hasHighMatch = Model.RecommendedCourses.Any(c => (c.Score ?? 0) >= 90);
                 var hasRecommended = Model.RecommendedCourses.Any(c => (c.Score ?? 0) >= 80);
 
-                <!-- Filter Section -->
                 <div class="filter-section">
                     <h2 class="filter-title">🔍 Filter suitable courses</h2>
                     <div class="filters">
@@ -519,7 +647,6 @@
                     </div>
                 </div>
 
-                <!-- Courses Grid -->
                 <div class="courses-grid" id="coursesGrid">
                     @foreach (var course in Model.RecommendedCourses)
                     {
@@ -612,7 +739,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Filter functionality
+    // Check if profile is complete
+    @if (Model.HasCompleteProfile)
+    {
+        <text>
+        // Check if loading has been shown before in this session
+        const hasShownLoading = sessionStorage.getItem('courseRecommendLoadingShown');
+        
+        if (!hasShownLoading) {
+            // Show loading screen và ẩn thanh cuộn
+            const loadingScreen = document.getElementById('loadingScreen');
+            const body = document.body;
+            
+            loadingScreen.style.display = 'flex';
+            body.classList.add('loading'); // Thêm class để ẩn thanh cuộn
+            
+            setTimeout(function() {
+                loadingScreen.style.display = 'none';
+                body.classList.remove('loading'); // Bỏ class để hiện lại thanh cuộn
+                
+                // Mark as shown for this session
+                sessionStorage.setItem('courseRecommendLoadingShown', 'true');
+            }, 20000); // Giữ nguyên 30s cho hiệu ứng AI phân tích
+        }
+        </text>
+    }
+            
+            // Phần còn lại của script giữ nguyên...
             const filterBtns = document.querySelectorAll('.filter-btn');
             const courseCards = document.querySelectorAll('.course-card');
             const noCourses = document.getElementById('noCourses');
@@ -620,15 +773,12 @@
 
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // Remove active class from all buttons
                     filterBtns.forEach(b => b.classList.remove('active'));
-                    // Add active class to clicked button
                     btn.classList.add('active');
 
                     const filter = btn.dataset.filter;
                     let visibleCards = [];
 
-                    // Lọc theo categories
                     if (filter === 'all' || filter === 'high-match' || filter === 'recommended') {
                         courseCards.forEach(card => {
                             const categories = card.dataset.categories;
@@ -637,7 +787,6 @@
                             }
                         });
                     }
-                    // Lọc theo giá
                     else if (filter === 'price-low' || filter === 'price-high') {
                         visibleCards = Array.from(courseCards).sort((a, b) => {
                             const priceA = parseFloat(a.dataset.price) || 0;
@@ -646,12 +795,10 @@
                         });
                     }
 
-                    // Ẩn tất cả cards trước
                     courseCards.forEach(card => {
                         card.style.display = 'none';
                     });
 
-                    // Hiển thị các cards được lọc
                     if (visibleCards.length > 0) {
                         visibleCards.forEach((card, index) => {
                             card.style.display = 'flex';
@@ -659,7 +806,6 @@
                             card.style.animationDelay = `${index * 0.1}s`;
                         });
 
-                        // Sắp xếp lại trong DOM nếu là filter theo giá
                         if (filter === 'price-low' || filter === 'price-high') {
                             visibleCards.forEach(card => {
                                 coursesGrid.appendChild(card);
@@ -667,7 +813,6 @@
                         }
                     }
 
-                    // Show/hide no courses message
                     if (visibleCards.length === 0 && noCourses) {
                         noCourses.style.display = 'block';
                     } else if (noCourses) {
@@ -676,12 +821,10 @@
                 });
             });
 
-            // Add animation delay to course cards
             courseCards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
             });
 
-            // Smooth scroll for internal links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();

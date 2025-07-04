@@ -66,6 +66,7 @@ namespace final_project_fe.Pages
                     PropertyNameCaseInsensitive = true
                 }) ?? new User();
 
+                // Set HasCompleteProfile based on user data
                 HasCompleteProfile = UserInfo?.UserMetaData != null &&
                                     !string.IsNullOrWhiteSpace(UserInfo.UserMetaData.Level) &&
                                     !string.IsNullOrWhiteSpace(UserInfo.UserMetaData.Goals) &&
@@ -78,6 +79,7 @@ namespace final_project_fe.Pages
                     return Page();
                 }
 
+                // Only proceed with recommendations if profile is complete
                 var response = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Course/recommend-course?userId={CurrentUserId}");
 
                 if (!response.IsSuccessStatusCode)
@@ -100,6 +102,11 @@ namespace final_project_fe.Pages
                     {
                         course.CoursesImage = ImageUrlHelper.AppendSasTokenIfNeeded(course.CoursesImage, SasToken);
                     }
+                }
+
+                if (RecommendedCourses.Any())
+                {
+                    // The loading screen will be handled by the client-side script
                 }
 
                 return Page();
