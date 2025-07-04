@@ -108,6 +108,30 @@
                             </div>
                         </li>
                         @{
+                            var isTransactionManager = (ViewData["ActivePage"] as string ?? "").StartsWith("TransactionManager");
+                        }
+                        <li class="nav-item @(isTransactionManager ? "active" : "")">
+                            <a data-bs-toggle="collapse" href="#collapseTransactionManager" aria-expanded="false">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Transaction Manager</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="collapseTransactionManager">
+                                <ul class="nav nav-collapse">
+                                    <li class="@(ViewData["ActivePage"] as string == "TransactionManager.ListTransaction" ? "active" : "")">
+                                        <a asp-page="/Admin/TransactionManager/Index">
+                                            <span class="sub-item">List Transaction</span>
+                                        </a>
+                                    </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "PostManager.ListDeleted" ? "active" : "")">
+                                        <a asp-page="/Admin/PostManager/ListDeleted">
+                                            <span class="sub-item">List Deleted</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        @{
                             var isReportManager = (ViewData["ActivePage"] as string ?? "").StartsWith("ReportManager");
                         }
                         <li class="nav-item @(isReportManager ? "active" : "")">
@@ -151,7 +175,7 @@
                         }
                         <li class="nav-item @(isConrseManager ? "active" : "")">
                             <a data-bs-toggle="collapse" href="#collapseConrseManager" aria-expanded="false">
-                                <i class="fas fa-clipboard"></i>
+                                <i class="fas fa-graduation-cap"></i>
                                 <p>Conrse Manager</p>
                                 <span class="caret"></span>
                             </a>
