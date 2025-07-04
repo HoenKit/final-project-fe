@@ -4,6 +4,7 @@
     ViewData["Title"] = "Login";
     Layout = null;
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +15,7 @@
     <link rel="stylesheet" href="css/main.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/color.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -56,6 +58,19 @@
                                     <button class="mtr-btn signin" type="submit"><span>Login</span></button>
                                     <button class="mtr-btn signup" type="button" onclick="window.location.href='@Url.Page("/Register")'"><span>Register</span></button>
                                 </div>
+
+                            </form>
+                            <form method="post">
+                                <div class="submit-btns mt-3">
+                                    <button type="submit" asp-page-handler="GoogleLogin"
+                                            class="btn btn-light d-flex align-items-center"
+                                            style="gap: 8px; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px;">                                    
+                                        <i class="bi bi-google" style="font-size: 18px;"></i>
+                                        <span>
+                                            Login by google
+                                        </span>
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -63,7 +78,20 @@
             </div>
         </div>
     </div>
+
     <script src="js/main.min.js"></script>
     <script src="js/script.js"></script>
+
+    <script>
+        // Kiểm tra nếu AccessToken đã được set => redirect sang trang chính
+        if (document.cookie.includes("AccessToken") && !sessionStorage.getItem("redirected")) {
+            sessionStorage.setItem("redirected", "true");
+
+            // Nếu có tham số redirectTo trong URL thì chuyển đúng trang
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectTo = urlParams.get("redirectTo") || "Index";
+            window.location.href = `/${redirectTo}`;
+        }
+    </script>
 </body>
 </html>
