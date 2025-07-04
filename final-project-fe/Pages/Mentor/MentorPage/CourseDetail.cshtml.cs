@@ -119,7 +119,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     return Page();
                 }
                 // Get User by ID
-                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/{Mentor.UserId}");
+                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{Mentor.UserId}");
                 if (!userResponse.IsSuccessStatusCode)
                 {
                     _logger.LogError("Can not get Mentor.");
