@@ -1,0 +1,410 @@
+﻿@page
+@model final_project_fe.Pages.Admin.TransactionManager.IndexModel
+@{
+    ViewData["ActivePage"] = "TransactionManager.ListTransaction";
+}
+
+<style>
+    .transaction-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s ease;
+    }
+
+    .transaction-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        border-bottom: 1px solid #f0f0f0;
+        border-radius: 12px 12px 0 0;
+        padding: 24px;
+    }
+
+    .search-box {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .filter-dropdown {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .table-container {
+        background: #ffffff;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .table-custom {
+        margin-bottom: 0;
+    }
+
+    .table-custom thead th {
+        background: #f8f9fa;
+        border: none;
+        font-weight: 600;
+        font-size: 14px;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 16px 20px;
+    }
+
+    .table-custom tbody tr {
+        border-bottom: 1px solid #f5f5f5;
+        transition: all 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8f9ff;
+        transform: translateY(-1px);
+    }
+
+    .table-custom tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-size: 12px;
+    }
+
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .amount-display {
+        font-size: 16px;
+        font-weight: 700;
+        color: #28a745;
+    }
+
+    .points-display {
+        font-size: 16px;
+        font-weight: 700;
+        color: #007bff;
+    }
+
+    .payment-method-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .order-code {
+        background: #f5f5f5;
+        color: #666;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: #adb5bd;
+        font-size: 32px;
+    }
+
+    .refresh-btn {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        color: #495057;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        background: #f8f9fa;
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .stats-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #f0f0f0;
+        border-radius: 0 0 12px 12px;
+        padding: 16px 24px;
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="transaction-card">
+            <!-- Header -->
+            <div class="card-header-custom">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="mb-2 fw-bold text-dark">Transaction History</h3>
+                        <p class="text-muted mb-0">Track and monitor all payment transactions this month</p>
+                    </div>
+                    <div class="d-flex gap-3 align-items-center">
+                        <!-- Filter Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle d-flex align-items-center gap-2" 
+                                    type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter"></i>
+                                <span>Filter Status</span>
+                            </button>
+                            <div class="dropdown-menu filter-dropdown shadow-sm">
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterTransactionsByStatus('all')">
+                                    <i class="fas fa-list text-muted"></i>All Status
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterTransactionsByStatus('Completed')">
+                                    <i class="fas fa-check-circle text-success"></i>Completed
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterTransactionsByStatus('Cancel')">
+                                    <i class="fas fa-times-circle text-danger"></i>Cancelled
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Search Box -->
+                        <div class="search-box d-flex align-items-center" style="width: 300px;">
+                            <div class="ps-3 pe-2">
+                                <i class="fas fa-search text-muted"></i>
+                            </div>
+                            <input type="text" class="form-control border-0 shadow-none" 
+                                   id="emailSearchInput"
+                                   placeholder="Search by email address..." 
+                                   onkeyup="searchTransactionsByEmail(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-custom">
+                        <thead style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th>Payment User</th>
+                                <th class="text-center">Points</th>
+                                <th class="text-center">Date & Time</th>
+                                <th class="text-center">Amount</th>
+                                <th class="text-center">Payment Method</th>
+                                <th class="text-center">Order Code</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTableBody">
+                            @if (Model.Transactions?.Items != null && Model.Transactions.Items.Any())
+                            {
+                                @foreach (var transaction in Model.Transactions.Items)
+                                {
+                                    <tr data-email="@(transaction.User?.Email?.ToLower() ?? "")" data-status="@transaction.Status">
+                                        <!-- User Info -->
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="status-badge @(transaction.Status == "Completed" ? "status-completed" : "status-cancelled")">
+                                                    <i class="@(transaction.Status == "Completed" ? "fas fa-check" : "fas fa-times")"></i>
+                                                </div>
+                                                <div class="user-avatar">
+                                                    @(transaction.User?.Email?.Substring(0, 1).ToUpper() ?? "?")
+                                                </div>
+                                                <div>
+                                                    <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@transaction.UserId"
+                                                       class="text-decoration-none text-dark fw-medium d-block">
+                                                        @(transaction.User?.Email ?? "Unknown User")
+                                                    </a>
+                                                    <small class="text-muted">
+                                                        Status: <span class="@(transaction.Status == "Completed" ? "text-success" : "text-danger")">
+                                                            @transaction.Status
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <!-- Points -->
+                                        <td class="text-center">
+                                            <div class="points-display">@(transaction.Points?.ToString("N0") ?? "N/A")</div>
+                                            <small class="text-muted">points</small>
+                                        </td>
+
+                                        <!-- Date & Time -->
+                                        <td class="text-center">
+                                            <div class="fw-medium text-dark">@transaction.CreateAt.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@transaction.CreateAt.ToString("h:mm tt")</small>
+                                        </td>
+
+                                        <!-- Amount -->
+                                        <td class="text-center">
+                                            <div class="amount-display">@(transaction.Amount?.ToString("N0") ?? "0")₫</div>
+                                        </td>
+
+                                        <!-- Payment Method -->
+                                        <td class="text-center">
+                                            <span class="payment-method-badge">
+                                                @(transaction.PaymentMethod ?? "N/A")
+                                            </span>
+                                        </td>
+
+                                        <!-- Order Code -->
+                                        <td class="text-center">
+                                            <span class="order-code">@(transaction.OrderCode ?? "N/A")</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">
+                                                <i class="fas fa-receipt"></i>
+                                            </div>
+                                            <h5 class="text-dark mb-2">No transactions found</h5>
+                                            <p class="text-muted mb-0">Transactions will appear here when users make payments</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="stats-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Total transactions this month: <strong class="text-dark">@(Model.Transactions?.TotalCount ?? 0)</strong></span>
+                    </div>
+                    <button class="refresh-btn d-flex align-items-center gap-2" onclick="refreshTransactions()">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enhanced JavaScript functions
+    function filterTransactionsByStatus(status) {
+        const rows = document.querySelectorAll('#transactionTableBody tr[data-status]');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            if (status === 'all' || row.getAttribute('data-status') === status) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        updateTransactionCount(visibleCount);
+    }
+
+    function searchTransactionsByEmail(event) {
+        if (!event || event.key === 'Enter') {
+            const searchTerm = document.getElementById('emailSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionTableBody tr[data-email]');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const email = row.getAttribute('data-email');
+                if (email.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateTransactionCount(visibleCount);
+        }
+    }
+
+    function updateTransactionCount(count = null) {
+        if (count === null) {
+            const visibleRows = document.querySelectorAll('#transactionTableBody tr[data-email]:not([style*="display: none"])');
+            count = visibleRows.length;
+        }
+
+        const countElement = document.querySelector('.card-footer small span.fw-bold');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    function exportTransactions() {
+        // Placeholder for export functionality
+        alert('Export functionality would be implemented here');
+    }
+
+    function refreshTransactions() {
+        // Placeholder for refresh functionality
+        location.reload();
+    }
+
+    // Auto-refresh every 30 seconds (optional)
+    // setInterval(refreshTransactions, 30000);
+</script>

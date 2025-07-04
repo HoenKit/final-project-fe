@@ -68,7 +68,7 @@ namespace final_project_fe.Pages.Admin.UserManager
             // Lưu lại vào session
             HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
 
-            string apiUrl = $"{_apiSettings.BaseUrl}/User/{userId}";
+            string apiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/{userId}";
 
             try
             {

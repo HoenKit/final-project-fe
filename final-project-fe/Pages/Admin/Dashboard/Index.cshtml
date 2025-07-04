@@ -236,7 +236,7 @@
                                 </th>
                                 <th scope="col" class="border-0 text-center pe-4">
                                     <span class="text-dark fw-bold">Order Code</span>
-                                </th>f
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="transactionTableBody">
@@ -532,85 +532,6 @@
         });
 
         updateTransactionCount(visibleCount);
-
-        // Update dropdown button text
-        const filterBtn = document.querySelector('.dropdown-toggle');
-        if (status === 'all') {
-            filterBtn.innerHTML = '<i class="fas fa-filter me-1"></i>Filter Status';
-        } else {
-            filterBtn.innerHTML = `<i class="fas fa-filter me-1"></i>${status}`;
-        }
-    }
-
-    function searchTransactionsByEmail(event) {
-        if (!event || event.key === 'Enter') {
-            const searchTerm = document.getElementById('emailSearchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('#transactionTableBody tr[data-email]');
-            let visibleCount = 0;
-
-            rows.forEach(row => {
-                const email = row.getAttribute('data-email');
-                if (email.includes(searchTerm)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            updateTransactionCount(visibleCount);
-        }
-    }
-
-    function updateTransactionCount(count = null) {
-        if (count === null) {
-            const visibleRows = document.querySelectorAll('#transactionTableBody tr[data-email]:not([style*="display: none"])');
-            count = visibleRows.length;
-        }
-
-        const countElement = document.querySelector('.card-footer small span.fw-bold');
-        if (countElement) {
-            countElement.textContent = count;
-        }
-    }
-
-    function exportTransactions() {
-        // Placeholder for export functionality
-        alert('Export functionality would be implemented here');
-    }
-
-    function refreshTransactions() {
-        // Placeholder for refresh functionality
-        location.reload();
-    }
-
-    // Auto-refresh every 30 seconds (optional)
-    // setInterval(refreshTransactions, 30000);
-</script>
-<script>
-    // Enhanced JavaScript functions
-    function filterTransactionsByStatus(status) {
-        const rows = document.querySelectorAll('#transactionTableBody tr[data-status]');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            if (status === 'all' || row.getAttribute('data-status') === status) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        updateTransactionCount(visibleCount);
-
-        // Update dropdown button text
-        const filterBtn = document.querySelector('.dropdown-toggle');
-        if (status === 'all') {
-            filterBtn.innerHTML = '<i class="fas fa-filter me-1"></i>Filter Status';
-        } else {
-            filterBtn.innerHTML = `<i class="fas fa-filter me-1"></i>${status}`;
-        }
     }
 
     function searchTransactionsByEmail(event) {
