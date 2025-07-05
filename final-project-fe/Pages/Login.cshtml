@@ -10,8 +10,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Winku Social Network Toolkit</title>
-    <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16">
+    <title>Phronesis – Grow Wisdom. Sharpen Skills.</title>
+    <link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
     <link rel="stylesheet" href="css/main.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/color.css">
@@ -25,10 +25,10 @@
                 <div class="col-lg-6">
                     <div class="land-featurearea">
                         <div class="land-meta">
-                            <h1>Winku</h1>
-                            <p>Winku is free to use for as long as you want with two active projects.</p>
-                            <div class="friend-logo">
-                                <span><img src="images/wink.png" alt=""></span>
+                            <h1>Phronesis</h1>
+                            <p>Phronesis helps you master essential soft skills to thrive in life and work.</p>
+                            <div class="circle-icon">
+                                <img src="/images/learning.png" alt="Learning Icon" />
                             </div>
                         </div>
                     </div>
@@ -93,5 +93,35 @@
             window.location.href = `/${redirectTo}`;
         }
     </script>
+    <style>
+        .circle-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px auto 0 auto;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+            .circle-icon img {
+                width: 100px;
+                height: 100px;
+                object-fit: contain;
+            }
+
+        .land-featurearea {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .land-meta {
+            text-align: center;
+        }
+    </style>
 </body>
 </html>
