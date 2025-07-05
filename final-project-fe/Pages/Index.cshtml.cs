@@ -99,7 +99,7 @@ namespace final_project_fe.Pages
             string postsApiUrl = $"{_apiSettings.BaseUrl}/Post";
 
 			// URL Comment API
-			string userApiUrl = $"{_apiSettings.BaseUrl}/User/";
+			string userApiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/";
 
 			string postFileApiUrl = $"{_apiSettings.BaseUrl}/PostFile";
 
