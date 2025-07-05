@@ -32,21 +32,20 @@ namespace final_project_fe.Pages.Shared
         [BindProperty]
         public LoginDto LoginData { get; set; } = new LoginDto();
 
-    public async Task<IActionResult> OnGetAsync(string? redirectTo)
-    {
-        var token = Request.Cookies["AccessToken"];
-        if (!string.IsNullOrEmpty(token))
+        public async Task<IActionResult> OnGetAsync(string? redirectTo)
         {
-            // Có token rồi => người dùng đã đăng nhập => chuyển trang
-            if (!string.IsNullOrEmpty(redirectTo))
-                return RedirectToPage($"/{redirectTo}");
+            var token = Request.Cookies["AccessToken"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                if (!string.IsNullOrEmpty(redirectTo))
+                    return RedirectToPage($"/{redirectTo}");
 
-            return RedirectToPage("/Index");
+                return RedirectToPage("/Index");
+            }
+
+            // Nếu chưa có token thì render form đăng nhập
+            return Page();
         }
-
-        // Nếu chưa có token thì render form đăng nhập
-        return Page();
-    }
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -83,7 +82,35 @@ namespace final_project_fe.Pages.Shared
                             });
 
                             string? role = JwtHelper.GetRoleFromToken(loginResponse.Token);
+                            string? userId = JwtHelper.GetUserIdFromToken(loginResponse.Token); 
+
                             _logger.LogInformation($"User Role: {role}");
+                            _logger.LogInformation($"User Id: {userId}");
+
+                            // Kiểm tra thông tin người dùng bằng API GetUserById
+                            if (!string.IsNullOrEmpty(userId))
+                            {
+                                var userApiClient = _httpClientFactory.CreateClient();
+                                userApiClient.DefaultRequestHeaders.Authorization =
+                                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResponse.Token);
+
+                                var userApiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/{userId}";
+                                var userResponse = await userApiClient.GetAsync(userApiUrl);
+
+                                if (userResponse.IsSuccessStatusCode)
+                                {
+                                    var userJson = await userResponse.Content.ReadAsStringAsync();
+                                    var userInfo = JsonSerializer.Deserialize<UserMetadata>(userJson, new JsonSerializerOptions
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    });
+
+                                    if (userInfo?.Level == null && userInfo?.Goals == null && userInfo?.FavouriteSubject == null)
+                                    {
+                                        return RedirectToPage("/RecommendQuestion");
+                                    }
+                                }
+                            }
 
                             if (role == "Admin")
                             {
@@ -92,10 +119,11 @@ namespace final_project_fe.Pages.Shared
 
                             return RedirectToPage("/Index");
                         }
+                        ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
                     }
-                    ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
                 }
             }
+
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi khi gọi API đăng nhập: {ex.Message}");
@@ -121,7 +149,7 @@ namespace final_project_fe.Pages.Shared
 
             if (result?.Url != null)
             {
-                return Redirect(result.Url); // Redirect to Google login
+                return Redirect(result.Url);
             }
 
             ModelState.AddModelError("", "Google login URL is invalid.");

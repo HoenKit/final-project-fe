@@ -946,9 +946,10 @@
                 let embedUrl = lesson.videoLink.replace("watch?v=", "embed/");
                 html += `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
             }
-
+                    const key = "@Model.ImageKey";
+                    const docLink = lesson.documentLink?.[key];
             if (lesson.documentLink) {
-                html += `<a href="${lesson.documentLink}" target="_blank">
+                html += `<a href="${docLink}" target="_blank">
                     <i class="fas fa-file-alt"></i>
                     View Document
                 </a>`;
