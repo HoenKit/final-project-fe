@@ -77,7 +77,7 @@
         }
 
         .section-title i {
-            color: #667eea;
+           color: #111827;
         }
 
         .amount-options {
@@ -99,14 +99,14 @@
         }
 
         .amount-option:hover {
-            border-color: #667eea;
+            border-color: #111827;
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
         }
 
         .amount-option.selected {
-            border-color: #667eea;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: #111827;
+            background: linear-gradient(45deg, #125d91, #111827);
             color: white;
         }
 
@@ -180,19 +180,19 @@
         }
 
         .payment-method:hover {
-            border-color: #667eea;
+            border-color: #111827;
             transform: translateY(-2px);
         }
 
         .payment-method.selected {
-            border-color: #667eea;
+            border-color: #111827;
             background: rgba(102, 126, 234, 0.1);
         }
 
         .payment-method i {
             font-size: 2rem;
             margin-bottom: 10px;
-            color: #667eea;
+            color: #111827;
         }
 
         .payment-method .name {
@@ -202,7 +202,7 @@
 
         .checkout-btn {
             width: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #125d91, #111827);
             color: white;
             border: none;
             padding: 18px;
@@ -253,7 +253,7 @@
         }
 
         .current-points {
-            background: linear-gradient(45deg, #ffd89b, #19547b);
+            background: linear-gradient(45deg, #125d91, #111827);
             color: white;
             padding: 20px;
             border-radius: 15px;
@@ -290,7 +290,7 @@
         }
 
         .benefit-item i {
-            color: #667eea;
+            color: #111827;
             font-size: 1.5rem;
         }
 
@@ -300,6 +300,11 @@
             padding: 20px;
             border-left: 4px solid #48bb78;
             animation: slideInRight 1s ease-out 0.4s both;
+            color: white;
+        }
+
+        .security-info p{
+            color: white;
         }
 
         .security-info i {
@@ -378,7 +383,7 @@
     </style>
 </head>
 <body>
-<div class="theme-layout">
+<div class="theme-layout" style="background-color: #111827;">
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-coins"></i> Phronesis Points</h1>
@@ -436,13 +441,13 @@
                         </h3>
                         <div class="payment-methods">
                             <div class="payment-method" data-method="payos">
-                                <i class="fas fa-credit-card" style="color: #0068ff;"></i>
+                                <i class="fas fa-credit-card" style="color: #111827;"></i>
                                 <div class="name">PayOS</div>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="checkout-btn pulse">
+                    <button style="background-color: #111827;" type="submit" class="checkout-btn pulse">
                         <i class="fas fa-shopping-cart"></i>
                         Pay Now
                     </button>

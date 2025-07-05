@@ -794,7 +794,7 @@
 				if (!id) return { avatar: defaultAvatar, name: defaultName };
 
 				try {
-					const res = await fetch(`${BaseUrl}/User/${id}`, { credentials: 'include' });
+				const res = await fetch(`${BaseUrl}/User/GetUserById/${id}`, { credentials: 'include' });
 					if (res.ok) {
 						const u = await res.json();
 						return {
