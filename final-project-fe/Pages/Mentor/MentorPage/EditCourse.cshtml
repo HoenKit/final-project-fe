@@ -532,7 +532,7 @@
                                     </div>
 
                                     <div class="step-navigation mt-4">
-                                        <button type="button" class="btn btn-secondary prev-step" data-prev="intended-learners">
+                                        <button type="button" class="btn btn-secondary prev-step" data-prev="level-language">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
                                         <button type="button" class="btn btn-primary next-step" data-next="curriculum">
@@ -658,7 +658,8 @@
                                                                                 <div class="btn-group">
                                                                                     <button type="button" class="btn-sm btn-outline-secondary"
                                                                                             onclick="editLesson(@lesson.LessonId,
-                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',)"
+                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',
+                                                                                            '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Description))')"
                                                                                             title="Update">
                                                                                         <i class="fa fa-edit" style="padding-left: 20%;"></i>
                                                                                     </button>
@@ -727,9 +728,9 @@
                                                                                                                 <button class="btn btn-sm btn-outline-primary" onclick="toggleFullscreen('video-@lesson.LessonId')">
                                                                                                                     <i class="bi bi-fullscreen"></i> Fullscreen
                                                                                                                 </button>
-                                                                                                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadMedia('@lesson.VideoLink', '@System.IO.Path.GetFileName(lesson.VideoLink)')">
+                                                                                                                @* <button class="btn btn-sm btn-outline-secondary" onclick="downloadMedia('@lesson.VideoLink', '@System.IO.Path.GetFileName(lesson.VideoLink)')">
                                                                                                                     <i class="bi bi-cloud-download"></i> Download
-                                                                                                                </button>
+                                                                                                                </button> *@
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </div>
@@ -801,9 +802,9 @@
                                                                                                                 <button class="btn btn-primary btn-sm" onclick="downloadMedia('@lesson.DocumentLink', '@fileName')">
                                                                                                                     <i class="bi bi-download"></i> Download
                                                                                                                 </button>
-                                                                                                                <a data-href="@lesson.DocumentLink" class="btn btn-outline-secondary btn-sm open-doc-btn" target="_blank">
+                                                                                                               @*  <a data-href="@lesson.DocumentLink" class="btn btn-outline-secondary btn-sm open-doc-btn" target="_blank">
                                                                                                                     <i class="bi bi-folder2-open"></i> Open
-                                                                                                                </a>
+                                                                                                                </a> *@
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </div>
@@ -1208,7 +1209,7 @@
 
                                                                                                 <div class="d-flex gap-2">
                                                                                                     <button type="submit" class="btn btn-info btn-sm">
-                                                                                                        <i class="fa fa-magic me-1"></i>Generate Questions
+                                                                                                        <i class="fa fa-magic me-1"></i>Generate
                                                                                                     </button>
                                                                                                     <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateQuestion(@lesson.LessonId)">
                                                                                                         <i class="fa fa-times me-1"></i>Cancel
@@ -1239,15 +1240,15 @@
                                                                             <!-- Form Edit Lesson -->
                                                                             <div id="edit-lesson-form-@lesson.LessonId" class="card mb-3" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
                                                                                 <div class="card-body">
-                                                                                    <h6 class="card-title">Edit This Lesson to "@module.Title"</h6>
-                                                                                    <form method="post" asp-page-handler="EditLesson" enctype="multipart/form-data">
+                                                                                <h6 class="card-title">Edit This Lesson to "@module.Title"</h6>
+                                                                                <form method="post" asp-page-handler="EditLesson" enctype="multipart/form-data">
                                                                                         <input type="hidden" asp-for="Lesson.LessonId" value="@lesson.LessonId" />
                                                                                         <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
                                                                                         <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
 
                                                                                         <div class="mb-3">
                                                                                             <label class="form-label">Lesson Title *</label>
-                                                                                            <input asp-for="Lesson.Title" type="text" class="form-control" value="@lesson.Title" required />
+                                                                                            <input asp-for="Lesson.Title" type="text" class="form-control" id="editLessonTitle-@lesson.LessonId" required />
                                                                                         </div>
 
                                                                                         <div class="mb-3">
@@ -1255,16 +1256,35 @@
                                                                                             <textarea asp-for="Lesson.Description" class="form-control" id="editLessonDescription-@lesson.LessonId" rows="3">@lesson.Description</textarea>
                                                                                         </div>
 
-                                                                                         <div class="mb-3">
-                                                                                              <label class="form-label">Document (optional)</label>                                                                                            
-                                                                                              <input asp-for="Document" type="file" class="form-control"/>
+                                                                                        <div class="mb-3">
+                                                                                            <label class="form-label">Document (optional)</label>
+                                                                                            @if (!string.IsNullOrEmpty(lesson.DocumentLink))
+                                                                                            {
+                                                                                                <div class="mb-2">
+                                                                                                    <small class="text-muted">Current: </small>
+                                                                                                    <a href="@lesson.DocumentLink" target="_blank" class="text-primary open-doc-btn" data-href="@lesson.DocumentLink">
+                                                                                                        View Document
+                                                                                                    </a>
+                                                                                                </div>
+                                                                                            }
+                                                                                            <input asp-for="Document" type="file" class="form-control" />
+                                                                                            <small class="form-text text-muted">Leave empty to keep current file</small>
+                                                                                        </div>
 
-                                                                                         </div>
-
-                                                                                         <div class="mb-3">
-                                                                                              <label class="form-label">Video (optional)</label>                                                                                             
-                                                                                              <input asp-for="Video" type="file" class="form-control" />
-                                                                                         </div>
+                                                                                        <div class="mb-3">
+                                                                                            <label class="form-label">Video (optional)</label>
+                                                                                            @if (!string.IsNullOrEmpty(lesson.VideoLink))
+                                                                                            {
+                                                                                                <div class="mb-2">
+                                                                                                    <small class="text-muted">Current: </small>
+                                                                                                    <a href="@lesson.VideoLink" target="_blank" class="text-primary">
+                                                                                                        View Video
+                                                                                                    </a>
+                                                                                                </div>
+                                                                                            }
+                                                                                            <input asp-for="Video" type="file" class="form-control" />
+                                                                                            <small class="form-text text-muted">Leave empty to keep current file</small>
+                                                                                        </div>
 
                                                                                         <div class="d-flex gap-2">
                                                                                             <button type="submit" class="btn btn-primary btn-sm">
@@ -1274,9 +1294,9 @@
                                                                                                 <i class="fa fa-times me-1"></i>Cancel
                                                                                             </button>
                                                                                         </div>
-                                                                                    </form>
-                                                                                </div>
+                                                                                </form>
                                                                             </div>
+                                                                        </div>
                                                                     }
                                                                 </div>
                                                             </div>                                                       
@@ -1341,7 +1361,20 @@
                                         <!-- Create Module Form (Hidden by default) -->
                                         <div id="create-module-form" class="card mb-3" style="display: none;">
                                             <div class="card-body">
-                                                <div class="form-section">
+                                                <!-- Module Creation Options -->
+                                                <div class="tab-container">
+                                                    <div class="tab-nav">
+                                                        <button type="button" class="tab-button active" id="manual-@Model.Course.CourseId" onclick="toggleModuleForms(@Model.Course.CourseId, 'manual', this)">
+                                                            <i class="fa fa-edit tab-icon"></i>
+                                                            Manual Entry
+                                                        </button>
+                                                        <button type="button" class="tab-button" id="ai-@Model.Course.CourseId" onclick="toggleModuleForms(@Model.Course.CourseId, 'ai', this)">
+                                                            <i class="bi bi-openai"></i>
+                                                            AI Generate
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="form-section" id="manual-form-@Model.Course.CourseId">
                                                     <form id="moduleForm" method="post" asp-page-handler="AddModule">
                                                         <input asp-for="Module.CourseId" type="hidden" value="@Model.Course.CourseId" />
                                                         <div class="mb-3">
@@ -1368,6 +1401,31 @@
                                                         </div>
                                                     </form>
                                                 </div>
+
+                                                <!-- AI Generation Form -->
+                                                <div class="form-section" id="ai-form-@Model.Course.CourseId" style="display: none;">
+                                                    <form id="aiModuleForm" method="post" asp-page-handler="GenerateModuleByAI">
+                                                        <input name="CourseId" type="hidden" value="@Model.Course.CourseId" />
+                                                        <div class="mb-3">
+                                                            <small class="text-danger">
+                                                            <i class="bi bi-send-exclamation"></i>
+                                                                Please fill out all course fields before using this feature!
+                                                            </small>
+                                                            <div class="alert alert-info">
+                                                                <i class="fa fa-info-circle me-2"></i>
+                                                                <strong>AI will generate:</strong> Module title, description, and suggested learning objectives based on your input.
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-info btn-sm" id="generateBtn">
+                                                                <i class="bi bi-magic me-1"></i>Generate
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary" onclick="cancelCreateModule()">
+                                                                <i class="fa fa-times me-1"></i>Cancel
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1380,7 +1438,7 @@
                                     </div>
 
                                     <div class="step-navigation mt-4">
-                                        <button type="button" class="btn btn-secondary prev-step" data-prev="course-image">
+                                    <button type="button" class="btn btn-secondary prev-step" data-prev="intended-learners">
                                             <i class="fa fa-arrow-left"></i> Previous
                                         </button>
                                     </div>
@@ -2565,7 +2623,7 @@
 
             // Progress tracking - Updated to show completion status without blocking
             function updateProgress() {
-                const totalSteps = 9;
+                const totalSteps = 8;
                 const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
                 const progressPercentage = (completedSteps / totalSteps) * 100;
 
@@ -2718,14 +2776,16 @@
             }
         }
         
-        function editLesson(lessonId, title) {
+        function editLesson(lessonId, title, description) {
             const displayDiv = document.getElementById(`lesson-display-${lessonId}`);
             const titleInput = document.getElementById(`editLessonTitle-${lessonId}`);
+            const desciptionInput = document.getElementById(`editLessonDescription-${lessonId}`);
             const form = document.getElementById(`edit-lesson-form-${lessonId}`);
             const createForm = document.getElementById(`create-lesson-form-${lessonId}`);
 
             if (displayDiv) displayDiv.style.display = 'none';
             if (titleInput) titleInput.value = title;
+            if(desciptionInput) desciptionInput.value = description;
             if (form) form.style.display = 'block';
             if (createForm) createForm.style.display = 'none';
         }
@@ -2903,6 +2963,48 @@
             }
         }
 
+        // Toggle between Manual and AI forms
+        function toggleModuleForms(courseId, formType, clickedButton) {
+            // Remove active class from all tab buttons
+            const allButtons = document.querySelectorAll('[id^="manual-' + courseId + '"], [id^="ai-' + courseId + '"]');
+            allButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Add active class to clicked button
+            clickedButton.classList.add('active');
+
+            // Hide all forms
+            const manualForm = document.getElementById('manual-form-' + courseId);
+            const aiForm = document.getElementById('ai-form-' + courseId);
+
+            if (manualForm) manualForm.style.display = 'none';
+            if (aiForm) aiForm.style.display = 'none';
+
+            // Show selected form
+            if (formType === 'manual' && manualForm) {
+                manualForm.style.display = 'block';
+            } else if (formType === 'ai' && aiForm) {
+                aiForm.style.display = 'block';
+            }
+        }
+
+        // Handle AI form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const aiForm = document.getElementById('aiModuleForm');
+            const generateBtn = document.getElementById('generateBtn');
+
+            if (aiForm && generateBtn) {
+                aiForm.addEventListener('submit', function(e) {
+                    // Show loading state
+                    generateBtn.disabled = true;
+                    generateBtn.innerHTML = '<span class="loading-spinner"></span>Generating...';
+
+                    // You can add additional validation here if needed
+                });
+            }
+        });
+
         // Handle module form submission
         document.addEventListener('DOMContentLoaded', function() {
             const moduleForm = document.getElementById('moduleForm');
@@ -3023,15 +3125,15 @@
         document.body.removeChild(a);
     }
 
-        document.addEventListener('DOMContentLoaded', function () {
-        const openBtn = document.querySelector('.open-doc-btn');
-        if (openBtn) {
-            openBtn.addEventListener('click', function (e) {
+    document.addEventListener('DOMContentLoaded', function () {
+        const docLinks = document.querySelectorAll('.open-doc-btn');
+        docLinks.forEach(function(link) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const baseUrl = this.getAttribute('data-href');
                 window.open(baseUrl + sasToken, '_blank');
             });
-        }
+        });
     });
 </script>
 
