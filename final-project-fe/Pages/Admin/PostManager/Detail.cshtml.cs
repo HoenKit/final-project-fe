@@ -89,7 +89,7 @@ namespace final_project_fe.Pages.Admin.PostManager
             if (Post == null) return NotFound();
 
             // Lấy thông tin User
-            string userUrl = $"{_apiSettings.BaseUrl}/User/{Post.UserId}";
+            string userUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/{Post.UserId}";
             var userResponse = await _httpClient.GetAsync(userUrl);
             if (userResponse.IsSuccessStatusCode)
             {

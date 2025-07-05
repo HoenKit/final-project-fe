@@ -12,49 +12,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Profile</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .main-container {
-            width: 100%;
-            max-width: 900px;
-            position: relative;
+        .container {
+            padding: 2rem 1rem;
         }
 
-        .card {
-            border: none;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        .main-card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
         }
 
-        .card:hover {
+        .main-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
             border: none;
-            padding: 40px 40px 30px;
             position: relative;
             overflow: hidden;
         }
@@ -62,105 +51,49 @@
         .card-header::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-            opacity: 0.3;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
         }
 
-        .card-header h3 {
-            color: white;
-            font-weight: 700;
-            font-size: 2rem;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
+        @@keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .step-item.active {
-            color: white;
-        }
-
-        .step-item.completed {
-            color: #4ade80;
-        }
-
-        .step-number {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
+        .card-title {
+            font-size: 1.8rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .step-item.active .step-number {
-            background: white;
-            color: #667eea;
-        }
-
-        .step-item.completed .step-number {
-            background: #4ade80;
-            color: white;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .progress-container {
             position: relative;
-            height: 6px;
+            z-index: 1;
+            margin-top: 1rem;
+        }
+
+        .progress {
+            height: 8px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
+            border-radius: 10px;
             overflow: hidden;
-            margin-top: 20px;
         }
 
         .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
-            border-radius: 3px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @@keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
         }
 
         .card-body {
-            padding: 50px;
+            padding: 2.5rem;
         }
 
         .question-step {
@@ -168,235 +101,219 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            opacity: 0;
-            transform: translateX(30px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        .question-step.active {
-            opacity: 1;
-            transform: translateX(0);
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .question-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .question-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
-        .form-label {
+            color: #2c3e50;
+            font-size: 1.4rem;
             font-weight: 600;
-            color: #374151;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
         }
 
-        .level-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+        .question-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
         }
 
         .level-option {
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .level-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .level-card {
             background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 25px 20px;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
             position: relative;
             overflow: hidden;
         }
 
-        .level-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .level-card > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .level-option:hover .level-card {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .level-option input[type="radio"]:checked + .level-card {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
-        }
-
-        .level-option input[type="radio"]:checked + .level-card::before {
-            opacity: 1;
-        }
-
-        .level-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            opacity: 0.8;
-        }
-
-        .level-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .level-description {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            line-height: 1.4;
-        }
-
-        .form-control {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 15px 20px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            outline: none;
-        }
-
-        .form-control::placeholder {
-            color: #9ca3af;
-            opacity: 1;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 40px;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            min-width: 120px;
-        }
-
-        .btn::before {
+        .level-option::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s ease;
         }
 
-        .btn:hover::before {
+        .level-option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .level-option:hover::before {
             left: 100%;
         }
 
+        .level-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea10, #764ba210);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .level-option .level-icon {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-option .level-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .level-option .level-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn-secondary {
-            background: #f8fafc;
-            color: #64748b;
-            border: 2px solid #e2e8f0;
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            color: white;
         }
 
         .btn-secondary:hover {
-            background: #e2e8f0;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
         }
 
         .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(74, 222, 128, 0.3);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
         }
 
-        .alert {
-            border-radius: 12px;
-            border: none;
-            padding: 15px 20px;
-            margin-top: 20px;
-            animation: slideIn 0.3s ease;
+        .error-message {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            animation: shake 0.5s ease-in-out;
         }
 
-        .alert-danger {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-            color: #dc2626;
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
 
-        @@keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
         .loading-overlay {
@@ -405,189 +322,182 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
+            display: none;
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
         }
 
-       @@keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
         }
 
+        /* Responsive Design */
         @@media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
             .card-body {
-                padding: 30px 20px;
+                padding: 1.5rem;
             }
-            
-            .card-header {
-                padding: 30px 20px;
+
+            .question-step {
+                min-height: 350px;
             }
-            
-            .level-options {
-                grid-template-columns: 1fr;
-            }
-            
+
             .btn-group {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .btn {
                 width: 100%;
-                max-width: 300px;
+                max-width: 250px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Loading overlay -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
     </div>
 
-    <div class="main-container">
-        <div class="card">
-            <div class="card-header">
-                <h3><i class="fas fa-graduation-cap me-3"></i>Set up learning profile</h3>
-                
-                <div class="step-indicator">
-                    <div class="step-item active" id="stepIndicator1">
-                        <div class="step-number">1</div>
-                        <span>Level</span>
-                    </div>
-                    <div class="step-item" id="stepIndicator2">
-                        <div class="step-number">2</div>
-                        <span>Goals</span>
-                    </div>
-                    <div class="step-item" id="stepIndicator3">
-                        <div class="step-number">3</div>
-                        <span>Subject</span>
-                    </div>
-                </div>
-                
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar" style="width: 33%"></div>
-                </div>
-            </div>
-            
-            <div class="card-body">
-                <form id="learningProfileForm">
-                    <!-- Question 1: Level -->
-                    <div class="question-step active" id="step1">
-                        <div class="question-icon">
-                            <i class="fas fa-chart-line"></i>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card main-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            Learning Profile Setup
+                        </h3>
+                        <div class="step-indicator">
+                            <div class="step-dot active" id="dot1"></div>
+                            <div class="step-dot" id="dot2"></div>
+                            <div class="step-dot" id="dot3"></div>
                         </div>
-                        <h4 class="question-title">What is your current level?</h4>
-                        
-                        <div class="form-group">
-                            <div class="level-options">
-                                <div class="level-option">
-                                    <input type="radio" name="level" value="Beginner" id="beginner">
-                                    <label for="beginner" class="level-card">
-                                        <div class="level-icon">🌱</div>
-                                        <div class="level-title">Beginner</div>
-                                        <div class="level-description">Just starting out</div>
-                                    </label>
-                                </div>
-                                <div class="level-option">
-                                    <input type="radio" name="level" value="Intermediate" id="intermediate">
-                                    <label for="intermediate" class="level-card">
-                                        <div class="level-icon">🚀</div>
-                                        <div class="level-title">Intermediate</div>
-                                        <div class="level-description">Some experience</div>
-                                    </label>
-                                </div>
-                                <div class="level-option">
-                                    <input type="radio" name="level" value="Advanced" id="advanced">
-                                    <label for="advanced" class="level-card">
-                                        <div class="level-icon">⭐</div>
-                                        <div class="level-title">Advanced</div>
-                                        <div class="level-description">Strong foundation</div>
-                                    </label>
-                                </div>
-                                <div class="level-option">
-                                    <input type="radio" name="level" value="Expert" id="expert">
-                                    <label for="expert" class="level-card">
-                                        <div class="level-icon">🏆</div>
-                                        <div class="level-title">Expert</div>
-                                        <div class="level-description">Highly skilled</div>
-                                    </label>
-                                </div>
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 33%" id="progressBar"></div>
                             </div>
                         </div>
-                        
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="nextBtn1">
-                                Next <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
                     </div>
+                    <div class="card-body">
+                        <form id="learningProfileForm" method="post" action="/RecommendQuestion">
+                            @Html.AntiForgeryToken()
+                            
+                            <!-- Hidden inputs để chứa dữ liệu - match với UpdateUserMetadataDto -->
+                            <input type="hidden" name="UserMetadata.Level" id="levelInput" />
+                            <input type="hidden" name="UserMetadata.Goals" id="goalsInput" />
+                            <input type="hidden" name="UserMetadata.FavouriteSubject" id="subjectInput" />
+                            
+                            <!-- Question 1: Level -->
+                            <div class="question-step" id="step1">
+                                <h4 class="question-title">Question 1/3: What's your current level?</h4>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="level-option" data-level="Beginner">
+                                            <div class="level-icon">
+                                                <i class="fas fa-seedling"></i>
+                                            </div>
+                                            <div class="level-name">Beginner</div>
+                                            <div class="level-desc">New to this field</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="level-option" data-level="Intermediate">
+                                            <div class="level-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <div class="level-name">Intermediate</div>
+                                            <div class="level-desc">Have basic knowledge</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="level-option" data-level="Advanced">
+                                            <div class="level-icon">
+                                                <i class="fas fa-rocket"></i>
+                                            </div>
+                                            <div class="level-name">Advanced</div>
+                                            <div class="level-desc">Have practical experience</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="level-option" data-level="Expert">
+                                            <div class="level-icon">
+                                                <i class="fas fa-crown"></i>
+                                            </div>
+                                            <div class="level-name">Expert</div>
+                                            <div class="level-desc">Proficient and can guide others</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" id="nextBtn1">
+                                        <i class="fas fa-arrow-right me-2"></i>Next
+                                    </button>
+                                </div>
+                            </div>
 
-                    <!-- Question 2: Goals -->
-                    <div class="question-step" id="step2">
-                        <div class="question-icon">
-                            <i class="fas fa-target"></i>
-                        </div>
-                        <h4 class="question-title">What are your learning goals?</h4>
-                        
-                        <div class="form-group">
-                            <label for="goals" class="form-label">Describe your learning objectives:</label>
-                            <textarea name="goals" id="goals" class="form-control" rows="4"
-                                      placeholder="For example: I want to develop programming skills, prepare for exams, or improve my professional knowledge..."></textarea>
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-secondary" id="backBtn2">
-                                <i class="fas fa-arrow-left me-2"></i>Back
-                            </button>
-                            <button type="button" class="btn btn-primary" id="nextBtn2">
-                                Next <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
-                    </div>
+                            <!-- Question 2: Goals -->
+                            <div class="question-step" id="step2" style="display: none;">
+                                <h4 class="question-title">Question 2/3: What are your learning goals?</h4>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-bullseye me-2"></i>Describe your learning goals:
+                                    </label>
+                                    <textarea class="form-control" rows="4" id="goals"
+                                              placeholder="Example: I want to learn programming to develop web applications, prepare for exams, or enhance my professional knowledge..."></textarea>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary" id="backBtn2">
+                                        <i class="fas fa-arrow-left me-2"></i>Back
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="nextBtn2">
+                                        <i class="fas fa-arrow-right me-2"></i>Next
+                                    </button>
+                                </div>
+                            </div>
 
-                    <!-- Question 3: Favourite Subject -->
-                    <div class="question-step" id="step3">
-                        <div class="question-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <h4 class="question-title">What's your favorite subject?</h4>
-                        
-                        <div class="form-group">
-                            <label for="subject" class="form-label">Favorite subject or field:</label>
-                            <input type="text" name="subject" id="subject" class="form-control" 
-                                   placeholder="For example: Math, Programming, English, Science, History..." />
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-secondary" id="backBtn3">
-                                <i class="fas fa-arrow-left me-2"></i>Back
-                            </button>
-                            <button type="submit" class="btn btn-success" id="submitBtn">
-                                <i class="fas fa-check me-2"></i>Complete
-                            </button>
-                        </div>
+                            <!-- Question 3: Favourite Subject -->
+                            <div class="question-step" id="step3" style="display: none;">
+                                <h4 class="question-title">Question 3/3: What's your favorite subject?</h4>
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-heart me-2"></i>Favorite subject or field:
+                                    </label>
+                                    <input type="text" class="form-control" id="FavouriteSubject"
+                                           placeholder="Example: Mathematics, Programming, English, Science, History..." />
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary" id="backBtn3">
+                                        <i class="fas fa-arrow-left me-2"></i>Back
+                                    </button>
+                                    <button type="submit" class="btn btn-success" id="submitBtn">
+                                        <i class="fas fa-check me-2"></i>Complete
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -595,88 +505,105 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let currentStep = 1;
+            let selectedLevel = '';
             const totalSteps = 3;
-            
+
             // Update progress bar and step indicators
             function updateProgress() {
                 const progress = (currentStep / totalSteps) * 100;
                 document.getElementById('progressBar').style.width = progress + '%';
                 
-                // Update step indicators
+                // Update step dots
                 for (let i = 1; i <= totalSteps; i++) {
-                    const indicator = document.getElementById(`stepIndicator${i}`);
-                    indicator.classList.remove('active', 'completed');
-                    
-                    if (i < currentStep) {
-                        indicator.classList.add('completed');
-                    } else if (i === currentStep) {
-                        indicator.classList.add('active');
+                    const dot = document.getElementById(`dot${i}`);
+                    if (i <= currentStep) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
                     }
                 }
             }
-            
-            // Show specific step with animation
+
+            // Show specific step
             function showStep(step) {
                 // Hide all steps
-                document.querySelectorAll('.question-step').forEach(stepEl => {
-                    stepEl.classList.remove('active');
-                });
-                
-                // Show current step with delay for animation
-                setTimeout(() => {
-                    document.getElementById(`step${step}`).classList.add('active');
-                }, 100);
-                
+                for (let i = 1; i <= totalSteps; i++) {
+                    document.getElementById(`step${i}`).style.display = 'none';
+                }
+                // Show current step
+                document.getElementById(`step${step}`).style.display = 'block';
                 updateProgress();
             }
-            
+
+            // Level selection
+            document.querySelectorAll('.level-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selection from all options
+                    document.querySelectorAll('.level-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    // Add selection to clicked option
+                    this.classList.add('selected');
+                    selectedLevel = this.getAttribute('data-level');
+                });
+            });
+
             // Validate current step
             function validateStep(step) {
                 if (step === 1) {
-                    const levelRadios = document.querySelectorAll('input[name="level"]');
-                    return Array.from(levelRadios).some(radio => radio.checked);
+                    return selectedLevel !== '';
                 } else if (step === 2) {
                     const goals = document.getElementById('goals');
                     return goals.value.trim() !== '';
                 } else if (step === 3) {
-                    const subject = document.getElementById('subject');
-                    return subject.value.trim() !== '';
+                    const FavouriteSubject = document.getElementById('FavouriteSubject');
+                    return FavouriteSubject.value.trim() !== '';
                 }
                 return false;
             }
-            
+
             // Show error message
             function showError(message) {
                 // Remove existing error
-                const existingError = document.querySelector('.temp-error');
+                const existingError = document.querySelector('.error-message');
                 if (existingError) {
                     existingError.remove();
                 }
-                
+
                 // Add new error
                 const errorDiv = document.createElement('div');
-                errorDiv.className = 'alert alert-danger temp-error';
+                errorDiv.className = 'error-message';
                 errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
                 document.querySelector(`#step${currentStep}`).appendChild(errorDiv);
-                
-                // Remove error after 5 seconds
+
+                // Remove error after 4 seconds
                 setTimeout(() => {
                     if (errorDiv.parentNode) {
                         errorDiv.remove();
                     }
-                }, 5000);
+                }, 4000);
             }
-            
+
+            // Show loading overlay
+            function showLoading() {
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            }
+
+            // Hide loading overlay
+            function hideLoading() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+
             // Next button for step 1
             document.getElementById('nextBtn1').addEventListener('click', function() {
                 if (validateStep(1)) {
                     currentStep = 2;
                     showStep(2);
                 } else {
-                    showError('Please select your current level!');
+                    showError('Please select your level!');
                 }
             });
-            
+
             // Next button for step 2
             document.getElementById('nextBtn2').addEventListener('click', function() {
                 if (validateStep(2)) {
@@ -686,58 +613,61 @@
                     showError('Please enter your learning goals!');
                 }
             });
-            
+
             // Back button for step 2
             document.getElementById('backBtn2').addEventListener('click', function() {
                 currentStep = 1;
                 showStep(1);
             });
-            
+
             // Back button for step 3
             document.getElementById('backBtn3').addEventListener('click', function() {
                 currentStep = 2;
                 showStep(2);
             });
-            
+
             // Form submission
             document.getElementById('learningProfileForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                if (!validateStep(3)) {
-                    showError('Please enter your favorite subject!');
-                    return;
-                }
-                
-                // Show loading overlay
-                document.getElementById('loadingOverlay').classList.add('active');
-                
-                // Simulate form submission delay
-                setTimeout(() => {
-                    // Here you would normally submit the form data
-                    console.log('Form submitted successfully!');
+                if (validateStep(3)) {
+                    // Show loading
+                    showLoading();
                     
-                    // Redirect to course recommendation page
-                    window.location.href = '/CourseRecommend';
-                }, 1500);
+                    // Update hidden inputs with form data
+                    document.getElementById('levelInput').value = selectedLevel;
+                    document.getElementById('goalsInput').value = document.getElementById('goals').value;
+                    document.getElementById('subjectInput').value = document.getElementById('FavouriteSubject').value;
+                    
+                    // Submit form using fetch API
+                    const formData = new FormData(this);
+                    
+                    fetch('/RecommendQuestion', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Success - redirect to course recommendation page
+                            window.location.href = '/CourseRecommend';
+                        } else {
+                            return response.text().then(text => {
+                                throw new Error(`HTTP ${response.status}: ${text}`);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        hideLoading();
+                        showError('Something went wrong. Please try again!');
+                    });
+                } else {
+                    showError('Please enter your favorite subject!');
+                }
             });
-            
-            // Add hover effects for level cards
-            document.querySelectorAll('.level-option').forEach(option => {
-                option.addEventListener('mouseenter', function() {
-                    if (!this.querySelector('input').checked) {
-                        this.querySelector('.level-card').style.transform = 'translateY(-5px)';
-                    }
-                });
-                
-                option.addEventListener('mouseleave', function() {
-                    if (!this.querySelector('input').checked) {
-                        this.querySelector('.level-card').style.transform = 'translateY(0)';
-                    }
-                });
-            });
-            
+
             // Initialize
-            updateProgress();
+            showStep(1);
         });
     </script>
 </body>
