@@ -573,19 +573,6 @@
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(TempData["ErrorMessage"] as string))
-    {
-        <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
-        </div>
-    }
-    @if (!string.IsNullOrEmpty(TempData["WarningMessage"] as string))
-    {
-        <div class="alert alert-warning">
-            @TempData["WarningMessage"]
-        </div>
-    }
-
     <header class="header" style="background: #111827;">
         <div class="container">
             <h1 style="color: white;">
@@ -621,8 +608,8 @@
             @if (!Model.HasCompleteProfile)
             {
                 <div class="alert alert-info">
-                    <p>🔍 Please complete your profile to get personalized recommendations.</p>
-                    <a asp-page="/Profile/Edit" class="btn btn-primary">Update Profile</a>
+                    <p>🔍 Please take our survey first to get personalized recommendations.</p>
+                    <a asp-page="/RecommendQuestion" class="btn btn-primary">Survey</a>
                 </div>
             }
             else if (Model.RecommendedCourses.Any())
@@ -752,20 +739,19 @@
             const body = document.body;
             
             loadingScreen.style.display = 'flex';
-            body.classList.add('loading'); // Thêm class để ẩn thanh cuộn
+            body.classList.add('loading');
             
             setTimeout(function() {
                 loadingScreen.style.display = 'none';
-                body.classList.remove('loading'); // Bỏ class để hiện lại thanh cuộn
+                body.classList.remove('loading');
                 
                 // Mark as shown for this session
                 sessionStorage.setItem('courseRecommendLoadingShown', 'true');
-            }, 20000); // Giữ nguyên 30s cho hiệu ứng AI phân tích
+            }, 20000);
         }
         </text>
     }
             
-            // Phần còn lại của script giữ nguyên...
             const filterBtns = document.querySelectorAll('.filter-btn');
             const courseCards = document.querySelectorAll('.course-card');
             const noCourses = document.getElementById('noCourses');
