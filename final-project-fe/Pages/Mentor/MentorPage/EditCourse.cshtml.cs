@@ -378,6 +378,75 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
 
 
+
+        //Handler Create Module and Lesson by AI
+        public async Task<IActionResult> OnPostGenerateModuleByAIAsync(int courseId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                new KeyValuePair<string, string>("courseId", courseId.ToString())});
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Course/generate-structure/{courseId}", formContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Course structure generated successfully.";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Could not generate modules and lessons for this course.";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, $"Error generating course structure for course {courseId}");
+                TempData["ErrorMessage"] = "An error occurred while generating course structure.";
+                return Page();
+            }
+        }
+
         // Handler Create Module
         public async Task<IActionResult> OnPostAddModuleAsync()
         {
@@ -1013,8 +1082,6 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             return RedirectToPage(new { courseId = Module.CourseId });
         }
 
-
-
         //Handler Generate Question and Answer by Upload Excel
         public async Task<IActionResult> OnPostUploadExcel(IFormFile excelFile, int lessonId)
         {
@@ -1178,6 +1245,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             return Page();
         }
+
 
 
         //Handler Delete Answer
