@@ -21,4 +21,5 @@
         public int CountModule { get; set; }
         public int CountLesson { get; set; }
     }
+
 }

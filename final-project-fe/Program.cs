@@ -35,6 +35,7 @@ builder.Host.UseSerilog();
 
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+builder.Services.Configure<ImageSettings>(builder.Configuration.GetSection("ImageSettings"));
 builder.Services.AddScoped<PayOSService>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
