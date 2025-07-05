@@ -694,16 +694,25 @@
                                                                                                         <!-- Video Player -->
                                                                                                         <div class="video-container" style="position: relative; background: #000;">
                                                                                                             <video controls
-                                                                                                                   class="w-100"
+                                                                                                                   class="w-100 protected-video"
                                                                                                                    style="max-height: 300px; object-fit: contain;"
                                                                                                                    preload="metadata"
                                                                                                                    id="video-@lesson.LessonId"
-                                                                                                                   poster="/images/video-placeholder.jpg">
+                                                                                                                   poster="/images/video-placeholder.jpg"
+                                                                                                                   controlsList="nodownload noremoteplayback"
+                                                                                                                   disablePictureInPicture
+                                                                                                                   oncontextmenu="return false;">
                                                                                                                 <source src="@lesson.VideoLink" type="video/mp4">
                                                                                                                 <source src="@lesson.VideoLink" type="video/webm">
                                                                                                                 <source src="@lesson.VideoLink" type="video/ogg">
                                                                                                                 Your browser does not support the video tag.
                                                                                                             </video>
+
+                                                                                                            <!-- Overlay để ngăn right-click -->
+                                                                                                            <div class="video-overlay"
+                                                                                                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                                                                                                                    pointer-events: none; z-index: 1;">
+                                                                                                            </div>
                                                                                                         </div>
 
                                                                                                         <!-- Video Info -->
@@ -724,14 +733,14 @@
                                                                                                             </div>
 
                                                                                                             <!-- Video Controls -->
-                                                                                                            <div class="mt-2 d-flex gap-2">
+                                                                                                            @* <div class="mt-2 d-flex gap-2">
                                                                                                                 <button class="btn btn-sm btn-outline-primary" onclick="toggleFullscreen('video-@lesson.LessonId')">
                                                                                                                     <i class="bi bi-fullscreen"></i> Fullscreen
                                                                                                                 </button>
-                                                                                                                @* <button class="btn btn-sm btn-outline-secondary" onclick="downloadMedia('@lesson.VideoLink', '@System.IO.Path.GetFileName(lesson.VideoLink)')">
+                                                                                                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadMedia('@lesson.VideoLink', '@System.IO.Path.GetFileName(lesson.VideoLink)')">
                                                                                                                     <i class="bi bi-cloud-download"></i> Download
-                                                                                                                </button> *@
-                                                                                                            </div>
+                                                                                                                </button>
+                                                                                                            </div> *@
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
@@ -792,19 +801,19 @@
                                                                                                                     </small>
                                                                                                                     <br>
                                                                                                                     <span class="badge">
-                                                                                                                        <i class="bi bi-file-earmark-arrow-down"></i>Available for Download
+                                                                                                                        <i class="bi bi-file-earmark-arrow-down"></i>Available
                                                                                                                     </span>
                                                                                                                 </div>
                                                                                                             </div>
 
                                                                                                             <!-- Document Controls -->
                                                                                                             <div class="d-flex flex-column gap-2">
-                                                                                                                <button class="btn btn-primary btn-sm" onclick="downloadMedia('@lesson.DocumentLink', '@fileName')">
+                                                                                                                @* <button class="btn btn-primary btn-sm" onclick="downloadMedia('@lesson.DocumentLink', '@fileName')">
                                                                                                                     <i class="bi bi-download"></i> Download
-                                                                                                                </button>
-                                                                                                               @*  <a data-href="@lesson.DocumentLink" class="btn btn-outline-secondary btn-sm open-doc-btn" target="_blank">
+                                                                                                                </button> *@
+                                                                                                                <a data-href="@lesson.DocumentLink" class="btn btn-outline-secondary btn-sm open-doc-btn" target="_blank">
                                                                                                                     <i class="bi bi-folder2-open"></i> Open
-                                                                                                                </a> *@
+                                                                                                                </a>
                                                                                                             </div>
                                                                                                         </div>
                                                                                                     </div>
@@ -1257,7 +1266,7 @@
                                                                                         </div>
 
                                                                                         <div class="mb-3">
-                                                                                            <label class="form-label">Document (optional)</label>
+                                                                                            <label class="form-label">Document (PDF only) *</label>
                                                                                             @if (!string.IsNullOrEmpty(lesson.DocumentLink))
                                                                                             {
                                                                                                 <div class="mb-2">
@@ -1267,23 +1276,36 @@
                                                                                                     </a>
                                                                                                 </div>
                                                                                             }
-                                                                                            <input asp-for="Document" type="file" class="form-control" />
-                                                                                            <small class="form-text text-muted">Leave empty to keep current file</small>
+                                                                                            <input asp-for="Document"
+                                                                                                   type="file"
+                                                                                                   class="form-control"
+                                                                                                   accept=".pdf"
+                                                                                                   id="editDocument-@lesson.LessonId"
+                                                                                                   data-max-size="10485760" />
+                                                                                            <small class="form-text text-muted">
+                                                                                                <strong>Only PDF files are allowed (max 10MB).</strong> Leave empty to keep current file
+                                                                                            </small>
+                                                                                            <div class="invalid-feedback" id="documentError-@lesson.LessonId" style="display: none;"></div>
                                                                                         </div>
 
                                                                                         <div class="mb-3">
-                                                                                            <label class="form-label">Video (optional)</label>
-                                                                                            @if (!string.IsNullOrEmpty(lesson.VideoLink))
+                                                                                            <label class="form-label">Document (PDF only)</label>
+                                                                                            @if (!string.IsNullOrEmpty(lesson.DocumentLink))
                                                                                             {
                                                                                                 <div class="mb-2">
                                                                                                     <small class="text-muted">Current: </small>
-                                                                                                    <a href="@lesson.VideoLink" target="_blank" class="text-primary">
-                                                                                                        View Video
+                                                                                                    <a href="@lesson.DocumentLink" target="_blank" class="text-primary open-doc-btn" data-href="@lesson.DocumentLink">
+                                                                                                        View Document
                                                                                                     </a>
                                                                                                 </div>
                                                                                             }
-                                                                                            <input asp-for="Video" type="file" class="form-control" />
-                                                                                            <small class="form-text text-muted">Leave empty to keep current file</small>
+                                                                                            <input asp-for="Document"
+                                                                                                   type="file"
+                                                                                                   class="form-control"
+                                                                                                   accept=".pdf,application/pdf"
+                                                                                                   id="editDocument-@lesson.LessonId" />
+                                                                                            <small class="form-text text-muted">Only PDF files are allowed. Leave empty to keep current file</small>
+                                                                                            <div class="invalid-feedback" id="documentError-@lesson.LessonId"></div>
                                                                                         </div>
 
                                                                                         <div class="d-flex gap-2">
@@ -1322,8 +1344,17 @@
                                                                             <textarea asp-for="Lesson.Description" class="form-control" id="lessonDescription-@module.ModuleId" rows="3"></textarea>
                                                                         </div>
                                                                         <div class="mb-3">
-                                                                            <label class="form-label">Document (optional)</label>
-                                                                            <input asp-for="Document" type="file" class="form-control" />
+                                                                            <label class="form-label">Document (PDF only)</label>
+                                                                            <input asp-for="Document"
+                                                                                   type="file"
+                                                                                   class="form-control"
+                                                                                   accept=".pdf"
+                                                                                   id="createDocument-@module.ModuleId"
+                                                                                   data-max-size="10485760" />
+                                                                            <small class="form-text text-muted">
+                                                                                <strong>Only PDF files are allowed (max 10MB).</strong>
+                                                                            </small>
+                                                                            <div class="invalid-feedback" id="createDocumentError-@module.ModuleId" style="display: none;"></div>
                                                                         </div>
                                                                         <div class="mb-3">
                                                                             <label class="form-label">Video (optional)</label>
@@ -3074,6 +3105,172 @@
             }
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+        // Validation cho Document input trong Create Form (chỉ PDF)
+        const createDocumentInputs = document.querySelectorAll('input[asp-for="Document"]');
+        createDocumentInputs.forEach(function(input) {
+            // Chỉ áp dụng cho create form (id bắt đầu với "createDocument")
+            if (input.id && input.id.startsWith('createDocument')) {
+                input.addEventListener('change', function(e) {
+                    const file = this.files[0];
+                    const moduleId = this.id.split('-')[1];
+                    const errorDiv = document.getElementById('createDocumentError-' + moduleId);
+                    const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB default
+
+                    if (file) {
+                        let isValid = true;
+                        let errorMessage = '';
+
+                        // Kiểm tra extension
+                        const fileName = file.name.toLowerCase();
+                        if (!fileName.endsWith('.pdf')) {
+                            isValid = false;
+                            errorMessage = 'Only PDF files are allowed. Please select a .pdf file.';
+                        }
+
+                        // Kiểm tra MIME type
+                        if (isValid && file.type !== 'application/pdf') {
+                            isValid = false;
+                            errorMessage = 'Invalid file type. Only PDF files are accepted.';
+                        }
+
+                        // Kiểm tra file size
+                        if (isValid && file.size > maxSize) {
+                            isValid = false;
+                            errorMessage = `File size too large. Maximum allowed size is ${Math.round(maxSize/1024/1024)}MB.`;
+                        }
+
+                        // Kiểm tra file có rỗng không
+                        if (isValid && file.size === 0) {
+                            isValid = false;
+                            errorMessage = 'File is empty. Please select a valid PDF file.';
+                        }
+
+                        if (!isValid) {
+                            this.setCustomValidity(errorMessage);
+                            this.classList.add('is-invalid');
+                            errorDiv.textContent = errorMessage;
+                            errorDiv.style.display = 'block';
+                            this.value = ''; // Clear the input
+
+                            // Prevent form submission
+                            e.preventDefault();
+                            return false;
+                        } else {
+                            this.setCustomValidity('');
+                            this.classList.remove('is-invalid');
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                });
+
+                // Validation khi drag & drop
+                input.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('drag-over');
+                });
+
+                input.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                });
+
+                input.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.files = files;
+                        // Trigger change event để validation chạy
+                        this.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+        // Validation cho Document input (chỉ PDF)
+        const documentInputs = document.querySelectorAll('input[asp-for="Document"]');
+        documentInputs.forEach(function(input) {
+            input.addEventListener('change', function(e) {
+                const file = this.files[0];
+                const lessonId = this.id.split('-')[1];
+                const errorDiv = document.getElementById('documentError-' + lessonId);
+                const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB default
+
+                if (file) {
+                    let isValid = true;
+                    let errorMessage = '';
+
+                    // Kiểm tra extension
+                    const fileName = file.name.toLowerCase();
+                    if (!fileName.endsWith('.pdf')) {
+                        isValid = false;
+                        errorMessage = 'Only PDF files are allowed. Please select a .pdf file.';
+                    }
+
+                    // Kiểm tra MIME type
+                    if (isValid && file.type !== 'application/pdf') {
+                        isValid = false;
+                        errorMessage = 'Invalid file type. Only PDF files are accepted.';
+                    }
+
+                    // Kiểm tra file size
+                    if (isValid && file.size > maxSize) {
+                        isValid = false;
+                        errorMessage = `File size too large. Maximum allowed size is ${Math.round(maxSize/1024/1024)}MB.`;
+                    }
+
+                    // Kiểm tra file có rỗng không
+                    if (isValid && file.size === 0) {
+                        isValid = false;
+                        errorMessage = 'File is empty. Please select a valid PDF file.';
+                    }
+
+                    if (!isValid) {
+                        this.setCustomValidity(errorMessage);
+                        this.classList.add('is-invalid');
+                        errorDiv.textContent = errorMessage;
+                        errorDiv.style.display = 'block';
+                        this.value = ''; // Clear the input
+
+                        // Prevent form submission
+                        e.preventDefault();
+                        return false;
+                    } else {
+                        this.setCustomValidity('');
+                        this.classList.remove('is-invalid');
+                        errorDiv.style.display = 'none';
+                    }
+                }
+            });
+
+            // Validation khi drag & drop
+            input.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            input.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+            });
+
+            input.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.files = files;
+                    // Trigger change event để validation chạy
+                    this.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+
         function downloadMedia(url, filename) {
             const link = document.createElement('a');
             link.href = url;
@@ -3135,5 +3332,113 @@
             });
         });
     });
+</script>
+
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy tất cả video elements
+        const videos = document.querySelectorAll('.protected-video');
+
+        videos.forEach(function(video) {
+            // Disable right-click context menu
+            video.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable drag
+            video.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable select
+            video.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable keyboard shortcuts
+            video.addEventListener('keydown', function(e) {
+                // Disable F12, Ctrl+S, Ctrl+U, etc.
+                if (e.keyCode === 123 || // F12
+                    (e.ctrlKey && e.keyCode === 83) || // Ctrl+S
+                    (e.ctrlKey && e.keyCode === 85) || // Ctrl+U
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 67) || // Ctrl+Shift+C
+                    (e.ctrlKey && e.shiftKey && e.keyCode === 74)) { // Ctrl+Shift+J
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Disable print screen (limited effectiveness)
+            video.addEventListener('keyup', function(e) {
+                if (e.keyCode === 44) { // Print Screen
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Monitor video loading và prevent direct access
+            video.addEventListener('loadstart', function() {
+                // Thêm timestamp để URL không thể reuse
+                const currentTime = Date.now();
+                console.log('Video loading started at:', currentTime);
+            });
+
+            // Hide controls khi không hover (optional)
+            let controlsTimeout;
+            video.addEventListener('mouseenter', function() {
+                clearTimeout(controlsTimeout);
+                this.setAttribute('controls', 'controls');
+            });
+
+            video.addEventListener('mouseleave', function() {
+                const self = this;
+                controlsTimeout = setTimeout(function() {
+                    // Giữ controls nhưng ẩn download button
+                    // self.removeAttribute('controls');
+                }, 3000);
+            });
+        });
+
+        // Disable right-click trên toàn bộ video container
+        const videoContainers = document.querySelectorAll('.video-container');
+        videoContainers.forEach(function(container) {
+            container.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+    });
+
+    // Prevent video URL access through browser tools
+    (function() {
+        // Disable console
+        const devtools = {
+            open: false,
+            orientation: null
+        };
+
+        setInterval(function() {
+            if (window.outerHeight - window.innerHeight > 200 ||
+                window.outerWidth - window.innerWidth > 200) {
+                // Dev tools might be open
+                console.clear();
+            }
+        }, 500);
+
+        // Disable common debugging
+        window.addEventListener('keydown', function(e) {
+            if (e.keyCode === 123 || // F12
+                (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+                (e.ctrlKey && e.shiftKey && e.keyCode === 67) || // Ctrl+Shift+C
+                (e.ctrlKey && e.shiftKey && e.keyCode === 74)) { // Ctrl+Shift+J
+                e.preventDefault();
+                return false;
+            }
+        });
+    })();
 </script>
 

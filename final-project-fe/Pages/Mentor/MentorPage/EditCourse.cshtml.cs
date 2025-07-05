@@ -715,6 +715,26 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     var documentContent = new StreamContent(Document.OpenReadStream());
                     documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
                     form.Add(documentContent, "Document", Document.FileName);
+
+                    var extension = Path.GetExtension(Document.FileName).ToLower();
+                    if (extension != ".pdf")
+                    {
+                        ModelState.AddModelError("Document", "Only PDF files are allowed.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
+
+                    // Kiểm tra MIME type
+                    if (Document.ContentType != "application/pdf")
+                    {
+                        ModelState.AddModelError("Document", "Invalid file type. Only PDF files are accepted.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
+                    // Kiểm tra kích thước (10MB = 10 * 1024 * 1024 bytes)
+                    if (Document.Length > 10485760)
+                    {
+                        ModelState.AddModelError("Document", "File size too large. Maximum allowed size is 10MB.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
                 }
                 if (Video != null)
                 {
@@ -811,6 +831,26 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     var documentContent = new StreamContent(Document.OpenReadStream());
                     documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
                     form.Add(documentContent, "Document", Document.FileName);
+
+                    var extension = Path.GetExtension(Document.FileName).ToLower();
+                    if (extension != ".pdf")
+                    {
+                        ModelState.AddModelError("Document", "Only PDF files are allowed.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
+
+                    // Kiểm tra MIME type
+                    if (Document.ContentType != "application/pdf")
+                    {
+                        ModelState.AddModelError("Document", "Invalid file type. Only PDF files are accepted.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
+                    // Kiểm tra kích thước (10MB = 10 * 1024 * 1024 bytes)
+                    if (Document.Length > 10485760)
+                    {
+                        ModelState.AddModelError("Document", "File size too large. Maximum allowed size is 10MB.");
+                        return RedirectToPage(new { courseId = Module.CourseId });
+                    }
                 }
                 if (Video != null)
                 {
