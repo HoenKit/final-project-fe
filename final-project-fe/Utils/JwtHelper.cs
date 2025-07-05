@@ -21,16 +21,12 @@ namespace final_project_fe.Utils
         public static string? GetUserIdFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var jwtToken = handler.ReadJwtToken(token);
 
-            var userIdClaim = jsonToken?.Claims.FirstOrDefault(c =>
-                c.Type == ClaimTypes.NameIdentifier || 
-                c.Type == "sub" ||                
-                c.Type == "userId" ||                 
-                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-            )?.Value;
+            var userIdClaim = jwtToken.Claims.FirstOrDefault(c =>
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
 
-            return userIdClaim;
+            return userIdClaim?.Value;
         }
 
     }

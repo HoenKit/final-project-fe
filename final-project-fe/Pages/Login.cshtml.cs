@@ -82,7 +82,7 @@ namespace final_project_fe.Pages.Shared
                             });
 
                             string? role = JwtHelper.GetRoleFromToken(loginResponse.Token);
-                            string? userId = JwtHelper.GetUserIdFromToken(loginResponse.Token); 
+                            string? userId = JwtHelper.GetUserIdFromToken(loginResponse.Token);
 
                             _logger.LogInformation($"User Role: {role}");
                             _logger.LogInformation($"User Id: {userId}");
