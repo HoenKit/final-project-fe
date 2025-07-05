@@ -87,30 +87,6 @@ namespace final_project_fe.Pages.Shared
                             _logger.LogInformation($"User Role: {role}");
                             _logger.LogInformation($"User Id: {userId}");
 
-                            // Kiểm tra thông tin người dùng bằng API GetUserById
-                            if (!string.IsNullOrEmpty(userId))
-                            {
-                                var userApiClient = _httpClientFactory.CreateClient();
-                                userApiClient.DefaultRequestHeaders.Authorization =
-                                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResponse.Token);
-
-                                var userApiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/{userId}";
-                                var userResponse = await userApiClient.GetAsync(userApiUrl);
-
-                                if (userResponse.IsSuccessStatusCode)
-                                {
-                                    var userJson = await userResponse.Content.ReadAsStringAsync();
-                                    var userInfo = JsonSerializer.Deserialize<UserMetadata>(userJson, new JsonSerializerOptions
-                                    {
-                                        PropertyNameCaseInsensitive = true
-                                    });
-
-                                    if (userInfo?.Level == null && userInfo?.Goals == null && userInfo?.FavouriteSubject == null)
-                                    {
-                                        return RedirectToPage("/RecommendQuestion");
-                                    }
-                                }
-                            }
 
                             if (role == "Admin")
                             {
