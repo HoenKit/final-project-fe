@@ -1289,25 +1289,19 @@
                                                                                         </div>
 
                                                                                         <div class="mb-3">
-                                                                                            <label class="form-label">Document (PDF only)</label>
-                                                                                            @if (!string.IsNullOrEmpty(lesson.DocumentLink))
+                                                                                            <label class="form-label">Video (optional)</label>
+                                                                                            @if (!string.IsNullOrEmpty(lesson.VideoLink))
                                                                                             {
                                                                                                 <div class="mb-2">
                                                                                                     <small class="text-muted">Current: </small>
-                                                                                                    <a href="@lesson.DocumentLink" target="_blank" class="text-primary open-doc-btn" data-href="@lesson.DocumentLink">
-                                                                                                        View Document
+                                                                                                    <a href="@lesson.VideoLink" target="_blank" class="text-primary">
+                                                                                                        View Video
                                                                                                     </a>
                                                                                                 </div>
                                                                                             }
-                                                                                            <input asp-for="Document"
-                                                                                                   type="file"
-                                                                                                   class="form-control"
-                                                                                                   accept=".pdf,application/pdf"
-                                                                                                   id="editDocument-@lesson.LessonId" />
-                                                                                            <small class="form-text text-muted">Only PDF files are allowed. Leave empty to keep current file</small>
-                                                                                            <div class="invalid-feedback" id="documentError-@lesson.LessonId"></div>
+                                                                                            <input asp-for="Video" type="file" class="form-control" />
+                                                                                            <small class="form-text text-muted">Leave empty to keep current file</small>
                                                                                         </div>
-
                                                                                         <div class="d-flex gap-2">
                                                                                             <button type="submit" class="btn btn-primary btn-sm">
                                                                                                 <i class="fa fa-save me-1"></i>Save Changes
