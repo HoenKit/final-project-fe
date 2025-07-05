@@ -1,4 +1,6 @@
-﻿using final_project_fe.Dtos.Lesson;
+﻿using final_project_fe.Dtos.Courses;
+using final_project_fe.Dtos.Lesson;
+using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.Module;
 using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
@@ -20,17 +22,21 @@ namespace final_project_fe.Pages.Mentor
         private readonly HttpClient _httpClient;
         private readonly ILogger<LearningPageModel> _logger;
         private readonly ApiSettings _apiSettings;
-
-        public LearningPageModel(HttpClient httpClient, IOptions<ApiSettings> apiSettings, ILogger<LearningPageModel> logger, IHttpClientFactory httpClientFactory)
+        private readonly ImageSettings _imagesettings;
+        public LearningPageModel(HttpClient httpClient, IOptions<ApiSettings> apiSettings, ILogger<LearningPageModel> logger, IHttpClientFactory httpClientFactory, IOptions<ImageSettings> imageSettings)
         {
             _httpClient = httpClient;
             _apiSettings = apiSettings.Value;
             _logger = logger;
             _httpClientFactory = httpClientFactory;
+            _imagesettings = imageSettings.Value;
         }
 
-        public string BaseUrl { get; set; }
+        public CourseResponseDto Course { get; set; }
+        public string MentorFullName { get; set; }
 
+        public string BaseUrl { get; set; }
+        public string ImageKey { get; set; } 
         public List<ModuleProgressDto> Modules { get; set; } = new();
         public List<LessonbyModuleDto> Lessons { get; set; }
 
@@ -45,6 +51,7 @@ namespace final_project_fe.Pages.Mentor
         public async Task<IActionResult> OnGetAsync(int CourseId)
         {
 
+            ImageKey = _imagesettings.ImageKey;
             BaseUrl = _apiSettings.BaseUrl;
             string token = Request.Cookies["AccessToken"];
             if (string.IsNullOrEmpty(token))
@@ -58,6 +65,22 @@ namespace final_project_fe.Pages.Mentor
             UserId = userIdClaim;
             string apiUrl = $"{_apiSettings.BaseUrl}/Progress/get-module-progress-by-course?userId={userIdClaim}&courseId={CourseId}";
             var response = await _httpClient.GetFromJsonAsync<List<ModuleProgressDto>>(apiUrl);
+
+            var courseResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Course/{CourseId}");
+            if (courseResponse.IsSuccessStatusCode)
+            {
+                var courseJson = await courseResponse.Content.ReadAsStringAsync();
+                Course = JsonConvert.DeserializeObject<CourseResponseDto>(courseJson);
+            }
+
+            var mentorResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Mentor/by-course/{CourseId}");
+            if (mentorResponse.IsSuccessStatusCode)
+            {
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonConvert.DeserializeObject<MentorDto>(mentorJson);
+                MentorFullName = $"{mentor.FirstName} {mentor.LastName}";
+            }
+
 
             if (response != null)
                 Modules = response;
@@ -88,6 +111,8 @@ namespace final_project_fe.Pages.Mentor
                     LessonDetail = JsonConvert.DeserializeObject<LessonDetailDto>(json);
                     return new JsonResult(LessonDetail);
                 }
+
+
             }
             catch (Exception ex)
             {
@@ -147,8 +172,18 @@ namespace final_project_fe.Pages.Mentor
                 return new JsonResult(new { success = false, error = errorMsg });
             }
 
-            return new JsonResult(new { success = true });
+            var responseJson = await response.Content.ReadAsStringAsync();
+
+            var result = JsonConvert.DeserializeObject<dynamic>(responseJson);
+
+            return new JsonResult(new
+            {
+                success = true,
+                score = (int)result.score,
+                isPassed = (bool)result.isPassed
+            });
         }
+
 
 
     }

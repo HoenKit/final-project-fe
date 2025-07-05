@@ -13,15 +13,16 @@ namespace final_project_fe.Pages
     public class UserCourseModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
+        private readonly ImageSettings _imagesettings;
         private readonly ApiSettings _apiSettings;
-        public UserCourseModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings)
+        public UserCourseModel(IHttpClientFactory httpClientFactory, IOptions<ApiSettings> apiSettings, IOptions<ImageSettings> imageSettings)
         {
             _httpClientFactory = httpClientFactory;
             _apiSettings = apiSettings.Value;
+            _imagesettings = imageSettings.Value;
         }
         public List<UserCourseDto> Courses { get; set; } = new();
-
+        public string ImageKey { get; set; }
         [BindProperty(SupportsGet = true)]
         public string? Status { get; set; }
 
@@ -29,6 +30,7 @@ namespace final_project_fe.Pages
         public string UserId { get; set; }
         public async Task<IActionResult> OnGetAsync()
         {
+            ImageKey = _imagesettings.ImageKey;
             try
             {
                 // 🔐 Lấy token từ cookie

@@ -38,6 +38,7 @@ namespace final_project_fe.Pages
                 {
                     Response.Cookies.Delete("AccessToken");
                     _logger.LogInformation("User logged out successfully.");
+                    ViewData["ResetLoadingSession"] = true;
                     return RedirectToPage("/Index");
                 }
                 else

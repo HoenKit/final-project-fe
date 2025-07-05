@@ -66,6 +66,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public string BaseUrl { get; set; }
         public List<string> UserRoles { get; private set; }
         public IFormFile? NewImage { get; set; }
+        public IFormFile? Document { get; set; }
+        public IFormFile? Video { get; set; }
         public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
         public async Task<IActionResult> OnGetAsync(int courseId)
@@ -376,6 +378,75 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
 
 
+
+        //Handler Create Module and Lesson by AI
+        public async Task<IActionResult> OnPostGenerateModuleByAIAsync(int courseId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                new KeyValuePair<string, string>("courseId", courseId.ToString())});
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Course/generate-structure/{courseId}", formContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Course structure generated successfully.";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Could not generate modules and lessons for this course.";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, $"Error generating course structure for course {courseId}");
+                TempData["ErrorMessage"] = "An error occurred while generating course structure.";
+                return Page();
+            }
+        }
+
         // Handler Create Module
         public async Task<IActionResult> OnPostAddModuleAsync()
         {
@@ -636,8 +707,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var form = new MultipartFormDataContent();
                 form.Add(new StringContent(Lesson.Title ?? ""), "Title");
-                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.Description ?? ""), "Description");
                 form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
+
+                if (Document != null)
+                {
+                    var documentContent = new StreamContent(Document.OpenReadStream());
+                    documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
+                    form.Add(documentContent, "Document", Document.FileName);
+                }
+                if (Video != null)
+                {
+                    var videoContent = new StreamContent(Video.OpenReadStream());
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Video.ContentType);
+                    form.Add(videoContent, "Video", Video.FileName);
+                }
 
                 // Gọi API tạo Lesson
                 var response = await _httpClient.PostAsync($"{BaseUrl}/Lesson", form);
@@ -695,6 +779,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
+                
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
                 {
@@ -717,9 +802,22 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var form = new MultipartFormDataContent();
                 form.Add(new StringContent(Lesson.Title ?? ""), "Title");
-                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.Description ?? ""), "Description");
                 form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
                 form.Add(new StringContent(Lesson.LessonId.ToString()), "LessonId");
+
+                if (Document != null)
+                {
+                    var documentContent = new StreamContent(Document.OpenReadStream());
+                    documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
+                    form.Add(documentContent, "Document", Document.FileName);
+                }
+                if (Video != null)
+                {
+                    var videoContent = new StreamContent(Video.OpenReadStream());
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Video.ContentType);
+                    form.Add(videoContent, "Video", Video.FileName);
+                }
 
                 // Gọi API tạo Lesson
                 var response = await _httpClient.PutAsync($"{BaseUrl}/Lesson", form);
@@ -984,8 +1082,6 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             return RedirectToPage(new { courseId = Module.CourseId });
         }
 
-
-
         //Handler Generate Question and Answer by Upload Excel
         public async Task<IActionResult> OnPostUploadExcel(IFormFile excelFile, int lessonId)
         {
@@ -1149,6 +1245,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             return Page();
         }
+
 
 
         //Handler Delete Answer

@@ -320,18 +320,18 @@
                         var actionText = isComplete ? "Review course" : (percentage > 0 ? "Continue learning" : "Start learning");
 
                         <div class="course-card">
-                            <div class="course-image" style="background-image: url('@course.CourseImage')">
-                                <div class="course-menu">
-                                    <!-- menu icon -->
-                                </div>
-                                <div class="course-icon">
-                                    <!-- icon -->
-                                </div>
+                            <div class="course-image" style="background-image: url('@(string.IsNullOrEmpty(course.CourseImage)
+                                                          ? "https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg"
+                                                          : course.CourseImage + "?" + Model.ImageKey)')">
+                            <div class="course-menu">
+                                <!-- menu icon -->
                             </div>
+                            <div class="course-icon">
+                                <!-- icon -->
+                            </div>
+                        </div>
                             <div class="course-info">
                                 <h3 class="course-title">@course.CourseName</h3>
-                                <p class="course-instructor">Instructor Info Here</p>
-
                                 <div class="progress-section">
                                     <div class="progress-header">
                                         <span class="progress-text">@percentage.ToString("0")% Complete</span>
@@ -348,13 +348,6 @@
                                            asp-route-userId="@Model.UserId"
                                            asp-route-courseId="@course.CourseId">
                                             Get Certificate
-                                        </a>
-                                        <br />
-
-                                        <a asp-page="/CreateReview"
-                                           asp-route-userId="@Model.UserId"
-                                           asp-route-courseId="@course.CourseId">
-                                            @actionText
                                         </a>
                                         <br />
 
