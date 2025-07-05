@@ -7,6 +7,9 @@ namespace final_project_fe.Dtos.Lesson
         public int LessonId { get; set; }
         public int ModuleId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? DocumentLink { get; set; }
+        public string? VideoLink { get; set; }
         public List<QuestionResponseDto> Questions { get; set; } = new();
 
     }

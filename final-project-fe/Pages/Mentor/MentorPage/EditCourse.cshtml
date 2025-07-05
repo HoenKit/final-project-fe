@@ -631,7 +631,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- Lesson List -->
-                                                <div class="card-body">                                                                                                  
+                                                <div class="card-body">
                                                     @if (module.Lessons != null && module.Lessons.Any())
                                                     {
                                                         <div class="lessons-list">
@@ -641,12 +641,21 @@
                                                                 {
                                                                     <div id="lesson-display-@lesson.LessonId">
                                                                         <div class="list-group-item d-flex flex-column">
-                                                                            <div class="d-flex justify-content-between align-items-center w-100">
-                                                                                <div>
-                                                                                    <i class="fa fa-play-circle text-primary me-2"></i>
-                                                                                    @lesson.Title
+                                                                            <!-- Header Section: Title, Description, Actions -->
+                                                                            <div class="d-flex justify-content-between align-items-start w-100 mb-3">
+                                                                                <div class="flex-grow-1">
+                                                                                    <div class="d-flex align-items-center mb-2">
+                                                                                        <i class="fa fa-play-circle text-primary me-2"></i>
+                                                                                        <h6 class="mb-0">@lesson.Title</h6>
+                                                                                    </div>
+                                                                                    @if (!string.IsNullOrEmpty(lesson.Description))
+                                                                                    {
+                                                                                        <p class="text-muted mb-0">@lesson.Description</p>
+                                                                                    }
                                                                                 </div>
-                                                                                <div class="btn-group">                                      
+
+                                                                                <!-- Action Buttons -->
+                                                                                <div class="btn-group">
                                                                                     <button type="button" class="btn-sm btn-outline-secondary"
                                                                                             onclick="editLesson(@lesson.LessonId,
                                                                                             '@Html.Raw(JavaScriptEncoder.Default.Encode(lesson.Title))',)"
@@ -654,9 +663,9 @@
                                                                                         <i class="fa fa-edit" style="padding-left: 20%;"></i>
                                                                                     </button>
                                                                                     <form method="post" asp-page-handler="DeleteLesson"
-                                                                                        asp-route-id="@lesson.LessonId"
-                                                                                        asp-route-courseId="@Model.Course.CourseId"
-                                                                                        class="d-inline">
+                                                                                          asp-route-id="@lesson.LessonId"
+                                                                                          asp-route-courseId="@Model.Course.CourseId"
+                                                                                          class="d-inline">
                                                                                         <button style="font-size: 100%;" type="submit" class="btn-sm btn-outline-danger"
                                                                                                 onclick="return confirm('Delete this Lesson?')"
                                                                                                 title="Delete">
@@ -665,6 +674,152 @@
                                                                                     </form>
                                                                                 </div>
                                                                             </div>
+
+                                                                            <!-- Media Content Section -->
+                                                                            @if (lesson.VideoLink != null || lesson.DocumentLink != null)
+                                                                            {
+                                                                                <div class="media-content-section mb-3">
+                                                                                    <div class="row g-3">
+                                                                                        <!-- Video Section -->
+                                                                                        @if (lesson.VideoLink != null)
+                                                                                        {
+                                                                                            <div class="col-12">
+                                                                                                <div class="card shadow-sm">
+                                                                                                    <div class="card-header bg-gradient-danger text-white d-flex align-items-center">
+                                                                                                        <i class="bi bi-camera-video" style="color: black"></i>
+                                                                                                        <span style="color: black">Video Content</span>
+                                                                                                    </div>
+                                                                                                    <div class="card-body p-0">
+                                                                                                        <!-- Video Player -->
+                                                                                                        <div class="video-container" style="position: relative; background: #000;">
+                                                                                                            <video controls
+                                                                                                                   class="w-100"
+                                                                                                                   style="max-height: 300px; object-fit: contain;"
+                                                                                                                   preload="metadata"
+                                                                                                                   id="video-@lesson.LessonId"
+                                                                                                                   poster="/images/video-placeholder.jpg">
+                                                                                                                <source src="@lesson.VideoLink" type="video/mp4">
+                                                                                                                <source src="@lesson.VideoLink" type="video/webm">
+                                                                                                                <source src="@lesson.VideoLink" type="video/ogg">
+                                                                                                                Your browser does not support the video tag.
+                                                                                                            </video>
+                                                                                                        </div>
+
+                                                                                                        <!-- Video Info -->
+                                                                                                        <div class="p-3 bg-light border-top">
+                                                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                                                <div>
+                                                                                                                    <h6 class="mb-1 text-truncate">@(System.IO.Path.GetFileName(lesson.VideoLink))</h6>
+                                                                                                                    <small class="text-muted">
+                                                                                                                        <i class="fas fa-file-video me-1"></i>
+                                                                                                                        Video File
+                                                                                                                    </small>
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    <span class="badge">
+                                                                                                                        <i class="bi bi-file-earmark-play"></i>Available
+                                                                                                                    </span>
+                                                                                                                </div>
+                                                                                                            </div>
+
+                                                                                                            <!-- Video Controls -->
+                                                                                                            <div class="mt-2 d-flex gap-2">
+                                                                                                                <button class="btn btn-sm btn-outline-primary" onclick="toggleFullscreen('video-@lesson.LessonId')">
+                                                                                                                    <i class="bi bi-fullscreen"></i> Fullscreen
+                                                                                                                </button>
+                                                                                                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadMedia('@lesson.VideoLink', '@System.IO.Path.GetFileName(lesson.VideoLink)')">
+                                                                                                                    <i class="bi bi-cloud-download"></i> Download
+                                                                                                                </button>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        }
+
+                                                                                        <!-- Document Section - Download Only -->
+                                                                                        @if (lesson.DocumentLink != null)
+                                                                                        {
+                                                                                            <div class="col-12" style="padding-top: 4%">
+                                                                                                <div class="card shadow-sm">
+                                                                                                    <div class="card-header bg-gradient-success text-white d-flex align-items-center">
+                                                                                                        <i class="bi bi-file-earmark-text" style="color: black"></i>
+                                                                                                        <span style="color: black">Document Content</span>
+                                                                                                    </div>
+                                                                                                    <div class="card-body">
+                                                                                                        @{
+                                                                                                            var fileName = System.IO.Path.GetFileName(lesson.DocumentLink);
+                                                                                                            var fileExtension = System.IO.Path.GetExtension(lesson.DocumentLink).ToLower();
+                                                                                                        }
+
+                                                                                                        <div class="d-flex align-items-center justify-content-between">
+                                                                                                            <div class="d-flex align-items-center">
+                                                                                                                <div class="document-icon me-3">
+                                                                                                                    @if (fileExtension == ".pdf")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-filetype-pdf" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else if (fileExtension == ".doc" || fileExtension == ".docx")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-word" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else if (fileExtension == ".xls" || fileExtension == ".xlsx")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-excel" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else if (fileExtension == ".ppt" || fileExtension == ".pptx")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-ppt" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else if (fileExtension == ".txt")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-font" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else if (fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".png" || fileExtension == ".gif")
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-image" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                    else
+                                                                                                                    {
+                                                                                                                        <i class="bi bi-file-earmark-fill" style="font-size: 2.5rem;"></i>
+                                                                                                                    }
+                                                                                                                </div>
+                                                                                                                <div>
+                                                                                                                    <h6 class="mb-1">@fileName</h6>
+                                                                                                                    <small class="text-muted">
+                                                                                                                        @fileExtension.ToUpper() File
+                                                                                                                    </small>
+                                                                                                                    <br>
+                                                                                                                    <span class="badge">
+                                                                                                                        <i class="bi bi-file-earmark-arrow-down"></i>Available for Download
+                                                                                                                    </span>
+                                                                                                                </div>
+                                                                                                            </div>
+
+                                                                                                            <!-- Document Controls -->
+                                                                                                            <div class="d-flex flex-column gap-2">
+                                                                                                                <button class="btn btn-primary btn-sm" onclick="downloadMedia('@lesson.DocumentLink', '@fileName')">
+                                                                                                                    <i class="bi bi-download"></i> Download
+                                                                                                                </button>
+                                                                                                                <a data-href="@lesson.DocumentLink" class="btn btn-outline-secondary btn-sm open-doc-btn" target="_blank">
+                                                                                                                    <i class="bi bi-folder2-open"></i> Open
+                                                                                                                </a>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="alert alert-info d-flex align-items-center mb-3">
+                                                                                    <i class="fa fa-info-circle me-2"></i>
+                                                                                    <span>No video or document available for this lesson</span>
+                                                                                </div>
+                                                                            }
 
                                                                             <!-- Questions List -->
                                                                             @if (lesson.Questions != null && lesson.Questions.Any())
@@ -904,7 +1059,7 @@
                                                                                                     From Excel
                                                                                                 </button>
                                                                                                 <button type="button" class="tab-button" id="ai-@lesson.LessonId" onclick="toggleQuestionForms(@lesson.LessonId, 'ai', this)">
-                                                                                                <i class="bi bi-robot"></i>
+                                                                                                <i class="bi bi-openai"></i>
                                                                                                     AI Generate
                                                                                                 </button>
                                                                                             </div>
@@ -1082,8 +1237,9 @@
                                                                             </div>
 
                                                                             <!-- Form Edit Lesson -->
-                                                                            <div id="edit-lesson-form-@lesson.LessonId" class="card mb-3" style="display: none;">
+                                                                            <div id="edit-lesson-form-@lesson.LessonId" class="card mb-3" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
                                                                                 <div class="card-body">
+                                                                                    <h6 class="card-title">Edit This Lesson to "@module.Title"</h6>
                                                                                     <form method="post" asp-page-handler="EditLesson" enctype="multipart/form-data">
                                                                                         <input type="hidden" asp-for="Lesson.LessonId" value="@lesson.LessonId" />
                                                                                         <input type="hidden" asp-for="Lesson.ModuleId" value="@lesson.ModuleId" />
@@ -1094,20 +1250,21 @@
                                                                                             <input asp-for="Lesson.Title" type="text" class="form-control" value="@lesson.Title" required />
                                                                                         </div>
 
-                                                                                        @* <div class="mb-3">
+                                                                                        <div class="mb-3">
                                                                                             <label class="form-label">Description</label>
                                                                                             <textarea asp-for="Lesson.Description" class="form-control" id="editLessonDescription-@lesson.LessonId" rows="3">@lesson.Description</textarea>
                                                                                         </div>
 
                                                                                          <div class="mb-3">
-                                                                                              <label class="form-label">Document (optional)</label>
-                                                                                              <input name="Lesson.Document" type="file" class="form-control" />
+                                                                                              <label class="form-label">Document (optional)</label>                                                                                            
+                                                                                              <input asp-for="Document" type="file" class="form-control"/>
+
                                                                                          </div>
 
                                                                                          <div class="mb-3">
-                                                                                              <label class="form-label">Video (optional)</label>
-                                                                                              <input name="Lesson.Video" type="file" class="form-control" />
-                                                                                         </div> *@
+                                                                                              <label class="form-label">Video (optional)</label>                                                                                             
+                                                                                              <input asp-for="Video" type="file" class="form-control" />
+                                                                                         </div>
 
                                                                                         <div class="d-flex gap-2">
                                                                                             <button type="submit" class="btn btn-primary btn-sm">
@@ -1133,17 +1290,25 @@
                                                             <div class="card-body">
                                                                 <h6 class="card-title">Add New Lesson to "@module.Title"</h6>
                                                                 <div class="form-section">
-                                                                    <form id="lessonForm-@module.ModuleId" method="post" asp-page-handler="AddLesson">
+                                                                    <form id="lessonForm-@module.ModuleId" method="post" asp-page-handler="AddLesson" enctype="multipart/form-data">
                                                                         <input type="hidden" asp-for="Lesson.ModuleId" value="@module.ModuleId" />
                                                                         <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
                                                                         <div class="mb-3">
                                                                             <label asp-for="Lesson.Title" class="form-label">Lesson Title *</label>
                                                                             <input asp-for="Lesson.Title" type="text" class="form-control" id="lessonTitle-@module.ModuleId" required>
                                                                         </div>
-                                                                        @* <div class="mb-3">
-                                                                                <label asp-for="Lesson.Description" class="form-label">Description</label>
-                                                                                <textarea asp-for="Lesson.Description" class="form-control" id="lessonDescription-@module.ModuleId" rows="3"></textarea>
-                                                                            </div> *@
+                                                                        <div class="mb-3">
+                                                                            <label asp-for="Lesson.Description" class="form-label">Description</label>
+                                                                            <textarea asp-for="Lesson.Description" class="form-control" id="lessonDescription-@module.ModuleId" rows="3"></textarea>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Document (optional)</label>
+                                                                            <input asp-for="Document" type="file" class="form-control" />
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label">Video (optional)</label>
+                                                                            <input asp-for="Video" type="file" class="form-control" />
+                                                                        </div>
                                                                         <div class="d-flex gap-2">
                                                                             <button type="submit" class="btn btn-primary btn-sm">
                                                                                 <i class="fa fa-save me-1"></i>Save Lesson
@@ -1250,10 +1415,59 @@
     </section>
 </div>
 
-    <style>
+ <style>
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
+
+    .video-container {
+        border-radius: 0.375rem 0.375rem 0 0;
+        overflow: hidden;
+    }
+
+    .document-container {
+        border-radius: 0.375rem 0.375rem 0 0;
+        overflow: hidden;
+    }
+
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    /* Custom scrollbar for text content */
+    .document-container pre {
+        scrollbar-width: thin;
+        scrollbar-color: #6c757d #f8f9fa;
+    }
+
+        .document-container pre::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .document-container pre::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+
+        .document-container pre::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 4px;
+        }
+
+
+
     .card {
         background: white;
         border-radius: 12px;
@@ -1930,7 +2144,7 @@
         }
     </style>
 
-    <script>
+ <script>
         // Course Editor Step Navigation Script - Fixed Version
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -2457,7 +2671,7 @@
         });
     </script>
 
-    <script>
+ <script>
         // JavaScript functions for handling forms
         function showCreateModuleForm() {
             document.getElementById('create-module-form').style.display = 'block';
@@ -2742,4 +2956,82 @@
    
 
     </script>
+
+ <!-- JavaScript for enhanced functionality -->
+ <script>
+        function toggleFullscreen(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                }
+            }
+        }
+
+        function downloadMedia(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function openDocumentModal(lessonId) {
+            const modal = new bootstrap.Modal(document.getElementById('documentModal-' + lessonId));
+            modal.show();
+        }
+
+        function printDocument(url) {
+            const printWindow = window.open(url, '_blank');
+            printWindow.addEventListener('load', function() {
+                printWindow.print();
+            });
+        }
+
+        // Auto-resize video elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const videos = document.querySelectorAll('.video-container video');
+            videos.forEach(video => {
+                video.addEventListener('loadedmetadata', function() {
+                    // Auto-adjust height based on video aspect ratio
+                    const aspectRatio = this.videoWidth / this.videoHeight;
+                    if (aspectRatio > 1.5) {
+                        this.style.height = '200px';
+                    } else {
+                        this.style.height = '300px';
+                    }
+                });
+            });
+        });
+    </script>
+
+ <script>
+    const sasToken = "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
+
+    function downloadMedia(baseUrl, fileName) {
+        const fullUrl = baseUrl + sasToken;
+        const a = document.createElement('a');
+        a.href = fullUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const openBtn = document.querySelector('.open-doc-btn');
+        if (openBtn) {
+            openBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const baseUrl = this.getAttribute('data-href');
+                window.open(baseUrl + sasToken, '_blank');
+            });
+        }
+    });
+</script>
 

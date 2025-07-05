@@ -66,6 +66,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public string BaseUrl { get; set; }
         public List<string> UserRoles { get; private set; }
         public IFormFile? NewImage { get; set; }
+        public IFormFile? Document { get; set; }
+        public IFormFile? Video { get; set; }
         public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
         public async Task<IActionResult> OnGetAsync(int courseId)
@@ -636,8 +638,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var form = new MultipartFormDataContent();
                 form.Add(new StringContent(Lesson.Title ?? ""), "Title");
-                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.Description ?? ""), "Description");
                 form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
+
+                if (Document != null)
+                {
+                    var documentContent = new StreamContent(Document.OpenReadStream());
+                    documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
+                    form.Add(documentContent, "Document", Document.FileName);
+                }
+                if (Video != null)
+                {
+                    var videoContent = new StreamContent(Video.OpenReadStream());
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Video.ContentType);
+                    form.Add(videoContent, "Video", Video.FileName);
+                }
 
                 // Gọi API tạo Lesson
                 var response = await _httpClient.PostAsync($"{BaseUrl}/Lesson", form);
@@ -695,6 +710,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
+                
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
                 {
@@ -717,9 +733,22 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var form = new MultipartFormDataContent();
                 form.Add(new StringContent(Lesson.Title ?? ""), "Title");
-                /*form.Add(new StringContent(Lesson.Description ?? ""), "Description");*/
+                form.Add(new StringContent(Lesson.Description ?? ""), "Description");
                 form.Add(new StringContent(Lesson.ModuleId.ToString()), "ModuleId");
                 form.Add(new StringContent(Lesson.LessonId.ToString()), "LessonId");
+
+                if (Document != null)
+                {
+                    var documentContent = new StreamContent(Document.OpenReadStream());
+                    documentContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Document.ContentType);
+                    form.Add(documentContent, "Document", Document.FileName);
+                }
+                if (Video != null)
+                {
+                    var videoContent = new StreamContent(Video.OpenReadStream());
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(Video.ContentType);
+                    form.Add(videoContent, "Video", Video.FileName);
+                }
 
                 // Gọi API tạo Lesson
                 var response = await _httpClient.PutAsync($"{BaseUrl}/Lesson", form);
