@@ -3,6 +3,7 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
@@ -32,9 +33,14 @@ namespace final_project_fe.Pages.Shared
         [BindProperty]
         public LoginDto LoginData { get; set; } = new LoginDto();
 
+        public string BaseUrl { get; set; }
         public async Task<IActionResult> OnGetAsync(string? redirectTo)
         {
+
+            BaseUrl = _apiSettings.BaseUrl;
             var token = Request.Cookies["AccessToken"];
+
+            // Nếu đã có token, thì chuyển hướng đến trang đã định hoặc Index
             if (!string.IsNullOrEmpty(token))
             {
                 if (!string.IsNullOrEmpty(redirectTo))
@@ -43,9 +49,9 @@ namespace final_project_fe.Pages.Shared
                 return RedirectToPage("/Index");
             }
 
-            // Nếu chưa có token thì render form đăng nhập
             return Page();
         }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -109,27 +115,28 @@ namespace final_project_fe.Pages.Shared
             return Page();
         }
 
-        public async Task<IActionResult> OnPostGoogleLoginAsync()
-        {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
+        //public async Task<IActionResult> OnPostGoogleLoginAsync()
+        //{
+        //    var client = _httpClientFactory.CreateClient();
+        //    var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
 
-            if (!response.IsSuccessStatusCode)
-            {
-                ModelState.AddModelError("", "Cannot connect to Google login API.");
-                return Page();
-            }
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        ModelState.AddModelError("", "Cannot connect to Google login API.");
+        //        return Page();
+        //    }
 
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        //    var json = await response.Content.ReadAsStringAsync();
+        //    var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (result?.Url != null)
-            {
-                return Redirect(result.Url);
-            }
+        //    if (result?.Url != null)
+        //    {
+        //        ViewData["GoogleUrl"] = result.Url;
+        //        return Page(); // Trả về page để script xử lý
+        //    }
 
-            ModelState.AddModelError("", "Google login URL is invalid.");
-            return Page();
-        }
+        //    ModelState.AddModelError("", "Google login URL is invalid.");
+        //    return Page();
+        //}
     }
 }
