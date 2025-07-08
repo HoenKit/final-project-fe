@@ -31,7 +31,7 @@ namespace final_project_fe.Pages
 
         [BindProperty]
         public CreateMentorDto Mentor { get; set; } = new CreateMentorDto();
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
             var token = Request.Cookies["AccessToken"];
             if (string.IsNullOrEmpty(token))
@@ -53,7 +53,7 @@ namespace final_project_fe.Pages
             {
                 return RedirectToPage("/Index");
             }
-            return RedirectToPage("/Index");
+            return Page();
 
         }
 
