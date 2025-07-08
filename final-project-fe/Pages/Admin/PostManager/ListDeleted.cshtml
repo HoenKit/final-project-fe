@@ -167,7 +167,7 @@
             row.addEventListener("click", () => {
                 const postId = row.getAttribute("data-id");
                 if (postId) {
-                    window.location.href = `/Admin/PostManager/Detail?id=${postId}`;
+                    window.location.href = `/DetailPost?id=${postId}`;
                 }
             });
         });

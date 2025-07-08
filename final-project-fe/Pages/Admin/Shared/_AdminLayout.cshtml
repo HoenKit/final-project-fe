@@ -46,8 +46,8 @@
             <div class="sidebar-logo">
                 <!-- Logo Header -->
                 <div class="logo-header" data-background-color="dark">
-                        <a title="" asp-page="/Index"><img style="width:85%;" src="~/AdminAssets//img//Logowhite.png" alt=""></a>
-                 
+                    <a title="" asp-page="/Index"><img style="width:85%;" src="~/AdminAssets//img//Logowhite.png" alt=""></a>
+
                     <div class="nav-toggle">
                         <button class="btn btn-toggle toggle-sidebar">
                             <i class="gg-menu-right"></i>
@@ -321,18 +321,18 @@
     <script src="~/AdminAssets/js/kaiadmin.min.js"></script>
 
     <script>
-    // Reset loading session khi có token mới
-    document.addEventListener('DOMContentLoaded', function() {
-        // Kiểm tra nếu có token và chưa reset trong session này
-        const hasToken = document.cookie.includes('AccessToken=');
-        const hasResetThisSession = sessionStorage.getItem('hasResetLoadingToday');
-        
-        if (hasToken && !hasResetThisSession) {
-            sessionStorage.removeItem('courseRecommendLoadingShown');
-            sessionStorage.setItem('hasResetLoadingToday', 'true');
-        }
-    });
-</script>
+        // Reset loading session khi có token mới
+        document.addEventListener('DOMContentLoaded', function () {
+            // Kiểm tra nếu có token và chưa reset trong session này
+            const hasToken = document.cookie.includes('AccessToken=');
+            const hasResetThisSession = sessionStorage.getItem('hasResetLoadingToday');
+
+            if (hasToken && !hasResetThisSession) {
+                sessionStorage.removeItem('courseRecommendLoadingShown');
+                sessionStorage.setItem('hasResetLoadingToday', 'true');
+            }
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>
