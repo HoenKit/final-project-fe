@@ -60,14 +60,18 @@
                                 </div>
 
                             </form>
-                            <div class="submit-btns mt-3">
-                                <button type="button" id="googleLoginBtn"
-                                        class="btn btn-light d-flex align-items-center"
-                                        style="gap: 8px; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px;">
-                                    <i class="bi bi-google" style="font-size: 18px;"></i>
-                                    <span>Login by Google</span>
-                                </button>
-                            </div>
+                            <form method="post">
+                                <div class="submit-btns mt-3">
+                                    <button type="submit" asp-page-handler="GoogleLogin"
+                                            class="btn btn-light d-flex align-items-center"
+                                            style="gap: 8px; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <i class="bi bi-google" style="font-size: 18px;"></i>
+                                        <span>
+                                            Login by google
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -120,46 +124,7 @@
         }
     </style>
 
-     <script>
-        document.getElementById("googleLoginBtn").addEventListener("click", async () => {
-            // Gọi API backend để lấy URL login Google
-            const response = await fetch("@($"{Model.BaseUrl}/Auth/google-login")");
 
-            if (response.ok) {
-                const result = await response.json();
-                if (result.url) {
-                    // Redirect trình duyệt đến Google
-                    window.location.href = result.url;
-                } else {
-                    alert("Google login URL is invalid.");
-                }
-            } else {
-                alert("Cannot connect to Google login API.");
-            }
-        });
-
-        // Xử lý khi quay về từ Google (có ?code=...)
-        async function handleGoogleCallback() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.has("code")) {
-                const code = params.get("code");
-
-                const callbackResponse = await fetch("@($"{Model.BaseUrl}/Auth/google-callback?code=")" + code, {
-                    credentials: "include"
-                });
-
-                const result = await callbackResponse.json();
-
-                if (result.tokenSet && result.redirectTo) {
-                    window.location.href = result.redirectTo;
-                } else {
-                    alert("Google login failed.");
-                }
-            }
-        }
-
-        handleGoogleCallback();
-    </script> 
 
 </body>
 </html>

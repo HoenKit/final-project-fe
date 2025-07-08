@@ -34,21 +34,54 @@ namespace final_project_fe.Pages.Shared
         public LoginDto LoginData { get; set; } = new LoginDto();
 
         public string BaseUrl { get; set; }
-        public async Task<IActionResult> OnGetAsync(string? redirectTo)
+        public async Task<IActionResult> OnGetAsync(string? code, string? error)
         {
-
             BaseUrl = _apiSettings.BaseUrl;
-            var token = Request.Cookies["AccessToken"];
 
-            // Nếu đã có token, thì chuyển hướng đến trang đã định hoặc Index
+            // ✅ 1. Nếu đã có token, chuyển hướng
+            var token = Request.Cookies["AccessToken"];
             if (!string.IsNullOrEmpty(token))
             {
-                if (!string.IsNullOrEmpty(redirectTo))
-                    return RedirectToPage($"/{redirectTo}");
+                return RedirectToPage("/Index");
+            }
+
+            // ✅ 2. Nếu có mã từ Google callback
+            if (!string.IsNullOrEmpty(code) || !string.IsNullOrEmpty(error))
+            {
+                if (!string.IsNullOrEmpty(error))
+                {
+                    ModelState.AddModelError("", "Google login error: " + error);
+                    return Page();
+                }
+
+                // Gọi backend để xử lý code và trả về token
+                var client = _httpClientFactory.CreateClient();
+                var callbackUrl = $"{_apiSettings.BaseUrl}/Auth/google-callback?code={code}";
+
+                var response = await client.GetAsync(callbackUrl);
+                if (!response.IsSuccessStatusCode)
+                {
+                    ModelState.AddModelError("", "Login failed during callback.");
+                    return Page();
+                }
+
+                var newToken = await response.Content.ReadAsStringAsync();
+
+                // ✅ Lưu token vào cookie
+                Response.Cookies.Append("AccessToken", newToken, new CookieOptions
+                {
+                    Secure = true,
+                    HttpOnly = false, // dùng JS nếu cần
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTimeOffset.UtcNow.AddDays(3)
+                });
+
+                // ✅ Redirect sau khi lưu token
 
                 return RedirectToPage("/Index");
             }
 
+            // 🟡 3. Không có token và không phải callback → hiển thị form login
             return Page();
         }
 
@@ -115,28 +148,28 @@ namespace final_project_fe.Pages.Shared
             return Page();
         }
 
-        //public async Task<IActionResult> OnPostGoogleLoginAsync()
-        //{
-        //    var client = _httpClientFactory.CreateClient();
-        //    var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
+        public async Task<IActionResult> OnPostGoogleLoginAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
 
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        ModelState.AddModelError("", "Cannot connect to Google login API.");
-        //        return Page();
-        //    }
+            if (!response.IsSuccessStatusCode)
+            {
+                ModelState.AddModelError("", "Cannot connect to Google login API.");
+                return Page();
+            }
 
-        //    var json = await response.Content.ReadAsStringAsync();
-        //    var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        //    if (result?.Url != null)
-        //    {
-        //        ViewData["GoogleUrl"] = result.Url;
-        //        return Page(); // Trả về page để script xử lý
-        //    }
 
-        //    ModelState.AddModelError("", "Google login URL is invalid.");
-        //    return Page();
-        //}
+            if (result?.Url != null)
+            {
+                return Redirect(result.Url);
+            }
+
+            ModelState.AddModelError("", "Google login URL is invalid.");
+            return Page();
+        }
     }
 }
