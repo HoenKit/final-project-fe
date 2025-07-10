@@ -1,4 +1,5 @@
-﻿using final_project_fe.Dtos.Post;
+﻿using final_project_fe.Dtos.Notification;
+using final_project_fe.Dtos.Post;
 using final_project_fe.Dtos.Users;
 using final_project_fe.Pages.Admin.UserManager;
 using final_project_fe.Utils;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace final_project_fe.Pages.Admin.PostManager
 {
@@ -21,7 +23,8 @@ namespace final_project_fe.Pages.Admin.PostManager
             _httpClient = httpClient;
         }
 
-        public PostManagerDto? Post { get; set; }
+        public PostDetail? Post { get; set; }
+        public CreateNotification Notification { get; set; }
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
@@ -33,6 +36,23 @@ namespace final_project_fe.Pages.Admin.PostManager
 
             try
             {
+                string postUrl = $"{_apiSettings.BaseUrl}/Post/GetDetail/{id}";
+                var postRequest = new HttpRequestMessage(HttpMethod.Get, postUrl);
+                postRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var postResponse = await _httpClient.SendAsync(postRequest);
+                if (!postResponse.IsSuccessStatusCode)
+                {
+                    return NotFound();
+                }
+
+                var postJson = await postResponse.Content.ReadAsStringAsync();
+                var postRoot = JsonNode.Parse(postJson);
+                Post = postRoot.Deserialize<PostDetail>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new PostDetail();
+
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
@@ -41,6 +61,43 @@ namespace final_project_fe.Pages.Admin.PostManager
                 HttpResponseMessage response = await _httpClient.PutAsync(apiUrl, null);
                 if (response.IsSuccessStatusCode)
                 {
+                    if (Post.IsDeleted != true)
+                    {
+                        var notification = new CreateNotification
+                        {
+                            userId = Post.UserId,
+                            message = $"Your article titled '{Post.Title}' has been removed for violating our standards."
+                        };
+
+                        var content = new StringContent(JsonSerializer.Serialize(notification), System.Text.Encoding.UTF8, "application/json");
+
+                        string notiApiUrl = $"{_apiSettings.BaseUrl}/Notification";
+                        var notiResponse = await _httpClient.PostAsync(notiApiUrl, content);
+
+                        if (!notiResponse.IsSuccessStatusCode)
+                        {
+                            _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
+                        }
+                    }
+                    else
+                    {
+                        var notification = new CreateNotification
+                        {
+                            userId = Post.UserId,
+                            message = $"Your article titled '{Post.Title}' has been restored after we reviewed the article again."
+                        };
+
+                        var content = new StringContent(JsonSerializer.Serialize(notification), System.Text.Encoding.UTF8, "application/json");
+
+                        string notiApiUrl = $"{_apiSettings.BaseUrl}/Notification";
+                        var notiResponse = await _httpClient.PostAsync(notiApiUrl, content);
+
+                        if (!notiResponse.IsSuccessStatusCode)
+                        {
+                            _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
+                        }
+                    }
+
                     return RedirectToPage("./Index");
                 }
                 else
