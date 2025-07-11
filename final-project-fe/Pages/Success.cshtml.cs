@@ -13,6 +13,7 @@ using System.Text;
 using final_project_fe.Dtos.Users;
 using System.Drawing;
 using System.Net.Http.Headers;
+using final_project_fe.Dtos.Notification;
 
 namespace final_project_fe.Pages
 {
@@ -30,6 +31,7 @@ namespace final_project_fe.Pages
             _payOSService = payOSService;
         }
         public string BaseUrl { get; set; }
+        public TransactionDto Transaction { get; set; }
         public string CurrentUserId { get; set; }
         public async Task<IActionResult> OnGetAsync(long orderCode)
         {
@@ -51,7 +53,7 @@ namespace final_project_fe.Pages
                 if (paymentStatus.IsPaid)
                 {
 
-                    var transaction = new TransactionDto
+                    Transaction = new TransactionDto
                     {
                         UserId = Guid.Parse(CurrentUserId),
                         Amount = paymentStatus.Amount,
@@ -62,7 +64,7 @@ namespace final_project_fe.Pages
                         CreateAt = DateTime.UtcNow
                     };
 
-                    var jsonContent = JsonSerializer.Serialize(transaction);
+                    var jsonContent = JsonSerializer.Serialize(Transaction);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
 
@@ -100,6 +102,22 @@ namespace final_project_fe.Pages
                         TempData["SuccessMessage"] = "Payment successful!";
                         return RedirectToPage("/PointTransaction");
                     }
+
+                    var notification = new CreateNotification
+                    {
+                        userId = Transaction.UserId,
+                        message = $"You have successfully loaded {Transaction.Points} points into your account."
+                    };
+
+                    var notiContent = new StringContent(JsonSerializer.Serialize(notification), Encoding.UTF8, "application/json");
+                    var notiApiUrl = $"{_apiSettings.BaseUrl}/Notification";
+                    var notiResponse = await _httpClient.PostAsync(notiApiUrl, notiContent);
+
+                    if (!notiResponse.IsSuccessStatusCode)
+                    {
+                        _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
+                    }
+
 
                     return RedirectToPage("/PointTransaction");
                 }

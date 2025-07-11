@@ -77,13 +77,38 @@
                                                     <i class="fa fa-edit"></i>
                                                 </a>
 
-                                                <a href="javascript:void(0);"
-                                                   class="btn btn-link @(user.IsBanned ? "btn-success" : "btn-danger")"
-                                                   data-bs-toggle="tooltip"
-                                                   data-original-title="@(user.IsBanned ? "Unban User" : "Ban User")"
-                                                   onclick="confirmBanUnban('@user.UserId', @user.IsBanned.ToString().ToLower(), event)">
-                                                    <i class="@(user.IsBanned ? "fas fa-check" : "fa fa-times")"></i>
-                                                </a>
+                                                <form method="post" asp-page="/Admin/UserManager/BanUnban" asp-route-userId="@user.UserId" style="display: inline;">
+                                                    @if (user.IsBanned)
+                                                    {
+                                                        <button type="submit" class="btn btn-success me-2"
+                                                                onclick="event.preventDefault(); showConfirm({
+                                                    type: 'success' ,
+                                                    title: 'Unban User' ,
+                                                    message: 'Are you sure you want to unban this user?' ,
+                                                    confirmText: 'Unban' ,
+                                                    cancelText: 'Cancel' ,
+                                                    onConfirm: ()=>
+                                                this.closest('form').submit()
+                                                })">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="submit" class="btn btn-danger me-2"
+                                                                onclick="event.preventDefault(); showConfirm({
+                                                    type: 'danger' ,
+                                                    title: 'Ban User' ,
+                                                    message: 'Are you sure you want to ban this user?' ,
+                                                    confirmText: 'Ban' ,
+                                                    cancelText: 'Cancel' ,
+                                                    onConfirm: ()=>
+                                                this.closest('form').submit()
+                                                })">
+                                                            <i class="fa fa-times"></i>
+                                                        </button>
+                                                    }
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -130,6 +155,7 @@
     </div>
 </div>
 
+<partial name="_ConfirmDialog" />
 @* <script>
     $(document).ready(function () {
         $("#basic-datatables").DataTable({});
@@ -187,22 +213,3 @@
         });
     });
 </script> *@
-
-<script>
-    function confirmBanUnban(userId, isBanned, event) {
-        event.preventDefault(); // Prevent default action
-
-        let action = isBanned ? "unban" : "ban";
-        let confirmMessage = `Are you sure you want to ${action} this user?`;
-
-        if (confirm(confirmMessage)) {
-            const button = event.target.closest('a');
-            if (button) {
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                button.style.pointerEvents = 'none';
-            }
-
-            window.location.href = `/Admin/UserManager/BanUnban?userId=${userId}`;
-        }
-    }
-</script>

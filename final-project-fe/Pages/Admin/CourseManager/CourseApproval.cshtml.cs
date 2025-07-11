@@ -28,7 +28,6 @@ namespace final_project_fe.Pages.Admin.CourseManager
         }
 
         public GetCourseDto Course { get; set; }
-        public CreateNotification Notification { get; set; }
 
         public async Task<IActionResult> OnPostAsync(int id, string status)
         {
