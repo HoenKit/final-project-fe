@@ -1,4 +1,6 @@
-﻿namespace final_project_fe.Dtos.Courses
+﻿using final_project_fe.Dtos.Mentors;
+
+namespace final_project_fe.Dtos.Courses
 {
 	public class CourseResponseDto
 	{
@@ -16,10 +18,12 @@
         public int? StudentCount { get; set; }
         public string? CoursesImage { get; set; }
         public double? CourseLength { get; set; }
+        public bool isDeleted { get; set; }
         public string? Status { get; set; }
         public DateTime? UpdateAt { get; set; }
         public int CountModule { get; set; }
         public int CountLesson { get; set; }
+        public MentorDto? Mentor { get; set; }
     }
 
 }
