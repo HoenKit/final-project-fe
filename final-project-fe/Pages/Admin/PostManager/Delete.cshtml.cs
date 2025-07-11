@@ -24,7 +24,6 @@ namespace final_project_fe.Pages.Admin.PostManager
         }
 
         public PostDetail? Post { get; set; }
-        public CreateNotification Notification { get; set; }
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
@@ -43,7 +42,7 @@ namespace final_project_fe.Pages.Admin.PostManager
                 var postResponse = await _httpClient.SendAsync(postRequest);
                 if (!postResponse.IsSuccessStatusCode)
                 {
-                    return NotFound();
+                    return RedirectToPage("/Page/ErrorPage");
                 }
 
                 var postJson = await postResponse.Content.ReadAsStringAsync();
@@ -78,6 +77,8 @@ namespace final_project_fe.Pages.Admin.PostManager
                         {
                             _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
                         }
+
+                        TempData["SuccessMessage"] = $"The article has been successfully deleted.";
                     }
                     else
                     {
@@ -96,6 +97,7 @@ namespace final_project_fe.Pages.Admin.PostManager
                         {
                             _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
                         }
+                        TempData["SuccessMessage"] = $"The article has been successfully restored.";
                     }
 
                     return RedirectToPage("./Index");
@@ -103,13 +105,14 @@ namespace final_project_fe.Pages.Admin.PostManager
                 else
                 {
                     _logger.LogError($"Xóa post thất bại: {response.StatusCode}");
-                    return StatusCode((int)response.StatusCode);
+                    TempData["ErrorMessage"] = $"Article deleted failed.";
+                    return RedirectToPage("./Index");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi API khi xóa post: {ex.Message}");
-                return StatusCode(500);
+                return RedirectToPage("/Page/ErrorPage");
             }
         }
     }

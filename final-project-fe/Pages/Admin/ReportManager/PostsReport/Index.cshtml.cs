@@ -8,6 +8,7 @@ using System.Text.Json;
 using final_project_fe.Dtos.Report;
 using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Users;
+using final_project_fe.Dtos.Notification;
 
 namespace final_project_fe.Pages.Admin.ReportManager.PostsReport
 {
@@ -169,6 +170,45 @@ namespace final_project_fe.Pages.Admin.ReportManager.PostsReport
             }
 
             return new KeyValuePair<int, List<ReportPostDto>>(postId, new List<ReportPostDto>());
+        }
+
+        public async Task<IActionResult> OnPostDeleteReportAsync(Guid id, string title)
+        {
+            if (!Request.Cookies.ContainsKey("AccessToken"))
+                return RedirectToPage("/Login");
+
+            string token = Request.Cookies["AccessToken"];
+            string? role = JwtHelper.GetRoleFromToken(token);
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var notification = new CreateNotification
+                {
+                    userId = id,
+                    message = $"Warning users whose articles titled '{title}' have been reported as not following our site's community standards."
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(notification), System.Text.Encoding.UTF8, "application/json");
+
+                string notiApiUrl = $"{_apiSettings.BaseUrl}/Notification";
+                var notiResponse = await _httpClient.PostAsync(notiApiUrl, content);
+
+                if (!notiResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
+                }
+                TempData["SuccessMessage"] = $"Alert sent successfully.";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Lỗi API khi xóa báo cáo: {ex.Message}");
+                TempData["ErrorMessage"] = "Server error.";
+                return RedirectToPage();
+            }
         }
     }
 }

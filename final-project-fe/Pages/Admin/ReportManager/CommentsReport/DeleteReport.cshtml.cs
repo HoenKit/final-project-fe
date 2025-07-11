@@ -19,7 +19,7 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
             _httpClient = httpClient;
         }
 
-        public GroupedReportDto<int, ReportPostDto> GroupedReportPosts { get; set; }
+        public GroupedReportDto<int, ReportCommentDto> GroupedReportComments { get; set; }
 
         public async Task<IActionResult> OnPostDeleteReportAsync(int id)
         {
@@ -37,25 +37,25 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                string apiUrl = $"{_apiSettings.BaseUrl}/ReportPost/DeleteReportsByPostId/{id}";
+                string apiUrl = $"{_apiSettings.BaseUrl}/ReportComment/DeleteReportsByCommentId/{id}";
 
                 var response = await _httpClient.DeleteAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Xóa báo cáo thành công.";
-                    return RedirectToPage("/Admin/ReportManager/PostsReport/Index");
+                    TempData["SuccessMessage"] = "Delete report successful.";
+                    return RedirectToPage("/Admin/ReportManager/CommentsReport/Index");
                 }
                 else
                 {
                     _logger.LogError($"Xóa báo cáo thất bại: {response.StatusCode}");
-                    TempData["ErrorMessage"] = "Xóa báo cáo thất bại.";
+                    TempData["ErrorMessage"] = "Delete report failed.";
                     return RedirectToPage();
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi API khi xóa báo cáo: {ex.Message}");
-                TempData["ErrorMessage"] = "Lỗi khi gọi API.";
+                TempData["ErrorMessage"] = "Server error.";
                 return RedirectToPage();
             }
         }

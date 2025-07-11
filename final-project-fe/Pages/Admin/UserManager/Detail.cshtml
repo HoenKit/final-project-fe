@@ -141,14 +141,40 @@
                     <div class="row mt-4">
                         <div class="col-12 text-center">
                             <div class="btn-group" role="group">
-                                <a href="javascript:void(0);"
-                                   class="btn @(Model.UserDetail.IsBanned ? "btn-success" : "btn-danger") me-2"
-                                   data-bs-toggle="tooltip"
-                                   data-original-title="@(Model.UserDetail.IsBanned ? "Unban User" : "Ban User")"
-                                   onclick="confirmBanUnban('@Model.UserDetail.UserId', @(Model.UserDetail.IsBanned.ToString().ToLower()))">
-                                    <i class="@(Model.UserDetail.IsBanned ? "fas fa-check" : "fas fa-times") me-1"></i>
-                                    @(Model.UserDetail.IsBanned ? "Unban User" : "Ban User")
-                                </a>
+                                <form method="post" asp-page="/Admin/UserManager/BanUnban" asp-route-userId="@Model.UserDetail.UserId" style="display: inline;">
+                                    @if (Model.UserDetail.IsBanned)
+                                    {
+                                        <button type="submit" class="btn btn-success me-2"
+                                                onclick="event.preventDefault(); showConfirm({
+                                        type: 'success' ,
+                                        title: 'Unban User' ,
+                                        message: 'Are you sure you want to unban this user?' ,
+                                        confirmText: 'Unban' ,
+                                        cancelText: 'Cancel' ,
+                                        onConfirm: ()=>
+                                    this.closest('form').submit()
+                                    })">
+                                            <i class="fas fa-check me-1"></i>
+                                            Unban User
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-danger me-2"
+                                                onclick="event.preventDefault(); showConfirm({
+                                        type: 'danger' ,
+                                        title: 'Ban User' ,
+                                        message: 'Are you sure you want to ban this user?' ,
+                                        confirmText: 'Ban' ,
+                                        cancelText: 'Cancel' ,
+                                        onConfirm: ()=>
+                                    this.closest('form').submit()
+                                    })">
+                                            <i class="fas fa-times me-1"></i>
+                                            Ban User
+                                        </button>
+                                    }
+                                </form>
 
                                 <form method="post" class="d-inline">
                                     <button type="submit" asp-page-handler="Back" class="btn btn-secondary">
@@ -172,13 +198,5 @@
     </div>
 </div>
 
-<script>
-    function confirmBanUnban(userId, isBanned) {
-        let action = isBanned ? "unban" : "ban";
-        let confirmMessage = `Are you sure you want to ${action} this user?`;
-
-        if (confirm(confirmMessage)) {
-            window.location.href = `/Admin/UserManager/BanUnban?userId=${userId}`;
-        }
-    }
-</script>
+<!-- Include the confirm dialog partial -->
+<partial name="_ConfirmDialog" />

@@ -1,0 +1,498 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Confirm Dialog</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        /* Enhanced Confirm Dialog Styles */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+            .confirm-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        .confirm-dialog {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+            overflow: hidden;
+            transform: scale(0.9) translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .confirm-overlay.show .confirm-dialog {
+            transform: scale(1) translateY(0);
+        }
+
+        .confirm-header {
+            padding: 24px 24px 16px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .confirm-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            font-size: 24px;
+        }
+
+            .confirm-icon.warning {
+                background: linear-gradient(135deg, #ffa726, #ff9800);
+            }
+
+            .confirm-icon.success {
+                background: linear-gradient(135deg, #66bb6a, #4caf50);
+            }
+
+            .confirm-icon.info {
+                background: linear-gradient(135deg, #42a5f5, #2196f3);
+            }
+
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #212529;
+            margin: 0 0 8px 0;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .confirm-body {
+            padding: 0 24px 24px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 0 24px 24px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+            .confirm-btn:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            }
+
+        .confirm-btn-cancel {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+            .confirm-btn-cancel:hover {
+                background: #e9ecef;
+                color: #495057;
+                border-color: #dee2e6;
+            }
+
+        .confirm-btn-confirm {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: 2px solid transparent;
+        }
+
+            .confirm-btn-confirm:hover {
+                background: linear-gradient(135deg, #c82333, #bd2130);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+            }
+
+            .confirm-btn-confirm.success {
+                background: linear-gradient(135deg, #28a745, #218838);
+            }
+
+                .confirm-btn-confirm.success:hover {
+                    background: linear-gradient(135deg, #218838, #1e7e34);
+                    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+                }
+
+            .confirm-btn-confirm.info {
+                background: linear-gradient(135deg, #2196f3, #1976d2);
+            }
+
+                .confirm-btn-confirm.info:hover {
+                    background: linear-gradient(135deg, #1976d2, #1565c0);
+                    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+                }
+
+        /* Animation keyframes */
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .confirm-icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Mobile responsive */
+        @@media (max-width: 480px) {
+            .confirm-dialog {
+                margin: 10px;
+                border-radius: 12px;
+            }
+
+            .confirm-header {
+                padding: 20px 20px 12px;
+            }
+
+            .confirm-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 20px;
+            }
+
+            .confirm-title {
+                font-size: 18px;
+            }
+
+            .confirm-message {
+                font-size: 14px;
+            }
+
+            .confirm-actions {
+                flex-direction: column;
+                padding: 0 20px 20px;
+            }
+
+            .confirm-btn {
+                padding: 14px 20px;
+            }
+        }
+
+        /* Demo styles */
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .demo-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .demo-btn.delete {
+                background: #dc3545;
+                color: white;
+            }
+
+                .demo-btn.delete:hover {
+                    background: #c82333;
+                }
+
+            .demo-btn.restore {
+                background: #28a745;
+                color: white;
+            }
+
+                .demo-btn.restore:hover {
+                    background: #218838;
+                }
+
+            .demo-btn.warning {
+                background: #ffc107;
+                color: #212529;
+            }
+
+                .demo-btn.warning:hover {
+                    background: #e0a800;
+                }
+
+            .demo-btn.info {
+                background: #2196f3;
+                color: white;
+            }
+
+                .demo-btn.info:hover {
+                    background: #1976d2;
+                }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+            .code-block pre {
+                margin: 0;
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Confirm Dialog -->
+    <div id="confirm-overlay" class="confirm-overlay">
+        <div class="confirm-dialog">
+            <div class="confirm-header">
+                <div id="confirm-icon" class="confirm-icon">
+                    <span>❗</span>
+                </div>
+                <h3 id="confirm-title" class="confirm-title">Confirm Action</h3>
+                <p id="confirm-message" class="confirm-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="confirm-actions">
+                <button id="confirm-cancel" class="confirm-btn confirm-btn-cancel">Cancel</button>
+                <button id="confirm-confirm" class="confirm-btn confirm-btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Confirm Dialog System
+        class ConfirmDialog {
+            constructor() {
+                this.overlay = document.getElementById('confirm-overlay');
+                this.icon = document.getElementById('confirm-icon');
+                this.title = document.getElementById('confirm-title');
+                this.message = document.getElementById('confirm-message');
+                this.cancelBtn = document.getElementById('confirm-cancel');
+                this.confirmBtn = document.getElementById('confirm-confirm');
+
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Close on overlay click
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) {
+                        this.hide();
+                    }
+                });
+
+                // Close on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.overlay.classList.contains('show')) {
+                        this.hide();
+                    }
+                });
+
+                // Cancel button
+                this.cancelBtn.addEventListener('click', () => {
+                    this.hide();
+                });
+            }
+
+            show(options = {}) {
+                const {
+                    type = 'danger',
+                    title = 'Confirm Action',
+                    message = 'Are you sure you want to proceed?',
+                    confirmText = 'Confirm',
+                    cancelText = 'Cancel',
+                    onConfirm = null,
+                    onCancel = null
+                } = options;
+
+                // Set content
+                this.title.textContent = title;
+                this.message.textContent = message;
+                this.cancelBtn.textContent = cancelText;
+                this.confirmBtn.textContent = confirmText;
+
+                // Set icon and styling based on type
+                this.setDialogType(type);
+
+                // Set up confirm button handler
+                this.confirmBtn.onclick = () => {
+                    if (onConfirm) onConfirm();
+                    this.hide();
+                };
+
+                // Set up cancel handler
+                this.cancelBtn.onclick = () => {
+                    if (onCancel) onCancel();
+                    this.hide();
+                };
+
+                // Show dialog
+                this.overlay.classList.add('show');
+
+                // Focus on appropriate button
+                setTimeout(() => {
+                    if (type === 'danger') {
+                        this.cancelBtn.focus();
+                    } else {
+                        this.confirmBtn.focus();
+                    }
+                }, 100);
+            }
+
+            setDialogType(type) {
+                // Reset classes
+                this.icon.className = 'confirm-icon';
+                this.confirmBtn.className = 'confirm-btn confirm-btn-confirm';
+
+                switch (type) {
+                    case 'danger':
+                        this.icon.innerHTML = '<span>🗑️</span>';
+                        this.icon.classList.add('danger');
+                        break;
+                    case 'success':
+                        this.icon.innerHTML = '<span>✅</span>';
+                        this.icon.classList.add('success');
+                        this.confirmBtn.classList.add('success');
+                        break;
+                    case 'warning':
+                        this.icon.innerHTML = '<span>⚠️</span>';
+                        this.icon.classList.add('warning');
+                        break;
+                    case 'info':
+                        this.icon.innerHTML = '<span>ℹ️</span>';
+                        this.icon.classList.add('info');
+                        this.confirmBtn.classList.add('info');
+                        break;
+                    default:
+                        this.icon.innerHTML = '<span>❓</span>';
+                }
+            }
+
+            hide() {
+                this.overlay.classList.remove('show');
+            }
+        }
+
+        // Initialize dialog
+        const confirmDialog = new ConfirmDialog();
+
+        // Global function for easy access
+        window.showConfirm = function (options) {
+            confirmDialog.show(options);
+        };
+
+        // Demo functions
+        function showDeleteConfirm() {
+            showConfirm({
+                type: 'danger',
+                title: 'Delete Post',
+                message: 'Are you sure you want to delete this post? This action cannot be undone.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    alert('Post deleted! (This is just a demo)');
+                }
+            });
+        }
+
+        function showRestoreConfirm() {
+            showConfirm({
+                type: 'success',
+                title: 'Restore Post',
+                message: 'Are you sure you want to restore this post?',
+                confirmText: 'Restore',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    alert('Post restored! (This is just a demo)');
+                }
+            });
+        }
+
+        function showWarningConfirm() {
+            showConfirm({
+                type: 'warning',
+                title: 'Warning',
+                message: 'This action may have unexpected consequences. Do you want to continue?',
+                confirmText: 'Continue',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    alert('Action confirmed! (This is just a demo)');
+                }
+            });
+        }
+
+        function showInfoConfirm() {
+            showConfirm({
+                type: 'info',
+                title: 'Information',
+                message: 'This is an informational dialog. Do you want to proceed?',
+                confirmText: 'OK',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    alert('Information acknowledged! (This is just a demo)');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

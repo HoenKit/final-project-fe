@@ -85,20 +85,7 @@
 </div>
 
 <!-- Add notification display at the top of the content -->
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["ErrorMessage"]
-    </div>
-}
-
+<partial name="_ConfirmDialog" />
 <div class="row">
     <div class="col-md-12">
         <div class="card">
@@ -166,13 +153,29 @@
                                         <td>
                                             <div class="form-button-action">
                                                 <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@course.CourseId" asp-route-status="Approved">
-                                                    <button type="submit" class="btn btn-link btn-success btn-sm">
+                                                    <button type="submit" class="btn btn-link btn-success btn-sm"" onclick="event.preventDefault(); showConfirm({
+                                                            type: 'success' ,
+                                                            title: 'Ignore reports' ,
+                                                            message: 'Are you sure you want to approve this course?' ,
+                                                            confirmText: 'Approved' ,
+                                                            cancelText: 'Cancel' ,
+                                                            onConfirm: ()=>
+                                                        this.closest('form').submit()
+                                                        })">
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 </form>
 
                                                 <form method="post" asp-page="/Admin/CourseManager/CourseApproval" asp-route-id="@course.CourseId" asp-route-status="Rejected">
-                                                    <button type="submit" class="btn btn-link btn-danger btn-sm">
+                                                    <button type="submit" class="btn btn-link btn-danger btn-sm"" onclick="event.preventDefault(); showConfirm({
+                                                            type: 'danger' ,
+                                                            title: 'Ignore reports' ,
+                                                            message: 'Are you sure you want to reject this course?' ,
+                                                            confirmText: 'Rejected' ,
+                                                            cancelText: 'Cancel' ,
+                                                            onConfirm: ()=>
+                                                        this.closest('form').submit()
+                                                        })">
                                                         <i class="fa fa-times"></i>
                                                     </button>
                                                 </form>
