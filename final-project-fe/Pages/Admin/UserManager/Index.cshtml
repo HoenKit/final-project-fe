@@ -67,7 +67,7 @@
                                         </td>
                                         <td>@user.Email</td>
                                         <td>@(user.Phone ?? "N/A")</td>
-                                        <td>@user.Point</td>
+                                        <td>@user.Point?.ToString("N0")</td>
                                         <td>@(user.CreateAt.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
                                         <td>
                                             <div class="form-button-action">
