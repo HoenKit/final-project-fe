@@ -1,12 +1,363 @@
-﻿@if (TempData["SuccessMessage"] != null)
+﻿@{
+    string message = null;
+    string type = null;
+
+    if (TempData["SuccessMessage"] is string success)
+    {
+        message = success;
+        type = "success";
+    }
+    else if (TempData["ErrorMessage"] is string error)
+    {
+        message = error;
+        type = "error";
+    }
+    else if (TempData["WarningMessage"] is string warning)
+    {
+        message = warning;
+        type = "warning";
+    }
+    else if (TempData["InfoMessage"] is string info)
+    {
+        message = info;
+        type = "info";
+    }
+}
+
+@if (!string.IsNullOrEmpty(message))
 {
-    <div class="alert alert-success" role="alert">
-        @TempData["SuccessMessage"]
+    <div id="notification-@(Guid.NewGuid().ToString("N")[..8])" class="notification @type" data-message="@message" data-type="@type">
+        <div class="notification-content">
+            <div class="notification-icon">
+                @switch(type)
+                {
+                    case "success":
+                        <i class="fas fa-check"></i>
+                        break;
+                    case "error":
+                        <i class="fas fa-times"></i>
+                        break;
+                    case "warning":
+                        <i class="fas fa-exclamation-triangle"></i>
+                        break;
+                    default:
+                        <i class="fas fa-info"></i>
+                        break;
+                }
+            </div>
+            <div class="notification-message">@message</div>
+            <button class="notification-close" onclick="closeNotification(this)">×</button>
+        </div>
+        <div class="notification-progress"></div>
     </div>
 }
-@if (TempData["ErrorMessage"] != null)
+
+<style>
+    /* Notification Container - Fixed position */
+    .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        width: 350px;
+        max-width: 90vw;
+        pointer-events: none;
+    }
+
+    /* Individual Notification */
+    .notification {
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid;
+        pointer-events: auto;
+        opacity: 0;
+        transform: translateX(100%);
+        animation: slideIn 0.4s ease forwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Notification Types */
+    .notification.success {
+        border-left-color: #10b981;
+    }
+
+    .notification.error {
+        border-left-color: #ef4444;
+    }
+
+    .notification.warning {
+        border-left-color: #f59e0b;
+    }
+
+    .notification.info {
+        border-left-color: #3b82f6;
+    }
+
+    /* Notification Content */
+    .notification-content {
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Notification Icon */
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .notification.success .notification-icon {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .notification.error .notification-icon {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .notification.warning .notification-icon {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .notification.info .notification-icon {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    /* Notification Message */
+    .notification-message {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.4;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    /* Close Button */
+    .notification-close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #9ca3af;
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .notification-close:hover {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    /* Progress Bar */
+    .notification-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: currentColor;
+        opacity: 0.3;
+        transform-origin: left;
+        animation: progressShrink 5s linear forwards;
+    }
+
+    .notification.success .notification-progress {
+        color: #10b981;
+    }
+
+    .notification.error .notification-progress {
+        color: #ef4444;
+    }
+
+    .notification.warning .notification-progress {
+        color: #f59e0b;
+    }
+
+    .notification.info .notification-progress {
+        color: #3b82f6;
+    }
+
+    /* Animations */
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @@keyframes slideOut {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+
+    @@keyframes progressShrink {
+        from {
+            transform: scaleX(1);
+        }
+        to {
+            transform: scaleX(0);
+        }
+    }
+
+    /* Mobile Responsive */
+    @@media (max-width: 640px) {
+        .notification-container {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+        }
+
+        .notification-content {
+            padding: 14px;
+        }
+
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .notification-message {
+            font-size: 13px;
+        }
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .notification {
+            background: #1f2937;
+            color: #f9fafb;
+        }
+
+        .notification-message {
+            color: #f9fafb;
+        }
+
+        .notification-close {
+            color: #9ca3af;
+        }
+
+        .notification-close:hover {
+            background: #374151;
+            color: #d1d5db;
+        }
+    }
+</style>
+
+<script>
+    // Ensure container exists
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!document.querySelector('.notification-container')) {
+            const container = document.createElement('div');
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+
+        // Move notifications to container
+        const notifications = document.querySelectorAll('.notification');
+        const container = document.querySelector('.notification-container');
+        
+        notifications.forEach(notification => {
+            container.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    closeNotification(notification.querySelector('.notification-close'));
+                }
+            }, 5000);
+        });
+    });
+
+    // Close notification function
+    function closeNotification(button) {
+        const notification = button.closest('.notification');
+        if (notification) {
+            notification.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }
+
+    // Global function to show notifications programmatically
+    function showNotification(message, type = 'info') {
+        const container = document.querySelector('.notification-container') || createNotificationContainer();
+        
+        const notification = document.createElement('div');
+        const notificationId = 'notification-' + Math.random().toString(36).substr(2, 9);
+        notification.id = notificationId;
+        notification.className = `notification ${type}`;
+        
+        const icons = {
+            success: 'fas fa-check',
+            error: 'fas fa-times',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info'
+        };
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-icon">
+                    <i class="${icons[type] || icons.info}"></i>
+                </div>
+                <div class="notification-message">${message}</div>
+                <button class="notification-close" onclick="closeNotification(this)">×</button>
+            </div>
+            <div class="notification-progress"></div>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                closeNotification(notification.querySelector('.notification-close'));
+            }
+        }, 5000);
+    }
+
+    // Create notification container if it doesn't exist
+    function createNotificationContainer() {
+        const container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+        return container;
+    }
+</script>
+
+@* FontAwesome Icons (add to your layout if not already included) *@
+@if (!ViewData.ContainsKey("FontAwesomeLoaded"))
 {
-    <div class="alert alert-danger" role="alert">
-        @TempData["ErrorMessage"]
-    </div>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    ViewData["FontAwesomeLoaded"] = true;
 }

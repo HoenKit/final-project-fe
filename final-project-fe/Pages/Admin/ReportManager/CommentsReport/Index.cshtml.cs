@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using final_project_fe.Dtos.Comment;
+using final_project_fe.Dtos.Notification;
+using Microsoft.Extensions.Hosting;
+using final_project_fe.Dtos.Post;
+using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
 {
@@ -24,6 +29,7 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
         }
 
         public PageResult<CommentDto> Comments { get; set; }
+        public CommentDto Comment { get; set; }
         public PageResult<GroupedReportDto<int, ReportCommentDto>> GroupedReportComments { get; set; }
         public Dictionary<int, List<ReportCommentDto>> DetailedReports { get; set; } = new Dictionary<int, List<ReportCommentDto>>();
         public int CurrentPage { get; set; }
@@ -169,6 +175,63 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
             }
 
             return new KeyValuePair<int, List<ReportCommentDto>>(commentId, new List<ReportCommentDto>());
+        }
+
+        public async Task<IActionResult> OnPostDeleteReportAsync(int id)
+        {
+            if (!Request.Cookies.ContainsKey("AccessToken"))
+                return RedirectToPage("/Login");
+
+            string token = Request.Cookies["AccessToken"];
+            string? role = JwtHelper.GetRoleFromToken(token);
+
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+
+                string commentUrl = $"{_apiSettings.BaseUrl}/Comment/{id}";
+                var commentRequest = new HttpRequestMessage(HttpMethod.Get, commentUrl);
+                commentRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var commentResponse = await _httpClient.SendAsync(commentRequest);
+                if (!commentResponse.IsSuccessStatusCode)
+                {
+                    return RedirectToPage("/Page/ErrorPage");
+                }
+
+                var commentJson = await commentResponse.Content.ReadAsStringAsync();
+                var commentRoot = JsonNode.Parse(commentJson);
+                Comment = commentRoot.Deserialize<CommentDto>(new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new CommentDto();
+
+                var notification = new CreateNotification
+                {
+                    userId = Comment.UserId,
+                    message = $"Warn users whose comments are reported as not following our site's community standards."
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(notification), System.Text.Encoding.UTF8, "application/json");
+
+                string notiApiUrl = $"{_apiSettings.BaseUrl}/Notification";
+                var notiResponse = await _httpClient.PostAsync(notiApiUrl, content);
+
+                if (!notiResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Gửi thông báo thất bại: {notiResponse.StatusCode}");
+                }
+                TempData["SuccessMessage"] = $"Alert sent successfully.";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Lỗi API khi xóa báo cáo: {ex.Message}");
+                TempData["ErrorMessage"] = "Server error.";
+                return RedirectToPage();
+            }
         }
     }
 }

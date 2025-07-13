@@ -22,7 +22,7 @@ namespace final_project_fe.Pages.Admin.UserManager
 
         public User? User { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(Guid userId)
+        public async Task<IActionResult> OnPostAsync(Guid userId)
         {
             if (userId == Guid.Empty)
             {
@@ -59,7 +59,10 @@ namespace final_project_fe.Pages.Admin.UserManager
                     });
 
                     string emailSubject = User.IsBanned ? "Account Access Suspended" : "Account Access Restored";
-
+                    
+                    string isBanned = User.IsBanned ? "Banned" : "Unbanned";
+                    TempData["SuccessMessage"] = $"User {User.Email} has been successfully {isBanned}.";
+                    
                     string emailBody = $@"
 <!DOCTYPE html>
 <html lang='en'>

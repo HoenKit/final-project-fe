@@ -1,5 +1,7 @@
 ﻿using final_project_fe.Dtos;
 using final_project_fe.Dtos.Category;
+using final_project_fe.Dtos.Comment;
+using final_project_fe.Dtos.Notification;
 using final_project_fe.Dtos.Post;
 using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
@@ -7,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace final_project_fe.Pages.Admin.PostManager
 {

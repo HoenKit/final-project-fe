@@ -25,7 +25,6 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
 
         public CourseResponseDto Course { get; set; }
-        public CreateNotification Notification { get; set; }
 
         public async Task<IActionResult> OnPostAsync(int id)
         {
@@ -57,6 +56,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 HttpResponseMessage response = await _httpClient.PutAsync(apiUrl, null);
                 if (response.IsSuccessStatusCode)
                 {
+                    TempData["SuccessMessage"] = $"The course has been successfully deleted.";
                     if (role == "Admin")
                     {
                         if (Course.isDeleted != true)
@@ -102,13 +102,18 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 else
                 {
                     _logger.LogError($"Xóa course thất bại: {response.StatusCode}");
-                    return StatusCode((int)response.StatusCode);
+                    TempData["ErrorMessage"] = $"Course deleted failed.";
+                    if (role == "Admin")
+                    {
+                        return RedirectToPage("/Admin/CourseManager/Index");
+                    }
+                    return RedirectToPage("./Index");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi API khi xóa course: {ex.Message}");
-                return StatusCode(500);
+                return RedirectToPage("/Page/ErrorPage");
             }
         }
     }
