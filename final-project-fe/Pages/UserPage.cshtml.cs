@@ -41,6 +41,7 @@ namespace final_project_fe.Pages
         [BindProperty]
         public CommentCreateDto NewComment { get; set; } 
         public PageResult<CommentDto> Comments { get; set; }
+        public User Profile { get; set; } = new();
         public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
         public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
         public int currentPage { get; set; }
@@ -104,7 +105,26 @@ namespace final_project_fe.Pages
                             CurrentUserId = null; // or other default value
                         }
                     }
+
+                    CurrentUserId = userId;
+                    var profileResponse = await _httpClient.GetAsync(userApiUrl + userId);
+                    if (profileResponse.IsSuccessStatusCode)
+                    {
+                        var userJson = await profileResponse.Content.ReadAsStringAsync();
+                        var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        if (apiResponse != null)
+                            Profile = apiResponse;
+                    }
+                    else
+                    {
+                        _logger.LogError("Unable to get user profile information. Status: " + profileResponse.StatusCode);
+                    }
                 }
+               
 
                 var categoryResponse = await _httpClient.GetAsync(categoryApiUrl);
                 if (categoryResponse.IsSuccessStatusCode)
