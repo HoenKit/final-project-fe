@@ -1,0 +1,1470 @@
+﻿@page
+@model final_project_fe.Pages.UserProfileModel
+@{
+	ViewData["Title"] = "UserProfile";
+}
+@{
+	var token = HttpContext.Request.Cookies["AccessToken"];
+}
+<div class="theme-layout">
+	<!-- Profile Header -->
+		<div class="profile-header">
+		<div class="d-flex justify-content-between align-items-start">
+			<div class="avtar-header">
+				<div class="profile-content">
+					<div class="profile-avatar-card">
+						@if (Model.Profile?.UserMetaData != null)
+						{
+						<img src="@Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png""
+							 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+							<h4 class="profile-name mt-4">
+								@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
+							</h4>
+						}
+						<div class="social-links">
+							<a href="#" class="social-link facebook">
+								<i class="bi bi-facebook"></i>
+							</a>
+							<a href="#" class="social-link linkedin">
+								<i class="bi bi-linkedin"></i>
+							</a>
+							<a href="#" class="social-link youtube">
+								<i class="bi bi-youtube"></i>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div style="width: 22%; margin-right: 5%;">
+			<div class="col-12">
+				@if (Model.Profile.IsPremium == false)
+				{
+					<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
+						<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+							<div class="d-flex justify-content-between align-items-start">
+								<div>
+									<small>MemberShip</small>
+									<h3 class="mt-1">Free Member</h3>
+								</div>
+								<i class="bi bi-person-badge-fill fs-3"></i>
+							</div>
+							<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+								Upgrade to Premium
+							</a>
+						</div>
+					</div>
+				}
+				else
+				{
+					<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
+						<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
+							<div>
+								<small>MemberShip</small>
+							</div>
+							<i style="color:#ffff" class="bi bi-gem fs-2"></i>
+							<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+								Premium Member
+							</a>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		</div>
+	</div>
+
+		<!-- Main Content with Sidebar -->
+		<div class="gap gray-bg">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="row" id="page-contents">
+							<!-- Sidebar -->
+							<div class="col-lg-3">
+								<aside class="sidebar">
+									<div class="widget">
+										<h4 class="widget-title">Shortcuts</h4>
+										<ul class="naves">
+											<li>
+												<i class="ti-clipboard"></i>
+												<a asp-page="/Index" title="">News feed</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-mortarboard"></i>
+												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-person"></i>
+												<a class="active" asp-page="/UserPage" title="" data-ripple="">Page</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-info-circle"></i>
+												<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
+											</li>
+										</ul>
+									</div><!-- Shortcuts -->
+									<div class="widget">
+										<h4 class="widget-title">Recent Activity</h4>
+										<ul class="activitiez">
+											<li>
+												<div class="activity-meta">
+													<i>10 hours Ago</i>
+													<span><a href="#" title="">Commented on Video posted </a></span>
+													<h6>by <a href="time-line.html">black demon.</a></h6>
+												</div>
+											</li>
+											<li>
+												<div class="activity-meta">
+													<i>30 Days Ago</i>
+													<span><a href="#" title="">Posted your status. "Hello guys, how are you?"</a></span>
+												</div>
+											</li>
+											<li>
+												<div class="activity-meta">
+													<i>2 Years Ago</i>
+													<span><a href="#" title="">Share a video on her timeline.</a></span>
+													<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
+												</div>
+											</li>
+										</ul>
+									</div><!-- recent activites -->
+								</aside>
+							</div><!-- sidebar -->
+
+							<!-- Main Content -->
+							<div class="col-lg-9">
+							<!-- About Me Tab Content -->
+							@if (!ViewData.ModelState.IsValid)
+							{
+								foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+								{
+									<div class="alert alert-danger">@error.ErrorMessage</div>
+								}
+							}
+							else if (Model.Profile != null && !string.IsNullOrEmpty(Model.Profile.Email))
+							{
+								var user = Model.Profile;
+
+								<div class="container">
+									<div class="profile-details-section">
+										<div class="container">
+											<h2 class="section-title d-flex justify-content-between align-items-center">
+												About me
+												<i class="bi bi-pencil-square edit-icon" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile"></i>
+											</h2>
+											<div class="profile-details-grid">
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-person-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">First Name</div>
+														<div class="profile-detail-value">@user.UserMetaData.FirstName</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-person-vcard-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Last Name</div>
+														<div class="profile-detail-value">@user.UserMetaData.LastName</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-envelope-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Email</div>
+														<div class="profile-detail-value">@user.Email</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-telephone-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Phone Number</div>
+														<div class="profile-detail-value">@user.Phone</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-gender-ambiguous"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Gender</div>
+														<div class="profile-detail-value">@user.UserMetaData.Gender</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-cake2-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Birthday</div>
+														<div class="profile-detail-value">@user.UserMetaData.Birthday?.ToString("MMMM dd, yyyy")</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-geo-alt-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Address</div>
+														<div class="profile-detail-value">@user.UserMetaData.Address</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-flag-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Nationality</div>
+														<div class="profile-detail-value">@user.UserMetaData.Nationality</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-heart-fill"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Favourite Subject</div>
+														<div class="profile-detail-value">@user.UserMetaData.FavouriteSubject</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-graph-up"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Level</div>
+														<div class="profile-detail-value">@user.UserMetaData.Level</div>
+													</div>
+												</div>
+
+												<div class="profile-detail-item">
+													<div class="profile-detail-icon">
+														<i class="bi bi-bullseye"></i>
+													</div>
+													<div class="profile-detail-content">
+														<div class="profile-detail-label">Goals</div>
+														<div class="profile-detail-value">@user.UserMetaData.Goals</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Edit Profile Modal -->
+								<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+									<div class="modal-dialog modal-lg">
+										<div class="modal-content">
+											<form method="post">
+												<div class="modal-header">
+													<h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body row g-3">
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
+														<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.LastName" class="form-label">Last Name</label>
+														<input asp-for="Profile.UserMetaData.LastName" class="form-control" />
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.Email" class="form-label">Email</label>
+														<input asp-for="Profile.Email" class="form-control" readonly/>
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.Phone" class="form-label">Phone</label>
+														<input asp-for="Profile.Phone" class="form-control" />
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.Gender" class="form-label">Gender</label>
+														<select asp-for="Profile.UserMetaData.Gender" class="form-select">
+															<option value="">Select gender</option>
+															<option>Male</option>
+															<option>Female</option>
+														</select>
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
+														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
+													</div>
+													<div class="col-md-12">
+														<label asp-for="Profile.UserMetaData.Address" class="form-label">Address</label>
+														<input asp-for="Profile.UserMetaData.Address" class="form-control" />
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.Nationality" class="form-label">Nationality</label>
+														<input asp-for="Profile.UserMetaData.Nationality" class="form-control" />
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.FavouriteSubject" class="form-label">Favourite Subject</label>
+														<input asp-for="Profile.UserMetaData.FavouriteSubject" class="form-control" readonly/>
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.Level" class="form-label">Level</label>
+														<input asp-for="Profile.UserMetaData.Level" class="form-control" readonly/>
+													</div>
+													<div class="col-md-6">
+														<label asp-for="Profile.UserMetaData.Goals" class="form-label">Goals</label>
+														<input asp-for="Profile.UserMetaData.Goals" class="form-control" readonly/>
+													</div>
+												</div>
+												<div class="modal-footer">
+													<button type="submit" class="btn btn-primary">Save changes</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							}
+							else
+							{
+								<div class="alert alert-info">
+									There is no user information to display.
+								</div>
+							}
+
+
+							<!-- Certificates Section -->
+							<div class="container">
+								<div class="certificates-section">
+									<div class="container">
+										<h2 class="section-title">My Certificates</h2>
+										<div class="certificates-content-wrapper">
+											<div class="certificates-content">
+												<div class="certificates-grid">
+													<!-- Certificate 1 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-award"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">Master of Computer Science</h3>
+															<p class="certificate-issuer">Stanford University</p>
+															<p class="certificate-date">Issued: June 2005</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Verified</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Certificate 2 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-patch-check"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">AWS Certified Solutions Architect</h3>
+															<p class="certificate-issuer">Amazon Web Services</p>
+															<p class="certificate-date">Issued: March 2023</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Professional</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Certificate 3 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-trophy-fill"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">Oracle Java SE 11 Developer</h3>
+															<p class="certificate-issuer">Oracle Corporation</p>
+															<p class="certificate-date">Issued: January 2022</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Expert</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Certificate 4 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-award"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">Microsoft Azure Fundamentals</h3>
+															<p class="certificate-issuer">Microsoft Corporation</p>
+															<p class="certificate-date">Issued: September 2023</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Fundamentals</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Certificate 5 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">Google Cloud Professional Developer</h3>
+															<p class="certificate-issuer">Google Cloud Platform</p>
+															<p class="certificate-date">Issued: November 2023</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Professional</span>
+															</div>
+														</div>
+													</div>
+
+													<!-- Certificate 6 -->
+													<div class="certificate-card">
+														<div class="certificate-icon">
+															<i class="bi bi-mortarboard-fill"></i>
+														</div>
+														<div class="certificate-content">
+															<h3 class="certificate-title">Certified Scrum Master</h3>
+															<p class="certificate-issuer">Scrum Alliance</p>
+															<p class="certificate-date">Issued: April 2021</p>
+															<div class="certificate-badge">
+																<span class="badge-text">Certified</span>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="certificates-summary-card">
+												<div class="summary-icon">
+													<i class="bi bi-bar-chart-line-fill"></i>
+												</div>
+												<div class="summary-content">
+													<h3 class="summary-title">Certifications Summary</h3>
+													<div class="summary-stats">
+														<div class="stat-item">
+															<span class="stat-number">6</span>
+															<span class="stat-label">Total Certificates</span>
+														</div>
+														<div class="stat-item">
+															<span class="stat-number">4</span>
+															<span class="stat-label">Professional Level</span>
+														</div>
+														<div class="stat-item">
+															<span class="stat-number">2023</span>
+															<span class="stat-label">Latest Update</span>
+														</div>
+													</div>
+													@* <div class="achievement-badges">
+														<div class="achievement-badge">
+															<i class="fas fa-cloud"></i>
+															<span>Cloud Expert</span>
+														</div>
+														<div class="achievement-badge">
+															<i class="fas fa-code"></i>
+															<span>Programming Pro</span>
+														</div>
+														<div class="achievement-badge">
+															<i class="fas fa-users"></i>
+															<span>Team Leader</span>
+														</div>
+													</div> *@
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Courses Section -->
+							<div class="courses-section">
+								<div class="container">
+									<h2 class="section-title">My courses (5)</h2>
+									<div class="courses-grid">
+										<!-- Course 1 -->
+										<div class="course-card">
+											<div style="position: relative;">
+												<img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop"
+													 alt="Data Structures Course" class="course-image">
+												<div class="bestseller-badge">Bestseller</div>
+											</div>
+											<div class="course-content">
+												<h3 class="course-title">Mastering Data Structures & Algorithms using C and C++</h3>
+												<p class="course-description">
+													Learn, Analyse and Implement Data Structure using C and C++. Learn Recursion and Sorting.
+												</p>
+												<div class="course-meta">
+													<div class="rating">
+														<div class="stars">
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<span>4.6</span>
+													</div>
+													<div class="price">$84.99</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Course 2 -->
+										<div class="course-card">
+											<div style="position: relative;">
+												<img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop"
+													 alt="Web Development Course" class="course-image">
+											</div>
+											<div class="course-content">
+												<h3 class="course-title">Complete Web Development Course</h3>
+												<p class="course-description">
+													Master modern web development with HTML, CSS, JavaScript, and popular frameworks.
+												</p>
+												<div class="course-meta">
+													<div class="rating">
+														<div class="stars">
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<span>4.5</span>
+													</div>
+													<div class="price">$69.99</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Course 3 -->
+										<div class="course-card">
+											<div style="position: relative;">
+												<img src="https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=250&fit=crop"
+													 alt="Java Programming Course" class="course-image">
+											</div>
+											<div class="course-content">
+												<h3 class="course-title">Advanced Java Programming</h3>
+												<p class="course-description">
+													Deep dive into Java programming with advanced concepts and enterprise development.
+												</p>
+												<div class="course-meta">
+													<div class="rating">
+														<div class="stars">
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<span>4.7</span>
+													</div>
+													<div class="price">$79.99</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Course 4 -->
+										<div class="course-card">
+											<div style="position: relative;">
+												<img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=400&h=250&fit=crop"
+													 alt="Database Course" class="course-image">
+											</div>
+											<div class="course-content">
+												<h3 class="course-title">Database Design and SQL</h3>
+												<p class="course-description">
+													Learn database design principles and master SQL for data management.
+												</p>
+												<div class="course-meta">
+													<div class="rating">
+														<div class="stars">
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<span>4.4</span>
+													</div>
+													<div class="price">$59.99</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Course 5 -->
+										<div class="course-card">
+											<div style="position: relative;">
+												<img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=250&fit=crop"
+													 alt="System Design Course" class="course-image">
+											</div>
+											<div class="course-content">
+												<h3 class="course-title">System Design and Architecture</h3>
+												<p class="course-description">
+													Master system design concepts for scalable and robust applications.
+												</p>
+												<div class="course-meta">
+													<div class="rating">
+														<div class="stars">
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+															<i class="bi bi-star-fill"></i>
+														</div>
+														<span>4.8</span>
+													</div>
+													<div class="price">$99.99</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+											</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<script>
+			// Add smooth animations
+			const observerOptions = {
+				threshold: 0.1,
+				rootMargin: '0px 0px -50px 0px'
+			};
+
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					if (entry.isIntersecting) {
+						entry.target.style.opacity = '1';
+						entry.target.style.transform = 'translateY(0)';
+					}
+				});
+			}, observerOptions);
+
+			// Apply animation to course cards
+			const courseCards = document.querySelectorAll('.course-card');
+			courseCards.forEach((card, index) => {
+				card.style.opacity = '0';
+				card.style.transform = 'translateY(20px)';
+				card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+				observer.observe(card);
+
+				// Add hover effects
+				card.addEventListener('mouseenter', function() {
+					this.style.transform = 'translateY(-10px) scale(1.02)';
+				});
+
+				card.addEventListener('mouseleave', function() {
+					this.style.transform = 'translateY(0) scale(1)';
+				});
+			});
+
+			// Animate profile detail items
+			const profileItems = document.querySelectorAll('.profile-detail-item');
+			profileItems.forEach(item => {
+				item.style.opacity = '0';
+				item.style.transform = 'translateX(-20px)';
+				item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+				observer.observe(item);
+			});
+
+			// Animate certificate cards
+			const certificateCards = document.querySelectorAll('.certificate-card');
+			certificateCards.forEach((card, index) => {
+				card.style.opacity = '0';
+				card.style.transform = 'translateY(20px)';
+				card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+				observer.observe(card);
+			});
+		});
+	</script>
+
+	<style>
+		.subscription-card {
+			background-color: #2c2c2c;
+			border-radius: 12px;
+		}
+
+		.upgrade-card {
+			background: linear-gradient(135deg, #636363 0%, #1c76c2 100%);
+			border-radius: 12px;
+			transition: transform 0.2s ease-in-out;
+		}
+
+			.upgrade-card:hover {
+				transform: scale(1.03);
+			}
+
+		.edit-icon {
+			font-size: 1.25rem;
+			color: #000000; 
+			cursor: pointer;
+			transition: color 0.2s ease, transform 0.2s ease;
+		}
+
+			.edit-icon:hover {
+				color: #0056b3; 
+				transform: scale(1.1);
+			}
+
+			.edit-icon:active {
+				transform: scale(0.95);
+			}
+
+		.gray-bg{
+			margin-left: 0,5%;
+		}
+
+		.sidebar {
+			position: sticky;
+			top: 20px; /* khoảng cách từ đỉnh màn hình khi dính */
+			z-index: 10;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			line-height: 1.6;
+			color: #333;
+			background: #f5f5f5;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 20px;
+		}
+
+		.avtar-header {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 20px;
+			margin-left: 3%;
+		}
+
+		/* Profile Header */
+		.profile-header {
+			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			padding: 40px 0;
+			margin-bottom: 30px;
+		}
+
+		.profile-content {
+			display: flex;
+			align-items: flex-start;
+			gap: 40px;
+		}
+
+		.profile-info {
+			flex: 1;
+		}
+
+		.instructor-label {
+			font-size: 14px;
+			color: #FFFAFA;
+			font-weight: 500;
+			margin-bottom: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.profile-name {
+			/* font-size: 3rem; */
+			font-size: 110%;
+			font-weight: 700;
+			color: black;
+			margin-bottom: 10px;
+			line-height: 1.2;
+		}
+
+		.profile-title {
+			font-size: 1.2rem;
+			color: #FFFAFA;
+			margin-bottom: 20px;
+			font-weight: 400;
+		}
+
+		.udemy-badge {
+			background: linear-gradient(135deg, #000000 0%, #064071 100%);
+			color: white;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-size: 0.85rem;
+			font-weight: 600;
+			display: inline-block;
+			text-decoration: none;
+		}
+
+		.profile-avatar-card {
+			background: white;
+			border-radius: 15px;
+			padding: 20px;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			/* min-width: 200px; */
+		}
+
+		.profile-avatar {
+			width: 140px;
+			height: 140px;
+			border-radius: 50%;
+			object-fit: cover;
+			border: 3px solid #064071;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+		}
+
+		.social-links {
+			display: flex;
+			gap: 12px;
+		}
+
+		.social-link {
+			width: 40px;
+			height: 40px;
+			border-radius: 8px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			text-decoration: none;
+			transition: all 0.3s ease;
+			font-size: 16px;
+			border: 2px solid transparent;
+		}
+
+			.social-link.facebook {
+				background: #1877F2;
+				border-color: #1877F2;
+			}
+
+			.social-link.linkedin {
+				background: #0A66C2;
+				border-color: #0A66C2;
+			}
+
+			.social-link.youtube {
+				background: #FF0000;
+				border-color: #FF0000;
+			}
+
+			.social-link:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+			}
+
+		.profile-stats {
+			display: flex;
+			gap: 30px;
+			margin-top: 15px;
+		}
+
+		.stat-item {
+			text-align: center;
+		}
+
+		.stat-number {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #FFFAFA;
+			display: block;
+		}
+
+		.stat-label {
+			font-size: 0.9rem;
+			color: #FFFAFA;
+			font-weight: 500;
+		}
+
+		/* Profile Details Section */
+		.profile-details-section {
+			background: white;
+			padding: 40px 0;
+			margin-bottom: 40px;
+			border-radius: 10px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+		}
+
+		.profile-details-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 30px;
+		}
+
+		.profile-detail-item {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+			padding: 20px;
+			background: #f8f9fa;
+			border-radius: 10px;
+			transition: all 0.3s ease;
+			border-left: 4px solid #1c76c2;
+		}
+
+			.profile-detail-item:hover {
+				background: #e9ecef;
+				transform: translateX(5px);
+			}
+
+		.profile-detail-icon {
+			width: 45px;
+			height: 45px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 18px;
+			flex-shrink: 0;
+		}
+
+		.profile-detail-content {
+			flex: 1;
+		}
+
+		.profile-detail-label {
+			font-size: 0.85rem;
+			color: #666;
+			font-weight: 500;
+			margin-bottom: 5px;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.profile-detail-value {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: #2c3e50;
+			word-break: break-word;
+		}
+
+		/* Certificates Section Styles */
+		.certificates-section {
+			background: white;
+			padding: 40px 0;
+			margin-bottom: 40px;
+			border-radius: 10px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+		}
+
+		.certificates-content-wrapper {
+			display: flex;
+			align-items: flex-start;
+			gap: 40px;
+		}
+
+		.certificates-content {
+			flex: 2;
+		}
+
+		.certificates-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 20px;
+			margin-bottom: 20px;
+		}
+
+		.certificate-card {
+			background: #f8f9fa;
+			border-radius: 12px;
+			padding: 20px;
+			transition: all 0.3s ease;
+			border-left: 4px solid #1c76c2;
+			position: relative;
+			overflow: hidden;
+		}
+
+			.certificate-card:hover {
+				background: #e9ecef;
+				transform: translateY(-3px);
+				box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+			}
+
+			.certificate-card::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 60px;
+				height: 60px;
+				background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+				border-radius: 0 12px 0 60px;
+			}
+
+		.certificate-icon {
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 20px;
+			margin-bottom: 15px;
+			box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+		}
+
+		.certificate-content {
+			position: relative;
+			z-index: 1;
+		}
+
+		.certificate-title {
+			font-size: 1.2rem;
+			font-weight: 600;
+			color: #2c3e50;
+			margin-bottom: 8px;
+			line-height: 1.3;
+		}
+
+		.certificate-issuer {
+			font-size: 0.95rem;
+			color: #666;
+			margin-bottom: 6px;
+			font-weight: 500;
+		}
+
+		.certificate-date {
+			font-size: 0.85rem;
+			color: #888;
+			margin-bottom: 12px;
+		}
+
+		.certificate-badge {
+			display: inline-block;
+		}
+
+		.badge-text {
+			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			color: white;
+			padding: 4px 12px;
+			border-radius: 15px;
+			font-size: 0.75rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		/* Certificates Summary Card */
+		.certificates-summary-card {
+			flex: 1;
+			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			border-radius: 15px;
+			padding: 30px;
+			color: white;
+			box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+			position: sticky;
+			top: 20px;
+			min-width: 280px;
+		}
+
+		.summary-icon {
+			width: 60px;
+			height: 60px;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.2);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 24px;
+			margin-bottom: 20px;
+			backdrop-filter: blur(10px);
+		}
+
+		.summary-title {
+			font-size: 1.4rem;
+			font-weight: 600;
+			margin-bottom: 20px;
+		}
+
+		.summary-stats {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+			margin-bottom: 25px;
+		}
+
+			.summary-stats .stat-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 10px 0;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+			}
+
+			.summary-stats .stat-number {
+				font-size: 1.3rem;
+				font-weight: 700;
+			}
+
+			.summary-stats .stat-label {
+				font-size: 0.9rem;
+				opacity: 0.9;
+			}
+
+		.achievement-badges {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		.achievement-badge {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: rgba(255, 255, 255, 0.1);
+			padding: 8px 12px;
+			border-radius: 20px;
+			font-size: 0.85rem;
+			backdrop-filter: blur(5px);
+		}
+
+			.achievement-badge i {
+				font-size: 14px;
+			}
+
+		/* Responsive Design */
+		@@media (max-width: 768px) {
+			.certificates-content-wrapper {
+				flex-direction: column;
+				gap: 30px;
+			}
+
+			.certificates-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.certificates-summary-card {
+				position: static;
+				min-width: auto;
+			}
+		}
+
+		@@media (max-width: 480px) {
+			.certificate-card {
+				padding: 15px;
+			}
+
+			.certificate-icon {
+				width: 45px;
+				height: 45px;
+				font-size: 18px;
+			}
+
+			.certificate-title {
+				font-size: 1.1rem;
+			}
+
+			.certificates-summary-card {
+				padding: 20px;
+			}
+		}
+
+		/* Animations */
+		@@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.certificate-card {
+			animation: fadeInUp 0.6s ease-out;
+		}
+
+			.certificate-card:nth-child(1) {
+				animation-delay: 0.1s;
+			}
+
+			.certificate-card:nth-child(2) {
+				animation-delay: 0.2s;
+			}
+
+			.certificate-card:nth-child(3) {
+				animation-delay: 0.3s;
+			}
+
+			.certificate-card:nth-child(4) {
+				animation-delay: 0.4s;
+			}
+
+			.certificate-card:nth-child(5) {
+				animation-delay: 0.5s;
+			}
+
+			.certificate-card:nth-child(6) {
+				animation-delay: 0.6s;
+			}
+
+		.certificates-summary-card {
+			animation: fadeInUp 0.8s ease-out;
+			animation-delay: 0.3s;
+		}
+
+		/* Courses Section */
+		.courses-section {
+			padding: 80px 0;
+			background: white;
+		}
+
+		.courses-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+			gap: 30px;
+			margin-top: 40px;
+		}
+
+		.course-card {
+			background: white;
+			border-radius: 15px;
+			overflow: hidden;
+			box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+			transition: all 0.3s ease;
+			position: relative;
+		}
+
+			.course-card:hover {
+				transform: translateY(-8px);
+				box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+			}
+
+		.course-image {
+			width: 100%;
+			height: 200px;
+			object-fit: cover;
+			position: relative;
+		}
+
+		.bestseller-badge {
+			position: absolute;
+			top: 15px;
+			left: 15px;
+			background: #ff9500;
+			color: white;
+			padding: 6px 12px;
+			border-radius: 15px;
+			font-size: 0.8rem;
+			font-weight: 600;
+			text-transform: uppercase;
+		}
+
+		.course-content {
+			padding: 25px;
+		}
+
+		.course-title {
+			font-size: 1.3rem;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 12px;
+			line-height: 1.4;
+		}
+
+		.course-description {
+			color: #666;
+			margin-bottom: 20px;
+			line-height: 1.6;
+		}
+
+		.course-meta {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 0.9rem;
+		}
+
+		.rating {
+			color: #ffc107;
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+			.rating .stars {
+				display: flex;
+				gap: 2px;
+			}
+
+		.price {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: #333;
+		}
+
+		/* Responsive Design */
+		@@media (max-width: 768px) {
+			.profile-content {
+				flex-direction: column;
+				text-align: center;
+				gap: 30px;
+			}
+
+			.about-content-wrapper {
+				flex-direction: column;
+				text-align: center;
+				gap: 30px;
+			}
+
+			.profile-name {
+				font-size: 2.5rem;
+			}
+
+			.profile-details-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.courses-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.container {
+				padding: 0 15px;
+			}
+		}
+
+		@@media (max-width: 480px) {
+			.profile-name {
+				font-size: 2rem;
+			}
+
+			.profile-avatar {
+				width: 120px;
+				height: 120px;
+			}
+
+			.about-avatar {
+				width: 100px;
+				height: 100px;
+			}
+
+			.social-links {
+				flex-wrap: wrap;
+			}
+
+			.profile-details-grid {
+				gap: 20px;
+			}
+
+			.profile-detail-item {
+				padding: 15px;
+			}
+		}
+
+		/* Animations */
+		@@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.course-card {
+			animation: fadeInUp 0.6s ease-out;
+		}
+
+			.course-card:nth-child(1) {
+				animation-delay: 0.1s;
+			}
+
+			.course-card:nth-child(2) {
+				animation-delay: 0.2s;
+			}
+
+			.course-card:nth-child(3) {
+				animation-delay: 0.3s;
+			}
+
+			.course-card:nth-child(4) {
+				animation-delay: 0.4s;
+			}
+
+			.course-card:nth-child(5) {
+				animation-delay: 0.5s;
+			}
+
+		@@keyframes slideInLeft {
+			from {
+				opacity: 0;
+				transform: translateX(-30px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateX(0);
+			}
+		}
+
+		.profile-detail-item {
+			animation: slideInLeft 0.6s ease-out;
+		}
+
+			.profile-detail-item:nth-child(1) {
+				animation-delay: 0.1s;
+			}
+
+			.profile-detail-item:nth-child(2) {
+				animation-delay: 0.2s;
+			}
+
+			.profile-detail-item:nth-child(3) {
+				animation-delay: 0.3s;
+			}
+
+			.profile-detail-item:nth-child(4) {
+				animation-delay: 0.4s;
+			}
+
+			.profile-detail-item:nth-child(5) {
+				animation-delay: 0.5s;
+			}
+
+			.profile-detail-item:nth-child(6) {
+				animation-delay: 0.6s;
+			}
+
+			.profile-detail-item:nth-child(7) {
+				animation-delay: 0.7s;
+			}
+
+			.profile-detail-item:nth-child(8) {
+				animation-delay: 0.8s;
+			}
+
+			.profile-detail-item:nth-child(9) {
+				animation-delay: 0.9s;
+			}
+
+			.profile-detail-item:nth-child(10) {
+				animation-delay: 1.0s;
+			}
+	</style>
