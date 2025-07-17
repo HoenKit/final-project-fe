@@ -15,6 +15,7 @@ using System.Web;
 using final_project_fe.Dtos.Transaction;
 using System.Buffers.Text;
 using System.Reflection.Emit;
+using final_project_fe.Dtos.Payment;
 
 namespace final_project_fe.Pages.Admin.Dashboard
 {
@@ -344,33 +345,33 @@ namespace final_project_fe.Pages.Admin.Dashboard
         {
             try
             {
-                // Get all transactions for sales calculation
-                var transactionUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Transaction");
-                var transactionQuery = HttpUtility.ParseQueryString(string.Empty);
+                // Get all payments for sales calculation
+                var paymentUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Payment");
+                var paymentQuery = HttpUtility.ParseQueryString(string.Empty);
 
-                transactionQuery["page"] = "1";
-                transactionQuery["pageSize"] = "10000"; // Get all transactions
-                transactionQuery["sortOption"] = "desc_date";
+                paymentQuery["page"] = "1";
+                paymentQuery["pageSize"] = "10000";
+                paymentQuery["sortOption"] = "desc_date";
 
-                transactionUrl.Query = transactionQuery.ToString();
+                paymentUrl.Query = paymentQuery.ToString();
 
-                var transactionRequest = new HttpRequestMessage(HttpMethod.Get, transactionUrl.ToString());
-                transactionRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var paymentRequest = new HttpRequestMessage(HttpMethod.Get, paymentUrl.ToString());
+                paymentRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                var transactionResponse = await _httpClient.SendAsync(transactionRequest);
+                var paymentResponse = await _httpClient.SendAsync(paymentRequest);
 
-                if (transactionResponse.IsSuccessStatusCode)
+                if (paymentResponse.IsSuccessStatusCode)
                 {
-                    var transactionJson = await transactionResponse.Content.ReadAsStringAsync();
-                    var allTransactions = JsonSerializer.Deserialize<PageResult<GetTransactionDto>>(transactionJson, new JsonSerializerOptions
+                    var paymentJson = await paymentResponse.Content.ReadAsStringAsync();
+                    var allPayments = JsonSerializer.Deserialize<PageResult<GetPaymentDto>>(paymentJson, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
-                    }) ?? new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 10000);
+                    }) ?? new PageResult<GetPaymentDto>(new List<GetPaymentDto>(), 0, 1, 10000);
 
-                    // Calculate TotalSales from ALL completed transactions (all time)
-                    TotalSales = allTransactions.Items
-                        .Where(t => t.Status == "Completed" && t.Amount.HasValue)
-                        .Sum(t => t.Amount.Value);
+                    // Calculate TotalSales from ALL completed payments (all time)
+                    TotalSales = allPayments.Items
+                        .Where(p => p.Status == "Success")
+                        .Sum(p => CalculateActualAmount(p));
 
                     // Calculate date range for Daily Money chart: from same day last month to today
                     var currentDate = DateTime.Now;
@@ -380,18 +381,17 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     // Set sales period
                     SalesPeriod = $"{startDate:MMMM dd} - {endDate:MMMM dd}";
 
-                    // Filter completed transactions for the specified date range (for Daily Money chart)
-                    var rangeTransactions = allTransactions.Items
-                        .Where(t => t.Status == "Completed"
-                                   && t.CreateAt.Date >= startDate.Date
-                                   && t.CreateAt.Date <= endDate.Date
-                                   && t.Amount.HasValue)
+                    // Filter completed payments for the specified date range (for Daily Money chart)
+                    var rangePayments = allPayments.Items
+                        .Where(p => p.Status == "Success"
+                                   && p.CreatedAt.Date >= startDate.Date
+                                   && p.CreatedAt.Date <= endDate.Date)
                         .ToList();
 
-                    // Group transactions by date and calculate daily sales
-                    var dailySales = rangeTransactions
-                        .GroupBy(t => t.CreateAt.Date)
-                        .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount.Value));
+                    // Group payments by date and calculate daily sales
+                    var dailySales = rangePayments
+                        .GroupBy(p => p.CreatedAt.Date)
+                        .ToDictionary(g => g.Key, g => g.Sum(p => CalculateActualAmount(p)));
 
                     // Initialize data arrays
                     DailySalesData.Clear();
@@ -401,7 +401,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     var currentDateIter = startDate.Date;
                     while (currentDateIter <= endDate.Date)
                     {
-                        // Add sales data (0 if no transactions on that day)
+                        // Add sales data (0 if no payments on that day)
                         decimal dailySale = dailySales.ContainsKey(currentDateIter) ? dailySales[currentDateIter] : 0;
                         DailySalesData.Add(dailySale);
 
@@ -441,7 +441,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     TotalSales = 0;
                     TotalSalesOneMonth = 0;
 
-                    _logger.LogWarning("Failed to load transactions for daily sales, using empty data");
+                    _logger.LogWarning("Failed to load payments for daily sales, using empty data");
                 }
             }
             catch (Exception ex)
@@ -468,6 +468,24 @@ namespace final_project_fe.Pages.Admin.Dashboard
 
                 TotalSales = 0;
                 TotalSalesOneMonth = 0;
+            }
+        }
+
+        // Helper method to calculate actual amount in VND based on service type
+        private decimal CalculateActualAmount(GetPaymentDto payment)
+        {
+            // Convert points to VND (1 point = 1000₫)
+            decimal amountInVND = payment.Amount * 1000;
+
+            // Apply percentage based on service type
+            switch (payment.ServiceType?.ToLower())
+            {
+                case "course":
+                    return amountInVND * 0.35m; // 15% for courses
+                case "premium":
+                    return amountInVND; // 100% for premiums
+                default:
+                    return amountInVND; // Default to 100% if service type is unknown
             }
         }
 

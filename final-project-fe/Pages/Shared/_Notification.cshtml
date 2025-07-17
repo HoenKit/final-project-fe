@@ -354,10 +354,3 @@
         return container;
     }
 </script>
-
-@* FontAwesome Icons (add to your layout if not already included) *@
-@if (!ViewData.ContainsKey("FontAwesomeLoaded"))
-{
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    ViewData["FontAwesomeLoaded"] = true;
-}

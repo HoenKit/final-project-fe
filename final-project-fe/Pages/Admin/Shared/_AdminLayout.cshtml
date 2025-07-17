@@ -123,9 +123,14 @@
                                             <span class="sub-item">List Transaction</span>
                                         </a>
                                     </li>
-                                    <li class="@(ViewData["ActivePage"] as string == "PostManager.ListDeleted" ? "active" : "")">
-                                        <a asp-page="/Admin/PostManager/ListDeleted">
-                                            <span class="sub-item">List Deleted</span>
+                                    <li class="@(ViewData["ActivePage"] as string == "TransactionManager.ListPayment" ? "active" : "")">
+                                        <a asp-page="/Admin/TransactionManager/Payment">
+                                            <span class="sub-item">List Payment</span>
+                                        </a>
+                                    </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "TransactionManager.WithdrawalRequest" ? "active" : "")">
+                                        <a asp-page="/Admin/TransactionManager/WithdrawalRequest">
+                                            <span class="sub-item">List Withdrawal Request</span>
                                         </a>
                                     </li>
                                 </ul>

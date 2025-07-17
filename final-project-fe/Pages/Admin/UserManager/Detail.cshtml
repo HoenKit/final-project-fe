@@ -63,7 +63,7 @@
 
                             <div class="user-points">
                                 <div class="badge badge-warning badge-lg">
-                                    <i class="fas fa-star"></i> Points: @Model.UserDetail.Point
+                                    <i class="fas fa-star"></i> Points: @Model.UserDetail.Point?.ToString("N0")
                                 </div>
                             </div>
                         </div>

@@ -133,7 +133,9 @@
                                     </button>
                                 </form>
                                 <form method="post" asp-page="/Admin/ReportManager/PostsReport/DeleteReport" asp-page-handler="DeleteReport" asp-route-id="@group.Id" class="d-inline">
-                                <button class="btn btn-sm btn-success"
+                                    <input type="hidden" name="id" value="@post?.UserId" />
+                                    <input type="hidden" name="title" value="@post?.Title" />
+                                    <button class="btn btn-sm btn-success"
                                             onclick="event.preventDefault(); showConfirm({
                                     type: 'info' ,
                                     title: 'Ignore reports' ,

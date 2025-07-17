@@ -17,6 +17,8 @@
 	{
 		public int MentorId { get; set; }
 		public Guid UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string? Introduction { get; set; }
         public string? JobTitle { get; set; }
         public string? StudyLevel { get; set; }
@@ -32,6 +34,9 @@
         public int TotalStudents { get; set; } = 0;
         public int TotalReviews { get; set; } = 0;
         public decimal AverageRating { get; set; } = 0;
+        public string? AccountNumber { get; set; }
+        public string? AccountName { get; set; }
+        public string? AccountBank { get; set; }
     }
     public class CreateMentorDto
     {
