@@ -128,6 +128,11 @@
                                             <span class="sub-item">List Payment</span>
                                         </a>
                                     </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "TransactionManager.WithdrawalRequest" ? "active" : "")">
+                                        <a asp-page="/Admin/TransactionManager/WithdrawalRequest">
+                                            <span class="sub-item">List Withdrawal Request</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

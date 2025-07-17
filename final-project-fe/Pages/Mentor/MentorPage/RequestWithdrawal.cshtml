@@ -1,0 +1,582 @@
+﻿@page
+@model final_project_fe.Pages.Mentor.MentorPage.RequestWithdrawalModel
+@{
+    ViewData["Title"] = "Withdrawal Request";
+    Layout = "/Pages/Mentor/Shared/_MentorLayout2.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .status-pending { background-color: #FEF3C7; color: #92400E; }
+        .status-approved { background-color: #D1FAE5; color: #059669; }
+        .status-rejected { background-color: #FEE2E2; color: #DC2626; }
+        .status-processing { background-color: #DBEAFE; color: #1D4ED8; }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal overlay to ensure it doesn't affect other layouts */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 32rem;
+            width: 100%;
+            margin: 1rem;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-hidden {
+            display: none !important;
+        }
+
+        /* Prevent body scroll when modal is open */
+        .modal-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold" style="white;color: white;">Withdrawal Management</h1>
+                    <p class="text-blue-100 mt-2">Manage your balance and withdrawal requests</p>
+                </div>
+                <div class="text-right">
+                    <button type="button"
+                            onclick="showBankModal()"
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        Edit Bank
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Balance Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Current Balance -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Current Balance</p>
+                        <p class="text-2xl font-bold text-blue-600">@((Model.User?.Point ?? 0).ToString("N0")) points</p>
+                        <p class="text-sm text-gray-500">≈ @(((Model.User?.Point ?? 0) * 1000).ToString("N0"))₫</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-coins text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Withdrawals -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Pending</p>
+                        <p class="text-2xl font-bold text-yellow-600">@(Model.Withdraw?.Items?.Count(w => w.Status == "Pending") ?? 0)</p>
+                        <p class="text-sm text-gray-500">≈ @((Model.Withdraw?.Items?.Where(w => w.Status == "Pending").Sum(w => w.Amount) ?? 0).ToString("N0"))₫</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Withdrawn -->
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Withdrawn</p>
+                        <p class="text-2xl font-bold text-green-600">@((Model.Withdraw?.Items?.Where(w => w.Status == "Accepted").Sum(w => w.Amount) ?? 0).ToString("N0"))₫</p>
+                        <p class="text-sm text-gray-500">@((Model.Withdraw?.Items?.Where(w => w.Status == "Accepted").Sum(w => w.Points) ?? 0).ToString("N0")) points</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Withdraw Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
+            <h2 class="text-xl font-semibold mb-6 flex items-center">
+                <i class="fas fa-money-check-alt mr-2 text-blue-600"></i>
+                Create Withdrawal Request
+            </h2>
+
+            <form method="post" id="withdrawForm" class="space-y-6">
+                <input type="hidden" name="CurrentMentorId" value="@Model.CurrentMentorId" />
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="points" class="block text-sm font-medium text-gray-700 mb-2">
+                            Points to Withdraw
+                        </label>
+                        <div class="relative">
+                            <input type="number"
+                                   id="points"
+                                   name="points"
+                                   min="1"
+                                   max="@Model.User?.Point"
+                                   step="1"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="Enter points"
+                                   required>
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <span class="text-gray-500 text-sm">points</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Maximum: @((Model.User?.Point ?? 0).ToString("N0")) points</p>
+                    </div>
+
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                            Amount to Receive
+                        </label>
+                        <div class="relative">
+                            <input type="text"
+                                   id="amount"
+                                   name="amount"
+                                   readonly
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                                   placeholder="0₫">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <span class="text-gray-500 text-sm">VND</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">Exchange Rate: 1 point = 1,000₫</p>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-medium text-blue-900">Important Notes:</h4>
+                            <ul class="text-sm text-blue-800 mt-2 space-y-1">
+                                <li>• Minimum withdrawal amount is 1 point (1,000₫)</li>
+                                <li>• Processing time: 1-3 business days</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <button type="button"
+                            id="resetForm"
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </button>
+                    
+                    @if (string.IsNullOrEmpty(Model.Mentor?.AccountNumber) && string.IsNullOrEmpty(Model.Mentor?.AccountName) && string.IsNullOrEmpty(Model.Mentor?.AccountBank))
+                    {
+                        <button type="button"
+                                onclick="showBankModal()"
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Request
+                        </button>
+                    }
+                    else
+                    {
+                        <form method="post" id="withdrawForm" class="space-y-6" asp-page-handler="Async">
+                            <input type="hidden" name="CurrentMentorId" value="@Model.CurrentMentorId" />
+                            <button type="submit"
+                                    id="submitBtn"
+                                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                                <i class="fas fa-paper-plane mr-2"></i>Submit Request
+                            </button>
+                        </form>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- Withdrawal History -->
+        <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold flex items-center">
+                    <i class="fas fa-history mr-2 text-blue-600"></i>
+                    Withdrawal History
+                </h2>
+                <button onclick="location.reload()"
+                        class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                </button>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-1">
+                    <!-- Search removed as requested -->
+                </div>
+                <select id="statusFilter"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                @if (Model.Withdraw?.Items?.Any() == true)
+                {
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach (var withdraw in Model.Withdraw.Items)
+                            {
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @withdraw.Points.ToString("N0") points
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @withdraw.Amount.ToString("N0")₫
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @withdraw.CreateAt.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if (withdraw.Status == "Accepted")
+                                        {
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full status-approved">
+                                                Completed
+                                            </span>
+                                        }
+                                        else if (withdraw.Status == "Pending")
+                                        {
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full status-pending">
+                                                Pending
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full status-rejected">
+                                                @withdraw.Status
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <!-- Empty State -->
+                    <div class="text-center py-12">
+                        <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Withdrawal Requests</h3>
+                        <p class="text-gray-500">You haven't made any withdrawal requests yet. Create your first one!</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Information Modal -->
+    <div id="bankModal" class="modal-overlay modal-hidden">
+        <div class="modal-content animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-university mr-2 text-blue-600"></i>
+                    Bank Account Information
+                </h3>
+                <button onclick="hideBankModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="post" asp-page="./UpdateMentorBank">
+                <input type="hidden" name="mentorId" value="@Model.Mentor?.MentorId" />
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="accountNumber" class="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="accountNumber" 
+                                   name="accountNumber"
+                                   value="@Model.Mentor?.AccountNumber"
+                                   class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="Enter account number"
+                                   required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fas fa-hashtag text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="accountName" class="block text-sm font-medium text-gray-700 mb-2">Account Name</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="accountName" 
+                                   name="accountName"
+                                   value="@Model.Mentor?.AccountName"
+                                   class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="Enter account name"
+                                   required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="accountBank" class="block text-sm font-medium text-gray-700 mb-2">Bank Name</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="accountBank" 
+                                   name="accountBank"
+                                   value="@Model.Mentor?.AccountBank"
+                                   class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                   placeholder="Enter bank name"
+                                   required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fas fa-building text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3 flex-shrink-0"></i>
+                        <div>
+                            @if (string.IsNullOrEmpty(Model.Mentor?.AccountNumber) && string.IsNullOrEmpty(Model.Mentor?.AccountName) && string.IsNullOrEmpty(Model.Mentor?.AccountBank))
+                            {
+                            <h4 class="font-medium text-blue-900">Missing Bank Information</h4>
+                                <p class="text-sm text-blue-800 mt-1">Please check and fill in your bank account information carefully. Withdrawal funds will be transferred to this account.</p>
+                            }
+                            else
+                            {
+                                <h4 class="font-medium text-blue-900">Note bank information</h4>
+                                <p class="text-sm text-blue-800 mt-1">Please check your bank account details carefully. The withdrawal will be transferred to this account.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" 
+                            onclick="hideBankModal()"
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Format number with Vietnamese locale
+        function formatNumber(num) {
+            return new Intl.NumberFormat('vi-VN').format(num);
+        }
+
+        // Calculate and display amount based on points
+        function updateAmount() {
+            const points = parseInt(document.getElementById('points').value) || 0;
+            const amount = points * 1000;
+            
+            if (points > 0) {
+                document.getElementById('amount').value = formatNumber(amount) + '₫';
+            } else {
+                document.getElementById('amount').value = '';
+            }
+        }
+
+        // Show/Hide bank modal with proper layout isolation
+        function showBankModal() {
+            const modal = document.getElementById('bankModal');
+            const body = document.body;
+            
+            modal.classList.remove('modal-hidden');
+            body.classList.add('modal-open');
+            
+            // Focus trap - focus first input
+            setTimeout(() => {
+                const firstInput = modal.querySelector('input[type="text"]');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }, 100);
+        }
+
+        function hideBankModal() {
+            const modal = document.getElementById('bankModal');
+            const body = document.body;
+            
+            modal.classList.add('modal-hidden');
+            body.classList.remove('modal-open');
+        }
+
+        // Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listeners for points input
+            const pointsInput = document.getElementById('points');
+            if (pointsInput) {
+                pointsInput.addEventListener('input', updateAmount);
+                pointsInput.addEventListener('keyup', updateAmount);
+                pointsInput.addEventListener('change', updateAmount);
+            }
+
+            // Reset form button
+            const resetBtn = document.getElementById('resetForm');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    document.getElementById('withdrawForm').reset();
+                    document.getElementById('amount').value = '';
+                });
+            }
+
+            // Validate points input
+            if (pointsInput) {
+                pointsInput.addEventListener('input', function() {
+                    const maxPoints = parseInt(this.getAttribute('max')) || 0;
+                    const currentPoints = parseInt(this.value) || 0;
+                    
+                    if (currentPoints > maxPoints) {
+                        this.value = maxPoints;
+                        updateAmount();
+                    }
+                    
+                    if (currentPoints < 1 && this.value !== '') {
+                        this.value = 1;
+                        updateAmount();
+                    }
+                });
+            }
+
+            // Initialize amount display
+            updateAmount();
+
+            // Status filter functionality
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    const selectedStatus = this.value;
+                    const rows = document.querySelectorAll('tbody tr');
+                    
+                    rows.forEach(row => {
+                        if (selectedStatus === '') {
+                            row.style.display = '';
+                        } else {
+                            const statusCell = row.querySelector('td:last-child span');
+                            if (statusCell) {
+                                const statusText = statusCell.textContent.trim();
+                                const shouldShow = 
+                                    (selectedStatus === 'Pending' && statusText === 'Pending') ||
+                                    (selectedStatus === 'Completed' && statusText === 'Completed') ||
+                                    (selectedStatus === 'Rejected' && (statusText !== 'Pending' && statusText !== 'Completed'));
+                                
+                                row.style.display = shouldShow ? '' : 'none';
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Close modal when clicking outside
+            const modal = document.getElementById('bankModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        hideBankModal();
+                    }
+                });
+            }
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.classList.contains('modal-hidden')) {
+                    hideBankModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
