@@ -481,9 +481,9 @@ namespace final_project_fe.Pages.Admin.Dashboard
             switch (payment.ServiceType?.ToLower())
             {
                 case "course":
-                    return amountInVND * 0.15m; // 15% for courses
-                case "membership":
-                    return amountInVND; // 100% for memberships
+                    return amountInVND * 0.35m; // 15% for courses
+                case "premium":
+                    return amountInVND; // 100% for premiums
                 default:
                     return amountInVND; // Default to 100% if service type is unknown
             }
