@@ -1,0 +1,915 @@
+﻿@page
+@model final_project_fe.Pages.ChattingModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phronesis - Chatting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1c1e21;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-item {
+            color: #65676b;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+            .nav-item:hover, .nav-item.active {
+                color: #1877f2;
+            }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+            .nav-icon:hover {
+                background-color: #e4e6ea;
+            }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1c1e21;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            color: #65676b;
+        }
+
+            .action-btn:hover {
+                background-color: #e4e6ea;
+            }
+
+        .search-box {
+            margin: 16px 16px 0 16px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: none;
+            background-color: #f0f2f5;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #1c1e21;
+        }
+
+            .search-input::placeholder {
+                color: #65676b;
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #65676b;
+            font-size: 16px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            padding: 16px 16px 0 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #65676b;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+            .filter-tab.active {
+                color: #1877f2;
+                border-bottom-color: #1877f2;
+            }
+
+            .filter-tab:hover {
+                background-color: #f0f2f5;
+                border-radius: 6px;
+            }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 0 8px;
+        }
+
+            .chat-item:hover {
+                background-color: #f0f2f5;
+            }
+
+            .chat-item.active {
+                background-color: #e7f3ff;
+            }
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .chat-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .chat-preview {
+            color: #65676b;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            color: #65676b;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .status-indicator {
+            width: 14px;
+            height: 14px;
+            background-color: #42b883;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .chat-user-name {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 16px;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+
+            .message.sent {
+                justify-content: flex-end;
+            }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
+
+        .message.sent .message-avatar {
+            display: none;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 16px;
+            border-radius: 18px;
+            background-color: #e4e6ea;
+            color: #1c1e21;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.sent .message-content {
+            background-color: #1877f2;
+            color: white;
+        }
+
+        .message-image {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .message-input-container {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            font-family: inherit;
+        }
+
+            .message-input:focus {
+                outline: none;
+                border-color: #1877f2;
+            }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #1877f2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            font-size: 16px;
+        }
+
+            .send-btn:hover {
+                background-color: #166fe5;
+            }
+
+            .send-btn:disabled {
+                background-color: #e4e6ea;
+                cursor: not-allowed;
+            }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-action-btn {
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1877f2;
+            transition: background-color 0.2s;
+            font-size: 16px;
+        }
+
+            .input-action-btn:hover {
+                background-color: #f0f2f5;
+            }
+
+        .emoji-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+            .emoji-btn:hover {
+                background-color: #f0f2f5;
+            }
+
+        .right-sidebar {
+            width: 280px;
+            background-color: white;
+            border-left: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+            .sidebar-section h3 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1c1e21;
+                margin-bottom: 12px;
+            }
+
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-link {
+            color: #65676b;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 4px 0;
+            transition: color 0.2s;
+        }
+
+            .sidebar-link:hover {
+                color: #1877f2;
+            }
+
+        .contact-info {
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+            .contact-info h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1c1e21;
+                margin-bottom: 8px;
+            }
+
+            .contact-info p {
+                color: #65676b;
+                font-size: 14px;
+                line-height: 1.4;
+                margin-bottom: 8px;
+            }
+
+        .contact-phone {
+            color: #1877f2;
+            font-weight: 500;
+        }
+
+        @@media (max-width: 1200px) {
+            .right-sidebar
+
+        {
+            display: none;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar
+
+        {
+            width: 100%;
+            position: absolute;
+            z-index: 10;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .chat-area {
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: none;
+        }
+
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background-color: #2d2d2d;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+            .back-btn i {
+                font-size: 20px; /* hoặc 22px nếu muốn lớn hơn nữa */
+            }
+
+            .back-btn:hover {
+                background-color: #1c1c1c;
+            }
+    </style>
+</head>
+<body>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Chat Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="sidebar-title">Chatting</h1>
+            </div>
+            <div class="chat-list" id="chatList">
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" style="display: none;">
+                <div class="chat-user-info">
+                    <img src="" alt="Avatar" class="chat-user-avatar">
+                    <div class="chat-user-name"></div>
+                </div>
+            </div>
+
+            <div class="messages-container empty-chat">
+                <div style="text-align: center; font-size: 24px; font-weight: bold; padding: 40px; color: #666;">
+                    <i class="fas fa-comments" style="font-size: 32px; color: #999;"></i><br><br>
+                    Select a conversation to start messaging
+                    <br><br>
+                    <i class="far fa-smile-wink" style="font-size: 20px; color: #ccc;"></i>
+                    <i class="fas fa-paper-plane" style="font-size: 20px; color: #ccc;"></i>
+                </div>
+            </div>
+
+            <div class="message-input-container" style="display: none;">
+                <textarea class="message-input" placeholder="Aa" rows="1"></textarea>
+                <button class="send-btn">➤</button>
+            </div>
+        </div>
+        </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const baseUrl = "@Model.BaseUrl";
+        const HubUrl = "@Model.HubUrl";
+        const currentUserId = "@Model.CurrentUserId";
+
+        let currentReceiverId = '';
+        let currentReceiverName = '';
+        let currentReceiverAvatar = '';
+
+        const connection = new signalR.HubConnectionBuilder()
+          .withUrl(`${HubUrl}/postHub`)
+          .build();
+
+        connection.on("ReceiveMessage", (message) => {
+          if (message.senderId === currentReceiverId) {
+            appendMessage(message, false);
+          } else {
+            loadChatPartners();
+          }
+        });
+
+        connection.on("NewChatRoom", (newSenderId) => {
+          if (newSenderId !== currentUserId) {
+            loadChatPartners();
+          }
+        });
+
+        connection.start().catch(err => console.error("SignalR connection error:", err));
+
+        async function loadChatPartners() {
+          try {
+            const res = await fetch(`${baseUrl}/Message/chat-rooms?userId=${currentUserId}`);
+            const chatList = document.querySelector('.chat-list');
+            chatList.innerHTML = '';
+
+            if (res.ok) {
+              const partners = await res.json();
+
+              // Kiểm tra nếu partners là array và có dữ liệu
+              if (Array.isArray(partners) && partners.length > 0) {
+                partners.forEach(p => {
+                  // Xử lý dữ liệu theo cấu trúc mới
+                  const fullName = p.userMetaData
+                    ? `${p.userMetaData.firstName} ${p.userMetaData.lastName}`.trim()
+                    : p.email || 'Unknown User';
+
+                  const avatar = p.userMetaData?.avatar || 'https://via.placeholder.com/50';
+
+                  // Sử dụng createAt hoặc updateAt làm thời gian cuối cùng (có thể cần thay đổi theo logic business)
+                  const lastTime = p.lastSentAt || p.updateAt || p.createAt;
+
+                  const div = document.createElement('div');
+                  div.classList.add('chat-item');
+                  div.innerHTML = `
+                    <div class="avatar-container">
+                      <img src="${avatar}" class="avatar">
+                      <div class="status-indicator"></div>
+                    </div>
+                    <div class="chat-info">
+                      <div class="chat-name">${fullName}</div>
+                    </div>
+                    <div class="chat-time">${new Date(lastTime).toLocaleTimeString()}</div>
+                  `;
+                  div.onclick = () => loadConversation(p.userId, fullName, avatar);
+                  chatList.appendChild(div);
+                });
+              } else {
+                // Hiển thị thông báo khi không có chat partners
+                chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
+              }
+            } else {
+              // Xử lý khi API trả về lỗi (404, 500, etc.)
+              console.warn("No chat partners found or API error");
+              chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
+            }
+          } catch (err) {
+            console.error("Error loading chat partners:", err);
+            const chatList = document.querySelector('.chat-list');
+            chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">Error loading conversations</div>';
+          }
+        }
+
+        // Hàm mới để lấy thông tin user theo ID
+        async function getUserInfo(userId) {
+          try {
+            const res = await fetch(`${baseUrl}/User/GetUserById/${userId}`);
+            if (res.ok) {
+              const user = await res.json();
+
+              // Xử lý theo cấu trúc API mới
+              const fullName = user.userMetaData
+                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
+                : user.email || 'Unknown User';
+
+              const avatar = user.userMetaData?.avatar || 'https://via.placeholder.com/50';
+
+              return {
+                fullName: fullName,
+                avatar: avatar,
+                email: user.email,
+                phone: user.phone,
+                userId: user.userId
+              };
+            }
+            return null;
+          } catch (err) {
+            console.error("Error fetching user info:", err);
+            return null;
+          }
+        }
+
+        async function loadConversation(userId, fullName, avatar) {
+          currentReceiverId = userId;
+          currentReceiverName = fullName;
+          currentReceiverAvatar = avatar;
+
+          document.querySelector('.chat-user-name').textContent = fullName;
+          document.querySelector('.chat-user-avatar').src = avatar;
+
+          document.querySelector('.messages-container').classList.remove('empty-chat');
+          document.querySelector('.chat-header').style.display = 'flex';
+          document.querySelector('.message-input-container').style.display = 'flex';
+
+          const container = document.querySelector('.messages-container');
+          container.innerHTML = '';
+
+          try {
+            const res = await fetch(`${baseUrl}/Message/Room?userId1=${currentUserId}&userId2=${userId}`);
+
+            let messages = [];
+
+            if (res.ok) {
+              try {
+                messages = await res.json();
+              } catch (parseError) {
+                console.warn("Failed to parse messages JSON:", parseError);
+                messages = [];
+              }
+            }
+
+            if (messages.length === 0) {
+              container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
+            } else {
+              messages.forEach(m => appendMessage(m, m.senderId === currentUserId));
+            }
+
+          } catch (err) {
+            console.warn("Conversation not found yet. This is a new chat.");
+            container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
+          }
+        }
+
+        // Hàm mới để tạo chat area trống cho user chưa nhắn tin
+        async function createNewChatArea(userId, userName = null, userAvatar = null) {
+          // Nếu không có thông tin user, cố gắng lấy từ API
+          if (!userName || !userAvatar) {
+            console.log(`Fetching user info for userId: ${userId}`);
+            const userInfo = await getUserInfo(userId);
+            if (userInfo) {
+              userName = userInfo.fullName;
+              userAvatar = userInfo.avatar;
+              console.log(`User info found:`, userInfo);
+            } else {
+              userName = userName || "Unknown User";
+              userAvatar = userAvatar || "https://via.placeholder.com/50";
+              console.warn(`Could not fetch user info for userId: ${userId}`);
+            }
+          }
+
+          // Load conversation với thông tin user
+          await loadConversation(userId, userName, userAvatar);
+        }
+
+        function appendMessage(message, isSent) {
+          const container = document.querySelector('.messages-container');
+
+          // Xóa thông báo "Start your conversation..." nếu có
+          const emptyMessage = container.querySelector('div[style*="text-align:center"]');
+          if (emptyMessage) {
+            emptyMessage.remove();
+          }
+
+          const msgDiv = document.createElement('div');
+          msgDiv.classList.add('message');
+          if (isSent) msgDiv.classList.add('sent');
+
+          const avatarHtml = isSent ? '' : `
+            <img src="${currentReceiverAvatar || 'https://via.placeholder.com/50'}" class="message-avatar">
+          `;
+
+          msgDiv.innerHTML = `
+            ${avatarHtml}
+            <div class="message-content">${message.content}</div>
+          `;
+
+          container.appendChild(msgDiv);
+          container.scrollTop = container.scrollHeight;
+        }
+
+        document.querySelector('.send-btn').onclick = async () => {
+          const textarea = document.querySelector('.message-input');
+          const content = textarea.value.trim();
+          if (!content || !currentReceiverId) return;
+
+          const payload = {
+            senderId: currentUserId,
+            receiverId: currentReceiverId,
+            content: content
+          };
+
+          try {
+            const res = await fetch(`${baseUrl}/Message/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              const sent = await res.json();
+              appendMessage(sent, true);
+              textarea.value = '';
+
+              // Reload chat partners để cập nhật danh sách
+              await loadChatPartners();
+            } else {
+              console.error("Failed to send message");
+            }
+          } catch (err) {
+            console.error("Error sending message:", err);
+          }
+        };
+
+        // Thêm sự kiện Enter cho textarea
+        document.querySelector('.message-input').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.querySelector('.send-btn').click();
+          }
+        });
+
+        function getQueryParam(key) {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(key);
+        }
+
+        // Hàm tiện ích để khởi tạo chat với user ID từ bất kỳ đâu
+        window.startChatWithUser = async function(userId) {
+          if (!userId) {
+            console.error("User ID is required");
+            return;
+          }
+
+          await createNewChatArea(userId);
+        };
+
+        // Hàm tiện ích để chuyển đến chat page với user ID
+        window.navigateToChatWithUser = function(userId, userName = null, userAvatar = null) {
+          const params = new URLSearchParams();
+          params.append('partnerId', userId);
+
+          if (userName) params.append('partnerName', userName);
+          if (userAvatar) params.append('partnerAvatar', userAvatar);
+
+          window.location.href = `${baseUrl}/Chat?${params.toString()}`;
+        };
+
+        window.onload = async () => {
+          await loadChatPartners();
+
+          const partnerId = getQueryParam("partnerId");
+          const partnerName = getQueryParam("partnerName");
+          const partnerAvatar = getQueryParam("partnerAvatar");
+
+          if (partnerId) {
+            console.log(`Loading chat for partnerId: ${partnerId}`);
+            // Sử dụng hàm mới để tạo chat area, sẽ tự động lấy thông tin user nếu cần
+            await createNewChatArea(partnerId, partnerName, partnerAvatar);
+          }
+        };
+    </script>
+
+</body>
+</html>

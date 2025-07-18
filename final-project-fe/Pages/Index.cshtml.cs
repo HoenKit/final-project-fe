@@ -115,7 +115,7 @@ namespace final_project_fe.Pages
                 var handler = new JwtSecurityTokenHandler();
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.LogError("Lỗi không tìm thấy token");
+                    _logger.LogError("Token not found error");
                     // Optionally, set a default or fallback value if token is missing
                     CurrentUserId = null; // or other default value
                 }
@@ -124,7 +124,7 @@ namespace final_project_fe.Pages
                     var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
                     if (jsonToken == null)
                     {
-                        _logger.LogError("Lỗi không thể đọc token");
+                        _logger.LogError("Error cannot read token");
                         CurrentUserId = null; // or other default value
                     }
                     else
@@ -136,7 +136,7 @@ namespace final_project_fe.Pages
                         }
                         else
                         {
-                            _logger.LogError("Không tìm thấy userId trong token");
+                            _logger.LogError("UserId not found in token");
                             CurrentUserId = null; // or other default value
                         }
                     }

@@ -21,6 +21,7 @@ using final_project_fe.Dtos.Question;
 using System.Reflection;
 using final_project_fe.Dtos.Answer;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using final_project_fe.Dtos.Assignment;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -43,6 +44,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
         [BindProperty]
         public UpdateLessonDto Lesson { get; set; } = new UpdateLessonDto();
+        [BindProperty]
+        public int DeleteAssignmentId { get; set; }
+        [BindProperty]
+        public AssignmentDto Assignment { get; set; } = new AssignmentDto();
+        [BindProperty]
+        public AssignmentResponseDto EditAssignment { get; set; } = new();
 
         [BindProperty]
         public string Topic { get; set; } = string.Empty;
@@ -219,6 +226,31 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                                 {
                                     _logger.LogWarning($"Could not load questions for lesson {lesson.LessonId}. Status: {questionResponse.StatusCode}");
                                     lesson.Questions = new(); // Khởi tạo trống để tránh null
+                                }
+
+                                var assignmentResponse = await _httpClient.GetAsync($"{BaseUrl}/Assignment/get-all-assignment-by-lesson/{lesson.LessonId}");
+                                if (assignmentResponse.IsSuccessStatusCode)
+                                {
+                                    var assignmentJson = await assignmentResponse.Content.ReadAsStringAsync();
+                                    var assignments = JsonSerializer.Deserialize<List<AssignmentResponseDto>>(assignmentJson, new JsonSerializerOptions
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    });
+
+                                    if (assignments != null && assignments.Count > 0)
+                                    {
+                                        // ✅ Gán toàn bộ danh sách Assignment vào lesson
+                                        lesson.Assignment = assignments;
+                                    }
+                                    else
+                                    {
+                                        lesson.Assignment = new(); // Gán danh sách trống nếu không có gì
+                                    }
+                                }
+                                else
+                                {
+                                    _logger.LogWarning($"Could not load assignment for lesson {lesson.LessonId}. Status: {assignmentResponse.StatusCode}");
+                                    lesson.Assignment = new(); // Tránh null reference
                                 }
                             }
                         }
@@ -1321,6 +1353,80 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
 
             // Redirect lại trang hiện tại và giữ lại courseId nếu có
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
+        public async Task<IActionResult> OnPostAddAssignmentAsync()
+        {
+
+            var requestPayload = new
+            {
+                lessonId = Assignment.LessonId,
+                content = Assignment.Content,
+                meetLink = ""
+            };
+
+            var response = await _httpClient.PostAsJsonAsync($"{_apiSettings.BaseUrl}/Assignment", requestPayload);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            ModelState.AddModelError(string.Empty, "Failed to create assignment.");
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
+
+        public async Task<IActionResult> OnPostEditAssignmentAsync()
+        {
+
+            // API yêu cầu full payload
+            var requestPayload = new
+            {
+                assignmentId = EditAssignment.AssignmentId,
+                lessonId = EditAssignment.LessonId,
+                content = EditAssignment.Content,
+                meetLink = EditAssignment.MeetLink ?? ""
+            };
+
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync($"{_apiSettings.BaseUrl}/Assignment", requestPayload);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Update failed: {error}");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Exception: {ex.Message}");
+            }
+
+            return RedirectToPage(new { courseId = Module.CourseId });
+        }
+        public async Task<IActionResult> OnPostDeleteAssignmentAsync()
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"{_apiSettings.BaseUrl}/Assignment/{DeleteAssignmentId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Xóa thành công, reload lại trang
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Delete failed: {error}");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Exception: {ex.Message}");
+            }
+
             return RedirectToPage(new { courseId = Module.CourseId });
         }
     }

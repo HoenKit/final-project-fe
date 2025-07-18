@@ -1,4 +1,5 @@
-﻿using final_project_fe.Dtos.Question;
+﻿using final_project_fe.Dtos.Assignment;
+using final_project_fe.Dtos.Question;
 
 namespace final_project_fe.Dtos.Lesson
 {
@@ -11,6 +12,7 @@ namespace final_project_fe.Dtos.Lesson
         public string? DocumentLink { get; set; }
         public string? VideoLink { get; set; }
         public List<QuestionResponseDto> Questions { get; set; } = new();
+        public List<AssignmentResponseDto>? Assignment { get; set; } = new();
 
     }
     public class LessonbyModuleDto
