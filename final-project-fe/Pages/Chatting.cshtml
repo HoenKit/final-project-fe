@@ -668,17 +668,10 @@
             if (res.ok) {
               const partners = await res.json();
 
-              // Kiểm tra nếu partners là array và có dữ liệu
               if (Array.isArray(partners) && partners.length > 0) {
                 partners.forEach(p => {
-                  // Xử lý dữ liệu theo cấu trúc mới
-                  const fullName = p.userMetaData
-                    ? `${p.userMetaData.firstName} ${p.userMetaData.lastName}`.trim()
-                    : p.email || 'Unknown User';
-
-                  const avatar = p.userMetaData?.avatar || 'https://via.placeholder.com/50';
-
-                  // Sử dụng createAt hoặc updateAt làm thời gian cuối cùng (có thể cần thay đổi theo logic business)
+                  const fullName = p.fullName || p.email || 'Unknown User';
+                  const avatar = p.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
                   const lastTime = p.lastSentAt || p.updateAt || p.createAt;
 
                   const div = document.createElement('div');
@@ -697,11 +690,9 @@
                   chatList.appendChild(div);
                 });
               } else {
-                // Hiển thị thông báo khi không có chat partners
                 chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
               }
             } else {
-              // Xử lý khi API trả về lỗi (404, 500, etc.)
               console.warn("No chat partners found or API error");
               chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
             }
@@ -739,6 +730,57 @@
             console.error("Error fetching user info:", err);
             return null;
           }
+        }
+
+        // Hàm mới để tạo chat item trong danh sách
+        function createChatItem(userInfo, isNewChat = false) {
+          const chatList = document.querySelector('.chat-list');
+
+          // Kiểm tra xem user đã có trong danh sách chưa
+          const existingItem = chatList.querySelector(`[data-user-id="${userInfo.userId}"]`);
+          if (existingItem) {
+            // Nếu đã có, chỉ cần click vào item đó
+            existingItem.click();
+            return existingItem;
+          }
+
+          // Xóa thông báo "No conversations yet" nếu có
+          const emptyMessage = chatList.querySelector('div[style*="text-align:center"]');
+          if (emptyMessage) {
+            emptyMessage.remove();
+          }
+
+          const div = document.createElement('div');
+          div.classList.add('chat-item');
+          if (isNewChat) {
+            div.classList.add('new-chat-item'); // Thêm class để có thể style khác biệt
+          }
+          div.setAttribute('data-user-id', userInfo.userId);
+
+          const currentTime = new Date().toLocaleTimeString();
+
+          div.innerHTML = `
+            <div class="avatar-container">
+              <img src="${userInfo.avatar}" class="avatar">
+              <div class="status-indicator"></div>
+            </div>
+            <div class="chat-info">
+              <div class="chat-name">${userInfo.fullName}</div>
+              ${isNewChat ? '<div style="font-size: 12px; color: #999; font-style: italic;">New conversation</div>' : ''}
+            </div>
+            <div class="chat-time">${currentTime}</div>
+          `;
+
+          div.onclick = () => loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
+
+          // Thêm vào đầu danh sách (cho các chat mới)
+          if (isNewChat) {
+            chatList.insertBefore(div, chatList.firstChild);
+          } else {
+            chatList.appendChild(div);
+          }
+
+          return div;
         }
 
         async function loadConversation(userId, fullName, avatar) {
@@ -780,14 +822,22 @@
             console.warn("Conversation not found yet. This is a new chat.");
             container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
           }
+
+          // Highlight selected chat item
+          document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+          const selectedItem = document.querySelector(`[data-user-id="${userId}"]`);
+          if (selectedItem) {
+            selectedItem.classList.add('active');
+          }
         }
 
         // Hàm mới để tạo chat area trống cho user chưa nhắn tin
         async function createNewChatArea(userId, userName = null, userAvatar = null) {
           // Nếu không có thông tin user, cố gắng lấy từ API
+          let userInfo = null;
           if (!userName || !userAvatar) {
             console.log(`Fetching user info for userId: ${userId}`);
-            const userInfo = await getUserInfo(userId);
+            userInfo = await getUserInfo(userId);
             if (userInfo) {
               userName = userInfo.fullName;
               userAvatar = userInfo.avatar;
@@ -796,8 +846,23 @@
               userName = userName || "Unknown User";
               userAvatar = userAvatar || "https://via.placeholder.com/50";
               console.warn(`Could not fetch user info for userId: ${userId}`);
+              // Tạo userInfo object với thông tin có sẵn
+              userInfo = {
+                userId: userId,
+                fullName: userName,
+                avatar: userAvatar
+              };
             }
+          } else {
+            userInfo = {
+              userId: userId,
+              fullName: userName,
+              avatar: userAvatar
+            };
           }
+
+          // Tạo chat item mới trong danh sách nếu chưa có
+          const newChatItem = createChatItem(userInfo, true);
 
           // Load conversation với thông tin user
           await loadConversation(userId, userName, userAvatar);
@@ -817,7 +882,7 @@
           if (isSent) msgDiv.classList.add('sent');
 
           const avatarHtml = isSent ? '' : `
-            <img src="${currentReceiverAvatar || 'https://via.placeholder.com/50'}" class="message-avatar">
+            <img src="${currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}" class="message-avatar">
           `;
 
           msgDiv.innerHTML = `
@@ -852,8 +917,25 @@
               appendMessage(sent, true);
               textarea.value = '';
 
+              // Cập nhật chat item để xóa trạng thái "New conversation"
+              const currentChatItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
+              if (currentChatItem && currentChatItem.classList.contains('new-chat-item')) {
+                currentChatItem.classList.remove('new-chat-item');
+                const newConvText = currentChatItem.querySelector('div[style*="font-style: italic"]');
+                if (newConvText) {
+                  newConvText.remove();
+                }
+              }
+
               // Reload chat partners để cập nhật danh sách
-              await loadChatPartners();
+              setTimeout(async () => {
+                await loadChatPartners();
+                // Giữ selection sau khi reload
+                const updatedItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
+                if (updatedItem) {
+                  updatedItem.classList.add('active');
+                }
+              }, 500);
             } else {
               console.error("Failed to send message");
             }
@@ -905,7 +987,7 @@
 
           if (partnerId) {
             console.log(`Loading chat for partnerId: ${partnerId}`);
-            // Sử dụng hàm mới để tạo chat area, sẽ tự động lấy thông tin user nếu cần
+            // Sử dụng hàm mới để tạo chat area, sẽ tự động tạo chat item và lấy thông tin user nếu cần
             await createNewChatArea(partnerId, partnerName, partnerAvatar);
           }
         };
