@@ -43,7 +43,7 @@ namespace final_project_fe.Pages
             {
                 _logger.LogError("Token not found");
                 TempData["ErrorMessage"] = "You are not logged in yet.";
-                return RedirectToPage("/Login"); 
+                return RedirectToPage("/Login");
             }
 
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
@@ -51,14 +51,14 @@ namespace final_project_fe.Pages
             {
                 _logger.LogError("Invalid token");
                 TempData["ErrorMessage"] = "Invalid token.";
-                return RedirectToPage("/Login"); 
+                return RedirectToPage("/Login");
             }
 
             CurrentUserId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             var roles = jsonToken.Claims
-    .Where(c => c.Type == ClaimTypes.Role)
-    .Select(c => c.Value)
-    .ToList();
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
 
             if (string.IsNullOrEmpty(CurrentUserId) || roles == null || roles.Count == 0)
             {
@@ -101,28 +101,52 @@ namespace final_project_fe.Pages
                 TempData["ErrorMessage"] = "System error while checking permissions.";
                 return RedirectToPage("/ErrorPage");
             }
-            using var client2 = new HttpClient();
-            client2.BaseAddress = new Uri(BaseUrl);
-            client2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            // Gọi API Room để lấy tin nhắn giữa CurrentUserId và partnerId
-            var responseMessages = await client2.GetAsync($"{BaseUrl}/Messages/Room?userId1={CurrentUserId}&userId2={partnerId}");
-
-            if (responseMessages.IsSuccessStatusCode)
+            // ⭐ FIX: Chỉ load messages nếu có partnerId
+            if (!string.IsNullOrEmpty(partnerId))
             {
-                var json = await responseMessages.Content.ReadAsStringAsync();
-                Messages = JsonSerializer.Deserialize<List<MessageDto>>(json, new JsonSerializerOptions
+                using var client2 = new HttpClient();
+                client2.BaseAddress = new Uri(BaseUrl);
+                client2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                try
                 {
-                    PropertyNameCaseInsensitive = true
-                });
+                    // ⭐ Log để debug
+                    _logger.LogInformation($"Loading messages between {CurrentUserId} and {partnerId}");
+
+                    var responseMessages = await client2.GetAsync($"{BaseUrl}/Messages/Room?userId1={CurrentUserId}&userId2={partnerId}");
+
+                    if (responseMessages.IsSuccessStatusCode)
+                    {
+                        var json = await responseMessages.Content.ReadAsStringAsync();
+                        Messages = JsonSerializer.Deserialize<List<MessageDto>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        _logger.LogInformation($"Loaded {Messages?.Count ?? 0} messages");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Failed to load messages: {responseMessages.StatusCode}");
+                        Messages = new List<MessageDto>(); // Chưa có tin nhắn thì để rỗng
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error loading messages between {CurrentUserId} and {partnerId}");
+                    Messages = new List<MessageDto>();
+                }
             }
             else
             {
-                Messages = new List<MessageDto>(); // Chưa có tin nhắn thì để rỗng
+                // ⭐ Không có partnerId thì Messages để empty
+                Messages = new List<MessageDto>();
             }
-            PartnerId = partnerId?.ToString();
 
-            return Page(); 
+            PartnerId = partnerId; // ⭐ Bỏ .ToString() vì partnerId đã là string
+
+            return Page();
         }
     }
     }
