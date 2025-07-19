@@ -634,20 +634,71 @@
         const baseUrl = "@Model.BaseUrl";
         const HubUrl = "@Model.HubUrl";
         const currentUserId = "@Model.CurrentUserId";
+        console.log("baseUrl:", baseUrl);
+        console.log("HubUrl:", HubUrl);
+        console.log("currentUserId:", currentUserId);
 
         let currentReceiverId = '';
         let currentReceiverName = '';
         let currentReceiverAvatar = '';
+        let isConnected = false;
+        let lastMessageId = null;
+        let isInitialized = false;
 
         const connection = new signalR.HubConnectionBuilder()
           .withUrl(`${HubUrl}/postHub`)
           .build();
 
+        // Sử dụng Map để track messages với timestamp
+        let messageTracker = new Map();
+
+        // Queue để lưu trữ messages nhận được trước khi conversation được load
+        let pendingMessages = [];
+
         connection.on("ReceiveMessage", (message) => {
-          if (message.senderId === currentReceiverId) {
-            appendMessage(message, false);
+          console.log("📥 [SignalR] Received message:", message);
+          console.log("📍 Current receiver ID:", currentReceiverId);
+          console.log("📍 Current user ID:", currentUserId);
+          console.log("📍 Is chat initialized:", isInitialized);
+
+          const messageKey = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
+          console.log("🔑 Generated message key:", messageKey);
+
+          if (messageTracker.has(messageKey)) {
+            console.log("⚠️ Duplicate message detected, skipping.");
+            return;
+          }
+          messageTracker.set(messageKey, Date.now());
+
+        const normalize = id => id?.toString().toLowerCase();
+
+        const isRelevant =
+            (normalize(message.senderId) === normalize(currentReceiverId) &&
+             normalize(message.receiverId) === normalize(currentUserId)) ||
+            (normalize(message.senderId) === normalize(currentUserId) &&
+             normalize(message.receiverId) === normalize(currentReceiverId));
+          console.log("📌 Is message relevant to current chat:", isRelevant);
+
+          if (isRelevant) {
+            const isSentByCurrentUser = message.senderId === currentUserId;
+            console.log("✉️ Is sent by current user:", isSentByCurrentUser);
+
+            if (currentReceiverId && isInitialized) {
+              console.log("✅ Appending message immediately...");
+              appendMessage(message, isSentByCurrentUser);
+            } else {
+              console.log("⏳ Chat not initialized yet, queuing message.");
+              pendingMessages.push({ message, isSentByCurrentUser });
+            }
           } else {
+            console.log("🔄 Message is not for current chat, reloading chat partners.");
             loadChatPartners();
+          }
+
+          if (messageTracker.size > 200) {
+            const entries = Array.from(messageTracker.entries()).sort((a, b) => a[1] - b[1]);
+            entries.slice(0, 100).forEach(([key]) => messageTracker.delete(key));
+            console.log("🧹 Cleaned up old messages from tracker.");
           }
         });
 
@@ -657,7 +708,29 @@
           }
         });
 
-        connection.start().catch(err => console.error("SignalR connection error:", err));
+        // Hàm xử lý pending messages
+        function processPendingMessages() {
+          if (pendingMessages.length > 0) {
+            console.log(`🚀 Processing ${pendingMessages.length} pending messages...`);
+            pendingMessages.forEach(({ message, isSentByCurrentUser }) => {
+              appendMessage(message, isSentByCurrentUser);
+            });
+            pendingMessages = [];
+            console.log("✅ All pending messages processed.");
+          }
+        }
+
+        async function startConnection() {
+          try {
+            await connection.start();
+            isConnected = true;
+            console.log("SignalR connected successfully");
+            return true;
+          } catch (err) {
+            console.error("SignalR connection error:", err);
+            return false;
+          }
+        }
 
         async function loadChatPartners() {
           try {
@@ -676,6 +749,7 @@
 
                   const div = document.createElement('div');
                   div.classList.add('chat-item');
+                  div.setAttribute('data-user-id', p.userId);
                   div.innerHTML = `
                     <div class="avatar-container">
                       <img src="${avatar}" class="avatar">
@@ -703,14 +777,12 @@
           }
         }
 
-        // Hàm mới để lấy thông tin user theo ID
         async function getUserInfo(userId) {
           try {
             const res = await fetch(`${baseUrl}/User/GetUserById/${userId}`);
             if (res.ok) {
               const user = await res.json();
 
-              // Xử lý theo cấu trúc API mới
               const fullName = user.userMetaData
                 ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
                 : user.email || 'Unknown User';
@@ -732,19 +804,20 @@
           }
         }
 
-        // Hàm mới để tạo chat item trong danh sách
+        function findExistingChatItem(userId) {
+          const chatList = document.querySelector('.chat-list');
+          return chatList.querySelector(`[data-user-id="${userId}"]`);
+        }
+
         function createChatItem(userInfo, isNewChat = false) {
           const chatList = document.querySelector('.chat-list');
 
-          // Kiểm tra xem user đã có trong danh sách chưa
-          const existingItem = chatList.querySelector(`[data-user-id="${userInfo.userId}"]`);
+          const existingItem = findExistingChatItem(userInfo.userId);
           if (existingItem) {
-            // Nếu đã có, chỉ cần click vào item đó
             existingItem.click();
             return existingItem;
           }
 
-          // Xóa thông báo "No conversations yet" nếu có
           const emptyMessage = chatList.querySelector('div[style*="text-align:center"]');
           if (emptyMessage) {
             emptyMessage.remove();
@@ -753,7 +826,7 @@
           const div = document.createElement('div');
           div.classList.add('chat-item');
           if (isNewChat) {
-            div.classList.add('new-chat-item'); // Thêm class để có thể style khác biệt
+            div.classList.add('new-chat-item');
           }
           div.setAttribute('data-user-id', userInfo.userId);
 
@@ -773,7 +846,6 @@
 
           div.onclick = () => loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
 
-          // Thêm vào đầu danh sách (cho các chat mới)
           if (isNewChat) {
             chatList.insertBefore(div, chatList.firstChild);
           } else {
@@ -784,6 +856,9 @@
         }
 
         async function loadConversation(userId, fullName, avatar) {
+          console.log(`Loading conversation with ${userId}`);
+
+          // Set current receiver info TRƯỚC KHI load messages
           currentReceiverId = userId;
           currentReceiverName = fullName;
           currentReceiverAvatar = avatar;
@@ -797,6 +872,10 @@
 
           const container = document.querySelector('.messages-container');
           container.innerHTML = '';
+
+          // Clear message tracker khi load conversation mới
+          messageTracker.clear();
+          domMessageIds.clear();
 
           try {
             const res = await fetch(`${baseUrl}/Message/Room?userId1=${currentUserId}&userId2=${userId}`);
@@ -815,13 +894,24 @@
             if (messages.length === 0) {
               container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
             } else {
-              messages.forEach(m => appendMessage(m, m.senderId === currentUserId));
+              messages.forEach(m => {
+                // Track loaded messages để tránh duplicate từ SignalR
+                const messageKey = m.id || `${m.senderId}-${m.receiverId}-${m.content}`;
+                messageTracker.set(messageKey, Date.now());
+                appendMessage(m, m.senderId === currentUserId);
+              });
             }
 
           } catch (err) {
             console.warn("Conversation not found yet. This is a new chat.");
             container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
           }
+
+          // Đánh dấu conversation đã được load
+          isInitialized = true;
+
+          // Xử lý các messages đang chờ
+          processPendingMessages();
 
           // Highlight selected chat item
           document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
@@ -831,9 +921,17 @@
           }
         }
 
-        // Hàm mới để tạo chat area trống cho user chưa nhắn tin
         async function createNewChatArea(userId, userName = null, userAvatar = null) {
-          // Nếu không có thông tin user, cố gắng lấy từ API
+          const existingChatItem = findExistingChatItem(userId);
+
+          if (existingChatItem) {
+            console.log(`User ${userId} already exists in chat list, opening existing chat`);
+            existingChatItem.click();
+            return;
+          }
+
+          console.log(`User ${userId} not in chat list, creating new chat`);
+
           let userInfo = null;
           if (!userName || !userAvatar) {
             console.log(`Fetching user info for userId: ${userId}`);
@@ -846,7 +944,6 @@
               userName = userName || "Unknown User";
               userAvatar = userAvatar || "https://via.placeholder.com/50";
               console.warn(`Could not fetch user info for userId: ${userId}`);
-              // Tạo userInfo object với thông tin có sẵn
               userInfo = {
                 userId: userId,
                 fullName: userName,
@@ -861,29 +958,53 @@
             };
           }
 
-          // Tạo chat item mới trong danh sách nếu chưa có
           const newChatItem = createChatItem(userInfo, true);
-
-          // Load conversation với thông tin user
           await loadConversation(userId, userName, userAvatar);
         }
 
-        function appendMessage(message, isSent) {
-          const container = document.querySelector('.messages-container');
+        // Sử dụng Set để track DOM elements
+        let domMessageIds = new Set();
 
-          // Xóa thông báo "Start your conversation..." nếu có
+                function appendMessage(message, isSent) {
+          console.log("🧩 [appendMessage] Appending message:", message);
+          console.log("🧾 Message content:", message.content);
+          console.log("✉️ Sent by current user:", isSent);
+
+          const container = document.querySelector('.messages-container');
+          if (!container) {
+            console.error("❌ messages-container NOT FOUND in DOM.");
+            return;
+          }
+
+          const domMessageId = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
+          console.log("🔖 DOM Message ID:", domMessageId);
+
+          if (domMessageIds.has(domMessageId)) {
+            console.warn("⚠️ Message already exists in domMessageIds Set.");
+            return;
+          }
+
+          if (container.querySelector(`[data-message-id="${domMessageId}"]`)) {
+            console.warn("⚠️ Message element already exists in DOM.");
+            return;
+          }
+
+          domMessageIds.add(domMessageId);
+
           const emptyMessage = container.querySelector('div[style*="text-align:center"]');
           if (emptyMessage) {
+            console.log("🧽 Removing empty message placeholder.");
             emptyMessage.remove();
           }
 
           const msgDiv = document.createElement('div');
           msgDiv.classList.add('message');
           if (isSent) msgDiv.classList.add('sent');
+          msgDiv.setAttribute('data-message-id', domMessageId);
 
-          const avatarHtml = isSent ? '' : `
-            <img src="${currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}" class="message-avatar">
-          `;
+          const avatarHtml = isSent
+            ? ''
+            : `<img src="${currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}" class="message-avatar">`;
 
           msgDiv.innerHTML = `
             ${avatarHtml}
@@ -892,12 +1013,41 @@
 
           container.appendChild(msgDiv);
           container.scrollTop = container.scrollHeight;
+
+          console.log("✅ Message appended successfully to DOM.");
+
+          if (domMessageIds.size > 200) {
+            const ids = Array.from(domMessageIds);
+            ids.slice(0, 100).forEach(id => domMessageIds.delete(id));
+            console.log("🧹 Cleaned up old message DOM IDs.");
+          }
         }
 
+        // Send message function với better duplicate prevention
+        let isSending = false;
+        let lastSentContent = '';
+        let lastSentTime = 0;
+
         document.querySelector('.send-btn').onclick = async () => {
+          if (isSending) {
+            console.log("Already sending, ignoring click");
+            return;
+          }
+
           const textarea = document.querySelector('.message-input');
           const content = textarea.value.trim();
           if (!content || !currentReceiverId) return;
+
+          // Prevent spam/duplicate sends
+          const now = Date.now();
+          if (content === lastSentContent && (now - lastSentTime) < 1000) {
+            console.log("Duplicate message within 1 second, ignoring");
+            return;
+          }
+
+          isSending = true;
+          lastSentContent = content;
+          lastSentTime = now;
 
           const payload = {
             senderId: currentUserId,
@@ -906,6 +1056,7 @@
           };
 
           try {
+            console.log("Sending message:", payload);
             const res = await fetch(`${baseUrl}/Message/sendMessage`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -914,10 +1065,19 @@
 
             if (res.ok) {
               const sent = await res.json();
+              console.log(`Message sent successfully:`, sent);
+
+              // Track this message để tránh duplicate từ SignalR
+              const messageKey = `${sent.senderId}-${sent.receiverId}-${sent.content}-${sent.id || Date.now()}`;
+              messageTracker.set(messageKey, Date.now());
+
+              // Append message immediately
               appendMessage(sent, true);
+
+              // Clear input
               textarea.value = '';
 
-              // Cập nhật chat item để xóa trạng thái "New conversation"
+              // Update chat item
               const currentChatItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
               if (currentChatItem && currentChatItem.classList.contains('new-chat-item')) {
                 currentChatItem.classList.remove('new-chat-item');
@@ -927,37 +1087,40 @@
                 }
               }
 
-              // Reload chat partners để cập nhật danh sách
-              setTimeout(async () => {
-                await loadChatPartners();
-                // Giữ selection sau khi reload
-                const updatedItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
-                if (updatedItem) {
-                  updatedItem.classList.add('active');
-                }
-              }, 500);
+              // Update timestamp
+              const currentTime = new Date().toLocaleTimeString();
+              const timeElement = currentChatItem?.querySelector('.chat-time');
+              if (timeElement) {
+                timeElement.textContent = currentTime;
+              }
+
             } else {
-              console.error("Failed to send message");
+              console.error("Failed to send message", res.status);
             }
           } catch (err) {
             console.error("Error sending message:", err);
+          } finally {
+            isSending = false;
           }
         };
 
-        // Thêm sự kiện Enter cho textarea
-        document.querySelector('.message-input').addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            document.querySelector('.send-btn').click();
-          }
-        });
+        // Event listener cho Enter key (chỉ đăng ký 1 lần)
+        let enterListenerAdded = false;
+        if (!enterListenerAdded) {
+          document.querySelector('.message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              document.querySelector('.send-btn').click();
+            }
+          });
+          enterListenerAdded = true;
+        }
 
         function getQueryParam(key) {
           const urlParams = new URLSearchParams(window.location.search);
           return urlParams.get(key);
         }
 
-        // Hàm tiện ích để khởi tạo chat với user ID từ bất kỳ đâu
         window.startChatWithUser = async function(userId) {
           if (!userId) {
             console.error("User ID is required");
@@ -967,7 +1130,6 @@
           await createNewChatArea(userId);
         };
 
-        // Hàm tiện ích để chuyển đến chat page với user ID
         window.navigateToChatWithUser = function(userId, userName = null, userAvatar = null) {
           const params = new URLSearchParams();
           params.append('partnerId', userId);
@@ -978,18 +1140,32 @@
           window.location.href = `${baseUrl}/Chat?${params.toString()}`;
         };
 
+        // Khởi tạo ứng dụng
         window.onload = async () => {
+          console.log("Initializing chat application...");
+
+          // Kết nối SignalR TRƯỚC TIÊN
+          const connected = await startConnection();
+          if (!connected) {
+            console.error("Failed to connect to SignalR");
+            return;
+          }
+
+          // Load danh sách chat partners
           await loadChatPartners();
 
+          // Xử lý partnerId từ URL parameters
           const partnerId = getQueryParam("partnerId");
           const partnerName = getQueryParam("partnerName");
           const partnerAvatar = getQueryParam("partnerAvatar");
 
           if (partnerId) {
             console.log(`Loading chat for partnerId: ${partnerId}`);
-            // Sử dụng hàm mới để tạo chat area, sẽ tự động tạo chat item và lấy thông tin user nếu cần
+            // Không cần timeout, load ngay lập tức sau khi SignalR đã connect
             await createNewChatArea(partnerId, partnerName, partnerAvatar);
           }
+
+          console.log("Chat application initialized successfully");
         };
     </script>
 
