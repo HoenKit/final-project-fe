@@ -1,0 +1,1173 @@
+﻿@page
+@model final_project_fe.Pages.ChattingModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phronesis - Chatting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1c1e21;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-item {
+            color: #65676b;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+            .nav-item:hover, .nav-item.active {
+                color: #1877f2;
+            }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+            .nav-icon:hover {
+                background-color: #e4e6ea;
+            }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            background-color: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1c1e21;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #f0f2f5;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            color: #65676b;
+        }
+
+            .action-btn:hover {
+                background-color: #e4e6ea;
+            }
+
+        .search-box {
+            margin: 16px 16px 0 16px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: none;
+            background-color: #f0f2f5;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #1c1e21;
+        }
+
+            .search-input::placeholder {
+                color: #65676b;
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #65676b;
+            font-size: 16px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            padding: 16px 16px 0 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #65676b;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+            .filter-tab.active {
+                color: #1877f2;
+                border-bottom-color: #1877f2;
+            }
+
+            .filter-tab:hover {
+                background-color: #f0f2f5;
+                border-radius: 6px;
+            }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 8px;
+            margin: 0 8px;
+        }
+
+            .chat-item:hover {
+                background-color: #f0f2f5;
+            }
+
+            .chat-item.active {
+                background-color: #e7f3ff;
+            }
+
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .chat-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .chat-preview {
+            color: #65676b;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-time {
+            color: #65676b;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .status-indicator {
+            width: 14px;
+            height: 14px;
+            background-color: #42b883;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .chat-user-name {
+            font-weight: 600;
+            color: #1c1e21;
+            font-size: 16px;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+
+            .message.sent {
+                justify-content: flex-end;
+            }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
+
+        .message.sent .message-avatar {
+            display: none;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 10px 16px;
+            border-radius: 18px;
+            background-color: #e4e6ea;
+            color: #1c1e21;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.sent .message-content {
+            background-color: #1877f2;
+            color: white;
+        }
+
+        .message-image {
+            max-width: 300px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .message-input-container {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            font-family: inherit;
+        }
+
+            .message-input:focus {
+                outline: none;
+                border-color: #1877f2;
+            }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background-color: #1877f2;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            font-size: 16px;
+        }
+
+            .send-btn:hover {
+                background-color: #166fe5;
+            }
+
+            .send-btn:disabled {
+                background-color: #e4e6ea;
+                cursor: not-allowed;
+            }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-action-btn {
+            width: 32px;
+            height: 32px;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1877f2;
+            transition: background-color 0.2s;
+            font-size: 16px;
+        }
+
+            .input-action-btn:hover {
+                background-color: #f0f2f5;
+            }
+
+        .emoji-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+            .emoji-btn:hover {
+                background-color: #f0f2f5;
+            }
+
+        .right-sidebar {
+            width: 280px;
+            background-color: white;
+            border-left: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+            .sidebar-section h3 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1c1e21;
+                margin-bottom: 12px;
+            }
+
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-link {
+            color: #65676b;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 4px 0;
+            transition: color 0.2s;
+        }
+
+            .sidebar-link:hover {
+                color: #1877f2;
+            }
+
+        .contact-info {
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+            .contact-info h4 {
+                font-size: 16px;
+                font-weight: 600;
+                color: #1c1e21;
+                margin-bottom: 8px;
+            }
+
+            .contact-info p {
+                color: #65676b;
+                font-size: 14px;
+                line-height: 1.4;
+                margin-bottom: 8px;
+            }
+
+        .contact-phone {
+            color: #1877f2;
+            font-weight: 500;
+        }
+
+        @@media (max-width: 1200px) {
+            .right-sidebar
+
+        {
+            display: none;
+        }
+
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar
+
+        {
+            width: 100%;
+            position: absolute;
+            z-index: 10;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .chat-area {
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: none;
+        }
+
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background-color: #2d2d2d;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+            .back-btn i {
+                font-size: 20px; /* hoặc 22px nếu muốn lớn hơn nữa */
+            }
+
+            .back-btn:hover {
+                background-color: #1c1c1c;
+            }
+    </style>
+</head>
+<body>
+
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Chat Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="sidebar-title">Chatting</h1>
+            </div>
+            <div class="chat-list" id="chatList">
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" style="display: none;">
+                <div class="chat-user-info">
+                    <img src="" alt="Avatar" class="chat-user-avatar">
+                    <div class="chat-user-name"></div>
+                </div>
+            </div>
+
+            <div class="messages-container empty-chat">
+                <div style="text-align: center; font-size: 24px; font-weight: bold; padding: 40px; color: #666;">
+                    <i class="fas fa-comments" style="font-size: 32px; color: #999;"></i><br><br>
+                    Select a conversation to start messaging
+                    <br><br>
+                    <i class="far fa-smile-wink" style="font-size: 20px; color: #ccc;"></i>
+                    <i class="fas fa-paper-plane" style="font-size: 20px; color: #ccc;"></i>
+                </div>
+            </div>
+
+            <div class="message-input-container" style="display: none;">
+                <textarea class="message-input" placeholder="Aa" rows="1"></textarea>
+                <button class="send-btn">➤</button>
+            </div>
+        </div>
+        </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const baseUrl = "@Model.BaseUrl";
+        const HubUrl = "@Model.HubUrl";
+        const currentUserId = "@Model.CurrentUserId";
+        console.log("baseUrl:", baseUrl);
+        console.log("HubUrl:", HubUrl);
+        console.log("currentUserId:", currentUserId);
+
+        let currentReceiverId = '';
+        let currentReceiverName = '';
+        let currentReceiverAvatar = '';
+        let isConnected = false;
+        let lastMessageId = null;
+        let isInitialized = false;
+
+        const connection = new signalR.HubConnectionBuilder()
+          .withUrl(`${HubUrl}/postHub`)
+          .build();
+
+        // Sử dụng Map để track messages với timestamp
+        let messageTracker = new Map();
+
+        // Queue để lưu trữ messages nhận được trước khi conversation được load
+        let pendingMessages = [];
+
+        connection.on("ReceiveMessage", (message) => {
+          console.log("📥 [SignalR] Received message:", message);
+          console.log("📍 Current receiver ID:", currentReceiverId);
+          console.log("📍 Current user ID:", currentUserId);
+          console.log("📍 Is chat initialized:", isInitialized);
+
+          const messageKey = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
+          console.log("🔑 Generated message key:", messageKey);
+
+          if (messageTracker.has(messageKey)) {
+            console.log("⚠️ Duplicate message detected, skipping.");
+            return;
+          }
+          messageTracker.set(messageKey, Date.now());
+
+        const normalize = id => id?.toString().toLowerCase();
+
+        const isRelevant =
+            (normalize(message.senderId) === normalize(currentReceiverId) &&
+             normalize(message.receiverId) === normalize(currentUserId)) ||
+            (normalize(message.senderId) === normalize(currentUserId) &&
+             normalize(message.receiverId) === normalize(currentReceiverId));
+          console.log("📌 Is message relevant to current chat:", isRelevant);
+
+          if (isRelevant) {
+            const isSentByCurrentUser = message.senderId === currentUserId;
+            console.log("✉️ Is sent by current user:", isSentByCurrentUser);
+
+            if (currentReceiverId && isInitialized) {
+              console.log("✅ Appending message immediately...");
+              appendMessage(message, isSentByCurrentUser);
+            } else {
+              console.log("⏳ Chat not initialized yet, queuing message.");
+              pendingMessages.push({ message, isSentByCurrentUser });
+            }
+          } else {
+            console.log("🔄 Message is not for current chat, reloading chat partners.");
+            loadChatPartners();
+          }
+
+          if (messageTracker.size > 200) {
+            const entries = Array.from(messageTracker.entries()).sort((a, b) => a[1] - b[1]);
+            entries.slice(0, 100).forEach(([key]) => messageTracker.delete(key));
+            console.log("🧹 Cleaned up old messages from tracker.");
+          }
+        });
+
+        connection.on("NewChatRoom", (newSenderId) => {
+          if (newSenderId !== currentUserId) {
+            loadChatPartners();
+          }
+        });
+
+        // Hàm xử lý pending messages
+        function processPendingMessages() {
+          if (pendingMessages.length > 0) {
+            console.log(`🚀 Processing ${pendingMessages.length} pending messages...`);
+            pendingMessages.forEach(({ message, isSentByCurrentUser }) => {
+              appendMessage(message, isSentByCurrentUser);
+            });
+            pendingMessages = [];
+            console.log("✅ All pending messages processed.");
+          }
+        }
+
+        async function startConnection() {
+          try {
+            await connection.start();
+            isConnected = true;
+            console.log("SignalR connected successfully");
+            return true;
+          } catch (err) {
+            console.error("SignalR connection error:", err);
+            return false;
+          }
+        }
+
+        async function loadChatPartners() {
+          try {
+            const res = await fetch(`${baseUrl}/Message/chat-rooms?userId=${currentUserId}`);
+            const chatList = document.querySelector('.chat-list');
+            chatList.innerHTML = '';
+
+            if (res.ok) {
+              const partners = await res.json();
+
+              if (Array.isArray(partners) && partners.length > 0) {
+                partners.forEach(p => {
+                  const fullName = p.fullName || p.email || 'Unknown User';
+                  const avatar = p.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
+                  const lastTime = p.lastSentAt || p.updateAt || p.createAt;
+
+                  const div = document.createElement('div');
+                  div.classList.add('chat-item');
+                  div.setAttribute('data-user-id', p.userId);
+                  div.innerHTML = `
+                    <div class="avatar-container">
+                      <img src="${avatar}" class="avatar">
+                      <div class="status-indicator"></div>
+                    </div>
+                    <div class="chat-info">
+                      <div class="chat-name">${fullName}</div>
+                    </div>
+                    <div class="chat-time">${new Date(lastTime).toLocaleTimeString()}</div>
+                  `;
+                  div.onclick = () => loadConversation(p.userId, fullName, avatar);
+                  chatList.appendChild(div);
+                });
+              } else {
+                chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
+              }
+            } else {
+              console.warn("No chat partners found or API error");
+              chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
+            }
+          } catch (err) {
+            console.error("Error loading chat partners:", err);
+            const chatList = document.querySelector('.chat-list');
+            chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">Error loading conversations</div>';
+          }
+        }
+
+        async function getUserInfo(userId) {
+          try {
+            const res = await fetch(`${baseUrl}/User/GetUserById/${userId}`);
+            if (res.ok) {
+              const user = await res.json();
+
+              const fullName = user.userMetaData
+                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
+                : user.email || 'Unknown User';
+
+              const avatar = user.userMetaData?.avatar || 'https://via.placeholder.com/50';
+
+              return {
+                fullName: fullName,
+                avatar: avatar,
+                email: user.email,
+                phone: user.phone,
+                userId: user.userId
+              };
+            }
+            return null;
+          } catch (err) {
+            console.error("Error fetching user info:", err);
+            return null;
+          }
+        }
+
+        function findExistingChatItem(userId) {
+          const chatList = document.querySelector('.chat-list');
+          return chatList.querySelector(`[data-user-id="${userId}"]`);
+        }
+
+        function createChatItem(userInfo, isNewChat = false) {
+          const chatList = document.querySelector('.chat-list');
+
+          const existingItem = findExistingChatItem(userInfo.userId);
+          if (existingItem) {
+            existingItem.click();
+            return existingItem;
+          }
+
+          const emptyMessage = chatList.querySelector('div[style*="text-align:center"]');
+          if (emptyMessage) {
+            emptyMessage.remove();
+          }
+
+          const div = document.createElement('div');
+          div.classList.add('chat-item');
+          if (isNewChat) {
+            div.classList.add('new-chat-item');
+          }
+          div.setAttribute('data-user-id', userInfo.userId);
+
+          const currentTime = new Date().toLocaleTimeString();
+
+          div.innerHTML = `
+            <div class="avatar-container">
+              <img src="${userInfo.avatar}" class="avatar">
+              <div class="status-indicator"></div>
+            </div>
+            <div class="chat-info">
+              <div class="chat-name">${userInfo.fullName}</div>
+              ${isNewChat ? '<div style="font-size: 12px; color: #999; font-style: italic;">New conversation</div>' : ''}
+            </div>
+            <div class="chat-time">${currentTime}</div>
+          `;
+
+          div.onclick = () => loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
+
+          if (isNewChat) {
+            chatList.insertBefore(div, chatList.firstChild);
+          } else {
+            chatList.appendChild(div);
+          }
+
+          return div;
+        }
+
+        async function loadConversation(userId, fullName, avatar) {
+          console.log(`Loading conversation with ${userId}`);
+
+          // Set current receiver info TRƯỚC KHI load messages
+          currentReceiverId = userId;
+          currentReceiverName = fullName;
+          currentReceiverAvatar = avatar;
+
+          document.querySelector('.chat-user-name').textContent = fullName;
+          document.querySelector('.chat-user-avatar').src = avatar;
+
+          document.querySelector('.messages-container').classList.remove('empty-chat');
+          document.querySelector('.chat-header').style.display = 'flex';
+          document.querySelector('.message-input-container').style.display = 'flex';
+
+          const container = document.querySelector('.messages-container');
+          container.innerHTML = '';
+
+          // Clear message tracker khi load conversation mới
+          messageTracker.clear();
+          domMessageIds.clear();
+
+          try {
+            const res = await fetch(`${baseUrl}/Message/Room?userId1=${currentUserId}&userId2=${userId}`);
+
+            let messages = [];
+
+            if (res.ok) {
+              try {
+                messages = await res.json();
+              } catch (parseError) {
+                console.warn("Failed to parse messages JSON:", parseError);
+                messages = [];
+              }
+            }
+
+            if (messages.length === 0) {
+              container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
+            } else {
+              messages.forEach(m => {
+                // Track loaded messages để tránh duplicate từ SignalR
+                const messageKey = m.id || `${m.senderId}-${m.receiverId}-${m.content}`;
+                messageTracker.set(messageKey, Date.now());
+                appendMessage(m, m.senderId === currentUserId);
+              });
+            }
+
+          } catch (err) {
+            console.warn("Conversation not found yet. This is a new chat.");
+            container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
+          }
+
+          // Đánh dấu conversation đã được load
+          isInitialized = true;
+
+          // Xử lý các messages đang chờ
+          processPendingMessages();
+
+          // Highlight selected chat item
+          document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+          const selectedItem = document.querySelector(`[data-user-id="${userId}"]`);
+          if (selectedItem) {
+            selectedItem.classList.add('active');
+          }
+        }
+
+        async function createNewChatArea(userId, userName = null, userAvatar = null) {
+          const existingChatItem = findExistingChatItem(userId);
+
+          if (existingChatItem) {
+            console.log(`User ${userId} already exists in chat list, opening existing chat`);
+            existingChatItem.click();
+            return;
+          }
+
+          console.log(`User ${userId} not in chat list, creating new chat`);
+
+          let userInfo = null;
+          if (!userName || !userAvatar) {
+            console.log(`Fetching user info for userId: ${userId}`);
+            userInfo = await getUserInfo(userId);
+            if (userInfo) {
+              userName = userInfo.fullName;
+              userAvatar = userInfo.avatar;
+              console.log(`User info found:`, userInfo);
+            } else {
+              userName = userName || "Unknown User";
+              userAvatar = userAvatar || "https://via.placeholder.com/50";
+              console.warn(`Could not fetch user info for userId: ${userId}`);
+              userInfo = {
+                userId: userId,
+                fullName: userName,
+                avatar: userAvatar
+              };
+            }
+          } else {
+            userInfo = {
+              userId: userId,
+              fullName: userName,
+              avatar: userAvatar
+            };
+          }
+
+          const newChatItem = createChatItem(userInfo, true);
+          await loadConversation(userId, userName, userAvatar);
+        }
+
+        // Sử dụng Set để track DOM elements
+        let domMessageIds = new Set();
+
+                function appendMessage(message, isSent) {
+          console.log("🧩 [appendMessage] Appending message:", message);
+          console.log("🧾 Message content:", message.content);
+          console.log("✉️ Sent by current user:", isSent);
+
+          const container = document.querySelector('.messages-container');
+          if (!container) {
+            console.error("❌ messages-container NOT FOUND in DOM.");
+            return;
+          }
+
+          const domMessageId = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
+          console.log("🔖 DOM Message ID:", domMessageId);
+
+          if (domMessageIds.has(domMessageId)) {
+            console.warn("⚠️ Message already exists in domMessageIds Set.");
+            return;
+          }
+
+          if (container.querySelector(`[data-message-id="${domMessageId}"]`)) {
+            console.warn("⚠️ Message element already exists in DOM.");
+            return;
+          }
+
+          domMessageIds.add(domMessageId);
+
+          const emptyMessage = container.querySelector('div[style*="text-align:center"]');
+          if (emptyMessage) {
+            console.log("🧽 Removing empty message placeholder.");
+            emptyMessage.remove();
+          }
+
+          const msgDiv = document.createElement('div');
+          msgDiv.classList.add('message');
+          if (isSent) msgDiv.classList.add('sent');
+          msgDiv.setAttribute('data-message-id', domMessageId);
+
+          const avatarHtml = isSent
+            ? ''
+            : `<img src="${currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}" class="message-avatar">`;
+
+          msgDiv.innerHTML = `
+            ${avatarHtml}
+            <div class="message-content">${message.content}</div>
+          `;
+
+          container.appendChild(msgDiv);
+          container.scrollTop = container.scrollHeight;
+
+          console.log("✅ Message appended successfully to DOM.");
+
+          if (domMessageIds.size > 200) {
+            const ids = Array.from(domMessageIds);
+            ids.slice(0, 100).forEach(id => domMessageIds.delete(id));
+            console.log("🧹 Cleaned up old message DOM IDs.");
+          }
+        }
+
+        // Send message function với better duplicate prevention
+        let isSending = false;
+        let lastSentContent = '';
+        let lastSentTime = 0;
+
+        document.querySelector('.send-btn').onclick = async () => {
+          if (isSending) {
+            console.log("Already sending, ignoring click");
+            return;
+          }
+
+          const textarea = document.querySelector('.message-input');
+          const content = textarea.value.trim();
+          if (!content || !currentReceiverId) return;
+
+          // Prevent spam/duplicate sends
+          const now = Date.now();
+          if (content === lastSentContent && (now - lastSentTime) < 1000) {
+            console.log("Duplicate message within 1 second, ignoring");
+            return;
+          }
+
+          isSending = true;
+          lastSentContent = content;
+          lastSentTime = now;
+
+          const payload = {
+            senderId: currentUserId,
+            receiverId: currentReceiverId,
+            content: content
+          };
+
+          try {
+            console.log("Sending message:", payload);
+            const res = await fetch(`${baseUrl}/Message/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              const sent = await res.json();
+              console.log(`Message sent successfully:`, sent);
+
+              // Track this message để tránh duplicate từ SignalR
+              const messageKey = `${sent.senderId}-${sent.receiverId}-${sent.content}-${sent.id || Date.now()}`;
+              messageTracker.set(messageKey, Date.now());
+
+              // Append message immediately
+              appendMessage(sent, true);
+
+              // Clear input
+              textarea.value = '';
+
+              // Update chat item
+              const currentChatItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
+              if (currentChatItem && currentChatItem.classList.contains('new-chat-item')) {
+                currentChatItem.classList.remove('new-chat-item');
+                const newConvText = currentChatItem.querySelector('div[style*="font-style: italic"]');
+                if (newConvText) {
+                  newConvText.remove();
+                }
+              }
+
+              // Update timestamp
+              const currentTime = new Date().toLocaleTimeString();
+              const timeElement = currentChatItem?.querySelector('.chat-time');
+              if (timeElement) {
+                timeElement.textContent = currentTime;
+              }
+
+            } else {
+              console.error("Failed to send message", res.status);
+            }
+          } catch (err) {
+            console.error("Error sending message:", err);
+          } finally {
+            isSending = false;
+          }
+        };
+
+        // Event listener cho Enter key (chỉ đăng ký 1 lần)
+        let enterListenerAdded = false;
+        if (!enterListenerAdded) {
+          document.querySelector('.message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              document.querySelector('.send-btn').click();
+            }
+          });
+          enterListenerAdded = true;
+        }
+
+        function getQueryParam(key) {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(key);
+        }
+
+        window.startChatWithUser = async function(userId) {
+          if (!userId) {
+            console.error("User ID is required");
+            return;
+          }
+
+          await createNewChatArea(userId);
+        };
+
+        window.navigateToChatWithUser = function(userId, userName = null, userAvatar = null) {
+          const params = new URLSearchParams();
+          params.append('partnerId', userId);
+
+          if (userName) params.append('partnerName', userName);
+          if (userAvatar) params.append('partnerAvatar', userAvatar);
+
+          window.location.href = `${baseUrl}/Chat?${params.toString()}`;
+        };
+
+        // Khởi tạo ứng dụng
+        window.onload = async () => {
+          console.log("Initializing chat application...");
+
+          // Kết nối SignalR TRƯỚC TIÊN
+          const connected = await startConnection();
+          if (!connected) {
+            console.error("Failed to connect to SignalR");
+            return;
+          }
+
+          // Load danh sách chat partners
+          await loadChatPartners();
+
+          // Xử lý partnerId từ URL parameters
+          const partnerId = getQueryParam("partnerId");
+          const partnerName = getQueryParam("partnerName");
+          const partnerAvatar = getQueryParam("partnerAvatar");
+
+          if (partnerId) {
+            console.log(`Loading chat for partnerId: ${partnerId}`);
+            // Không cần timeout, load ngay lập tức sau khi SignalR đã connect
+            await createNewChatArea(partnerId, partnerName, partnerAvatar);
+          }
+
+          console.log("Chat application initialized successfully");
+        };
+    </script>
+
+</body>
+</html>

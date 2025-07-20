@@ -24,6 +24,8 @@ namespace final_project_fe.Dtos.Users
 
         [JsonPropertyName("email")]
         public string Email { get; set; }
+        [JsonPropertyName("isPremium")]
+        public bool IsPremium { get; set; }
 
         [JsonPropertyName("userMetaData")]
         public UserMetaDataDto UserMetaData { get; set; }
