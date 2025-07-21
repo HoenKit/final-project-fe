@@ -16,6 +16,7 @@ using final_project_fe.Dtos.Transaction;
 using System.Buffers.Text;
 using System.Reflection.Emit;
 using final_project_fe.Dtos.Payment;
+using System.Globalization;
 
 namespace final_project_fe.Pages.Admin.Dashboard
 {
@@ -42,7 +43,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
         public string CurrentUserId { get; set; }
         public int TotalUsers { get; set; }
         public int TotalArticles { get; set; }
-        public int TotalMemberships { get; set; } = 576;
+        public int TotalPremiums { get; set; }
         public decimal TotalSales { get; set; }
         public decimal TotalSalesOneMonth { get; set; }
 
@@ -53,6 +54,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
 
         // Transaction properties
         public PageResult<GetTransactionDto> Transactions { get; set; }
+        public PageResult<User> Users { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string? status = null, string? email = null)
         {
@@ -81,6 +83,9 @@ namespace final_project_fe.Pages.Admin.Dashboard
 
         private async Task LoadDashboardData(string token, string? status)
         {
+            // Load payment statistics first as we'll use them in multiple places
+            var paymentStats = await LoadMonthlyPaymentStats(token);
+
             // Load transactions for current month only (for display)
             await LoadTransactions(null, null, null, false, status, token);
 
@@ -93,11 +98,11 @@ namespace final_project_fe.Pages.Admin.Dashboard
             // Load total counts
             await LoadTotalCounts(token);
 
-            // Load sales data (this will also calculate TotalSales)
-            await LoadSalesData(token);
+            // Load sales data (using payment stats)
+            await LoadSalesData(token, paymentStats);
 
-            // Load chart data
-            LoadChartData();
+            // Load chart data (using payment stats for MembershipsData)
+            LoadChartData(paymentStats);
         }
 
         private async Task LoadTransactions(int? currentPage, Guid? userId, string? sortOption, bool filterByUser, string? status, string token)
@@ -172,51 +177,6 @@ namespace final_project_fe.Pages.Admin.Dashboard
             {
                 _logger.LogError(ex, "Error loading transactions for current month");
                 Transactions = new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 0);
-            }
-        }
-
-        // Separate method to load total sales from ALL transactions
-        private async Task LoadTotalSales(string token)
-        {
-            try
-            {
-                var transactionUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Transaction");
-                var transactionQuery = HttpUtility.ParseQueryString(string.Empty);
-
-                transactionQuery["page"] = "1";
-                transactionQuery["pageSize"] = "10000";
-                transactionQuery["sortOption"] = "desc_date";
-
-                transactionUrl.Query = transactionQuery.ToString();
-
-                var transactionRequest = new HttpRequestMessage(HttpMethod.Get, transactionUrl.ToString());
-                transactionRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                var transactionResponse = await _httpClient.SendAsync(transactionRequest);
-                if (transactionResponse.IsSuccessStatusCode)
-                {
-                    var transactionJson = await transactionResponse.Content.ReadAsStringAsync();
-                    var allTransactions = JsonSerializer.Deserialize<PageResult<GetTransactionDto>>(transactionJson, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    }) ?? new PageResult<GetTransactionDto>(new List<GetTransactionDto>(), 0, 1, 10000);
-
-                    TotalSales = allTransactions.Items
-                        .Where(t => t.Status == "Completed" && t.Amount.HasValue)
-                        .Sum(t => t.Amount.Value);
-
-                    _logger.LogInformation($"Total sales calculated from {allTransactions.Items.Count(t => t.Status == "Completed")} completed transactions: {TotalSales:N0}₫");
-                }
-                else
-                {
-                    TotalSales = 0;
-                    _logger.LogWarning("Failed to load transactions for total sales calculation");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading total sales from all transactions");
-                TotalSales = 0;
             }
         }
 
@@ -329,9 +289,13 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var apiResponse = JsonSerializer.Deserialize<User>(json, options);
 
-                    if (apiResponse != null)
+                    var pageResult = JsonSerializer.Deserialize<PageResult<User>>(json, options);
+
+                    if (pageResult != null)
                     {
-                        TotalUsers = apiResponse.TotalCount;
+                        TotalUsers = pageResult.TotalCount;
+
+                        TotalPremiums = pageResult.Items.Count(u => u.IsPremium);
                     }
                 }
             }
@@ -341,11 +305,14 @@ namespace final_project_fe.Pages.Admin.Dashboard
             }
         }
 
-        private async Task LoadSalesData(string token)
+        private async Task LoadSalesData(string token, List<MothlyStatPaymentDto> paymentStats)
         {
             try
             {
-                // Get all payments for sales calculation
+                // Calculate TotalSales from ALL months' TotalPoint (converted to VND)
+                TotalSales = paymentStats.Sum(p => p.TotalPoint * 1000); // Convert points to VND (1 point = 1000₫)
+
+                // The rest of the method remains the same for daily sales
                 var paymentUrl = new UriBuilder($"{_apiSettings.BaseUrl}/Payment");
                 var paymentQuery = HttpUtility.ParseQueryString(string.Empty);
 
@@ -367,11 +334,6 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     {
                         PropertyNameCaseInsensitive = true
                     }) ?? new PageResult<GetPaymentDto>(new List<GetPaymentDto>(), 0, 1, 10000);
-
-                    // Calculate TotalSales from ALL completed payments (all time)
-                    TotalSales = allPayments.Items
-                        .Where(p => p.Status == "Success")
-                        .Sum(p => CalculateActualAmount(p));
 
                     // Calculate date range for Daily Money chart: from same day last month to today
                     var currentDate = DateTime.Now;
@@ -438,7 +400,6 @@ namespace final_project_fe.Pages.Admin.Dashboard
                         currentDateIter = currentDateIter.AddDays(1);
                     }
 
-                    TotalSales = 0;
                     TotalSalesOneMonth = 0;
 
                     _logger.LogWarning("Failed to load payments for daily sales, using empty data");
@@ -466,9 +427,33 @@ namespace final_project_fe.Pages.Admin.Dashboard
                     currentDateIter = currentDateIter.AddDays(1);
                 }
 
-                TotalSales = 0;
                 TotalSalesOneMonth = 0;
             }
+        }
+
+        private async Task<List<MothlyStatPaymentDto>> LoadMonthlyPaymentStats(string token)
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var paymentStatsUrl = $"{_apiSettings.BaseUrl}/Payment/monthly-stats?year={currentYear}";
+                var paymentStatsRequest = new HttpRequestMessage(HttpMethod.Get, paymentStatsUrl);
+                paymentStatsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var paymentStatsResponse = await _httpClient.SendAsync(paymentStatsRequest);
+                if (paymentStatsResponse.IsSuccessStatusCode)
+                {
+                    var json = await paymentStatsResponse.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return JsonSerializer.Deserialize<List<MothlyStatPaymentDto>>(json, options)
+                           ?? new List<MothlyStatPaymentDto>();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when calling monthly-stats of payment API");
+            }
+            return new List<MothlyStatPaymentDto>();
         }
 
         // Helper method to calculate actual amount in VND based on service type
@@ -481,7 +466,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
             switch (payment.ServiceType?.ToLower())
             {
                 case "course":
-                    return amountInVND * 0.35m; // 15% for courses
+                    return amountInVND * 0.35m; // 35% for courses
                 case "premium":
                     return amountInVND; // 100% for premiums
                 default:
@@ -489,20 +474,26 @@ namespace final_project_fe.Pages.Admin.Dashboard
             }
         }
 
-        private void LoadChartData()
+        private void LoadChartData(List<MothlyStatPaymentDto> paymentStats)
         {
             ChartLabels.Clear();
+            MembershipsData.Clear();
+
             int currentYear = DateTime.Now.Year;
             int currentMonth = DateTime.Now.Month;
 
+            // Convert payment stats to dictionary for easier lookup
+            var statsDict = paymentStats.ToDictionary(s => s.Time, s => s);
+
             for (int month = 1; month <= currentMonth; month++)
             {
-                ChartLabels.Add(new DateTime(currentYear, month, 1).ToString("MMMM"));
-            }
+                var monthKey = $"{month:D2}/{currentYear}";
+                ChartLabels.Add(CultureInfo.GetCultureInfo("en-US").DateTimeFormat.GetMonthName(month));
 
-            // Sample membership data - you can make this dynamic later
-            MembershipsData = new List<int> { 154, 184, 175, 203, 210, 231, 240, 278, 252, 312, 320, 374 }
-                .Take(currentMonth).ToList();
+                // Get premium count for this month
+                int premiumCount = statsDict.TryGetValue(monthKey, out var stat) ? stat.TotalPremium : 0;
+                MembershipsData.Add(premiumCount);
+            }
         }
 
         // API endpoint to handle AJAX requests from frontend
