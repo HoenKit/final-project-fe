@@ -53,7 +53,7 @@
                         <i class="lni lni-library"></i>
                     </div>
                     <div class="content">
-                        <h6 class="mb-10">Total Courses</h6>
+                        <h6 class="mb-10">Monthly Courses</h6>
                         <h3 class="text-bold mb-10">@Model.TotalCourse</h3>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                         <i class="lni lni-dollar"></i>
                     </div>
                     <div class="content">
-                        <h6 class="mb-10">Total Income</h6>
+                        <h6 class="mb-10">Monthly Income</h6>
                         <h3 class="text-bold mb-10">@Model.TotalIncome.ToString("N2") Point</h3>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                         <i class="lni lni-credit-cards"></i>
                     </div>
                     <div class="content">
-                        <h6 class="mb-10">Total Withdrawal</h6>
+                        <h6 class="mb-10">Monthly Withdrawal</h6>
                         <h3 class="text-bold mb-10">@Model.Withdraw.Items.Sum(w => w.Points) Point</h3>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                         <i class="lni lni-user"></i>
                     </div>
                     <div class="content">
-                        <h6 class="mb-10">Total Students</h6>
+                        <h6 class="mb-10">Monthly Students</h6>
                         <h3 class="text-bold mb-10">@Model.TotalStudent</h3>
                     </div>
                 </div>
@@ -146,7 +146,6 @@
 </section>
 <!-- ========== section end ========== -->
 <!-- ========= All Javascript files linkup ======== -->
-<script src=@Url.Content("~/MentorAssets/js/bootstrap.bundle.min.js")></script>
 <script src=@Url.Content("~/MentorAssets/js/Chart.min.js")></script>
 <script src=@Url.Content("~/MentorAssets/js/dynamic-pie-chart.js")></script>
 <script src=@Url.Content("~/MentorAssets/js/moment.min.js")></script>
@@ -154,7 +153,6 @@
 <script src=@Url.Content("~/MentorAssets/js/jvectormap.min.js")></script>
 <script src=@Url.Content("~/MentorAssets/js/world-merc.js")></script>
 <script src=@Url.Content("~/MentorAssets/js/polyfill.js")></script>
-<script src=@Url.Content("~/MentorAssets/js/main.js")></script>
 <script>
     // ======== jvectormap activation
     var markers = [
@@ -287,7 +285,7 @@
                         color: '#000000',
                         padding: 35,
                         callback: function (value) {
-                            return '$' + value;
+                            return value + ' Point';
                         }
                     },
                 },

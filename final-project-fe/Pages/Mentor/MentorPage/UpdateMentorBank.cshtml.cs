@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text;
 using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.Withdraw;
+using System.Text.RegularExpressions;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -27,11 +28,29 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
 
         [BindProperty]
-        public UpdateMentorBankDto Mentor { get; set; } = new();
+        public InfoBankDto Mentor { get; set; } = new();
         public string CurrentUserId { get; private set; } = string.Empty;
+        public Guid UserId { get; set; }
         public List<string> UserRoles { get; private set; } = new List<string>();
 
-        public async Task<IActionResult> OnPostAsync(int mentorId, string accountNumber, string accountName, string accountBank)
+        // Helper method to remove diacritics and convert to uppercase
+        private string NormalizeAccountName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return name;
+
+            // Convert to uppercase
+            name = name.ToUpperInvariant();
+
+            // Remove diacritics
+            string normalizedString = name.Normalize(NormalizationForm.FormD);
+            Regex regex = new Regex(@"\p{IsCombiningDiacriticalMarks}+");
+            string withoutDiacritics = regex.Replace(normalizedString, string.Empty).Normalize(NormalizationForm.FormC);
+
+            return withoutDiacritics;
+        }
+
+        public async Task<IActionResult> OnPostAsync(string accountNumber, string accountName, string accountBank)
         {
             // Check authentication
             if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
@@ -66,11 +85,15 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
-                Mentor = new UpdateMentorBankDto
+                UserId = Guid.Parse(CurrentUserId);
+
+                // Normalize the account name
+                string normalizedAccountName = NormalizeAccountName(accountName);
+
+                Mentor = new InfoBankDto
                 {
-                    MentorId = mentorId,
                     AccountNumber = accountNumber,
-                    AccountName = accountName,
+                    AccountName = normalizedAccountName, // Use the normalized version
                     AccountBank = accountBank
                 };
 
@@ -80,7 +103,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 });
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                string apiUrl = $"{_apiSettings.BaseUrl}/Mentor";
+                string apiUrl = $"{_apiSettings.BaseUrl}/Mentor/update/{UserId}";
                 var response = await _httpClient.PutAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
