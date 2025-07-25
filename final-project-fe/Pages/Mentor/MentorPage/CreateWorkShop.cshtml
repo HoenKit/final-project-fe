@@ -1,0 +1,401 @@
+﻿@page
+@model final_project_fe.Pages.Mentor.MentorPage.CreateWorkShopModel
+@{
+    ViewData["Title"] = "Create New Workshop";
+}
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a live stream platform</title>
+    <style>
+        .platform-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+
+            .platform-option:hover {
+                border-color: #0d6efd;
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+            }
+
+            .platform-option.selected {
+                border-color: #0d6efd;
+                background-color: #f8f9ff;
+                box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+            }
+
+                .platform-option.selected.facebook {
+                    border-color: #1877f2;
+                    background-color: #f0f2ff;
+                }
+
+                .platform-option.selected.youtube {
+                    border-color: #ff0000;
+                    background-color: #fff5f5;
+                }
+
+        .platform-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .facebook .platform-icon {
+            color: #1877f2;
+        }
+
+        .youtube .platform-icon {
+            color: #ff0000;
+        }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            border-radius: 8px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: linear-gradient(104deg, #000000 20%, #6e0491 100%);
+        }
+
+        .input-group-text {
+            border: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+            .error-message.show {
+                display: block;
+            }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @@keyframes spin {
+            0%
+
+        {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card">
+                    <div class="card-header text-white py-4">
+                        <h3 class="mb-0 text-center">
+                            <i class="bi bi-camera-video-fill me-2"></i>
+                            Create New Workshop
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="workshopForm" method="post" asp-page-handler="Create">
+                            <!-- Platform Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">
+                                    <i class="bi bi-broadcast-pin me-2"></i>
+                                    Choose a live stream platform
+                                </label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="platform-option facebook" data-platform="facebook">
+                                            <div class="text-center">
+                                                <i class="bi bi-facebook platform-icon"></i>
+                                                <h5 class="mb-1">Facebook Live</h5>
+                                                <p class="text-muted mb-0 small">Live stream via Facebook</p>
+                                            </div>
+                                            <input type="radio" name="platform" value="facebook" class="d-none">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="platform-option youtube" data-platform="youtube">
+                                            <div class="text-center">
+                                                <i class="bi bi-youtube platform-icon"></i>
+                                                <h5 class="mb-1">YouTube Live</h5>
+                                                <p class="text-muted mb-0 small">Live stream via YouTube</p>
+                                            </div>
+                                            <input type="radio" name="platform" value="youtube" class="d-none">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error-message text-danger mt-2 d-none" id="platformError">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Please select live stream platform
+                                </div>
+                            </div>
+
+                            <input type="hidden" asp-for="Workshop.MentorId" value="@Model.MentorId" />
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold" for="description">
+                                    <i class="bi bi-card-text me-2"></i>
+                                    Workshop Description
+                                </label>
+                                <textarea class="form-control"
+                                          asp-for="Workshop.Decription"
+                                          id="description"
+                                          rows="4"
+                                          placeholder="Enter a detailed description of your workshop..."
+                                          required></textarea>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Help students understand the content and benefits of the workshop
+                                </div>
+                                <div class="error-message text-danger mt-2 d-none" id="descriptionError">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Please enter workshop description
+                                </div>
+                            </div>
+
+                            <!-- Streaming Link -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold" for="streamingLink">
+                                    <i class="bi bi-link-45deg me-2"></i>
+                                    Link Live Stream
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="linkPrefix">
+                                        <i class="bi bi-link" id="platformIcon"></i>
+                                    </span>
+                                    <input asp-for="Workshop.StreamingLink"
+                                           type="url"
+                                           class="form-control"
+                                           id="streamingLink"
+                                           placeholder="Enter live stream link..."
+                                           required />
+                                </div>
+                                <div class="form-text" id="linkHelpText">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Enter live stream link from selected platform
+                                </div>
+                                <div class="error-message text-danger mt-2 d-none" id="linkError">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Please enter a valid live stream link
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-end gap-3 mt-4">
+                                <button type="button" class="btn btn-outline-secondary px-4" onclick="window.history.back()">
+                                    <i class="bi bi-x-lg me-2"></i>
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    Create Workshop
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h5 class="mb-2">Creating workshop...</h5>
+            <p class="text-muted mb-0">Please wait a moment</p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const platformOptions = document.querySelectorAll('.platform-option');
+            const form = document.getElementById('workshopForm');
+            const description = document.getElementById('description');
+            const streamingLink = document.getElementById('streamingLink');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Handle platform selection
+            platformOptions.forEach(option => {
+                option.addEventListener('click', function () {
+                    platformOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    this.querySelector('input[type="radio"]').checked = true;
+                    updatePlatformUI(this.dataset.platform);
+                    hideError('platformError');
+                });
+            });
+
+            // Update UI elements based on selected platform
+            function updatePlatformUI(platform) {
+                const icon = document.getElementById('platformIcon');
+                const prefix = document.getElementById('linkPrefix');
+                const helpText = document.getElementById('linkHelpText');
+
+                if (platform === 'facebook') {
+                    icon.className = 'bi bi-facebook';
+                    prefix.className = 'input-group-text bg-primary text-white';
+                    streamingLink.placeholder = 'https://www.facebook.com/...';
+                    helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i>Nhập link Facebook Live của bạn';
+                } else {
+                    icon.className = 'bi bi-youtube';
+                    prefix.className = 'input-group-text bg-danger text-white';
+                    streamingLink.placeholder = 'https://www.youtube.com/watch?v=...';
+                    helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i>Nhập link YouTube Live của bạn';
+                }
+            }
+
+            // Handle form submission
+            form.addEventListener('submit', function (e) {
+                let isValid = true;
+                const selectedPlatform = document.querySelector('input[name="platform"]:checked');
+                const linkValue = streamingLink.value.trim();
+
+                // Reset previous state
+                description.classList.remove('is-invalid', 'is-valid');
+                streamingLink.classList.remove('is-invalid', 'is-valid');
+                hideError('platformError');
+                hideError('descriptionError');
+                hideError('linkError');
+
+                // Validate platform
+                if (!selectedPlatform) {
+                    showError('platformError');
+                    isValid = false;
+                }
+
+                // Validate description
+                if (!description.value.trim()) {
+                    showError('descriptionError');
+                    description.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    description.classList.add('is-valid');
+                }
+
+                // Validate streaming link
+                if (!linkValue || !isValidUrl(linkValue)) {
+                    showError('linkError');
+                    streamingLink.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    const platform = selectedPlatform?.value;
+                    const isFacebook = linkValue.includes("facebook.com");
+                    const isYoutube = linkValue.includes("youtube.com") || linkValue.includes("youtu.be");
+
+                    if ((platform === 'facebook' && !isFacebook) ||
+                        (platform === 'youtube' && !isYoutube)) {
+                        showError('linkError');
+                        streamingLink.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        streamingLink.classList.add('is-valid');
+                    }
+                }
+
+                if (!isValid) {
+                    e.preventDefault(); // Block form submission
+                } else {
+                    loadingOverlay.style.display = 'flex'; // Show loading overlay
+                    // Allow Razor to post form to OnPostCreateAsync
+                }
+            });
+
+            // Validate description input
+            description.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    hideError('descriptionError');
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+
+            // Validate streaming link input
+            streamingLink.addEventListener('input', function () {
+                const linkVal = this.value.trim();
+                if (linkVal && isValidUrl(linkVal)) {
+                    hideError('linkError');
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+
+            // Check if a string is a valid URL
+            function isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+
+            // Show error message
+            function showError(id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('show');
+            }
+
+            // Hide error message
+            function hideError(id) {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('show');
+            }
+        });
+    </script>
+
+</body>
+</html>

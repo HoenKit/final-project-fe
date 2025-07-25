@@ -631,542 +631,722 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script>
-        const baseUrl = "@Model.BaseUrl";
-        const HubUrl = "@Model.HubUrl";
-        const currentUserId = "@Model.CurrentUserId";
-        console.log("baseUrl:", baseUrl);
-        console.log("HubUrl:", HubUrl);
-        console.log("currentUserId:", currentUserId);
-
-        let currentReceiverId = '';
-        let currentReceiverName = '';
-        let currentReceiverAvatar = '';
-        let isConnected = false;
-        let lastMessageId = null;
-        let isInitialized = false;
-
-        const connection = new signalR.HubConnectionBuilder()
-          .withUrl(`${HubUrl}/postHub`)
-          .build();
-
-        // Sử dụng Map để track messages với timestamp
-        let messageTracker = new Map();
-
-        // Queue để lưu trữ messages nhận được trước khi conversation được load
-        let pendingMessages = [];
-
-        connection.on("ReceiveMessage", (message) => {
-          console.log("📥 [SignalR] Received message:", message);
-          console.log("📍 Current receiver ID:", currentReceiverId);
-          console.log("📍 Current user ID:", currentUserId);
-          console.log("📍 Is chat initialized:", isInitialized);
-
-          const messageKey = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
-          console.log("🔑 Generated message key:", messageKey);
-
-          if (messageTracker.has(messageKey)) {
-            console.log("⚠️ Duplicate message detected, skipping.");
-            return;
-          }
-          messageTracker.set(messageKey, Date.now());
-
-        const normalize = id => id?.toString().toLowerCase();
-
-        const isRelevant =
-            (normalize(message.senderId) === normalize(currentReceiverId) &&
-             normalize(message.receiverId) === normalize(currentUserId)) ||
-            (normalize(message.senderId) === normalize(currentUserId) &&
-             normalize(message.receiverId) === normalize(currentReceiverId));
-          console.log("📌 Is message relevant to current chat:", isRelevant);
-
-          if (isRelevant) {
-            const isSentByCurrentUser = message.senderId === currentUserId;
-            console.log("✉️ Is sent by current user:", isSentByCurrentUser);
-
-            if (currentReceiverId && isInitialized) {
-              console.log("✅ Appending message immediately...");
-              appendMessage(message, isSentByCurrentUser);
-            } else {
-              console.log("⏳ Chat not initialized yet, queuing message.");
-              pendingMessages.push({ message, isSentByCurrentUser });
-            }
-          } else {
-            console.log("🔄 Message is not for current chat, reloading chat partners.");
-            loadChatPartners();
-          }
-
-          if (messageTracker.size > 200) {
-            const entries = Array.from(messageTracker.entries()).sort((a, b) => a[1] - b[1]);
-            entries.slice(0, 100).forEach(([key]) => messageTracker.delete(key));
-            console.log("🧹 Cleaned up old messages from tracker.");
-          }
-        });
-
-        connection.on("NewChatRoom", (newSenderId) => {
-          if (newSenderId !== currentUserId) {
-            loadChatPartners();
-          }
-        });
-
-        // Hàm xử lý pending messages
-        function processPendingMessages() {
-          if (pendingMessages.length > 0) {
-            console.log(`🚀 Processing ${pendingMessages.length} pending messages...`);
-            pendingMessages.forEach(({ message, isSentByCurrentUser }) => {
-              appendMessage(message, isSentByCurrentUser);
-            });
-            pendingMessages = [];
-            console.log("✅ All pending messages processed.");
-          }
-        }
-
-        async function startConnection() {
-          try {
-            await connection.start();
-            isConnected = true;
-            console.log("SignalR connected successfully");
-            return true;
-          } catch (err) {
-            console.error("SignalR connection error:", err);
-            return false;
-          }
-        }
-
-        async function loadChatPartners() {
-          try {
-            const res = await fetch(`${baseUrl}/Message/chat-rooms?userId=${currentUserId}`);
-            const chatList = document.querySelector('.chat-list');
-            chatList.innerHTML = '';
-
-            if (res.ok) {
-              const partners = await res.json();
-
-              if (Array.isArray(partners) && partners.length > 0) {
-                partners.forEach(p => {
-                  const fullName = p.fullName || p.email || 'Unknown User';
-                  const avatar = p.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
-                  const lastTime = p.lastSentAt || p.updateAt || p.createAt;
-
-                  const div = document.createElement('div');
-                  div.classList.add('chat-item');
-                  div.setAttribute('data-user-id', p.userId);
-                  div.innerHTML = `
-                    <div class="avatar-container">
-                      <img src="${avatar}" class="avatar">
-                      <div class="status-indicator"></div>
-                    </div>
-                    <div class="chat-info">
-                      <div class="chat-name">${fullName}</div>
-                    </div>
-                    <div class="chat-time">${new Date(lastTime).toLocaleTimeString()}</div>
-                  `;
-                  div.onclick = () => loadConversation(p.userId, fullName, avatar);
-                  chatList.appendChild(div);
-                });
-              } else {
-                chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
-              }
-            } else {
-              console.warn("No chat partners found or API error");
-              chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">No conversations yet</div>';
-            }
-          } catch (err) {
-            console.error("Error loading chat partners:", err);
-            const chatList = document.querySelector('.chat-list');
-            chatList.innerHTML = '<div style="text-align:center; color:#aaa; padding: 20px;">Error loading conversations</div>';
-          }
-        }
-
-        async function getUserInfo(userId) {
-          try {
-            const res = await fetch(`${baseUrl}/User/GetUserById/${userId}`);
-            if (res.ok) {
-              const user = await res.json();
-
-              const fullName = user.userMetaData
-                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
-                : user.email || 'Unknown User';
-
-              const avatar = user.userMetaData?.avatar || 'https://via.placeholder.com/50';
-
-              return {
-                fullName: fullName,
-                avatar: avatar,
-                email: user.email,
-                phone: user.phone,
-                userId: user.userId
-              };
-            }
-            return null;
-          } catch (err) {
-            console.error("Error fetching user info:", err);
-            return null;
-          }
-        }
-
-        function findExistingChatItem(userId) {
-          const chatList = document.querySelector('.chat-list');
-          return chatList.querySelector(`[data-user-id="${userId}"]`);
-        }
-
-        function createChatItem(userInfo, isNewChat = false) {
-          const chatList = document.querySelector('.chat-list');
-
-          const existingItem = findExistingChatItem(userInfo.userId);
-          if (existingItem) {
-            existingItem.click();
-            return existingItem;
-          }
-
-          const emptyMessage = chatList.querySelector('div[style*="text-align:center"]');
-          if (emptyMessage) {
-            emptyMessage.remove();
-          }
-
-          const div = document.createElement('div');
-          div.classList.add('chat-item');
-          if (isNewChat) {
-            div.classList.add('new-chat-item');
-          }
-          div.setAttribute('data-user-id', userInfo.userId);
-
-          const currentTime = new Date().toLocaleTimeString();
-
-          div.innerHTML = `
-            <div class="avatar-container">
-              <img src="${userInfo.avatar}" class="avatar">
-              <div class="status-indicator"></div>
-            </div>
-            <div class="chat-info">
-              <div class="chat-name">${userInfo.fullName}</div>
-              ${isNewChat ? '<div style="font-size: 12px; color: #999; font-style: italic;">New conversation</div>' : ''}
-            </div>
-            <div class="chat-time">${currentTime}</div>
-          `;
-
-          div.onclick = () => loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
-
-          if (isNewChat) {
-            chatList.insertBefore(div, chatList.firstChild);
-          } else {
-            chatList.appendChild(div);
-          }
-
-          return div;
-        }
-
-        async function loadConversation(userId, fullName, avatar) {
-          console.log(`Loading conversation with ${userId}`);
-
-          // Set current receiver info TRƯỚC KHI load messages
-          currentReceiverId = userId;
-          currentReceiverName = fullName;
-          currentReceiverAvatar = avatar;
-
-          document.querySelector('.chat-user-name').textContent = fullName;
-          document.querySelector('.chat-user-avatar').src = avatar;
-
-          document.querySelector('.messages-container').classList.remove('empty-chat');
-          document.querySelector('.chat-header').style.display = 'flex';
-          document.querySelector('.message-input-container').style.display = 'flex';
-
-          const container = document.querySelector('.messages-container');
-          container.innerHTML = '';
-
-          // Clear message tracker khi load conversation mới
-          messageTracker.clear();
-          domMessageIds.clear();
-
-          try {
-            const res = await fetch(`${baseUrl}/Message/Room?userId1=${currentUserId}&userId2=${userId}`);
-
-            let messages = [];
-
-            if (res.ok) {
-              try {
-                messages = await res.json();
-              } catch (parseError) {
-                console.warn("Failed to parse messages JSON:", parseError);
-                messages = [];
-              }
-            }
-
-            if (messages.length === 0) {
-              container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
-            } else {
-              messages.forEach(m => {
-                // Track loaded messages để tránh duplicate từ SignalR
-                const messageKey = m.id || `${m.senderId}-${m.receiverId}-${m.content}`;
-                messageTracker.set(messageKey, Date.now());
-                appendMessage(m, m.senderId === currentUserId);
-              });
-            }
-
-          } catch (err) {
-            console.warn("Conversation not found yet. This is a new chat.");
-            container.innerHTML = `<div style="text-align:center; color:#aaa; padding: 20px;">Start your conversation with ${fullName}...</div>`;
-          }
-
-          // Đánh dấu conversation đã được load
-          isInitialized = true;
-
-          // Xử lý các messages đang chờ
-          processPendingMessages();
-
-          // Highlight selected chat item
-          document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-          const selectedItem = document.querySelector(`[data-user-id="${userId}"]`);
-          if (selectedItem) {
-            selectedItem.classList.add('active');
-          }
-        }
-
-        async function createNewChatArea(userId, userName = null, userAvatar = null) {
-          const existingChatItem = findExistingChatItem(userId);
-
-          if (existingChatItem) {
-            console.log(`User ${userId} already exists in chat list, opening existing chat`);
-            existingChatItem.click();
-            return;
-          }
-
-          console.log(`User ${userId} not in chat list, creating new chat`);
-
-          let userInfo = null;
-          if (!userName || !userAvatar) {
-            console.log(`Fetching user info for userId: ${userId}`);
-            userInfo = await getUserInfo(userId);
-            if (userInfo) {
-              userName = userInfo.fullName;
-              userAvatar = userInfo.avatar;
-              console.log(`User info found:`, userInfo);
-            } else {
-              userName = userName || "Unknown User";
-              userAvatar = userAvatar || "https://via.placeholder.com/50";
-              console.warn(`Could not fetch user info for userId: ${userId}`);
-              userInfo = {
-                userId: userId,
-                fullName: userName,
-                avatar: userAvatar
-              };
-            }
-          } else {
-            userInfo = {
-              userId: userId,
-              fullName: userName,
-              avatar: userAvatar
-            };
-          }
-
-          const newChatItem = createChatItem(userInfo, true);
-          await loadConversation(userId, userName, userAvatar);
-        }
-
-        // Sử dụng Set để track DOM elements
-        let domMessageIds = new Set();
-
-                function appendMessage(message, isSent) {
-          console.log("🧩 [appendMessage] Appending message:", message);
-          console.log("🧾 Message content:", message.content);
-          console.log("✉️ Sent by current user:", isSent);
-
-          const container = document.querySelector('.messages-container');
-          if (!container) {
-            console.error("❌ messages-container NOT FOUND in DOM.");
-            return;
-          }
-
-          const domMessageId = message.id || `${message.senderId}-${message.receiverId}-${message.content}`;
-          console.log("🔖 DOM Message ID:", domMessageId);
-
-          if (domMessageIds.has(domMessageId)) {
-            console.warn("⚠️ Message already exists in domMessageIds Set.");
-            return;
-          }
-
-          if (container.querySelector(`[data-message-id="${domMessageId}"]`)) {
-            console.warn("⚠️ Message element already exists in DOM.");
-            return;
-          }
-
-          domMessageIds.add(domMessageId);
-
-          const emptyMessage = container.querySelector('div[style*="text-align:center"]');
-          if (emptyMessage) {
-            console.log("🧽 Removing empty message placeholder.");
-            emptyMessage.remove();
-          }
-
-          const msgDiv = document.createElement('div');
-          msgDiv.classList.add('message');
-          if (isSent) msgDiv.classList.add('sent');
-          msgDiv.setAttribute('data-message-id', domMessageId);
-
-          const avatarHtml = isSent
-            ? ''
-            : `<img src="${currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}" class="message-avatar">`;
-
-          msgDiv.innerHTML = `
-            ${avatarHtml}
-            <div class="message-content">${message.content}</div>
-          `;
-
-          container.appendChild(msgDiv);
-          container.scrollTop = container.scrollHeight;
-
-          console.log("✅ Message appended successfully to DOM.");
-
-          if (domMessageIds.size > 200) {
-            const ids = Array.from(domMessageIds);
-            ids.slice(0, 100).forEach(id => domMessageIds.delete(id));
-            console.log("🧹 Cleaned up old message DOM IDs.");
-          }
-        }
-
-        // Send message function với better duplicate prevention
-        let isSending = false;
-        let lastSentContent = '';
-        let lastSentTime = 0;
-
-        document.querySelector('.send-btn').onclick = async () => {
-          if (isSending) {
-            console.log("Already sending, ignoring click");
-            return;
-          }
-
-          const textarea = document.querySelector('.message-input');
-          const content = textarea.value.trim();
-          if (!content || !currentReceiverId) return;
-
-          // Prevent spam/duplicate sends
-          const now = Date.now();
-          if (content === lastSentContent && (now - lastSentTime) < 1000) {
-            console.log("Duplicate message within 1 second, ignoring");
-            return;
-          }
-
-          isSending = true;
-          lastSentContent = content;
-          lastSentTime = now;
-
-          const payload = {
-            senderId: currentUserId,
-            receiverId: currentReceiverId,
-            content: content
-          };
-
-          try {
-            console.log("Sending message:", payload);
-            const res = await fetch(`${baseUrl}/Message/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-              const sent = await res.json();
-              console.log(`Message sent successfully:`, sent);
-
-              // Track this message để tránh duplicate từ SignalR
-              const messageKey = `${sent.senderId}-${sent.receiverId}-${sent.content}-${sent.id || Date.now()}`;
-              messageTracker.set(messageKey, Date.now());
-
-              // Append message immediately
-              appendMessage(sent, true);
-
-              // Clear input
-              textarea.value = '';
-
-              // Update chat item
-              const currentChatItem = document.querySelector(`[data-user-id="${currentReceiverId}"]`);
-              if (currentChatItem && currentChatItem.classList.contains('new-chat-item')) {
-                currentChatItem.classList.remove('new-chat-item');
-                const newConvText = currentChatItem.querySelector('div[style*="font-style: italic"]');
-                if (newConvText) {
-                  newConvText.remove();
+           const ChatApp = {
+            // Configuration
+            config: {
+                baseUrl: "@Model.BaseUrl",
+                hubUrl: "@Model.HubUrl",
+                currentUserId: "@Model.CurrentUserId",
+                reconnectAttempts: 3,
+                messageCleanupThreshold: 200,
+                duplicatePreventionTime: 1000
+            },
+
+            // State management
+            state: {
+                connection: null,
+                currentReceiverId: '',
+                currentReceiverName: '',
+                currentReceiverAvatar: '',
+                isConnected: false,
+                isInitialized: false,
+                isSending: false,
+                lastSentContent: '',
+                lastSentTime: 0
+            },
+
+            // Data tracking
+            trackers: {
+                messageTracker: new Map(),
+                domMessageIds: new Set(),
+                pendingMessages: []
+            },
+
+            // Utility functions
+            utils: {
+                normalize: (id) => id?.toString().trim().toLowerCase(),
+
+                createUniqueMessageKey: (message) => {
+                    return message.id ? `id-${message.id}` :
+                           `${message.senderId}-${message.receiverId}-${message.content}-${Date.now()}`;
+                },
+
+                createDOMMessageId: (message) => {
+                    return message.id ? `msg-${message.id}` :
+                           `temp-${message.senderId}-${message.receiverId}-${message.content}-${Date.now()}`;
+                },
+
+                getQueryParam: (key) => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    return urlParams.get(key);
+                },
+
+                cleanupTracker: (tracker, threshold = 200, keepCount = 100) => {
+                    if (tracker.size > threshold) {
+                        const entries = Array.from(tracker.entries()).sort((a, b) => a[1] - b[1]);
+                        entries.slice(0, keepCount).forEach(([key]) => tracker.delete(key));
+                    }
                 }
-              }
+            },
 
-              // Update timestamp
-              const currentTime = new Date().toLocaleTimeString();
-              const timeElement = currentChatItem?.querySelector('.chat-time');
-              if (timeElement) {
-                timeElement.textContent = currentTime;
-              }
+            // SignalR Connection Management
+            connection: {
+                async initialize() {
+                    try {
+                        // Create new connection
+                        ChatApp.state.connection = new signalR.HubConnectionBuilder()
+                            .withUrl(`${ChatApp.config.hubUrl}/postHub?userId=${ChatApp.config.currentUserId}`)
+                            .withAutomaticReconnect()
+                            .build();
+
+                        ChatApp.connection.setupEventHandlers();
+                        return await ChatApp.connection.start();
+                    } catch (error) {
+                        console.error("❌ Failed to initialize SignalR connection:", error);
+                        return false;
+                    }
+                },
+
+                async start() {
+                    if (ChatApp.state.connection.state === signalR.HubConnectionState.Connected) {
+                        console.warn("⚠️ Already connected to SignalR.");
+                        return true;
+                    }
+
+                    try {
+                        console.log("🔌 Attempting to connect to SignalR...");
+                        await ChatApp.state.connection.start();
+                        console.log("✅ SignalR connected successfully!");
+                        ChatApp.state.isConnected = true;
+                        return true;
+                    } catch (error) {
+                        console.error("❌ SignalR connection failed:", error);
+                        ChatApp.state.isConnected = false;
+                        return false;
+                    }
+                    },
+
+                setupEventHandlers() {
+                    const conn = ChatApp.state.connection;
+
+                    if (!conn) {
+                        console.error("❌ Cannot setup handlers: connection is null");
+                        return;
+                    }
+
+                    try {
+                        // Message reception handler
+                        conn.on("ReceiveMessage", ChatApp.handlers.onReceiveMessage);
+                        conn.on("NewChatRoom", ChatApp.handlers.onNewChatRoom);
+
+                        // Connection state handlers
+                    conn.onreconnecting(error => {
+                        ChatApp.state.connectionStatus = "Reconnecting";
+                        console.warn("🔄 SignalR reconnecting...", error);
+                    });
+
+                    conn.onreconnected(connectionId => {
+                        ChatApp.state.connectionStatus = "Connected";
+                        console.log("✅ Reconnected! Connection ID:", connectionId);
+                    });
+
+                    conn.onclose(error => {
+                        ChatApp.state.connectionStatus = "Disconnected";
+                        console.error("❌ SignalR connection closed", error);
+                    });
+
+                        console.log("✅ SignalR event handlers setup complete");
+                    } catch (error) {
+                        console.error("❌ Error setting up SignalR handlers:", error);
+                    }
+                }
+            },
+
+            // Event Handlers
+           handlers: {
+                onReceiveMessage(message) {
+                console.log("📥 Received message via SignalR:", message);
+                console.log("Current state:", {
+                currentReceiverId: ChatApp.state.currentReceiverId,
+                currentUserId: ChatApp.config.currentUserId,
+                isInitialized: ChatApp.state.isInitialized
+                });
+
+            const messageKey = ChatApp.utils.createUniqueMessageKey(message);
+
+            if (ChatApp.trackers.messageTracker.has(messageKey)) {
+                console.log("🔄 Duplicate message ignored");
+                return;
+            }
+
+            ChatApp.trackers.messageTracker.set(messageKey, Date.now());
+
+            const { normalize } = ChatApp.utils;
+            const { currentReceiverId, isInitialized } = ChatApp.state;
+            const { currentUserId } = ChatApp.config;
+
+            const isIncomingMessage = normalize(message.senderId) === normalize(currentReceiverId) &&
+                                     normalize(message.receiverId) === normalize(currentUserId);
+
+            const isOutgoingMessage = normalize(message.senderId) === normalize(currentUserId) &&
+                                     normalize(message.receiverId) === normalize(currentReceiverId);
+
+            const isRelevantToCurrentChat = isIncomingMessage || isOutgoingMessage;
+
+            console.log("Message routing debug:", {
+                isIncoming: isIncomingMessage,
+                isOutgoing: isOutgoingMessage,
+                isRelevant: isRelevantToCurrentChat,
+                isInitialized,
+                currentReceiverId: !!currentReceiverId,
+                messageDetails: {
+                    from: message.senderId,
+                    to: message.receiverId,
+                    chatWith: currentReceiverId,
+                    currentUser: currentUserId
+                }
+            });
+
+            if (isRelevantToCurrentChat && currentReceiverId && isInitialized) {
+                const isSentByCurrentUser = normalize(message.senderId) === normalize(currentUserId);
+                console.log("✅ Displaying message in current chat:", { isSentByCurrentUser });
+                ChatApp.ui.appendMessage(message, isSentByCurrentUser);
+
+            } else if (isRelevantToCurrentChat && (!isInitialized || !currentReceiverId)) {
+                const isSentByCurrentUser = normalize(message.senderId) === normalize(currentUserId);
+                console.log("📋 Queuing message for later:", { isSentByCurrentUser });
+                ChatApp.trackers.pendingMessages.push({ message, isSentByCurrentUser });
 
             } else {
-              console.error("Failed to send message", res.status);
+                const isForCurrentUser = normalize(message.receiverId) === normalize(currentUserId);
+                if (isForCurrentUser) {
+                    console.log("🔄 New message from different user, refreshing chat list");
+                    ChatApp.chat.loadChatPartners();
+                } else {
+                    console.log("ℹ️ Message not relevant to current user");
+                }
             }
-          } catch (err) {
-            console.error("Error sending message:", err);
-          } finally {
-            isSending = false;
-          }
-        };
 
-        // Event listener cho Enter key (chỉ đăng ký 1 lần)
-        let enterListenerAdded = false;
-        if (!enterListenerAdded) {
-          document.querySelector('.message-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              document.querySelector('.send-btn').click();
+            ChatApp.utils.cleanupTracker(ChatApp.trackers.messageTracker);
             }
-          });
-          enterListenerAdded = true;
+                },
+
+            // Chat Management
+            chat: {
+                async loadChatPartners() {
+                    try {
+                        const response = await fetch(`${ChatApp.config.baseUrl}/Message/chat-rooms?userId=${ChatApp.config.currentUserId}`);
+                        const chatList = document.querySelector('.chat-list');
+
+                        if (!chatList) return;
+
+                        chatList.innerHTML = '';
+
+                        if (response.ok) {
+                            const partners = await response.json();
+
+                            if (Array.isArray(partners) && partners.length > 0) {
+                                partners.forEach(partner => {
+                                    const chatItem = ChatApp.ui.createChatPartnerItem(partner);
+                                    chatList.appendChild(chatItem);
+                                });
+                            } else {
+                                chatList.innerHTML = '<div class="no-conversations">No conversations yet</div>';
+                            }
+                        } else {
+                            console.warn("Failed to load chat partners");
+                            chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
+                        }
+                    } catch (error) {
+                        console.error("Error loading chat partners:", error);
+                        const chatList = document.querySelector('.chat-list');
+                        if (chatList) {
+                            chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
+                        }
+                    }
+                },
+
+                async loadConversation(userId, fullName, avatar) {
+                    // Reset state for new conversation
+                    ChatApp.state.isInitialized = false;
+
+                    ChatApp.trackers.messageTracker.clear();
+                    ChatApp.trackers.domMessageIds.clear();
+                    ChatApp.trackers.pendingMessages = [];
+
+                    // Set current receiver info
+                    ChatApp.state.currentReceiverId = userId;
+                    ChatApp.state.currentReceiverName = fullName;
+                    ChatApp.state.currentReceiverAvatar = avatar;
+
+                    // Update UI elements
+                    ChatApp.ui.updateChatHeader(fullName, avatar);
+                    ChatApp.ui.showChatInterface();
+
+                    const container = document.querySelector('.messages-container');
+                    if (!container) return;
+
+                    container.innerHTML = '';
+
+                    try {
+                        const response = await fetch(`${ChatApp.config.baseUrl}/Message/Room?userId1=${ChatApp.config.currentUserId}&userId2=${userId}`);
+                        let messages = [];
+
+                        if (response.ok) {
+                            const responseText = await response.text();
+                            if (responseText.trim()) {
+                                try {
+                                    messages = JSON.parse(responseText);
+                                } catch (parseError) {
+                                    console.warn("Failed to parse messages:", parseError);
+                                }
+                            }
+                        }
+
+                        if (!Array.isArray(messages)) {
+                            messages = [];
+                        }
+
+                        if (messages.length === 0) {
+                            ChatApp.ui.showEmptyChat(fullName);
+                        } else {
+                            messages.forEach(message => {
+                                const messageKey = ChatApp.utils.createUniqueMessageKey(message);
+                                ChatApp.trackers.messageTracker.set(messageKey, Date.now());
+                                const isSent = message.senderId.toString() === ChatApp.config.currentUserId.toString();
+                                ChatApp.ui.appendMessage(message, isSent);
+                            });
+                        }
+                    } catch (error) {
+                        console.warn("Conversation not found, starting new chat:", error);
+                        ChatApp.ui.showEmptyChat(fullName);
+                    }
+
+                    // Mark as initialized and process pending messages
+                    ChatApp.state.isInitialized = true;
+                    console.log("✅ Conversation initialized, isInitialized:", ChatApp.state.isInitialized);
+
+                    ChatApp.chat.processPendingMessages();
+
+                    // Update UI selection
+                    ChatApp.ui.updateChatSelection(userId);
+                },
+
+                processPendingMessages() {
+                    if (ChatApp.trackers.pendingMessages.length > 0) {
+                        ChatApp.trackers.pendingMessages.forEach(({ message, isSentByCurrentUser }) => {
+                            ChatApp.ui.appendMessage(message, isSentByCurrentUser);
+                        });
+                        ChatApp.trackers.pendingMessages = [];
+                    }
+                },
+
+                async getUserInfo(userId) {
+                    try {
+                        const response = await fetch(`${ChatApp.config.baseUrl}/User/GetUserById/${userId}`);
+                        if (response.ok) {
+                            const user = await response.json();
+
+                            const fullName = user.userMetaData
+                                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
+                                : user.email || 'Unknown User';
+
+                            const avatar = user.userMetaData?.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
+
+                            return {
+                                fullName,
+                                avatar,
+                                email: user.email,
+                                phone: user.phone,
+                                userId: user.userId
+                            };
+                        }
+                    } catch (error) {
+                        console.error("Error fetching user info:", error);
+                    }
+                    return null;
+                },
+
+                async createNewChat(userId, userName = null, userAvatar = null) {
+                    const existingChatItem = ChatApp.ui.findChatItem(userId);
+
+                    if (existingChatItem) {
+                        console.log("Opening existing chat");
+                        existingChatItem.click();
+                        return;
+                    }
+
+                    console.log("Creating new chat");
+
+                    let userInfo;
+                    if (!userName || !userAvatar) {
+                        userInfo = await ChatApp.chat.getUserInfo(userId);
+                        if (!userInfo) {
+                            userInfo = {
+                                userId,
+                                fullName: userName || "Unknown User",
+                                avatar: userAvatar || "https://i.postimg.cc/FHnRyy40/default.jpg"
+                            };
+                        }
+                    } else {
+                        userInfo = { userId, fullName: userName, avatar: userAvatar };
+                    }
+
+                    ChatApp.ui.createNewChatItem(userInfo);
+                    await ChatApp.chat.loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
+                }
+            },
+
+            // Message Management
+            message: {
+                async send() {
+                    if (ChatApp.state.isSending) {
+                        console.log("Already sending a message");
+                        return;
+                    }
+
+                    const textarea = document.querySelector('.message-input');
+                    const content = textarea?.value.trim();
+
+                    if (!content) {
+                        console.log("Empty content");
+                        return;
+                    }
+
+                    if (!ChatApp.state.currentReceiverId) {
+                        alert("Please select a conversation first");
+                        return;
+                    }
+
+                    // Check connection status
+                    if (!ChatApp.state.isConnected) {
+                        console.warn("⚠️ SignalR not connected, message may not sync in real-time");
+                    }
+
+                    // Prevent spam
+                    const now = Date.now();
+                    if (content === ChatApp.state.lastSentContent &&
+                        (now - ChatApp.state.lastSentTime) < ChatApp.config.duplicatePreventionTime) {
+                        console.log("Duplicate message ignored");
+                        return;
+                    }
+
+                    ChatApp.state.isSending = true;
+                    ChatApp.state.lastSentContent = content;
+                    ChatApp.state.lastSentTime = now;
+
+                    const originalContent = content;
+                    textarea.value = '';
+
+                    const payload = {
+                        senderId: ChatApp.config.currentUserId,
+                        receiverId: ChatApp.state.currentReceiverId,
+                        content: content
+                    };
+
+                    try {
+                        console.log("📤 Sending message:", payload);
+
+                        const response = await fetch(`${ChatApp.config.baseUrl}/Message/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            const sentMessage = await response.json();
+                            console.log("✅ Message sent successfully");
+
+                            const messageToAppend = {
+                                id: sentMessage.id || `temp-${Date.now()}`,
+                                senderId: ChatApp.config.currentUserId,
+                                receiverId: ChatApp.state.currentReceiverId,
+                                content: content,
+                                sentAt: sentMessage.sentAt || new Date().toISOString()
+                            };
+
+                            const messageKey = ChatApp.utils.createUniqueMessageKey(messageToAppend);
+                            ChatApp.trackers.messageTracker.set(messageKey, Date.now());
+
+                            ChatApp.ui.appendMessage(messageToAppend, true);
+                            ChatApp.ui.updateChatItemAfterSend();
+                        } else {
+                            const errorText = await response.text();
+                            console.error("❌ Message sending failed:", errorText);
+                            textarea.value = originalContent;
+                            alert("Failed to send message. Please try again.");
+                        }
+                    } catch (error) {
+                        console.error("Network error:", error);
+                        textarea.value = originalContent;
+                        alert("Network error. Please check your connection and try again.");
+                    } finally {
+                        ChatApp.state.isSending = false;
+                    }
+                }
+            },
+
+            // UI Management
+            ui: {
+                createChatPartnerItem(partner) {
+                    const fullName = partner.fullName || partner.email || 'Unknown User';
+                    const avatar = partner.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
+                    const lastTime = partner.lastSentAt || partner.updateAt || partner.createAt;
+
+                    const div = document.createElement('div');
+                    div.classList.add('chat-item');
+                    div.setAttribute('data-user-id', partner.userId);
+                    div.innerHTML = `
+                        <div class="avatar-container">
+                            <img src="${avatar}" class="avatar" alt="${fullName}">
+                            <div class="status-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-name">${fullName}</div>
+                        </div>
+                        <div class="chat-time">${new Date(lastTime).toLocaleTimeString()}</div>
+                    `;
+
+                    div.onclick = () => ChatApp.chat.loadConversation(partner.userId, fullName, avatar);
+                    return div;
+                },
+
+                createNewChatItem(userInfo) {
+                    const chatList = document.querySelector('.chat-list');
+                    if (!chatList) return;
+
+                    // Remove empty message if exists
+                    const emptyMessage = chatList.querySelector('.no-conversations');
+                    if (emptyMessage) {
+                        emptyMessage.remove();
+                    }
+
+                    const div = document.createElement('div');
+                    div.classList.add('chat-item', 'new-chat-item');
+                    div.setAttribute('data-user-id', userInfo.userId);
+
+                    const currentTime = new Date().toLocaleTimeString();
+                    div.innerHTML = `
+                        <div class="avatar-container">
+                            <img src="${userInfo.avatar}" class="avatar" alt="${userInfo.fullName}">
+                            <div class="status-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-name">${userInfo.fullName}</div>
+                            <div class="new-chat-indicator">New conversation</div>
+                        </div>
+                        <div class="chat-time">${currentTime}</div>
+                    `;
+
+                    div.onclick = () => ChatApp.chat.loadConversation(userInfo.userId, userInfo.fullName, userInfo.avatar);
+                    chatList.insertBefore(div, chatList.firstChild);
+                    return div;
+                },
+
+                findChatItem(userId) {
+                    const chatList = document.querySelector('.chat-list');
+                    return chatList?.querySelector(`[data-user-id="${userId}"]`);
+                },
+
+                updateChatHeader(fullName, avatar) {
+                    const nameElement = document.querySelector('.chat-user-name');
+                    const avatarElement = document.querySelector('.chat-user-avatar');
+
+                    if (nameElement) nameElement.textContent = fullName;
+                    if (avatarElement) avatarElement.src = avatar;
+                },
+
+                showChatInterface() {
+                    const container = document.querySelector('.messages-container');
+                    const header = document.querySelector('.chat-header');
+                    const inputContainer = document.querySelector('.message-input-container');
+
+                    if (container) container.classList.remove('empty-chat');
+                    if (header) header.style.display = 'flex';
+                    if (inputContainer) inputContainer.style.display = 'flex';
+                },
+
+                showEmptyChat(fullName) {
+                    const container = document.querySelector('.messages-container');
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="empty-chat-message">
+                                Start your conversation with ${fullName}...
+                            </div>
+                        `;
+                    }
+                },
+
+                appendMessage(message, isSent) {
+                    const container = document.querySelector('.messages-container');
+                    if (!container) return;
+
+                    const domMessageId = ChatApp.utils.createDOMMessageId(message);
+
+                    // Prevent DOM duplicates
+                    if (ChatApp.trackers.domMessageIds.has(domMessageId) ||
+                        container.querySelector(`[data-message-id="${domMessageId}"]`)) {
+                        return;
+                    }
+
+                    ChatApp.trackers.domMessageIds.add(domMessageId);
+
+                    // Remove empty message placeholder
+                    const emptyMessage = container.querySelector('.empty-chat-message');
+                    if (emptyMessage) {
+                        emptyMessage.remove();
+                    }
+
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('message');
+                    if (isSent) msgDiv.classList.add('sent');
+                    msgDiv.setAttribute('data-message-id', domMessageId);
+
+                    const avatarHtml = isSent ? '' :
+                        `<img src="${ChatApp.state.currentReceiverAvatar || 'https://i.postimg.cc/FHnRyy40/default.jpg'}"
+                              class="message-avatar" alt="Avatar">`;
+
+                    msgDiv.innerHTML = `
+                        ${avatarHtml}
+                        <div class="message-content">${message.content}</div>
+                    `;
+
+                    container.appendChild(msgDiv);
+                    container.scrollTop = container.scrollHeight;
+
+                    // Cleanup DOM tracker
+                    ChatApp.utils.cleanupTracker(ChatApp.trackers.domMessageIds);
+                },
+
+                updateChatSelection(userId) {
+                    document.querySelectorAll('.chat-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+
+                    const selectedItem = document.querySelector(`[data-user-id="${userId}"]`);
+                    if (selectedItem) {
+                        selectedItem.classList.add('active');
+                    }
+                },
+
+                updateChatItemAfterSend() {
+                    const currentChatItem = document.querySelector(`[data-user-id="${ChatApp.state.currentReceiverId}"]`);
+                    if (!currentChatItem) return;
+
+                    // Remove new chat indicators
+                    if (currentChatItem.classList.contains('new-chat-item')) {
+                        currentChatItem.classList.remove('new-chat-item');
+                        const indicator = currentChatItem.querySelector('.new-chat-indicator');
+                        if (indicator) indicator.remove();
+                    }
+
+                    // Update timestamp
+                    const timeElement = currentChatItem.querySelector('.chat-time');
+                    if (timeElement) {
+                        timeElement.textContent = new Date().toLocaleTimeString();
+                    }
+                }
+            },
+
+            // Event Setup
+            events: {
+                setup() {
+                    // Send button
+                    const sendBtn = document.querySelector('.send-btn');
+                    if (sendBtn) {
+                        sendBtn.onclick = ChatApp.message.send;
+                    }
+
+                    // Enter key for sending messages
+                    const messageInput = document.querySelector('.message-input');
+                    if (messageInput) {
+                        messageInput.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                ChatApp.message.send();
+                            }
+                        });
+                    }
+                }
+            },
+
+            // Public API
+            api: {
+                startChatWithUser: async function(userId) {
+                    if (!userId) {
+                        console.error("User ID is required");
+                        return;
+                    }
+                    await ChatApp.chat.createNewChat(userId);
+                },
+
+                navigateToChatWithUser: function(userId, userName = null, userAvatar = null) {
+                    const params = new URLSearchParams();
+                    params.append('partnerId', userId);
+                    if (userName) params.append('partnerName', userName);
+                    if (userAvatar) params.append('partnerAvatar', userAvatar);
+                    window.location.href = `${ChatApp.config.baseUrl}/Chat?${params.toString()}`;
+                }
+            },
+
+            // Main initialization
+            async init() {
+                try {
+                    console.log("🚀 Initializing ChatApp...");
+                    console.log("Config:", ChatApp.config);
+
+                    // Validate required configuration
+                    if (!ChatApp.config.baseUrl || !ChatApp.config.hubUrl || !ChatApp.config.currentUserId) {
+                        console.error("❌ Missing required configuration:", {
+                            baseUrl: ChatApp.config.baseUrl,
+                            hubUrl: ChatApp.config.hubUrl,
+                            currentUserId: ChatApp.config.currentUserId
+                        });
+                        return false;
+                    }
+
+                    // Setup event listeners first
+                    ChatApp.events.setup();
+
+                    // Initialize SignalR connection
+                    const connected = await ChatApp.connection.initialize();
+                    if (!connected) {
+                        console.error("❌ Failed to establish SignalR connection");
+                        // Continue without real-time features
+                        console.log("⚠️ Continuing without real-time messaging");
+                    }
+
+                    // Load existing chat partners
+                    await ChatApp.chat.loadChatPartners();
+
+                    // Handle URL parameters for direct chat
+                    const partnerId = ChatApp.utils.getQueryParam("partnerId");
+                    const partnerName = ChatApp.utils.getQueryParam("partnerName");
+                    const partnerAvatar = ChatApp.utils.getQueryParam("partnerAvatar");
+
+                    if (partnerId) {
+                        await ChatApp.chat.createNewChat(partnerId, partnerName, partnerAvatar);
+                    }
+
+                    console.log("✅ ChatApp initialized successfully");
+                    return true;
+                } catch (error) {
+                    console.error("❌ Critical error during initialization:", error);
+                    return false;
+                }
+            }
+        };
+
+        // Global API exposure
+        window.startChatWithUser = ChatApp.api.startChatWithUser;
+        window.navigateToChatWithUser = ChatApp.api.navigateToChatWithUser;
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ChatApp.init);
+        } else {
+            ChatApp.init();
         }
-
-        function getQueryParam(key) {
-          const urlParams = new URLSearchParams(window.location.search);
-          return urlParams.get(key);
-        }
-
-        window.startChatWithUser = async function(userId) {
-          if (!userId) {
-            console.error("User ID is required");
-            return;
-          }
-
-          await createNewChatArea(userId);
-        };
-
-        window.navigateToChatWithUser = function(userId, userName = null, userAvatar = null) {
-          const params = new URLSearchParams();
-          params.append('partnerId', userId);
-
-          if (userName) params.append('partnerName', userName);
-          if (userAvatar) params.append('partnerAvatar', userAvatar);
-
-          window.location.href = `${baseUrl}/Chat?${params.toString()}`;
-        };
-
-        // Khởi tạo ứng dụng
-        window.onload = async () => {
-          console.log("Initializing chat application...");
-
-          // Kết nối SignalR TRƯỚC TIÊN
-          const connected = await startConnection();
-          if (!connected) {
-            console.error("Failed to connect to SignalR");
-            return;
-          }
-
-          // Load danh sách chat partners
-          await loadChatPartners();
-
-          // Xử lý partnerId từ URL parameters
-          const partnerId = getQueryParam("partnerId");
-          const partnerName = getQueryParam("partnerName");
-          const partnerAvatar = getQueryParam("partnerAvatar");
-
-          if (partnerId) {
-            console.log(`Loading chat for partnerId: ${partnerId}`);
-            // Không cần timeout, load ngay lập tức sau khi SignalR đã connect
-            await createNewChatArea(partnerId, partnerName, partnerAvatar);
-          }
-
-          console.log("Chat application initialized successfully");
-        };
     </script>
 
 </body>
