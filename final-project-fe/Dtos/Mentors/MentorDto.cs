@@ -6,6 +6,10 @@
         public string FirstName { get; set; }
 		public string LastName { get; set; }
 	}
+    public class MentorResponse
+    {
+        public int MentorId { get; set; }
+    }
     public class MentorInforDto
     {
         public string FirstName { get; set; }
