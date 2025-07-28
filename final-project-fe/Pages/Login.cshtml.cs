@@ -38,36 +38,36 @@ namespace final_project_fe.Pages.Shared
         {
             BaseUrl = _apiSettings.BaseUrl;
 
-            // ✅ 1. Nếu đã có token, chuyển hướng
+            //  1. If token is present, redirect
             var token = Request.Cookies["AccessToken"];
             if (!string.IsNullOrEmpty(token))
             {
                 return RedirectToPage("/Index");
             }
 
-            // ✅ 2. Nếu có mã từ Google callback
+            //  2. If there is a code from Google callback
             if (!string.IsNullOrEmpty(code) || !string.IsNullOrEmpty(error))
             {
                 if (!string.IsNullOrEmpty(error))
                 {
-                    ModelState.AddModelError("", "Google login error: " + error);
+                    TempData["ErrorMessage"] = $"Google login error: {error}";
                     return Page();
                 }
 
-                // Gọi backend để xử lý code và trả về token
+                // Call backend to process code and return token
                 var client = _httpClientFactory.CreateClient();
                 var callbackUrl = $"{_apiSettings.BaseUrl}/Auth/google-callback?code={code}";
 
                 var response = await client.GetAsync(callbackUrl);
                 if (!response.IsSuccessStatusCode)
                 {
-                    ModelState.AddModelError("", "Login failed during callback.");
+                    TempData["Error"] = "Login failed during callback!";
                     return Page();
                 }
 
                 var newToken = await response.Content.ReadAsStringAsync();
 
-                // ✅ Lưu token vào cookie
+                //  Save tokens in cookies
                 Response.Cookies.Append("AccessToken", newToken, new CookieOptions
                 {
                     Secure = true,
@@ -76,12 +76,12 @@ namespace final_project_fe.Pages.Shared
                     Expires = DateTimeOffset.UtcNow.AddDays(3)
                 });
 
-                // ✅ Redirect sau khi lưu token
-
+                //  Redirect after saving token
+                TempData["SuccessMessage"] = "Login successful!";
                 return RedirectToPage("/Index");
             }
 
-            // 🟡 3. Không có token và không phải callback → hiển thị form login
+            //  3. No token and no callback → show login form
             return Page();
         }
 
@@ -89,6 +89,7 @@ namespace final_project_fe.Pages.Shared
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Login Error!";
                 return Page();
             }
 
@@ -129,20 +130,21 @@ namespace final_project_fe.Pages.Shared
 
                             if (role == "Admin")
                             {
+                                TempData["SuccessMessage"] = "Admin login successful!";
                                 return RedirectToPage("/Admin/Dashboard/Index");
                             }
-
+                            TempData["SuccessMessage"] = "Login successful!";
                             return RedirectToPage("/Index");
                         }
-                        ModelState.AddModelError("", "Đăng nhập thất bại! Vui lòng kiểm tra thông tin.");
+                        TempData["ErrorMessage"] = "Login failed! Please check your information.";
                     }
                 }
             }
 
             catch (Exception ex)
             {
-                _logger.LogError($"Lỗi khi gọi API đăng nhập: {ex.Message}");
-                ModelState.AddModelError("", "Đã xảy ra lỗi trong quá trình đăng nhập.");
+                _logger.LogError($"Error calling login API: {ex.Message}");
+                TempData["ErrorMessage"] = "An error occurred during login.";
             }
 
             return Page();
@@ -155,7 +157,7 @@ namespace final_project_fe.Pages.Shared
 
             if (!response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError("", "Cannot connect to Google login API.");
+                TempData["ErrorMessage"] = "Cannot connect to Google login API.";
                 return Page();
             }
 
@@ -168,7 +170,7 @@ namespace final_project_fe.Pages.Shared
                 return Redirect(result.Url);
             }
 
-            ModelState.AddModelError("", "Google login URL is invalid.");
+            TempData["ErrorMessage"] = "Google login URL is invalid.";
             return Page();
         }
     }

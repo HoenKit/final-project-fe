@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Web;
+using final_project_fe.Dtos;
 using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Courses;
 using final_project_fe.Dtos.Mentors;
@@ -36,7 +38,16 @@ namespace final_project_fe.Pages
         [BindProperty]
         public User Profile { get; set; } = new User();
         public string CurrentUserId { get; set; }
-        public async Task<IActionResult> OnGetAsync()
+        [BindProperty]
+        public int MentorId { get; set; }
+        [BindProperty]
+        public bool IsMentor { get; set; } = false;
+        public PageResult<CategoryDto> Categories { get; set; } = new PageResult<CategoryDto>(new List<CategoryDto>(), 0, 1, 10);
+        public PageResult<GetCourseDto> Courses { get; set; } = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 6);
+        public GetMentorDto? CurrentMentor { get; set; }
+        public List<string> UserRoles { get; private set; } = new List<string>();
+        public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
+        public async Task<IActionResult> OnGetAsync(int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
         {
             BaseUrl = _apiSettings.BaseUrl;
             if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
@@ -48,8 +59,30 @@ namespace final_project_fe.Pages
                 if (jsonToken != null)
                 {
                     CurrentUserId = jsonToken.Claims
-                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+                    // Kiểm tra role mentor
+                    IsMentor = jsonToken.Claims.Any(c =>
+                        (c.Type == ClaimTypes.Role || c.Type == "role") &&
+                        c.Value == "Mentor");
+
+                    // Lấy UserRoles từ token
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                        .Select(c => c.Value)
+                        .ToList();
+
+                    _logger.LogInformation("User roles: {Roles}", string.Join(", ", UserRoles));
+
+                    /*if (!string.IsNullOrEmpty(token))
+                    {
+                        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(token);
+                        IsMentor = jwt.Claims.Any(c =>
+                            (c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role") &&
+                            c.Value == "Mentor");
+                    }*/
                 }
+
                 // Gọi API để lấy thông tin user hiện tại
                 var response = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
                 if (!response.IsSuccessStatusCode)
@@ -70,6 +103,54 @@ namespace final_project_fe.Pages
                     return Page();
                 }
                 Profile = userInfo;
+
+                // Check if user has Mentor role
+                IsMentor = UserRoles != null && UserRoles.Contains("Mentor");
+
+                if (IsMentor)
+                {
+                    // Try to get current mentor info
+                    var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                    if (mentorResponse.IsSuccessStatusCode)
+                    {
+                        var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                        CurrentMentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        if (CurrentMentor != null)
+                        {
+                            // Set MentorId from CurrentMentor
+                            MentorId = CurrentMentor.MentorId;
+
+                            _logger.LogInformation("MentorId set to: {MentorId} from CurrentMentor for UserId: {CurrentUserId}",
+                                MentorId, CurrentUserId);
+
+                            //Load Category
+                            //await LoadCategoriesAsync();
+
+                            // Load courses for mentor
+                            await LoadCoursesAsync(currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to deserialize mentor information for user: {UserId}. User will only see profile.", CurrentUserId);
+                            IsMentor = false; // Set to false so courses section won't show
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Cannot get mentor information for user: {UserId}. Status: {StatusCode}. User will only see profile.",
+                            CurrentUserId, mentorResponse.StatusCode);
+                        IsMentor = false; // Set to false so courses section won't show
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("User {UserId} does not have Mentor role. Only profile will be displayed.", CurrentUserId);
+                }
+
             }
             catch (HttpRequestException ex)
             {
@@ -92,6 +173,97 @@ namespace final_project_fe.Pages
 
             return Page();
         }
+
+        private async Task LoadCoursesAsync(int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
+        {
+            try
+            {
+                // Kiểm tra MentorId thay vì CurrentMentor
+                if (MentorId <= 0) return;
+
+                var courseUrl = new UriBuilder($"{BaseUrl}/Course");
+                var courseQuery = HttpUtility.ParseQueryString(string.Empty);
+
+                // Basic pagination
+                courseQuery["page"] = (currentPage ?? 1).ToString();
+                courseQuery["pageSize"] = "8";
+
+                // Filter by current mentor - sử dụng MentorId từ OnGetAsync
+                courseQuery["mentorId"] = MentorId.ToString();
+
+                // Filter by status = "Approved"
+                courseQuery["statuses"] = "Approved";
+
+                // Add optional filters - Đồng bộ với controller parameters
+                if (!string.IsNullOrWhiteSpace(title))
+                    courseQuery["title"] = title.Trim();
+
+                if (categoryId.HasValue && categoryId.Value > 0)
+                    courseQuery["CategoryId"] = categoryId.Value.ToString();  // Dùng CategoryId với C hoa
+
+                if (!string.IsNullOrWhiteSpace(sortOption))
+                    courseQuery["sortOption"] = sortOption;
+
+                if (!string.IsNullOrWhiteSpace(language))
+                    courseQuery["Language"] = language;  // Dùng Language với L hoa
+
+                if (!string.IsNullOrWhiteSpace(level))
+                    courseQuery["Level"] = level;  // Dùng Level với L hoa
+
+                if (minCost.HasValue && minCost.Value >= 0)
+                    courseQuery["MinCost"] = minCost.Value.ToString();  // Dùng MinCost với M hoa
+
+                if (maxCost.HasValue && maxCost.Value >= 0)
+                    courseQuery["MaxCost"] = maxCost.Value.ToString();  // Dùng MaxCost với M hoa
+
+                if (minRate.HasValue && minRate.Value >= 0)
+                    courseQuery["MinRate"] = minRate.Value.ToString();  // Dùng MinRate với M hoa
+
+                if (maxRate.HasValue && maxRate.Value >= 0)
+                    courseQuery["MaxRate"] = maxRate.Value.ToString();  // Dùng MaxRate với M hoa
+
+                if (!string.IsNullOrWhiteSpace(status))
+                    courseQuery["statuses"] = status;  // Dùng statuses như trong controller
+
+                courseUrl.Query = courseQuery.ToString();
+                _logger.LogInformation("Loading courses with URL: {Url}", courseUrl.ToString());
+
+                var courseResponse = await _httpClient.GetAsync(courseUrl.ToString());
+
+                if (courseResponse.IsSuccessStatusCode)
+                {
+                    var courseJson = await courseResponse.Content.ReadAsStringAsync();
+                    Courses = JsonSerializer.Deserialize<PageResult<GetCourseDto>>(courseJson, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 8);
+
+                    // Gắn SAS token vào mỗi course image
+                    if (Courses?.Items != null)
+                    {
+                        foreach (var course in Courses.Items)
+                        {
+                            if (!string.IsNullOrWhiteSpace(course.CoursesImage))
+                            {
+                                course.CoursesImage = ImageUrlHelper.AppendSasTokenIfNeeded(course.CoursesImage, SasToken);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to load courses. Status: {StatusCode}, Response: {Response}",
+                        courseResponse.StatusCode, await courseResponse.Content.ReadAsStringAsync());
+                    Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 8);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading courses");
+                Courses = new PageResult<GetCourseDto>(new List<GetCourseDto>(), 0, 1, 8);
+            }
+        }
+
 
         // Handler Update Profile
         public async Task<IActionResult> OnPostAsync()

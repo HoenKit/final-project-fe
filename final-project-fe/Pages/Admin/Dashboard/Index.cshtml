@@ -94,7 +94,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                             <p class="card-category">User Premiums</p>
-                            <h4 class="card-title">@Model.TotalMemberships</h4>
+                            <h4 class="card-title">@Model.TotalPremiums</h4>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                     <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                             <p class="card-category">Sales</p>
-                            <h4 class="card-title">@Model.TotalSales.ToString("N0")₫</h4>
+                            <h4 class="card-title">@Model.TotalSales.ToString("N0")VNĐ</h4>
                         </div>
                     </div>
                 </div>
@@ -161,13 +161,13 @@
         <div class="card card-primary card-round">
             <div class="card-header">
                 <div class="card-head-row">
-                    <div class="card-title">Daily Money</div>
+                    <div class="card-title">Monthly Money</div>
                 </div>
                 <div class="card-category">@Model.SalesPeriod</div>
             </div>
             <div class="card-body pb-0">
                 <div class="mb-4 mt-2">
-                    <h1>@Model.TotalSalesOneMonth.ToString("N0")₫</h1>
+                    <h1>@Model.TotalSalesOneMonth.ToString("N0")VNĐ</h1>
                 </div>
                 <div class="pull-in">
                     <canvas id="dailySalesChart" height="200"></canvas>
@@ -270,11 +270,11 @@
                                             <div class="small text-muted">points</div>
                                         </td>
                                         <td class="text-center">
-                                            <div class="fw-medium">@transaction.CreateAt.ToString("MMM dd, yyyy")</div>
-                                            <div class="small text-muted">@transaction.CreateAt.ToString("h:mm tt")</div>
+                                            <div class="fw-medium">@transaction.CreateAt.ToString("MM/ dd/ yyyy")</div>
+                                            <div class="small text-muted">@transaction.CreateAt.ToString("hh:mm ")</div>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold text-success">@(transaction.Amount?.ToString("N0") ?? "0")₫</span>
+                                            <span class="fw-bold text-success">@(transaction.Amount?.ToString("N0") ?? "0")VNĐ</span>
                                         </td>
                                         <td class="text-center">
                                             <span class="badge badge-light-info px-3 py-2">
@@ -327,7 +327,7 @@
 
                 // You can pass data from your model like this:
                 var chartData = {
-                    labels: @Html.Raw(Json.Serialize(Model.ChartLabels)), // Example: ["Jan", "Feb", "Mar"]
+                    labels: @Json.Serialize(Model.ChartLabels), // Example: ["Jan", "Feb", "Mar"]
                     datasets: [
                         {
                             label: "Memberships",
@@ -450,6 +450,11 @@
             });
 
         // Daily Sales Chart
+        // Hàm định dạng số với dấu chấm ngăn cách
+        function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " VND";
+        }
+
         var dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
         var myDailySalesChart = new Chart(dailySalesCtx, {
             type: 'line',
@@ -460,55 +465,32 @@
                     fill: true,
                     backgroundColor: "rgba(255,255,255,0.2)",
                     borderColor: "#fff",
-                    borderCapStyle: "butt",
-                    borderDash: [],
-                    borderDashOffset: 0,
-                    pointBorderColor: "#fff",
                     pointBackgroundColor: "#fff",
-                    pointBorderWidth: 1,
                     pointHoverRadius: 5,
-                    pointHoverBackgroundColor: "#fff",
-                    pointHoverBorderColor: "#fff",
-                    pointHoverBorderWidth: 1,
-                    pointRadius: 1,
-                    pointHitRadius: 5,
-                    data: @Html.Raw(Json.Serialize(Model.DailySalesData))
+                    data: @Json.Serialize(Model.DailySalesData)
                 }]
             },
             options: {
                 maintainAspectRatio: false,
-                legend: {
-                    display: false
-                },
-                animation: {
-                    easing: "easeInOutBack"
-                },
+                legend: { display: false },
+                animation: { easing: "easeInOutBack" },
                 scales: {
                     yAxes: [{
                         display: false,
                         ticks: {
                             fontColor: "rgba(0,0,0,0.5)",
-                            fontStyle: "bold",
                             beginAtZero: true,
-                            maxTicksLimit: 10,
-                            padding: 0
-                        },
-                        gridLines: {
-                            drawTicks: false,
-                            display: false
+                            callback: formatNumber // Sử dụng hàm định dạng
                         }
                     }],
-                    xAxes: [{
-                        display: false,
-                        gridLines: {
-                            zeroLineColor: "transparent"
-                        },
-                        ticks: {
-                            padding: -20,
-                            fontColor: "rgba(255,255,255,0.2)",
-                            fontStyle: "bold"
+                    xAxes: [{ display: false }]
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatNumber(context.yLabel); // Sử dụng lại hàm định dạng
                         }
-                    }]
+                    }
                 }
             }
         });

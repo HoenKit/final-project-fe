@@ -5,18 +5,27 @@
 }
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
+	// var isMentor = false;
+
+	// if (!string.IsNullOrEmpty(token))
+	// {
+	// 	var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(token);
+	// 	isMentor = jwt.Claims.Any(c =>
+	// 		(c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role") &&
+	// 		c.Value == "Mentor");
+	// }
 }
 <div class="theme-layout">
 	<!-- Profile Header -->
-		<div class="profile-header">
+	<div class="profile-header">
 		<div class="d-flex justify-content-between align-items-start">
 			<div class="avtar-header">
 				<div class="profile-content">
 					<div class="profile-avatar-card">
 						@if (Model.Profile?.UserMetaData != null)
 						{
-						<img src="@Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png""
-							 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+							<img src="@Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png""
+							alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 							<h4 class="profile-name mt-4">
 								@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 							</h4>
@@ -36,103 +45,103 @@
 				</div>
 			</div>
 			<div style="width: 22%; margin-right: 5%;">
-			<div class="col-12">
-				@if (Model.Profile.IsPremium == false)
-				{
-					<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
-						<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
-							<div class="d-flex justify-content-between align-items-start">
+				<div class="col-12">
+					@if (Model.Profile.IsPremium)
+					{
+						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
+							<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
 								<div>
 									<small>MemberShip</small>
-									<h3 class="mt-1">Free Member</h3>
 								</div>
-								<i class="bi bi-person-badge-fill fs-3"></i>
+								<i style="color:#ffff" class="bi bi-gem fs-2"></i>
+								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+									Premium Member
+								</a>
 							</div>
-							<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-								Upgrade to Premium
-							</a>
 						</div>
-					</div>
-				}
-				else
-				{
-					<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
-						<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
-							<div>
-								<small>MemberShip</small>
+					}
+					else
+					{
+						<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
+							<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<small>MemberShip</small>
+										<h3 class="mt-1">Free Member</h3>
+									</div>
+									<i class="bi bi-person-badge-fill fs-3"></i>
+								</div>
+								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+									Upgrade to Premium
+								</a>
 							</div>
-							<i style="color:#ffff" class="bi bi-gem fs-2"></i>
-							<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-								Premium Member
-							</a>
 						</div>
-					</div>
-				}
+					}
+				</div>
 			</div>
-		</div>
 		</div>
 	</div>
 
-		<!-- Main Content with Sidebar -->
-		<div class="gap gray-bg">
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col-lg-12">
-						<div class="row" id="page-contents">
-							<!-- Sidebar -->
-							<div class="col-lg-3">
-								<aside class="sidebar">
-									<div class="widget">
-										<h4 class="widget-title">Shortcuts</h4>
-										<ul class="naves">
-											<li>
-												<i class="ti-clipboard"></i>
-												<a asp-page="/Index" title="">News feed</a>
-											</li>
-											<li style="display:flex">
-												<i class="bi bi-mortarboard"></i>
-												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-											</li>
-											<li style="display:flex">
-												<i class="bi bi-person"></i>
-												<a class="active" asp-page="/UserPage" title="" data-ripple="">Page</a>
-											</li>
-											<li style="display:flex">
-												<i class="bi bi-info-circle"></i>
-												<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
-											</li>
-										</ul>
-									</div><!-- Shortcuts -->
-									<div class="widget">
-										<h4 class="widget-title">Recent Activity</h4>
-										<ul class="activitiez">
-											<li>
-												<div class="activity-meta">
-													<i>10 hours Ago</i>
-													<span><a href="#" title="">Commented on Video posted </a></span>
-													<h6>by <a href="time-line.html">black demon.</a></h6>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>30 Days Ago</i>
-													<span><a href="#" title="">Posted your status. "Hello guys, how are you?"</a></span>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>2 Years Ago</i>
-													<span><a href="#" title="">Share a video on her timeline.</a></span>
-													<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-												</div>
-											</li>
-										</ul>
-									</div><!-- recent activites -->
-								</aside>
-							</div><!-- sidebar -->
+	<!-- Main Content with Sidebar -->
+	<div class="gap gray-bg">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="row" id="page-contents">
+						<!-- Sidebar -->
+						<div class="col-lg-3">
+							<aside class="sidebar">
+								<div class="widget">
+									<h4 class="widget-title">Shortcuts</h4>
+									<ul class="naves">
+										<li>
+											<i class="ti-clipboard"></i>
+											<a asp-page="/Index" title="">News feed</a>
+										</li>
+										<li style="display:flex">
+											<i class="bi bi-mortarboard"></i>
+											<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+										</li>
+										<li style="display:flex">
+											<i class="bi bi-person"></i>
+											<a class="active" asp-page="/UserPage" title="" data-ripple="">Page</a>
+										</li>
+										<li style="display:flex">
+											<i class="bi bi-info-circle"></i>
+											<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
+										</li>
+									</ul>
+								</div><!-- Shortcuts -->
+								<div class="widget">
+									<h4 class="widget-title">Recent Activity</h4>
+									<ul class="activitiez">
+										<li>
+											<div class="activity-meta">
+												<i>10 hours Ago</i>
+												<span><a href="#" title="">Commented on Video posted </a></span>
+												<h6>by <a href="time-line.html">black demon.</a></h6>
+											</div>
+										</li>
+										<li>
+											<div class="activity-meta">
+												<i>30 Days Ago</i>
+												<span><a href="#" title="">Posted your status. "Hello guys, how are you?"</a></span>
+											</div>
+										</li>
+										<li>
+											<div class="activity-meta">
+												<i>2 Years Ago</i>
+												<span><a href="#" title="">Share a video on her timeline.</a></span>
+												<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
+											</div>
+										</li>
+									</ul>
+								</div><!-- recent activites -->
+							</aside>
+						</div><!-- sidebar -->
 
-							<!-- Main Content -->
-							<div class="col-lg-9">
+						<!-- Main Content -->
+						<div class="col-lg-9">
 							<!-- About Me Tab Content -->
 							@if (!ViewData.ModelState.IsValid)
 							{
@@ -277,54 +286,74 @@
 													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 												</div>
 												<div class="modal-body row g-3">
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
-														<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
+													<div class="col-md-6" style="margin-top: 7%;">
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
+															<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.LastName" class="form-label">Last Name</label>
+															<input asp-for="Profile.UserMetaData.LastName" class="form-control" />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Gender" class="form-label">Gender</label>
+															<select asp-for="Profile.UserMetaData.Gender" class="form-select">
+																<option value="">Male</option>
+																<option>Female</option>
+															</select>
+														</div> 
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.LastName" class="form-label">Last Name</label>
-														<input asp-for="Profile.UserMetaData.LastName" class="form-control" />
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.Email" class="form-label">Email</label>
-														<input asp-for="Profile.Email" class="form-control" readonly/>
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.Phone" class="form-label">Phone</label>
-														<input asp-for="Profile.Phone" class="form-control" />
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Gender" class="form-label">Gender</label>
-														<select asp-for="Profile.UserMetaData.Gender" class="form-select">
-															<option value="">Select gender</option>
-															<option>Male</option>
-															<option>Female</option>
-														</select>
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
-														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
+														<div class="text-muted small mb-3">
+															@if (Model.Profile.IsPremium)
+															{
+																<div class="form-text">
+																	<i class="fa fa-info-circle me-1"></i>
+																	Please fill out the following <a href="/RecommendQuestion" class="text-primary fw-bold text-decoration-none" style="transition: all 0.3s ease;" onmouseover="this.style.color='#0056b3'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0d6efd'; this.style.textDecoration='none';">Survey</a> to add this information.
+																</div>
+															}
+															else
+															{
+																<div class="form-text">
+																	<i class="fa fa-info-circle me-1"></i>
+																	Please upgrade as a <a href="#" class="text-primary fw-bold text-decoration-none" style="transition: all 0.3s ease;" onmouseover="this.style.color='#0056b3'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0d6efd'; this.style.textDecoration='none';">Premium</a> to be able to update this information.
+																</div>
+															}
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.FavouriteSubject" class="form-label">Favourite Subject</label>
+															<input asp-for="Profile.UserMetaData.FavouriteSubject" class="form-control" readonly />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Level" class="form-label">Level</label>
+															<input asp-for="Profile.UserMetaData.Level" class="form-control" readonly />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Goals" class="form-label">Goals</label>
+															<input asp-for="Profile.UserMetaData.Goals" class="form-control" readonly />
+														</div>
 													</div>
 													<div class="col-md-12">
 														<label asp-for="Profile.UserMetaData.Address" class="form-label">Address</label>
 														<input asp-for="Profile.UserMetaData.Address" class="form-control" />
 													</div>
 													<div class="col-md-6">
+														<label asp-for="Profile.Email" class="form-label">Email</label>
+														<input asp-for="Profile.Email" class="form-control" readonly />
+													</div>													
+													<div class="col-md-6">
 														<label asp-for="Profile.UserMetaData.Nationality" class="form-label">Nationality</label>
 														<input asp-for="Profile.UserMetaData.Nationality" class="form-control" />
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.FavouriteSubject" class="form-label">Favourite Subject</label>
-														<input asp-for="Profile.UserMetaData.FavouriteSubject" class="form-control" readonly/>
+														<label asp-for="Profile.Phone" class="form-label">Phone Number</label>
+														<input asp-for="Profile.Phone" class="form-control" />
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Level" class="form-label">Level</label>
-														<input asp-for="Profile.UserMetaData.Level" class="form-control" readonly/>
+														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
+														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
 													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Goals" class="form-label">Goals</label>
-														<input asp-for="Profile.UserMetaData.Goals" class="form-control" readonly/>
-													</div>
+													
 												</div>
 												<div class="modal-footer">
 													<button type="submit" class="btn btn-primary">Save changes</button>
@@ -484,148 +513,192 @@
 							</div>
 
 							<!-- Courses Section -->
-							<div class="courses-section">
-								<div class="container">
-									<h2 class="section-title">My courses (5)</h2>
-									<div class="courses-grid">
-										<!-- Course 1 -->
-										<div class="course-card">
-											<div style="position: relative;">
-												<img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop"
-													 alt="Data Structures Course" class="course-image">
-												<div class="bestseller-badge">Bestseller</div>
-											</div>
-											<div class="course-content">
-												<h3 class="course-title">Mastering Data Structures & Algorithms using C and C++</h3>
-												<p class="course-description">
-													Learn, Analyse and Implement Data Structure using C and C++. Learn Recursion and Sorting.
-												</p>
-												<div class="course-meta">
-													<div class="rating">
-														<div class="stars">
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-														</div>
-														<span>4.6</span>
-													</div>
-													<div class="price">$84.99</div>
-												</div>
-											</div>
-										</div>
+							@if (Model.IsMentor)
+							{
+								<div class="courses-section">
+									<div class="container">
+										<h2 class="section-title">My courses (@Model.Courses.TotalCount)</h2>
 
-										<!-- Course 2 -->
-										<div class="course-card">
-											<div style="position: relative;">
-												<img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=250&fit=crop"
-													 alt="Web Development Course" class="course-image">
-											</div>
-											<div class="course-content">
-												<h3 class="course-title">Complete Web Development Course</h3>
-												<p class="course-description">
-													Master modern web development with HTML, CSS, JavaScript, and popular frameworks.
-												</p>
-												<div class="course-meta">
-													<div class="rating">
-														<div class="stars">
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-														</div>
-														<span>4.5</span>
-													</div>
-													<div class="price">$69.99</div>
-												</div>
-											</div>
-										</div>
+										@if (Model.Courses.Items != null && Model.Courses.Items.Any())
+										{
+											<div class="courses-grid">
+												@foreach (var course in Model.Courses.Items)
+												{
+													<div class="course-card" data-course-id="@course.CourseId">
+														<div style="position: relative;">
+															<img src="@(!string.IsNullOrEmpty(course.CoursesImage) ? course.CoursesImage : "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop")"
+																 alt="@course.CourseName" class="course-image" loading="lazy">
 
-										<!-- Course 3 -->
-										<div class="course-card">
-											<div style="position: relative;">
-												<img src="https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=250&fit=crop"
-													 alt="Java Programming Course" class="course-image">
-											</div>
-											<div class="course-content">
-												<h3 class="course-title">Advanced Java Programming</h3>
-												<p class="course-description">
-													Deep dive into Java programming with advanced concepts and enterprise development.
-												</p>
-												<div class="course-meta">
-													<div class="rating">
-														<div class="stars">
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-														</div>
-														<span>4.7</span>
-													</div>
-													<div class="price">$79.99</div>
-												</div>
-											</div>
-										</div>
+															@if (course.AverageRating >= 4.5m)
+															{
+																<div class="bestseller-badge">Bestseller</div>
+															}
 
-										<!-- Course 4 -->
-										<div class="course-card">
-											<div style="position: relative;">
-												<img src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=400&h=250&fit=crop"
-													 alt="Database Course" class="course-image">
-											</div>
-											<div class="course-content">
-												<h3 class="course-title">Database Design and SQL</h3>
-												<p class="course-description">
-													Learn database design principles and master SQL for data management.
-												</p>
-												<div class="course-meta">
-													<div class="rating">
-														<div class="stars">
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
+															@* @if (!string.IsNullOrEmpty(course.Status))
+															{
+																<div class="status-badge status-@course.Status.ToLower().Replace(" ", "-")">
+																	@course.Status
+																</div>
+															} *@
 														</div>
-														<span>4.4</span>
-													</div>
-													<div class="price">$59.99</div>
-												</div>
-											</div>
-										</div>
 
-										<!-- Course 5 -->
-										<div class="course-card">
-											<div style="position: relative;">
-												<img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=250&fit=crop"
-													 alt="System Design Course" class="course-image">
-											</div>
-											<div class="course-content">
-												<h3 class="course-title">System Design and Architecture</h3>
-												<p class="course-description">
-													Master system design concepts for scalable and robust applications.
-												</p>
-												<div class="course-meta">
-													<div class="rating">
-														<div class="stars">
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
-															<i class="bi bi-star-fill"></i>
+														<div class="course-content">
+															<h3 class="course-title" title="@course.CourseName">@course.CourseName</h3>
+
+															<p class="course-description" title="@course.CourseContent">
+																@if (!string.IsNullOrEmpty(course.CourseContent))
+																{
+																	@(course.CourseContent.Length > 120 ? course.CourseContent.Substring(0, 120) + "..." : course.CourseContent)
+																}
+																else
+																{
+																	<text>No description available</text>
+																}
+															</p>
+
+															<div class="course-info">
+																@if (!string.IsNullOrEmpty(course.Language))
+																{
+																	<span class="course-language">
+																		<i class="bi bi-translate"></i> @course.Language
+																	</span>
+																}
+
+																@if (!string.IsNullOrEmpty(course.Level))
+																{
+																	<span class="course-level level-@course.Level.ToLower()">
+																		<i class="bi bi-bar-chart"></i> @course.Level
+																	</span>
+																}
+
+																@if (course.CourseLength.HasValue)
+																{
+																	<span class="course-duration">
+																		<i class="bi bi-clock"></i> @course.CourseLength.Value.ToString("F1")h
+																	</span>
+																}
+
+																@if (course.StudentCount.HasValue && course.StudentCount > 0)
+																{
+																	<span class="student-count">
+																		<i class="bi bi-people"></i> @course.StudentCount students
+																	</span>
+																}
+															</div>
+
+															<div class="course-meta">
+																<div class="rating">
+																	@if (course.AverageRating.HasValue && course.AverageRating > 0)
+																	{
+																		<div class="stars">
+																			@for (int i = 1; i <= 5; i++)
+																			{
+																				if (i <= Math.Floor(course.AverageRating.Value))
+																				{
+																					<i class="bi bi-star-fill"></i>
+																				}
+																				else if (i <= course.AverageRating.Value)
+																				{
+																					<i class="bi bi-star-half"></i>
+																				}
+																				else
+																				{
+																					<i class="bi bi-star"></i>
+																				}
+																			}
+																		</div>
+																		<span class="rating-value">@course.AverageRating.Value.ToString("F1")</span>
+																		@if (course.TotalReviews.HasValue && course.TotalReviews > 0)
+																		{
+																			<span class="review-count">(@course.TotalReviews reviews)</span>
+																		}
+																	}
+																	else
+																	{
+																		<span class="no-rating">No ratings yet</span>
+																	}
+																</div>
+
+																<div class="price">
+																	@if (course.Cost > 0)
+																	{
+																		<i class="bi bi-p-circle"></i>
+																		<span class="price-value">@course.Cost.ToString("N0")</span>
+																	}
+																	else
+																	{
+																		<span class="price-free">Free</span>
+																	}
+																</div>
+															</div>
+
+															@if (course.CreateAt.HasValue)
+															{
+																<div class="course-date">
+																	<small class="text-muted">
+																		<i class="bi bi-calendar"></i> Created @course.CreateAt.Value.ToString("MMM dd, yyyy")
+																	</small>
+																</div>
+															}
+
+															@* <div class="course-actions">
+																<a href="/Course/Details/@course.CourseId" class="btn btn-primary btn-sm">
+																	<i class="bi bi-eye"></i> View Course
+																</a>
+																<a href="/Course/Edit/@course.CourseId" class="btn btn-outline-secondary btn-sm">
+																	<i class="bi bi-pencil"></i> Edit
+																</a>
+															</div> *@
 														</div>
-														<span>4.8</span>
 													</div>
-													<div class="price">$99.99</div>
+												}
+											</div>
+
+											<!-- Pagination -->
+											@if (Model.Courses.TotalPages > 1)
+											{
+												<nav aria-label="Course pagination" class="mt-4">
+													<ul class="pagination justify-content-center">
+														@if (Model.Courses.CurrentPage > 1)
+														{
+															<li class="page-item">
+																<a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage - 1)">Previous</a>
+															</li>
+														}
+
+														@for (int i = 1; i <= Model.Courses.TotalPages; i++)
+														{
+															<li class="page-item @(i == Model.Courses.CurrentPage ? "active" : "")">
+																<a class="page-link" href="?currentPage=@i">@i</a>
+															</li>
+														}
+
+														@if (Model.Courses.CurrentPage < Model.Courses.TotalPages)
+														{
+															<li class="page-item">
+																<a class="page-link" href="?currentPage=@(Model.Courses.CurrentPage + 1)">Next</a>
+															</li>
+														}
+													</ul>
+												</nav>
+											}
+										}
+										else
+										{
+											<div class="no-courses-message">
+												<div class="empty-state">
+													<i class="bi bi-book empty-icon"></i>
+													<a>No courses found</a>
+													<p>You haven't created any courses yet. Start creating your first course!</p>
+													@* <a asp-page="/Mentor/MentorPage/CreateCourse" class="btn btn-primary">
+														<i class="bi bi-plus"></i> Create New Course
+													</a> *@
 												</div>
 											</div>
-										</div>
+										}
 									</div>
 								</div>
-											</div>
+							}
 						</div>
 					</div>
 				</div>
@@ -635,60 +708,83 @@
 </div>
 
 	<script>
-			// Add smooth animations
-			const observerOptions = {
-				threshold: 0.1,
-				rootMargin: '0px 0px -50px 0px'
-			};
+		// Add smooth animations
+		const observerOptions = {
+			threshold: 0.1,
+			rootMargin: '0px 0px -50px 0px'
+		};
 
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					if (entry.isIntersecting) {
-						entry.target.style.opacity = '1';
-						entry.target.style.transform = 'translateY(0)';
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					entry.target.style.opacity = '1';
+					entry.target.style.transform = 'translateY(0)';
+				}
+			});
+		}, observerOptions);
+
+		// Apply animation to course cards
+		const courseCards = document.querySelectorAll('.course-card');
+		courseCards.forEach((card, index) => {
+			card.style.opacity = '0';
+			card.style.transform = 'translateY(20px)';
+			card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+			observer.observe(card);
+
+			// Add hover effects
+			card.addEventListener('mouseenter', function() {
+				this.style.transform = 'translateY(-10px) scale(1.02)';
+			});
+
+			card.addEventListener('mouseleave', function() {
+				this.style.transform = 'translateY(0) scale(1)';
+			});
+		});
+
+		// Animate profile detail items
+		const profileItems = document.querySelectorAll('.profile-detail-item');
+		profileItems.forEach(item => {
+			item.style.opacity = '0';
+			item.style.transform = 'translateX(-20px)';
+			item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+			observer.observe(item);
+		});
+
+		// Animate certificate cards
+		const certificateCards = document.querySelectorAll('.certificate-card');
+		certificateCards.forEach((card, index) => {
+			card.style.opacity = '0';
+			card.style.transform = 'translateY(20px)';
+			card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+			observer.observe(card);
+		});
+
+		// Image error handling
+		document.querySelectorAll('.course-image').forEach(img => {
+			img.addEventListener('error', function() {
+				this.src = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop';
+			});
+		});
+
+		// Course card click handler
+		courseCards.forEach(card => {
+			card.addEventListener('click', function(e) {
+				// Don't navigate if clicking on action buttons
+				if (!e.target.closest('.course-actions')) {
+					const courseId = this.dataset.courseId;
+					if (courseId) {
+				window.location.href = `/Mentor/MentorPage/CourseDetail?courseId=${courseId}`;
 					}
-				});
-			}, observerOptions);
-
-			// Apply animation to course cards
-			const courseCards = document.querySelectorAll('.course-card');
-			courseCards.forEach((card, index) => {
-				card.style.opacity = '0';
-				card.style.transform = 'translateY(20px)';
-				card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-				observer.observe(card);
-
-				// Add hover effects
-				card.addEventListener('mouseenter', function() {
-					this.style.transform = 'translateY(-10px) scale(1.02)';
-				});
-
-				card.addEventListener('mouseleave', function() {
-					this.style.transform = 'translateY(0) scale(1)';
-				});
-			});
-
-			// Animate profile detail items
-			const profileItems = document.querySelectorAll('.profile-detail-item');
-			profileItems.forEach(item => {
-				item.style.opacity = '0';
-				item.style.transform = 'translateX(-20px)';
-				item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-				observer.observe(item);
-			});
-
-			// Animate certificate cards
-			const certificateCards = document.querySelectorAll('.certificate-card');
-			certificateCards.forEach((card, index) => {
-				card.style.opacity = '0';
-				card.style.transform = 'translateY(20px)';
-				card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-				observer.observe(card);
+				}
 			});
 		});
 	</script>
 
 	<style>
+		.empty-state{
+			display: flex;
+			justify-content: center;
+		}
 		.subscription-card {
 			background-color: #2c2c2c;
 			border-radius: 12px;
@@ -1228,7 +1324,7 @@
 
 		/* Courses Section */
 		.courses-section {
-			padding: 80px 0;
+			padding: 30px 0;
 			background: white;
 		}
 
@@ -1410,6 +1506,18 @@
 
 			.course-card:nth-child(5) {
 				animation-delay: 0.5s;
+			}
+
+			.course-card:nth-child(6) {
+				animation-delay: 0.6s;
+			}
+
+			.course-card:nth-child(7) {
+				animation-delay: 0.7s;
+			}
+
+			.course-card:nth-child(8) {
+				animation-delay: 0.8s;
 			}
 
 		@@keyframes slideInLeft {
