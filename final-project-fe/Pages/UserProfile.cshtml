@@ -46,7 +46,21 @@
 			</div>
 			<div style="width: 22%; margin-right: 5%;">
 				<div class="col-12">
-					@if (Model.Profile.IsPremium == false)
+					@if (Model.Profile.IsPremium)
+					{
+						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
+							<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
+								<div>
+									<small>MemberShip</small>
+								</div>
+								<i style="color:#ffff" class="bi bi-gem fs-2"></i>
+								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+									Premium Member
+								</a>
+							</div>
+						</div>
+					}
+					else
 					{
 						<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
 							<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
@@ -59,20 +73,6 @@
 								</div>
 								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
 									Upgrade to Premium
-								</a>
-							</div>
-						</div>
-					}
-					else
-					{
-						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
-							<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
-								<div>
-									<small>MemberShip</small>
-								</div>
-								<i style="color:#ffff" class="bi bi-gem fs-2"></i>
-								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-									Premium Member
 								</a>
 							</div>
 						</div>
@@ -286,54 +286,74 @@
 													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 												</div>
 												<div class="modal-body row g-3">
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
-														<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
+													<div class="col-md-6" style="margin-top: 7%;">
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
+															<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.LastName" class="form-label">Last Name</label>
+															<input asp-for="Profile.UserMetaData.LastName" class="form-control" />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Gender" class="form-label">Gender</label>
+															<select asp-for="Profile.UserMetaData.Gender" class="form-select">
+																<option value="">Male</option>
+																<option>Female</option>
+															</select>
+														</div> 
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.LastName" class="form-label">Last Name</label>
-														<input asp-for="Profile.UserMetaData.LastName" class="form-control" />
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.Email" class="form-label">Email</label>
-														<input asp-for="Profile.Email" class="form-control" readonly/>
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.Phone" class="form-label">Phone</label>
-														<input asp-for="Profile.Phone" class="form-control" />
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Gender" class="form-label">Gender</label>
-														<select asp-for="Profile.UserMetaData.Gender" class="form-select">
-															<option value="">Select gender</option>
-															<option>Male</option>
-															<option>Female</option>
-														</select>
-													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
-														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
+														<div class="text-muted small mb-3">
+															@if (Model.Profile.IsPremium)
+															{
+																<div class="form-text">
+																	<i class="fa fa-info-circle me-1"></i>
+																	Please fill out the following <a href="/RecommendQuestion" class="text-primary fw-bold text-decoration-none" style="transition: all 0.3s ease;" onmouseover="this.style.color='#0056b3'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0d6efd'; this.style.textDecoration='none';">Survey</a> to add this information.
+																</div>
+															}
+															else
+															{
+																<div class="form-text">
+																	<i class="fa fa-info-circle me-1"></i>
+																	Please upgrade as a <a href="#" class="text-primary fw-bold text-decoration-none" style="transition: all 0.3s ease;" onmouseover="this.style.color='#0056b3'; this.style.textDecoration='underline';" onmouseout="this.style.color='#0d6efd'; this.style.textDecoration='none';">Premium</a> to be able to update this information.
+																</div>
+															}
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.FavouriteSubject" class="form-label">Favourite Subject</label>
+															<input asp-for="Profile.UserMetaData.FavouriteSubject" class="form-control" readonly />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Level" class="form-label">Level</label>
+															<input asp-for="Profile.UserMetaData.Level" class="form-control" readonly />
+														</div>
+														<div class="mb-3">
+															<label asp-for="Profile.UserMetaData.Goals" class="form-label">Goals</label>
+															<input asp-for="Profile.UserMetaData.Goals" class="form-control" readonly />
+														</div>
 													</div>
 													<div class="col-md-12">
 														<label asp-for="Profile.UserMetaData.Address" class="form-label">Address</label>
 														<input asp-for="Profile.UserMetaData.Address" class="form-control" />
 													</div>
 													<div class="col-md-6">
+														<label asp-for="Profile.Email" class="form-label">Email</label>
+														<input asp-for="Profile.Email" class="form-control" readonly />
+													</div>													
+													<div class="col-md-6">
 														<label asp-for="Profile.UserMetaData.Nationality" class="form-label">Nationality</label>
 														<input asp-for="Profile.UserMetaData.Nationality" class="form-control" />
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.FavouriteSubject" class="form-label">Favourite Subject</label>
-														<input asp-for="Profile.UserMetaData.FavouriteSubject" class="form-control" readonly/>
+														<label asp-for="Profile.Phone" class="form-label">Phone Number</label>
+														<input asp-for="Profile.Phone" class="form-control" />
 													</div>
 													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Level" class="form-label">Level</label>
-														<input asp-for="Profile.UserMetaData.Level" class="form-control" readonly/>
+														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
+														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
 													</div>
-													<div class="col-md-6">
-														<label asp-for="Profile.UserMetaData.Goals" class="form-label">Goals</label>
-														<input asp-for="Profile.UserMetaData.Goals" class="form-control" readonly/>
-													</div>
+													
 												</div>
 												<div class="modal-footer">
 													<button type="submit" class="btn btn-primary">Save changes</button>
@@ -603,7 +623,7 @@
 																	@if (course.Cost > 0)
 																	{
 																		<i class="bi bi-p-circle"></i>
-																		<span class="price-value">@course.Cost.ToString("F2")</span>
+																		<span class="price-value">@course.Cost.ToString("N0")</span>
 																	}
 																	else
 																	{
