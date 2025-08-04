@@ -4,6 +4,7 @@
     ViewData["Title"] = "Login";
     Layout = null;
 }
+
 @using System.Text.Json
 <!DOCTYPE html>
 <html lang="en">
@@ -60,6 +61,7 @@
                                 </div>
 
                             </form>
+                            @Html.Partial("_Notification")
                             <form method="post">
                                 <div class="submit-btns mt-3">
                                     <button type="submit" asp-page-handler="GoogleLogin"

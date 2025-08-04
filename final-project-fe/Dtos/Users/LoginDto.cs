@@ -9,6 +9,10 @@
     {
         public string Token { get; set; }
     }
+    public class ErrorResponseDto
+    {
+        public string Message { get; set; }
+    }
     public class GoogleLoginResponse
     {
         public string Url { get; set; }

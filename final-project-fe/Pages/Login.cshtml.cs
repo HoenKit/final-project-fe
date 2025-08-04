@@ -93,7 +93,6 @@ namespace final_project_fe.Pages.Shared
                 return Page();
             }
 
-
             string loginApiUrl = $"{_apiSettings.BaseUrl}/Auth/Login";
 
             try
@@ -106,7 +105,6 @@ namespace final_project_fe.Pages.Shared
 
                 if (response.IsSuccessStatusCode)
                 {
-
                     if (responseContent.Trim().StartsWith("{"))
                     {
                         var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -127,27 +125,49 @@ namespace final_project_fe.Pages.Shared
                             _logger.LogInformation($"User Role: {role}");
                             _logger.LogInformation($"User Id: {userId}");
 
-
                             if (role == "Admin")
                             {
                                 TempData["SuccessMessage"] = "Admin login successful!";
                                 return RedirectToPage("/Admin/Dashboard/Index");
                             }
+
                             TempData["SuccessMessage"] = "Login successful!";
                             return RedirectToPage("/Index");
                         }
+
                         TempData["ErrorMessage"] = "Login failed! Please check your information.";
+                        return Page();
                     }
+
+                    TempData["ErrorMessage"] = "Login failed! Invalid response format.";
+                    return Page();
+                }
+                else
+                {
+                    try
+                    {
+                        var errorObj = JsonSerializer.Deserialize<ErrorResponseDto>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                        TempData["ErrorMessage"] = errorObj?.Message ?? "Login failed.";
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error parsing login error response: {ex.Message}");
+                        TempData["ErrorMessage"] = "Login failed.";
+                    }
+
+                    return Page();
                 }
             }
-
             catch (Exception ex)
             {
                 _logger.LogError($"Error calling login API: {ex.Message}");
                 TempData["ErrorMessage"] = "An error occurred during login.";
+                return Page();
             }
-
-            return Page();
         }
 
         public async Task<IActionResult> OnPostGoogleLoginAsync()
