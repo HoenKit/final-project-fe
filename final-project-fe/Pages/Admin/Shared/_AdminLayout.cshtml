@@ -162,6 +162,11 @@
                                             <span class="sub-item">Comments</span>
                                         </a>
                                     </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "ReportManager.Courses" ? "active" : "")">
+                                        <a asp-page="/Admin/ReportManager/CourseReport/Index">
+                                            <span class="sub-item">Courses</span>
+                                        </a>
+                                    </li>
                                     <li class="@(ViewData["ActivePage"] as string == "ReportManager.Workshops" ? "active" : "")">
                                         <a asp-page="/Admin/ReportManager/WorkshopsReport/Index">
                                             <span class="sub-item">Workshops</span>

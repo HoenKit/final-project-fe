@@ -110,6 +110,52 @@
             padding: 16px;
         }
         }
+
+        .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        backdrop-filter: blur(2px);
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 32rem;
+        width: 100%;
+        margin: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-hidden {
+        display: none !important;
+    }
+
+    /* Prevent body scroll when modal is open */
+    .modal-open {
+        overflow: hidden;
+    }
+
+    /* Animation */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     </style>
 </head>
 <body class="bg-white text-gray-900">
@@ -129,7 +175,7 @@
                 </div>
             </div>
         </nav> *@
-
+    @Html.Partial("_Notification")
     <!-- Breadcrumb -->
     <div class="bg-gray-50 py-3">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,6 +260,16 @@
                             @Model.Course.Level
                         </div>
                     </div>
+                    @if (userIdToken == null || Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
+                    {
+                    <div>
+                        <button type="button"
+                                onclick="showReportModal()"
+                                class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center">
+                            <i class="fas fa-flag mr-2"></i>Report Course
+                        </button>
+                    </div>
+                    }
                 </div>
 
                 <!-- Mobile Sidebar (Hidden on desktop) -->
@@ -853,6 +909,51 @@
             </section>
         </div>
     </div>
+
+    <!-- Report Course Modal -->
+    <div id="reportCourseModal" class="modal-overlay modal-hidden">
+        <div class="modal-content animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                    Report Course
+                </h3>
+                <button onclick="hideReportModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form method="post" asp-page="/CreateReportPage/ReportCourse">
+                <input type="hidden" name="CourseId" value="@Model.Course.CourseId" />
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="reportContent" class="block text-sm font-medium text-gray-700 mb-2">Report Content</label>
+                        <div class="relative">
+                            <textarea id="reportContent"
+                                      name="Content"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                      rows="5"
+                                      placeholder="Please describe the issue you found in this course..."
+                                      required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button"
+                            onclick="hideReportModal()"
+                            class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     
 
     <!-- Mobile Bottom Bar -->
@@ -939,6 +1040,52 @@
         const dropdown = document.getElementById("couponDropdown");
         dropdown.classList.toggle("hidden");
     }
-</script>
+    </script>
+
+    <script>
+        // Show/Hide report modal
+        function showReportModal() {
+            const modal = document.getElementById('reportCourseModal');
+            const body = document.body;
+
+            modal.classList.remove('modal-hidden');
+            body.classList.add('modal-open');
+
+            // Focus first input
+            setTimeout(() => {
+                const textarea = modal.querySelector('textarea');
+                if (textarea) {
+                    textarea.focus();
+                }
+            }, 100);
+        }
+
+        function hideReportModal() {
+            const modal = document.getElementById('reportCourseModal');
+            const body = document.body;
+
+            modal.classList.add('modal-hidden');
+            body.classList.remove('modal-open');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('reportCourseModal');
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        hideReportModal();
+                    }
+                });
+            }
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal && !modal.classList.contains('modal-hidden')) {
+                    hideReportModal();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

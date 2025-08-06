@@ -1,19 +1,21 @@
-﻿using final_project_fe.Dtos.Report;
-using final_project_fe.Dtos.Users;
+﻿using final_project_fe.Dtos.Post;
 using final_project_fe.Dtos;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-using final_project_fe.Dtos.Comment;
+using final_project_fe.Dtos.Report;
+using final_project_fe.Dtos.Category;
+using final_project_fe.Dtos.Users;
 using final_project_fe.Dtos.Notification;
-using Microsoft.Extensions.Hosting;
-using final_project_fe.Dtos.Post;
+using final_project_fe.Dtos.Courses;
+using final_project_fe.Dtos.Comment;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
+using final_project_fe.Dtos.Mentors;
 
-namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
+namespace final_project_fe.Pages.Admin.ReportManager.CoursesReport
 {
     public class IndexModel : PageModel
     {
@@ -28,13 +30,12 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
             _httpClient = httpClient;
         }
 
-        public PageResult<CommentDto> Comments { get; set; }
-        public CommentDto Comment { get; set; }
-        public PageResult<GroupedReportDto<int, ReportCommentDto>> GroupedReportComments { get; set; }
-        public Dictionary<int, List<ReportCommentDto>> DetailedReports { get; set; } = new Dictionary<int, List<ReportCommentDto>>();
+        public PageResult<GetCourseDto> Courses { get; set; }
+        public MentorDto Mentor { get; set; }
+        public PageResult<GroupedReportDto<int, ReportCourseDto>> GroupedReportCourses { get; set; }
+        public Dictionary<int, List<ReportCourseDto>> DetailedReports { get; set; } = new Dictionary<int, List<ReportCourseDto>>();
         public int CurrentPage { get; set; }
         public int PageSize { get; set; } = 10;
-
         public async Task<IActionResult> OnGetAsync(int pageNumber = 1)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
@@ -74,22 +75,22 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
 
             CurrentPage = pageNumber;
 
-            string groupedUrl = $"{_apiSettings.BaseUrl}/ReportComment/grouped?page={pageNumber}";
-            string commentApiUrl = $"{_apiSettings.BaseUrl}/Comment/GetAllComments";
+            string groupedUrl = $"{_apiSettings.BaseUrl}/ReportCourse/grouped?page={pageNumber}";
+            string courseApiUrl = $"{_apiSettings.BaseUrl}/Course/";
 
             try
             {
                 var requestGrouped = new HttpRequestMessage(HttpMethod.Get, groupedUrl);
                 requestGrouped.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                var requestComment = new HttpRequestMessage(HttpMethod.Get, commentApiUrl);
-                requestComment.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                var requestCourse = new HttpRequestMessage(HttpMethod.Get, courseApiUrl);
+                requestCourse.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi api song song 2 request
                 var groupedTask = _httpClient.SendAsync(requestGrouped);
-                var commentTask = _httpClient.SendAsync(requestComment);
+                var courseTask = _httpClient.SendAsync(requestCourse);
 
-                await Task.WhenAll(groupedTask, commentTask);
+                await Task.WhenAll(groupedTask, courseTask);
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
@@ -97,18 +98,18 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
                 if (groupedTask.Result.IsSuccessStatusCode)
                 {
                     string json = await groupedTask.Result.Content.ReadAsStringAsync();
-                    GroupedReportComments = JsonSerializer.Deserialize<PageResult<GroupedReportDto<int, ReportCommentDto>>>(json, options);
+                    GroupedReportCourses = JsonSerializer.Deserialize<PageResult<GroupedReportDto<int, ReportCourseDto>>>(json, options);
                 }
 
-                if (commentTask.Result.IsSuccessStatusCode)
+                if (courseTask.Result.IsSuccessStatusCode)
                 {
-                    string json = await commentTask.Result.Content.ReadAsStringAsync();
-                    Comments = JsonSerializer.Deserialize<PageResult<CommentDto>>(json, options);
+                    string json = await courseTask.Result.Content.ReadAsStringAsync();
+                    Courses = JsonSerializer.Deserialize<PageResult<GetCourseDto>>(json, options);
                 }
 
-                if (GroupedReportComments?.Items != null && GroupedReportComments.Items.Any())
+                if (GroupedReportCourses?.Items != null && GroupedReportCourses.Items.Any())
                 {
-                    await LoadDetailedReportsAsync(token, GroupedReportComments.Items);
+                    await LoadDetailedReportsAsync(token, GroupedReportCourses.Items);
                 }
 
             }
@@ -117,21 +118,21 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
                 _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
             }
 
-            GroupedReportComments ??= new PageResult<GroupedReportDto<int, ReportCommentDto>>(Enumerable.Empty<GroupedReportDto<int, ReportCommentDto>>(), 0, CurrentPage, PageSize);
-            Comments ??= new PageResult<CommentDto>(Enumerable.Empty<CommentDto>(), 0, CurrentPage, PageSize);
+            GroupedReportCourses ??= new PageResult<GroupedReportDto<int, ReportCourseDto>>(Enumerable.Empty<GroupedReportDto<int, ReportCourseDto>>(), 0, CurrentPage, PageSize);
+            Courses ??= new PageResult<GetCourseDto>(Enumerable.Empty<GetCourseDto>(), 0, CurrentPage, PageSize);
 
             return Page();
         }
 
-        private async Task LoadDetailedReportsAsync(string token, IEnumerable<GroupedReportDto<int, ReportCommentDto>> groupedReports)
+        private async Task LoadDetailedReportsAsync(string token, IEnumerable<GroupedReportDto<int, ReportCourseDto>> groupedReports)
         {
-            var commentIds = groupedReports.Select(g => g.Id).ToList();
-            var detailTasks = new List<Task<KeyValuePair<int, List<ReportCommentDto>>>>();
+            var courseIds = groupedReports.Select(g => g.Id).ToList();
+            var detailTasks = new List<Task<KeyValuePair<int, List<ReportCourseDto>>>>();
 
-            // Tạo tasks để gọi API song song cho tất cả userIds
-            foreach (var commentId in commentIds)
+            // Tạo tasks để gọi API song song cho tất cả courseIds
+            foreach (var courseId in courseIds)
             {
-                detailTasks.Add(GetReportDetailsByUserIdAsync(token, commentId));
+                detailTasks.Add(GetReportDetailsByCourseIdAsync(token, courseId));
             }
 
             try
@@ -145,13 +146,13 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi khi lấy chi tiết reports: {ex.Message}");
-                DetailedReports = new Dictionary<int, List<ReportCommentDto>>();
+                DetailedReports = new Dictionary<int, List<ReportCourseDto>>();
             }
         }
 
-        private async Task<KeyValuePair<int, List<ReportCommentDto>>> GetReportDetailsByUserIdAsync(string token, int commentId)
+        private async Task<KeyValuePair<int, List<ReportCourseDto>>> GetReportDetailsByCourseIdAsync(string token, int courseId)
         {
-            string apiUrl = $"{_apiSettings.BaseUrl}/ReportManager/by-comment/{commentId}";
+            string apiUrl = $"{_apiSettings.BaseUrl}/ReportManager/by-Course/{courseId}";
 
             try
             {
@@ -164,20 +165,20 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
                 {
                     string json = await response.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    var reports = JsonSerializer.Deserialize<List<ReportCommentDto>>(json, options) ?? new List<ReportCommentDto>();
+                    var reports = JsonSerializer.Deserialize<List<ReportCourseDto>>(json, options) ?? new List<ReportCourseDto>();
 
-                    return new KeyValuePair<int, List<ReportCommentDto>>(commentId, reports);
+                    return new KeyValuePair<int, List<ReportCourseDto>>(courseId, reports);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Lỗi khi gọi API chi tiết report cho user {commentId}: {ex.Message}");
+                _logger.LogError($"Lỗi khi gọi API chi tiết report cho course {courseId}: {ex.Message}");
             }
 
-            return new KeyValuePair<int, List<ReportCommentDto>>(commentId, new List<ReportCommentDto>());
+            return new KeyValuePair<int, List<ReportCourseDto>>(courseId, new List<ReportCourseDto>());
         }
 
-        public async Task<IActionResult> OnPostWarningAsync(int id)
+        public async Task<IActionResult> OnPostWarningAsync(int courseId, string title)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
                 return RedirectToPage("/Login");
@@ -190,28 +191,27 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
+                string mentorUrl = $"{_apiSettings.BaseUrl}/Mentor/by-course/{courseId}";
+                var mentorRequest = new HttpRequestMessage(HttpMethod.Get, mentorUrl);
+                mentorRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-                string commentUrl = $"{_apiSettings.BaseUrl}/Comment/{id}";
-                var commentRequest = new HttpRequestMessage(HttpMethod.Get, commentUrl);
-                commentRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-                var commentResponse = await _httpClient.SendAsync(commentRequest);
-                if (!commentResponse.IsSuccessStatusCode)
+                var mentorResponse = await _httpClient.SendAsync(mentorRequest);
+                if (!mentorResponse.IsSuccessStatusCode)
                 {
                     return RedirectToPage("/Page/ErrorPage");
                 }
 
-                var commentJson = await commentResponse.Content.ReadAsStringAsync();
-                var commentRoot = JsonNode.Parse(commentJson);
-                Comment = commentRoot.Deserialize<CommentDto>(new JsonSerializerOptions
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentorRoot = JsonNode.Parse(mentorJson);
+                Mentor = mentorRoot.Deserialize<MentorDto>(new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
-                }) ?? new CommentDto();
+                }) ?? new MentorDto();
 
                 var notification = new CreateNotification
                 {
-                    userId = Comment.UserId,
-                    message = $"Warn users whose comments are reported as not following our site's community standards."
+                    userId = Mentor.UserId,
+                    message = $"Warning users whose Courses with name '{title}' have been reported as not following our site's community standards."
                 };
 
                 var content = new StringContent(JsonSerializer.Serialize(notification), System.Text.Encoding.UTF8, "application/json");
