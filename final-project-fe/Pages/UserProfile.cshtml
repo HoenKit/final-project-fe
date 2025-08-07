@@ -44,8 +44,26 @@
 					</div>
 				</div>
 			</div>
-			<div style="width: 22%; margin-right: 5%;">
-				<div class="col-12">
+			<div class="d-flex" style="width: 44%; margin-right: -5%;">
+				<!-- Points Card -->
+				<div class="col-4">
+					<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
+						<div style="color: #000;" class="card-body d-flex flex-column justify-content-between">
+							<div class="d-flex justify-content-between align-items-start">
+								<div>
+									<small>Your Points</small>
+									<h3 class="mt-1">@(Model.Profile?.Point?.ToString("N0") ?? "0")</h3>
+								</div>
+								<i style="font-size:150%" class="bi bi-p-circle"></i>
+							</div>
+							<a class="btn btn-outline-dark btn-sm rounded-pill mt-3 w-fit" asp-area="" asp-page="/PointTransaction">
+								Buy Points
+							</a>
+						</div>
+					</div>
+				</div>
+				<!-- MemberShip Card -->
+				<div class="col-6">
 					@if (Model.Profile.IsPremium)
 					{
 						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
@@ -104,11 +122,19 @@
 										</li>
 										<li style="display:flex">
 											<i class="bi bi-person"></i>
-											<a class="active" asp-page="/UserPage" title="" data-ripple="">Page</a>
+											<a class="active" asp-page="/UserPage" title="" data-ripple="">My Page</a>
 										</li>
-										<li style="display:flex">
+										@* <li style="display:flex">
 											<i class="bi bi-info-circle"></i>
 											<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
+										</li> *@
+										<li style="display:flex">
+											<i class="bi bi-bag"></i>
+											<a asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
+										</li>
+										<li style="display:flex">
+											<i class="bi bi-wallet2"></i>
+											<a asp-area="" asp-page="/TransactionHistory">Transaction History</a>
 										</li>
 									</ul>
 								</div><!-- Shortcuts -->
