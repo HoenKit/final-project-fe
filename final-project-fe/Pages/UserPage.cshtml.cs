@@ -37,6 +37,7 @@ namespace final_project_fe.Pages
         // Use PageResult for paginated posts
         public PageResult<PostDto> Posts { get; set; }
         public List<CategoryDto> Categories { get; set; } = new();
+        public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
 
         [BindProperty]
         public CommentCreateDto NewComment { get; set; } 
@@ -153,6 +154,20 @@ namespace final_project_fe.Pages
                     {
                         PropertyNameCaseInsensitive = true
                     }) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
+
+                    if (Posts?.Items != null)
+                    {
+                        foreach (var post in Posts.Items)
+                        {
+                            foreach (var postFile in post.PostFiles)
+                            {
+                                if (!string.IsNullOrWhiteSpace(postFile.FileUrl))
+                                {
+                                    postFile.FileUrl = ImageUrlHelper.AppendSasTokenIfNeeded(postFile.FileUrl, SasToken);
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
