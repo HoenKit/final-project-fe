@@ -1,0 +1,478 @@
+﻿@page "{id:int}"
+@model final_project_fe.Pages.DoAssignmentModel
+@{
+    ViewData["Title"] = "Do Assignment";
+}
+
+<style>
+    body {
+        background: #ffffff;
+        color: #333333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-container {
+        background: #ffffff;
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .main-card {
+        background: #ffffff;
+        border: 2px solid #333333;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .main-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #333333;
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        background: #333333;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.8rem;
+        margin-right: 1rem;
+        font-weight: bold;
+    }
+
+    .user-info h3 {
+        margin: 0;
+        font-weight: 700;
+        color: #333333;
+        font-size: 1.5rem;
+    }
+
+    .user-info small {
+        color: #666666;
+        font-size: 0.9rem;
+    }
+
+    .alert-custom {
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        border-left: 4px solid;
+    }
+
+    .alert-warning-custom {
+        background: #fff3cd;
+        color: #856404;
+        border-left-color: #ffc107;
+    }
+
+    .alert-danger-custom {
+        background: #f8d7da;
+        color: #721c24;
+        border-left-color: #dc3545;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left-color: #dc3545;
+    }
+
+    .btn-custom {
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+        border: 2px solid;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-outline-custom {
+        background: #ffffff;
+        color: #333333;
+        border-color: #333333;
+    }
+
+        .btn-outline-custom:hover {
+            background: #333333;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+    .btn-dark-custom {
+        background: #333333;
+        color: #ffffff;
+        border-color: #333333;
+    }
+
+        .btn-dark-custom:hover {
+            background: #555555;
+            border-color: #555555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+    .btn-success-custom {
+        background: #333333;
+        color: #ffffff;
+        border-color: #333333;
+    }
+
+        .btn-success-custom:hover {
+            background: #28a745;
+            border-color: #28a745;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+        }
+
+    .btn-danger-custom {
+        background: #333333;
+        color: #ffffff;
+        border-color: #333333;
+    }
+
+        .btn-danger-custom:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220,53,69,0.3);
+        }
+
+    .test-container {
+        background: #ffffff;
+        border: 2px solid #333333;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .question-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        border-left: 5px solid #333333;
+    }
+
+    .question-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333333;
+        margin-bottom: 1rem;
+    }
+
+    .question-content {
+        font-size: 1.1rem;
+        font-style: italic;
+        color: #555555;
+        line-height: 1.6;
+    }
+
+    .timer-section {
+        background: #fff;
+        border: 2px solid #333333;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .timer-label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333333;
+        margin-bottom: 0.5rem;
+    }
+
+    .timer-display {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #dc3545;
+        font-family: 'Courier New', monospace;
+    }
+
+    .answer-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333333;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .form-control-custom {
+        background: #f8f9fa;
+        border: 2px solid #333333;
+        border-radius: 8px;
+        color: #333333;
+        padding: 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+        resize: vertical;
+    }
+
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #555555;
+            box-shadow: 0 0 0 3px rgba(51,51,51,0.1);
+            background: #ffffff;
+        }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .text-end {
+        text-align: right;
+    }
+
+    .d-none {
+        display: none !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+
+    .px-4 {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    @@media (max-width: 768px) {
+        .user-profile
+
+    {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .user-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .timer-section {
+        margin-bottom: 1rem;
+    }
+
+    .btn-custom {
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    }
+</style>
+
+<div class="page-container">
+    <div class="container py-5">
+        <div class="main-card">
+            <div class="user-profile">
+                <div class="user-avatar">👤</div>
+                @if (Model.UserDetail?.UserMetaData != null)
+                {
+                    <div class="user-info">
+                        <h3>@Model.UserDetail.UserMetaData.FirstName @Model.UserDetail.UserMetaData.LastName</h3>
+                        <small>Ready to do the test!</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert-custom alert-error">Unable to load user information.</div>
+                }
+            </div>
+
+            @if (!Model.IsUserAssignmentCreated)
+            {
+                <div class="alert-custom alert-warning-custom">⚠ Unable to initialize assignment.</div>
+            }
+            else if (!Model.IsPresented)
+            {
+                <div class="alert-custom alert-danger-custom">🔒 You are not allowed to take the test yet. Please wait until the test starts.</div>
+            }
+            else
+            {
+                <div class="text-end">
+                    <a id="meetLink" href="@Model?.MeetingLink" target="_blank" class="btn-custom btn-outline-custom">
+                        📹 Join the meeting
+                    </a>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button id="btnLamBai" class="btn-custom btn-dark-custom btn-lg px-4 d-none">Do Assignment</button>
+                    <button id="btnStartTest" class="btn-custom btn-success-custom btn-lg px-4 d-none">Start Test</button>
+                </div>
+            }
+        </div>
+
+        <div id="testContainer" class="d-none">
+            <div class="test-container">
+                <div class="question-section">
+                    <h4 class="question-title">📝 Question</h4>
+                    <p id="questionContent" class="question-content">Loading...</p>
+                </div>
+
+                <div class="timer-section">
+                    <div class="timer-label">⏳ Time left:</div>
+                    <div id="examTimer" class="timer-display">--:--</div>
+                </div>
+
+                <div class="answer-section">
+                    <label for="answerContent" class="form-label">✍️ Your Answer:</label>
+                    <textarea class="form-control-custom" id="answerContent" rows="8" placeholder="Enter your assignment answer..."></textarea>
+                </div>
+
+                <div class="text-end">
+                    <button class="btn-custom btn-danger-custom px-4" id="btnSubmit">
+                        📤 Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const Baseurl = "@Model.BaseUrl";
+        const assignmentId = "@Model.assignmentid";
+        const userId = "@Model.UserId";
+
+        const btnLamBai = document.getElementById("btnLamBai");
+        const btnStartTest = document.getElementById("btnStartTest");
+        const testContainer = document.getElementById("testContainer");
+        const questionContent = document.getElementById("questionContent");
+        const examTimer = document.getElementById("examTimer");
+        const meetLink = document.getElementById("meetLink");
+        const btnSubmit = document.getElementById("btnSubmit");
+
+        let countdownTimer;
+
+        // Bắt buộc vào meeting trước khi làm bài
+        meetLink?.addEventListener("click", () => {
+            const confirmed = confirm("Are you joining the meeting now?");
+            if (confirmed) {
+                btnLamBai.classList.remove("d-none");
+            }
+        });
+
+        btnLamBai?.addEventListener("click", () => {
+            btnLamBai.classList.add("d-none");
+            btnStartTest.classList.remove("d-none");
+        });
+
+        btnStartTest?.addEventListener("click", () => {
+            btnStartTest.classList.add("d-none");
+            testContainer.classList.remove("d-none");
+            loadAssignment();
+        });
+
+        btnSubmit?.addEventListener("click", () => submitAssignment(false));
+
+        function loadAssignment() {
+            fetch(`${Baseurl}/Assignment/${assignmentId}`)
+                .then(res => res.json())
+                .then(data => {
+                    questionContent.textContent = data.content;
+                    examTimer.textContent = data.examTime;
+                    meetLink.href = data.meetLink;
+                    startCountdown(data.examTime);
+                })
+                .catch(err => {
+                    console.error("Error loading assignment:", err);
+                    showNotification("The assignment could not be loaded. Please try again later.", "error");
+                });
+        }
+
+        function startCountdown(timeStr) {
+            const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+            let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            countdownTimer = setInterval(() => {
+                if (totalSeconds <= 0) {
+                    clearInterval(countdownTimer);
+                    examTimer.textContent = "Time's up!";
+                    submitAssignment(true);
+                    return;
+                }
+
+                totalSeconds--;
+                const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                const s = String(totalSeconds % 60).padStart(2, '0');
+                examTimer.textContent = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function submitAssignment(auto = false) {
+            const answer = document.getElementById("answerContent").value.trim();
+            const payload = {
+                userId: userId,
+                assignmentId: assignmentId,
+                content: answer
+            };
+
+            fetch(`${Baseurl}/Learning/submitAssignment`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (res.ok) {
+                    showNotification(
+                        auto ? "⏱ Time's up. The post has been automatically returned." : "✅ The article has been submitted successfully!",
+                        "success"
+                    );
+                    setTimeout(() => {
+                        window.location.href = "/UserCourse";
+                    }, 2000);
+                } else {
+                    return res.text().then(errMsg => {
+                        showNotification("❌ Failed submission: " + errMsg, "error");
+                    });
+                }
+            })
+            .catch(err => {
+                console.error("Error when submitting assignment:", err);
+                showNotification("🚫 Server connection error. Please try again later.", "error");
+            });
+        }
+    </script>
+}

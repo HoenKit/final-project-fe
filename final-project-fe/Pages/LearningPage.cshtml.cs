@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Claims;
@@ -36,7 +37,7 @@ namespace final_project_fe.Pages.Mentor
         public string MentorFullName { get; set; }
 
         public string BaseUrl { get; set; }
-        public string ImageKey { get; set; } 
+        public string ImageKey { get; set; }
         public List<ModuleProgressDto> Modules { get; set; } = new();
         public List<LessonbyModuleDto> Lessons { get; set; }
 
@@ -86,33 +87,71 @@ namespace final_project_fe.Pages.Mentor
                 Modules = response;
             return Page();
         }
+
         public async Task<IActionResult> OnGetLessonAsync(int lessonId)
         {
             try
             {
-                var quizRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Learning/{lessonId}");
-                if (quizRes.IsSuccessStatusCode)
-                {
-                    var json = await quizRes.Content.ReadAsStringAsync();
-                    var quiz = JsonConvert.DeserializeObject<List<QuestionDto>>(json);
-
-                    if (quiz != null && quiz.Any())
-                    {
-                        QuizQuestions = quiz;
-                        return new JsonResult(QuizQuestions);
-                    }
-                }
-
-                // Nếu không có quiz, lấy lesson dạng video/docs
+                // Lấy thông tin lesson đầu tiên để kiểm tra có quiz và assignment không
                 var lessonRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Lesson/{lessonId}");
                 if (lessonRes.IsSuccessStatusCode)
                 {
                     var json = await lessonRes.Content.ReadAsStringAsync();
                     LessonDetail = JsonConvert.DeserializeObject<LessonDetailDto>(json);
-                    return new JsonResult(LessonDetail);
+
+                    // Kiểm tra có quiz không
+                    var quizRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Learning/{lessonId}");
+                    List<QuestionDto> quiz = null;
+
+                    if (quizRes.IsSuccessStatusCode)
+                    {
+                        var quizJson = await quizRes.Content.ReadAsStringAsync();
+                        quiz = JsonConvert.DeserializeObject<List<QuestionDto>>(quizJson);
+                    }
+
+                    // Kiểm tra assignment thông qua API khác
+                    bool hasAssignment = false;
+                    int? assignmentId = null;
+
+                    try
+                    {
+                        var assignmentRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Assignment/get-all-assignment-by-lesson/{lessonId}");
+                        if (assignmentRes.IsSuccessStatusCode)
+                        {
+                            var assignmentJson = await assignmentRes.Content.ReadAsStringAsync();
+                            var assignmentArray = JsonConvert.DeserializeObject<JArray>(assignmentJson);
+
+                            if (assignmentArray != null && assignmentArray.Any())
+                            {
+                                var firstAssignment = assignmentArray.First;
+
+                                hasAssignment = true;
+                                assignmentId =
+                                    (int?)firstAssignment["assignmentId"] ??
+                                    (int?)firstAssignment["AssignmentId"] ??
+                                    (int?)firstAssignment["id"] ??
+                                    (int?)firstAssignment["Id"];
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Nếu lỗi khi gọi API assignment, coi như không có
+                        hasAssignment = false;
+                    }
+
+                    // Tạo response object với đầy đủ thông tin
+                    var responseData = new
+                    {
+                        lesson = LessonDetail,
+                        quiz = quiz?.Any() == true ? quiz : null,
+                        hasQuiz = quiz?.Any() == true,
+                        hasAssignment = hasAssignment,
+                        assignmentId = assignmentId
+                    };
+
+                    return new JsonResult(responseData);
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -122,6 +161,7 @@ namespace final_project_fe.Pages.Mentor
 
             return NotFound();
         }
+
 
 
         public async Task<IActionResult> OnPostCompleteLessonAsync([FromBody] LessonCompletionDto model)
@@ -183,8 +223,6 @@ namespace final_project_fe.Pages.Mentor
                 isPassed = (bool)result.isPassed
             });
         }
-
-
 
     }
 

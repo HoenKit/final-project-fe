@@ -6,6 +6,8 @@
 @{
     var token = HttpContext.Request.Cookies["AccessToken"];
 }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <!--<div class="se-pre-con"></div>-->
 <div class="theme-layout">
     <section>
@@ -283,20 +285,51 @@
                                         <h3>Search results for: "@Model.Query"</h3>
                                     }
 
+												<div class="container my-4">
+													<h4 class="fw-bold mb-3">🎓 Workshops:</h4>
 
-                                    <!-- Posts container -->
-                                    <div class="posts-container">
-                                        @if (Model.Posts != null && Model.Posts.Items.Any())
-                                        {
-                                            @foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
-                                            {
-                                                <!-- Single post container -->
-                                                <div class="card p-3 mb-3 shadow-sm rounded">
-                                                    <!-- Post content -->
-                                                    <div class="friend-info">
-                                                        <figure>
-                                                            <img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-                                                                 alt="User Avatar">
+													<div class="swiper mySwiper">
+														<div class="swiper-wrapper">
+														@if (Model?.WorkShops?.Items != null)
+														{
+															foreach (var ws in Model.WorkShops.Items)
+															{
+																<div class="swiper-slide">
+																	<a href="/WorkshopDetail/@ws.WorkShopId" class="text-decoration-none">
+																		<div class="card text-center p-3" style="width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: space-between;">
+																			<div class="card-body d-flex flex-column justify-content-between">
+																				<h6 class="fw-bold text-dark text-truncate" title="@ws.Decription">
+																					@(ws.Decription.Length > 50 ? ws.Decription.Substring(0, 50) + "..." : ws.Decription)
+																				</h6>
+																				<p class="text-muted"><i class="bi bi-calendar"></i> @ws.UpdateAt.ToString("dd/MM/yyyy")</p>
+																				<button class="btn btn-outline-primary btn-sm mt-2">Join now</button>
+																			</div>
+																		</div>
+																	</a>
+																</div>
+															}
+														}
+														</div>
+
+														<!-- Navigation buttons -->
+														<div class="swiper-button-next"></div>
+														<div class="swiper-button-prev"></div>
+													</div>
+												</div>
+												<!-- Posts container -->
+												<div class="posts-container">
+												<h4 class="fw-bold mb-3">👥 Communicate:</h4>
+												@if (Model.Posts != null && Model.Posts.Items.Any())
+												{
+														@foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
+														{
+														<!-- Single post container -->
+														<div class="card p-3 mb-3 shadow-sm rounded">
+																<!-- Post content -->
+																<div class="friend-info">
+																	<figure>
+																		<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
+																		alt="User Avatar">
 
                                                         </figure>
 
@@ -694,15 +727,25 @@
 	<script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
 	<script src="js/map-init.js"></script> *@
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Configuration
-            currentUserId = "@Model.CurrentUserId"
-            const HubUrl = "@Model.HubUrl";
-            const BaseUrl = "@Model.BaseUrl";
-            const userId = currentUserId;
-            const token = "@token";
+	<script>
+		var swiper = new Swiper(".mySwiper", {
+			slidesPerView: 3,
+			spaceBetween: 15,
+			navigation: {
+				nextEl: ".swiper-button-next",
+				prevEl: ".swiper-button-prev",
+			},
+		});
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			// Configuration
+			currentUserId = "@Model.CurrentUserId"
+			const HubUrl = "@Model.HubUrl";
+			const BaseUrl = "@Model.BaseUrl";
+			const userId = currentUserId;
+			const token = "@token";
 
             // Load More Posts Configuration
             let currentPage = 1;

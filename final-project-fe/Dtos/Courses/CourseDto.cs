@@ -12,6 +12,15 @@
         public IFormFile? CoursesImage { get; set; }
         public double? CourseLength { get; set; }
     }
+    public class ListCourseDto 
+    {
+
+        public int CourseId { get; set; }
+
+        public string? CourseName { get; set; }
+
+        public int MentorId { get; set; }
+    }
     public class CourseCertificateDto
     {
         public string courseName { get; set; }

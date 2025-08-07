@@ -93,7 +93,6 @@ namespace final_project_fe.Pages.Shared
                 return Page();
             }
 
-
             string loginApiUrl = $"{_apiSettings.BaseUrl}/Auth/Login";
 
             try
@@ -106,7 +105,6 @@ namespace final_project_fe.Pages.Shared
 
                 if (response.IsSuccessStatusCode)
                 {
-
                     if (responseContent.Trim().StartsWith("{"))
                     {
                         var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -127,20 +125,40 @@ namespace final_project_fe.Pages.Shared
                             _logger.LogInformation($"User Role: {role}");
                             _logger.LogInformation($"User Id: {userId}");
 
-
                             if (role == "Admin")
                             {
                                 TempData["SuccessMessage"] = "Admin login successful!";
                                 return RedirectToPage("/Admin/Dashboard/Index");
                             }
+
                             TempData["SuccessMessage"] = "Login successful!";
                             return RedirectToPage("/Index");
                         }
+
                         TempData["ErrorMessage"] = "Login failed! Please check your information.";
                     }
                 }
+                else
+                {
+                    // Nếu API trả về lỗi và responseContent là JSON chứa "message"
+                    if (responseContent.Trim().StartsWith("{"))
+                    {
+                        var errorObj = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+                        if (errorObj != null && errorObj.TryGetValue("message", out var errorMessage))
+                        {
+                            TempData["ErrorMessage"] = errorMessage;
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "Login failed!";
+                        }
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Login failed!";
+                    }
+                }
             }
-
             catch (Exception ex)
             {
                 _logger.LogError($"Error calling login API: {ex.Message}");
