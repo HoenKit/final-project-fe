@@ -15,6 +15,7 @@
 	}
 
 	bool isMentor = roles.Contains("Mentor");
+	bool isUser = roles.Contains("User");
 	bool isAdmin = roles.Contains("Admin");
 }
 <!DOCTYPE html>
@@ -181,6 +182,15 @@
 							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
 						</li>
 					}
+					@if (isUser && isMentor)
+					{
+						<li>
+							<a asp-page="/UserPage">My page</a>
+						</li>
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/CourseRecommend">Recommend Course</a>
+						</li>
+					}
 				</ul>
 				<ul class="setting-area">
 					<li>
@@ -268,7 +278,7 @@
 					</li>
 				</ul>
 				<div class="user-img" id="userImg">
-					<img src="@Url.Content("~/images/resources/admin.jpg")" alt="">
+					<img src="~/images/fav_icon.png" alt="">
 					<div class="custom-user-menu" id="userMenu">
 						@if (isAuthenticated)
 						{
@@ -279,7 +289,12 @@
 								</text>
 							}
 							<text>
-								<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+								@if (isUser && isMentor)
+								{
+									<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
+									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
+								}
 								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
 							</text>
 						}

@@ -19,7 +19,7 @@
 							<div class="col-lg-3">
 								<aside class="sidebar">
 									<div class="widget">
-										<h4 class="widget-title">Shortcuts</h4>
+										<h4 class="widget-title">Search</h4>
 										<ul class="naves">
 											<form style="margin-bottom: -15px;" method="get" asp-page-handler="SearchPost" class="d-flex">
 												<div class="input-group" style="margin-bottom: 40px">
@@ -29,7 +29,7 @@
 													</button>
 												</div>
 											</form>
-											@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+											@* @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
 											@{
 												var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
@@ -49,7 +49,7 @@
 													<i class="bi bi-wechat"></i>
 													<a href="/Chatting" title="">Chatting</a>
 												</li>
-											}
+											} *@
 											@* <li>
                                             <i class="ti-comments-smiley"></i>
                                             <a href="#" title="">Messages</a>
@@ -70,10 +70,10 @@
                                                 <i class="ti-image"></i>
                                                 <a href="#" title="">images</a>
                                             </li> *@
-											<li style="display:flex">
+											@* <li style="display:flex">
 												<i class="bi bi-book-half"></i>
 												<a href="/UserCourse" title="">My Own Course</a>
-											</li>
+											</li> *@
 
 										</ul>
 									</div><!-- Shortcuts -->
@@ -140,7 +140,7 @@
 								<div class="user-post">
 
 									@* <div class="newpst-input"> *@
-									@if (!string.IsNullOrEmpty(userToken))
+									@if (!string.IsNullOrEmpty(token))
 									{
 										<div class="card p-3 mb-3 shadow-sm rounded">
 											<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
