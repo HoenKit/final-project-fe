@@ -38,50 +38,75 @@ namespace final_project_fe.Pages.Shared
         {
             BaseUrl = _apiSettings.BaseUrl;
 
-            //  1. If token is present, redirect
+            // 1. Nếu đã có token thì redirect luôn
             var token = Request.Cookies["AccessToken"];
             if (!string.IsNullOrEmpty(token))
             {
                 return RedirectToPage("/Index");
             }
 
-            //  2. If there is a code from Google callback
-            if (!string.IsNullOrEmpty(code) || !string.IsNullOrEmpty(error))
+            // 2. Nếu có lỗi từ Google callback
+            if (!string.IsNullOrEmpty(error))
             {
-                if (!string.IsNullOrEmpty(error))
-                {
-                    TempData["ErrorMessage"] = $"Google login error: {error}";
-                    return Page();
-                }
+                TempData["ErrorMessage"] = $"Google login error: {error}";
+                return Page();
+            }
 
-                // Call backend to process code and return token
+            // 3. Nếu có code từ Google
+            if (!string.IsNullOrEmpty(code))
+            {
                 var client = _httpClientFactory.CreateClient();
                 var callbackUrl = $"{_apiSettings.BaseUrl}/Auth/google-callback?code={code}";
 
                 var response = await client.GetAsync(callbackUrl);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    TempData["Error"] = "Login failed during callback!";
+                    // Xử lý lỗi từ API (nếu có message)
+                    if (responseContent.Trim().StartsWith("{"))
+                    {
+                        var errorObj = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+                        if (errorObj != null && errorObj.TryGetValue("message", out var errorMsg))
+                        {
+                            TempData["ErrorMessage"] = $"Login failed: {errorMsg}";
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "Login failed during callback!";
+                        }
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Login failed during callback!";
+                    }
+
                     return Page();
                 }
 
-                var newToken = await response.Content.ReadAsStringAsync();
-
-                //  Save tokens in cookies
-                Response.Cookies.Append("AccessToken", newToken, new CookieOptions
+                // Nếu thành công, kiểm tra phản hồi là JSON có token
+                var tokenObj = JsonSerializer.Deserialize<Dictionary<string, string>>(responseContent);
+                if (tokenObj != null && tokenObj.TryGetValue("token", out var newToken))
                 {
-                    Secure = true,
-                    HttpOnly = false, // dùng JS nếu cần
-                    SameSite = SameSiteMode.None,
-                    Expires = DateTimeOffset.UtcNow.AddDays(3)
-                });
+                    Response.Cookies.Append("AccessToken", newToken, new CookieOptions
+                    {
+                        Secure = true,
+                        HttpOnly = false,
+                        SameSite = SameSiteMode.None,
+                        Expires = DateTimeOffset.UtcNow.AddDays(3)
+                    });
 
-                //  Redirect after saving token
-                TempData["SuccessMessage"] = "Login successful!";
-                return RedirectToPage("/Index");
+                    TempData["SuccessMessage"] = "Login successful!";
+                    return RedirectToPage("/Index");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Login failed! Please check your information.";
+                    return Page();
+                }
             }
 
-            //  3. No token and no callback → show login form
+            // 4. Không có token, không có code → hiển thị login form
             return Page();
         }
 
@@ -170,26 +195,59 @@ namespace final_project_fe.Pages.Shared
 
         public async Task<IActionResult> OnPostGoogleLoginAsync()
         {
-            var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                TempData["ErrorMessage"] = "Cannot connect to Google login API.";
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Auth/google-login");
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Deserialize để lấy message lỗi (nếu có)
+                    var errorDoc = JsonSerializer.Deserialize<JsonElement>(json);
+                    if (errorDoc.TryGetProperty("message", out var errorMessageProp))
+                    {
+                        TempData["ErrorMessage"] = $"Google login failed: {errorMessageProp.GetString()}";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Google login failed due to unknown error.";
+                    }
+                    return Page();
+                }
+
+                // Nếu thành công thì xử lý như bình thường
+                var jsonDoc = JsonSerializer.Deserialize<JsonElement>(json);
+
+                // Kiểm tra nếu có message nhưng không có url => lỗi
+                if (jsonDoc.TryGetProperty("message", out var messageProp) &&
+                    !jsonDoc.TryGetProperty("url", out _))
+                {
+                    var errorMessage = messageProp.GetString() ?? "Unknown error during Google login.";
+                    TempData["ErrorMessage"] = $"Google login failed: {errorMessage}";
+                    return Page();
+                }
+
+                // Nếu có URL thì redirect
+                var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (!string.IsNullOrEmpty(result?.Url))
+                {
+                    return Redirect(result.Url);
+                }
+
+                TempData["ErrorMessage"] = "Google login URL is invalid.";
                 return Page();
             }
-
-            var json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<GoogleLoginResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-
-            if (result?.Url != null)
+            catch (Exception ex)
             {
-                return Redirect(result.Url);
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}";
+                return Page();
             }
-
-            TempData["ErrorMessage"] = "Google login URL is invalid.";
-            return Page();
         }
     }
 }
