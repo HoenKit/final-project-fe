@@ -619,7 +619,7 @@ namespace final_project_fe.Pages
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "Post deleted successfully.";
-                    return RedirectToPage("/UserPage");
+                    return RedirectToPage("/Index");
                 }
                 else
                 {
