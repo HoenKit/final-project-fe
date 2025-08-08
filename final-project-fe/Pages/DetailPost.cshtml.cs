@@ -24,7 +24,7 @@ namespace final_project_fe.Pages
             _apiSettings = apiSettings.Value;
             _httpClient = httpClient;
         }
-
+        public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
         public PostDetail Post { get; set; }
         public List<PostFileDto> PostFile { get; set; }
         public List<CommentPostDetailDto> Comment { get; set; }
@@ -79,7 +79,16 @@ namespace final_project_fe.Pages
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new PostDetail();
-
+            if (Post.PostFiles != null || Post.PostFiles.Count() > 0)
+            {
+                foreach (var postFile in Post.PostFiles)
+                {
+                    if (!string.IsNullOrWhiteSpace(postFile.FileUrl))
+                    {
+                        postFile.FileUrl = ImageUrlHelper.AppendSasTokenIfNeeded(postFile.FileUrl, SasToken);
+                    }
+                }
+            }
             return Page();
         }
 
