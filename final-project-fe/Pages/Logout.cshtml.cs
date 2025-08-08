@@ -51,7 +51,7 @@ namespace final_project_fe.Pages
                 _logger.LogError($"Lỗi khi gọi API logout: {ex.Message}");
             }
 
-            return RedirectToPage("/Error");
+            return RedirectToPage("/ErrorPage");
         }
 
 

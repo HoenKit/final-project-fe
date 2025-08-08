@@ -1,7 +1,8 @@
-﻿@using System.IdentityModel.Tokens.Jwt
+﻿﻿@using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
 @{
 	var roles = new List<string>();
+	decimal userPoints = 0;
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
 	if (!string.IsNullOrEmpty(token))
@@ -12,6 +13,21 @@
 					.Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
 					.Select(c => c.Value)
 					.ToList();
+
+		var pointsClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "points");
+		if (pointsClaim != null)
+		{
+			var pointsValue = pointsClaim.Value;
+
+			// Thêm debug này để xem chính xác
+			var debugInfo = $"pointsValue: '{pointsValue}' | IsNull: {pointsValue == null} | IsEmpty: {string.IsNullOrEmpty(pointsValue)} | Length: {pointsValue?.Length ?? -1}";
+
+			// Sau đó parse
+			if (pointsValue != null && decimal.TryParse(pointsValue, out var points))
+			{
+				userPoints = points;
+			}
+		}
 	}
 
 	bool isMentor = roles.Contains("Mentor");
@@ -20,27 +36,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"]</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
 	<link rel="stylesheet" href="~/css/main.min.css">
 	<link rel="stylesheet" href="~/css/style.css">
 	<link rel="stylesheet" href="~/css/color.css">
 	<link rel="stylesheet" href="~/css/responsive.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    @* <link rel="stylesheet" href="~/final_project_fe.styles.css" asp-append-version="true" /> *@
+	@* <link rel="stylesheet" href="~/final_project_fe.styles.css" asp-append-version="true" /> *@
 	<style>
 		ul, ol {
 			list-style: none;
 			padding-left: 0;
 		}
+
+		.user-img {
+			position: relative;
+			display: inline-block;
+			cursor: pointer;
+		}
+
+			.user-img img {
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				border: 2px solid #e1e8ed;
+			}
+
+		.custom-user-menu {
+			position: absolute;
+			top: 100%;
+			right: 0;
+			background: white;
+			min-width: 200px;
+			border-radius: 8px;
+			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+			border: 1px solid #e1e8ed;
+			opacity: 0;
+			visibility: hidden;
+			transform: translateY(-10px);
+			transition: all 0.3s ease;
+			z-index: 1000;
+			margin-top: 8px;
+			/* Đảm bảo menu không bị overflow hidden */
+			overflow: visible;
+		}
+
+			.custom-user-menu.show {
+				opacity: 1;
+				visibility: visible;
+				transform: translateY(0);
+			}
+
+			.custom-user-menu::before {
+				content: '';
+				position: absolute;
+				top: -8px;
+				right: 15px;
+				width: 0;
+				height: 0;
+				border-left: 8px solid transparent;
+				border-right: 8px solid transparent;
+				border-bottom: 8px solid white;
+			}
+
+			.custom-user-menu a {
+				display: flex;
+				align-items: center;
+				padding: 12px 16px;
+				color: #333;
+				text-decoration: none;
+				font-size: 14px;
+				transition: background-color 0.2s ease;
+				border-bottom: 1px solid #f0f0f0;
+				/* Đảm bảo link có thể click */
+				pointer-events: auto;
+				position: relative;
+				z-index: 1001;
+			}
+
+				.custom-user-menu a:last-child {
+					border-bottom: none;
+					border-radius: 0 0 8px 8px;
+				}
+
+				.custom-user-menu a:first-child {
+					border-radius: 8px 8px 0 0;
+				}
+
+				.custom-user-menu a:hover {
+					background-color: #f8f9fa;
+					color: #007bff;
+				}
+
+				.custom-user-menu a i {
+					margin-right: 10px;
+					width: 16px;
+					text-align: center;
+					color: #666;
+				}
+
+				.custom-user-menu a:hover i {
+					color: #007bff;
+				}
 	</style>
 </head>
 <body>
-@*     <header>
+	@*     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">final_project_fe</a>
@@ -61,39 +167,37 @@
             </div>
         </nav>
     </header> *@
-    <header>
+	<header>
 		<div class="topbar">
 			<div class="logo">
 				<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="images/Logoda.png" alt=""></a>
 			</div>
 
 			<div class="top-area">
-				<ul class="main-menu">		
+				<ul class="main-menu">
 
 					<li>
-						<a href="#" title="">Home</a>
-						<ul>
-							<li>
-								<a class="nav-link text-dark" asp-area="" asp-page="/Index">Communication Page</a>
-							</li>					
-							<li>
-								<a class="nav-link text-dark" asp-page="/Mentor/MentorPage/Index">Course Page</a>
-							</li>
-						</ul>
+						<a asp-area="" asp-page="/Index" title="">Home</a>
 					</li>
 					<li>
-						<a href="#" title="">more pages</a>
-						<ul>
+						<a asp-page="/Mentor/MentorPage/Index" title="">Course</a>
+						@* <ul>
 							<li>
 								<a class="nav-link text-dark" asp-area="" asp-page="/PointTransaction">Buy Point</a>
 							</li>
-							@* <li>
-								<a class="nav-link text-dark" asp-area="" asp-page="/ErrorPage">404</a>
-							</li> *@
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
+							</li>
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/TransactionHistory">Transaction History</a>
+							</li>
 							<li>
 								<a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
 							</li>
-						</ul>
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/ErrorPage">404</a>
+							</li>
+						</ul> *@
 					</li>
 					@if (isMentor)
 					{
@@ -118,7 +222,7 @@
 							</form>
 						</div>
 					</li>
-					<li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li>
+					@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
 					<li>
 						<a href="#" title="Notification" data-ripple="">
 							<i class="ti-bell"></i><span>20</span>
@@ -186,98 +290,49 @@
 						</div>
 					</li>
 					<li>
-						<a href="#" title="Messages" data-ripple=""><i class="ti-comment"></i><span>12</span></a>
-						<div class="dropdowns">
-							<span>5 New Messages</span>
-							<ul class="drops-menu">
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-1.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>sarah Loren</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag green">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-2.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Jhon doe</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag red">Reply</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-3.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Andrew</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag blue">Unseen</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-4.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Tom cruse</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-5.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Amy</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-							</ul>
-							<a href="messages.html" title="" class="more-mesg">view more</a>
-						</div>
-					</li>
-					<li>
 						<a href="#" title="Languages" data-ripple=""><i class="fa fa-globe"></i></a>
 						<div class="dropdowns languages">
 							<a href="#" title=""><i class="ti-check"></i>English</a>
-							<a href="#" title="">Arabic</a>
-							<a href="#" title="">Dutch</a>
-							<a href="#" title="">French</a>
+							<a href="#" title="">Vietnam</a>
 						</div>
 					</li>
 				</ul>
-				<div class="user-img">
-					<img  src="images/resources/admin.jpg" alt="">
-					<span class="status f-online"></span>
-					<div class="user-setting">
-						<a href="#" title=""><span class="status f-online"></span>online</a>
-						<a href="#" title=""><span class="status f-away"></span>away</a>
-						<a href="#" title=""><span class="status f-off"></span>offline</a>
-						<a href="#" title=""><i class="ti-user"></i> view profile</a>
-						<a href="#" title=""><i class="ti-pencil-alt"></i>edit profile</a>
-						<a href="#" title=""><i class="ti-target"></i>activity log</a>
-						<a href="#" title=""><i class="ti-settings"></i>account setting</a>
-						@* <a href="#" title=""><i class="ti-power-off"></i>log out</a> *@
+				<div class="user-img" id="userImg">
+					<img src="~/images/fav_icon.png" alt="">
+					<div class="custom-user-menu" id="userMenu">
+						@if (isAuthenticated)
+						{
+							@* <text>
+								<a asp-page="#" id="userPointsLink">
+									<i class="bi bi-p-circle"></i>
+									<span id="userPoints">@userPoints.ToString("N0")</span>
+								</a>
+							</text> *@
+							if (!isMentor)
+							{
+								<text>
+									<a asp-page="/MentorRegulations"><i class="bi bi-person-vcard"></i> Become a Mentor</a>
+								</text>
+							}
+							<text>
+								<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
+							</text>
+						}
+						else
+						{
+							<text>
+								<a asp-page="/Login"><i class="bi bi-box-arrow-in-right" style="font-size: 118%;"></i> Login</a>
+								<a asp-page="/Register"><i class="bi bi-pencil-square"></i> Register</a>
+							</text>
+						}
 					</div>
 				</div>
-				<span class="ti-menu main-menu" data-ripple=""></span>
+
+				@* <span class="ti-menu main-menu" data-ripple=""></span> *@
 			</div>
 		</div><!-- topbar -->
-
-		<div class="side-panel">
+		@* 	<div class="side-panel">
 			<h4 class="panel-title">Account Manage</h4>
 			<ul class="navbar-nav flex-grow-1">
 				@if (isAuthenticated)
@@ -307,17 +362,17 @@
 					</li>
 				}
 			</ul>
-		</div><!-- side panel -->
+		</div><!-- side panel --> *@
 	</header>
 
-    <div class="">
-        <main role="main" class="pb-3">
-            @RenderBody()
+	<div class="">
+		<main role="main" class="pb-3">
+			@RenderBody()
 			@Html.Partial("_Notification")
-        </main>
-    </div>
+		</main>
+	</div>
 
-    <footer class="border-top footer text-muted">
+	<footer class="border-top footer text-muted">
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-4 col-md-4">
@@ -390,11 +445,11 @@
 				</div>
 			</div>
 		</div>
-    </footer>
+	</footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 	@* <script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script> *@
@@ -411,7 +466,52 @@
 			}
 		});
 	</script>
+	<script>
+				document.addEventListener('DOMContentLoaded', function () {
+			const hasToken = document.cookie.includes('AccessToken=');
 
-    @await RenderSectionAsync("Scripts", required: false)
+			if (!hasToken) {
+				sessionStorage.removeItem('courseRecommendLoadingShown');
+			}
+		});
+
+		// Fixed JavaScript cho user menu
+		const userImg = document.getElementById('userImg');
+		const userMenu = document.getElementById('userMenu');
+
+		// Toggle menu khi click vào ảnh user (không phải vào dropdown menu)
+		userImg.addEventListener('click', function (e) {
+			e.stopPropagation(); // Ngăn event bubble up
+
+			// Nếu click vào link trong menu, không toggle menu
+			if (e.target.closest('.custom-user-menu a')) {
+				return;
+			}
+
+			// Nếu click vào ảnh hoặc vùng user-img (không phải menu), toggle menu
+			if (e.target.closest('img') || (e.target === userImg && !e.target.closest('.custom-user-menu'))) {
+				userMenu.classList.toggle('show');
+			}
+		});
+
+		// Click bên ngoài sẽ đóng menu
+		document.addEventListener('click', function (event) {
+			// Chỉ đóng menu nếu click bên ngoài toàn bộ user-img container
+			if (!userImg.contains(event.target)) {
+				userMenu.classList.remove('show');
+			}
+		});
+
+		// Đảm bảo các link trong menu hoạt động bình thường
+		document.querySelectorAll('.custom-user-menu a').forEach(link => {
+			link.addEventListener('click', function (e) {
+				e.stopPropagation(); // Ngăn event bubble up
+				// Menu sẽ tự đóng khi navigate sang trang mới
+				// Không cần gọi userMenu.classList.remove('show') ở đây
+			});
+		});
+	</script>
+
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

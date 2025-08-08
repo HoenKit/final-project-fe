@@ -108,8 +108,8 @@ namespace final_project_fe.Pages.Admin.TransactionManager
                     var serviceTypeList = new List<string>();
                     if (serviceType.Contains("Course"))
                         serviceTypeList.Add("Course");
-                    if (serviceType.Contains("Membership"))
-                        serviceTypeList.Add("Membership");
+                    if (serviceType.Contains("Premium"))
+                        serviceTypeList.Add("Premium");
 
                     foreach (var s in serviceTypeList)
                     {

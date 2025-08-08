@@ -172,7 +172,7 @@ namespace final_project_fe.Pages.Admin.ReportManager.PostsReport
             return new KeyValuePair<int, List<ReportPostDto>>(postId, new List<ReportPostDto>());
         }
 
-        public async Task<IActionResult> OnPostDeleteReportAsync(Guid id, string title)
+        public async Task<IActionResult> OnPostWarningAsync(Guid id, string title)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
                 return RedirectToPage("/Login");

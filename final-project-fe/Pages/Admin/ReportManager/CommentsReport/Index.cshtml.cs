@@ -177,7 +177,7 @@ namespace final_project_fe.Pages.Admin.ReportManager.CommentsReport
             return new KeyValuePair<int, List<ReportCommentDto>>(commentId, new List<ReportCommentDto>());
         }
 
-        public async Task<IActionResult> OnPostDeleteReportAsync(int id)
+        public async Task<IActionResult> OnPostWarningAsync(int id)
         {
             if (!Request.Cookies.ContainsKey("AccessToken"))
                 return RedirectToPage("/Login");

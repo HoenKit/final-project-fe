@@ -1,0 +1,564 @@
+﻿@page
+@model final_project_fe.Pages.PurchaseHistoryModel
+@{
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Thêm wrapper container để thu nhỏ và tạo khoảng cách */
+    .page-wrapper {
+        max-width: 1000px; /* Thu nhỏ từ 1200px xuống 1000px */
+        margin: 40px auto; /* Thêm margin top/bottom */
+        padding: 0 20px; /* Thêm padding cho mobile */
+    }
+
+    .transaction-card {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px; /* Tăng border radius */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Tăng shadow mặc định */
+        transition: all 0.3s ease;
+        overflow: hidden;
+        max-width: 100%;
+    }
+
+        .transaction-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+    .card-header-custom {
+        background: #ffffff;
+        border-bottom: 1px solid #e9ecef;
+        padding: 24px 28px; /* Tăng padding */
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 24px; /* Tăng từ 22px */
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        font-size: 14px; /* Tăng từ 13px */
+        margin-bottom: 0;
+    }
+
+    .filter-btn {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        color: #495057;
+        padding: 10px 16px; /* Tăng padding */
+        border-radius: 8px; /* Tăng border radius */
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 14px; /* Tăng từ 13px */
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Tăng gap */
+    }
+
+        .filter-btn:hover, .filter-btn:focus {
+            background: #4f46e5;
+            border-color: #4f46e5;
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+        }
+
+    .filter-dropdown {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        border-radius: 10px; /* Tăng border radius */
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        padding: 8px 0; /* Tăng padding */
+        margin-top: 4px;
+        min-width: 180px; /* Tăng width */
+    }
+
+        .filter-dropdown .dropdown-item {
+            padding: 12px 18px; /* Tăng padding */
+            border-radius: 0;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Tăng gap */
+            font-size: 14px;
+        }
+
+            .filter-dropdown .dropdown-item:hover {
+                background: #f8f9fa;
+                color: #4f46e5;
+            }
+
+    .table-container {
+        background: #ffffff;
+    }
+
+    .table-scroll {
+        max-height: 450px; /* Tăng height */
+        overflow-y: auto;
+    }
+
+        .table-scroll::-webkit-scrollbar {
+            width: 8px; /* Tăng width */
+        }
+
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f3f5;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px; /* Tăng border radius */
+        }
+
+    .table-custom {
+        margin-bottom: 0;
+    }
+
+        .table-custom thead th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            font-size: 12px; /* Tăng từ 11px */
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 16px 14px; /* Tăng padding */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: all 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background: #f8f9ff;
+            }
+
+        .table-custom tbody td {
+            padding: 16px 14px; /* Tăng padding */
+            vertical-align: middle;
+            border: none;
+            font-size: 13px; /* Tăng từ 12px */
+            white-space: nowrap;
+        }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px; /* Tăng gap */
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px; /* Tăng từ 24px */
+        height: 28px; /* Tăng từ 24px */
+        border-radius: 50%;
+        font-size: 11px; /* Tăng từ 10px */
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelled {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .status-text {
+        font-weight: 500;
+        font-size: 13px; /* Tăng từ 12px */
+        margin-left: 6px;
+    }
+
+        .status-text.completed {
+            color: #166534;
+        }
+
+        .status-text.cancelled {
+            color: #dc2626;
+        }
+
+    .points-display {
+        font-size: 15px; /* Tăng từ 14px */
+        font-weight: 700;
+        color: #4f46e5;
+        margin-bottom: 1px;
+    }
+
+    .points-label {
+        color: #9ca3af;
+        font-size: 11px; /* Tăng từ 10px */
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+
+    .date-display {
+        font-weight: 600;
+        color: #374151;
+        font-size: 13px; /* Tăng từ 12px */
+        margin-bottom: 1px;
+    }
+
+    .time-display {
+        color: #9ca3af;
+        font-size: 11px; /* Tăng từ 10px */
+    }
+
+    .amount-display {
+        font-size: 15px; /* Tăng từ 14px */
+        font-weight: 700;
+        color: #059669;
+        margin-bottom: 1px;
+    }
+
+    .currency-label {
+        color: #9ca3af;
+        font-size: 11px; /* Tăng từ 10px */
+    }
+
+    .payment-method-badge {
+        background: linear-gradient(135deg, #e0f2fe 0%, #f3e5f5 100%);
+        color: #1976d2;
+        padding: 6px 10px; /* Tăng padding */
+        border-radius: 14px; /* Tăng border radius */
+        font-size: 11px; /* Tăng từ 10px */
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        border: 1px solid #e3f2fd;
+    }
+
+    .order-code {
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 6px 8px; /* Tăng padding */
+        border-radius: 6px; /* Tăng border radius */
+        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+        font-size: 11px; /* Tăng từ 10px */
+        font-weight: 500;
+        border: 1px solid #e2e8f0;
+    }
+
+    .empty-state {
+        padding: 80px 20px; /* Tăng padding */
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        width: 90px; /* Tăng từ 80px */
+        height: 90px; /* Tăng từ 80px */
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px; /* Tăng margin */
+        color: #94a3b8;
+        font-size: 36px; /* Tăng từ 32px */
+    }
+
+    .empty-state h5 {
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 12px; /* Tăng margin */
+        font-size: 18px; /* Tăng size */
+    }
+
+    .empty-state p {
+        color: #9ca3af;
+        font-size: 15px; /* Tăng từ 14px */
+        max-width: 380px; /* Tăng width */
+        margin: 0 auto;
+    }
+
+    .stats-footer {
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        padding: 24px 32px; /* Tăng padding */
+    }
+
+    .stats-text {
+        color: #6c757d;
+        font-size: 15px; /* Tăng từ 14px */
+    }
+
+    .stats-number {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .refresh-btn {
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+        color: #495057;
+        padding: 12px 18px; /* Tăng padding */
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Tăng gap */
+    }
+
+        .refresh-btn:hover {
+            background: #f8f9fa;
+            border-color: #4f46e5;
+            color: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+        }
+
+    @@media (max-width: 768px) {
+        .page-wrapper {
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .card-header-custom {
+            padding: 20px;
+        }
+
+        .page-title {
+            font-size: 20px;
+        }
+
+        .table-custom tbody td {
+            padding: 12px 8px;
+            font-size: 12px;
+        }
+
+        .stats-footer {
+            padding: 18px 20px;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+    }
+
+    @@keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<!-- Thêm wrapper div để thu nhỏ và tạo khoảng cách -->
+<div class="page-wrapper">
+    <div class="row">
+        <div class="col-12">
+            <div class="transaction-card">
+                <!-- Header -->
+                <div class="card-header-custom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="page-title">Purchase History</h3>
+                            <p class="page-subtitle">Track and monitor all payment transactions</p>
+                        </div>
+
+                        <!-- Filter Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle d-flex align-items-center gap-2"
+                                    type="button" data-bs-toggle="dropdown">
+                                <span>Filter by Service</span>
+                            </button>
+                            <div class="dropdown-menu filter-dropdown shadow-sm">
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterPaymentsByServiceType('all')">
+                                    All Services
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterPaymentsByServiceType('Course')">
+                                    Course
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center gap-2" href="#" onclick="filterPaymentsByServiceType('Premium')">
+                                    Premium
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div class="table-container">
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-custom">
+                                <thead style="position: sticky; top: 0; z-index: 10;">
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th class="text-center">Amount</th>
+                                        <th class="text-center">Date & Time</th>
+                                        <th class="text-center">Service Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentTableBody">
+                                    @if (Model.Payments?.Items != null && Model.Payments.Items.Any())
+                                    {
+                                        @foreach (var payment in Model.Payments.Items)
+                                        {
+                                            <tr data-email="@(payment?.Email?.ToLower() ?? "")" data-status="@payment.Status">
+                                                <!-- User Info -->
+                                                <td>
+                                                    <div class="user-info">
+                                                        <div class="status-badge @(payment.Status == "Success" ? "status-completed" : "status-cancelled")">
+                                                            @(payment.Status == "Success" ? "✔" : "❌")
+                                                        </div>
+                                                        @if (payment.CourseId.HasValue && !string.IsNullOrEmpty(payment.CourseName))
+                                                        {
+                                                            <a href="/Mentor/MentorPage/CourseDetail?courseId=@payment.CourseId"
+                                                               class="course-link">
+                                                                @payment.CourseName
+                                                            </a>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(payment.PlanName))
+                                                        {
+                                                            @payment.PlanName
+                                                        }
+                                                    </div>
+                                                </td>
+
+                                                <!-- Amount -->
+                                                <td class="text-center">
+                                                    <div class="points-display">@(payment.Amount.ToString("N0") ?? "N/A")</div>
+                                                    <small class="text-muted">points</small>
+                                                </td>
+
+                                                <!-- Date & Time -->
+                                                <td class="text-center">
+                                                    <div class="fw-medium text-dark">@payment.CreatedAt.ToString("MMM dd, yyyy")</div>
+                                                    <small class="text-muted">@payment.CreatedAt.ToString("h:mm tt")</small>
+                                                </td>
+
+                                                <!-- service Type -->
+                                                <td class="text-center">
+                                                    <span class="payment-method-badge">
+                                                        @(payment.ServiceType ?? "N/A")
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6">
+                                                <div class="empty-state">
+                                                    <div class="empty-state-icon">
+                                                        <i class="fas fa-receipt"></i>
+                                                    </div>
+                                                    <h5 class="text-dark mb-2">No payments found</h5>
+                                                    <p class="text-muted mb-0">Transactions will appear here when users make payments</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="stats-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2 text-muted">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Total payments: <strong class="text-dark">@(Model.Payments?.TotalCount ?? 0)</strong></span>
+                            </div>
+                            <button class="refresh-btn d-flex align-items-center gap-2" onclick="refreshPayments()">
+                                <span>Refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (Required for dropdown) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Enhanced JavaScript functions
+    function filterPaymentsByServiceType(serviceType) {
+        const rows = document.querySelectorAll('#paymentTableBody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            // Kiểm tra nếu có data-service-type attribute
+            const rowServiceType = row.querySelector('.payment-method-badge')?.textContent.trim();
+
+            if (serviceType === 'all' || rowServiceType === serviceType) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        updatePaymentCount(visibleCount);
+    }
+
+    function searchPaymentsByEmail(event) {
+        if (!event || event.key === 'Enter') {
+            const searchTerm = document.getElementById('emailSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#paymentTableBody tr[data-email]');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const email = row.getAttribute('data-email');
+                if (email.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updatePaymentCount(visibleCount);
+        }
+    }
+
+    function updatePaymentCount(count = null) {
+        if (count === null) {
+            const visibleRows = document.querySelectorAll('#paymentTableBody tr[data-email]:not([style*="display: none"])');
+            count = visibleRows.length;
+        }
+
+        const countElement = document.querySelector('.card-footer small span.fw-bold');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    function exportPayments() {
+        // Placeholder for export functionality
+        alert('Export functionality would be implemented here');
+    }
+
+    function refreshPayments() {
+        // Placeholder for refresh functionality
+        location.reload();
+    }
+
+    // Auto-refresh every 30 seconds (optional)
+    // setInterval(refreshPayments, 30000);
+</script>

@@ -6,8 +6,10 @@
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
 }
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <!--<div class="se-pre-con"></div>-->
-<div class="theme-layout">	
+<div class="theme-layout">
 	<section>
 		<div class="gap gray-bg">
 			<div class="container-fluid">
@@ -27,7 +29,7 @@
 													</button>
 												</div>
 											</form>
-												@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+											@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
 											@{
 												var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
@@ -35,40 +37,40 @@
 
 											@if (!string.IsNullOrEmpty(userToken))
 											{
-												<li>
-													<i class="ti-files"></i>
-													<a asp-page="/UserPage" title="">My pages</a>
+												<li style="display:flex">
+													<i class="bi bi-person"></i>
+													<a asp-page="/UserPage" title="">My page</a>
 												</li>
-												<li>
+												<li style="display:flex">
 													<i class="ti-comments-smiley"></i>
 													<a asp-page="/CourseRecommend" title="">Recommend Course</a>
 												</li>
-												<li>
+												<li style="display:flex">
 													<i class="bi bi-wechat"></i>
 													<a href="/Chatting" title="">Chatting</a>
 												</li>
 											}
 											@* <li>
-													<i class="ti-comments-smiley"></i>
-													<a href="#" title="">Messages</a>
-												</li>
-												<li>
-													<i class="ti-mouse-alt"></i>
-													<a href="#" title="">Inbox</a>
-												</li> 
-												<li>
-													<i class="ti-user"></i>
-													<a href="#" title="">friends</a>
-												</li>*@
+                                            <i class="ti-comments-smiley"></i>
+                                            <a href="#" title="">Messages</a>
+                                            </li>
+                                            <li>
+                                            <i class="ti-mouse-alt"></i>
+                                            <a href="#" title="">Inbox</a>
+                                            </li>
+                                            <li>
+                                            <i class="ti-user"></i>
+                                            <a href="#" title="">friends</a>
+                                            </li>*@
 											@* <li style="display:flex">
-												<i class="bi bi-mortarboard"></i>
-												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-											</li> *@
-											<li>
-												<i class="ti-image"></i>
-												<a href="#" title="">images</a>
-											</li>
-											<li>
+                                            <i class="bi bi-mortarboard"></i>
+                                            <a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+                                            </li> *@
+											@* <li>
+                                                <i class="ti-image"></i>
+                                                <a href="#" title="">images</a>
+                                            </li> *@
+											<li style="display:flex">
 												<i class="bi bi-book-half"></i>
 												<a href="/UserCourse" title="">My Own Course</a>
 											</li>
@@ -76,699 +78,754 @@
 										</ul>
 									</div><!-- Shortcuts -->
 									<div class="widget">
-										<h4 class="widget-title">Recent Activity</h4>
-										<ul class="activitiez">
-											<li>
-												<div class="activity-meta">
-													<i>10 hours Ago</i>
-													<span><a href="#" title="">Commented on Video posted </a></span>
-													<h6>by <a href="time-line.html">black demon.</a></h6>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>30 Days Ago</i>
-													<span><a href="#" title="">Posted your status. “Hello guys, how are you?”</a></span>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>2 Years Ago</i>
-													<span><a href="#" title="">Share a video on her timeline.</a></span>
-													<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-												</div>
-											</li>
-										</ul>
-									</div><!-- recent activites -->
+										<div class="banner medium-opacity bluesh">
+											<div class="bg-image" style="background-image: url(images/resources/baner-widgetbg.jpg)"></div>
+											<div class="baner-top">
+												<span><img alt="" src="images/book-icon.png"></span>
+												<i class="fa fa-ellipsis-h"></i>
+											</div>
+											<div class="banermeta">
+												<p>
+													create your own favourit page.
+												</p>
+												<span>like them all</span>
+												<a data-ripple="" title="" href="#">start now!</a>
+											</div>
+										</div>
+									</div>
 									@* <div class="widget stick-widget">
-											<h4 class="widget-title">Who's follownig</h4>
-											<ul class="followers">
-												<li>
-													<figure><img src="images/resources/friend-avatar2.jpg" alt=""></figure>
-													<div class="friend-meta">
-														<h4><a href="time-line.html" title="">Kelly Bill</a></h4>
-														<a href="#" title="" class="underline">Add Friend</a>
-													</div>
-												</li>
-												<li>
-													<figure><img src="images/resources/friend-avatar4.jpg" alt=""></figure>
-													<div class="friend-meta">
-														<h4><a href="time-line.html" title="">Issabel</a></h4>
-														<a href="#" title="" class="underline">Add Friend</a>
-													</div>
-												</li>
-												<li>
-													<figure><img src="images/resources/friend-avatar6.jpg" alt=""></figure>
-													<div class="friend-meta">
-														<h4><a href="time-line.html" title="">Andrew</a></h4>
-														<a href="#" title="" class="underline">Add Friend</a>
-													</div>
-												</li>
-												<li>
-													<figure><img src="images/resources/friend-avatar8.jpg" alt=""></figure>
-													<div class="friend-meta">
-														<h4><a href="time-line.html" title="">Sophia</a></h4>
-														<a href="#" title="" class="underline">Add Friend</a>
-													</div>
-												</li>
-												<li>
-													<figure><img src="images/resources/friend-avatar3.jpg" alt=""></figure>
-													<div class="friend-meta">
-														<h4><a href="time-line.html" title="">Allen</a></h4>
-														<a href="#" title="" class="underline">Add Friend</a>
-													</div>
-												</li>
-											</ul>
-										</div><!-- who's following --> *@
+                                    <h4 class="widget-title">Who's follownig</h4>
+                                    <ul class="followers">
+                                    <li>
+                                    <figure><img src="images/resources/friend-avatar2.jpg" alt=""></figure>
+                                    <div class="friend-meta">
+                                    <h4><a href="time-line.html" title="">Kelly Bill</a></h4>
+                                    <a href="#" title="" class="underline">Add Friend</a>
+                                    </div>
+                                    </li>
+                                    <li>
+                                    <figure><img src="images/resources/friend-avatar4.jpg" alt=""></figure>
+                                    <div class="friend-meta">
+                                    <h4><a href="time-line.html" title="">Issabel</a></h4>
+                                    <a href="#" title="" class="underline">Add Friend</a>
+                                    </div>
+                                    </li>
+                                    <li>
+                                    <figure><img src="images/resources/friend-avatar6.jpg" alt=""></figure>
+                                    <div class="friend-meta">
+                                    <h4><a href="time-line.html" title="">Andrew</a></h4>
+                                    <a href="#" title="" class="underline">Add Friend</a>
+                                    </div>
+                                    </li>
+                                    <li>
+                                    <figure><img src="images/resources/friend-avatar8.jpg" alt=""></figure>
+                                    <div class="friend-meta">
+                                    <h4><a href="time-line.html" title="">Sophia</a></h4>
+                                    <a href="#" title="" class="underline">Add Friend</a>
+                                    </div>
+                                    </li>
+                                    <li>
+                                    <figure><img src="images/resources/friend-avatar3.jpg" alt=""></figure>
+                                    <div class="friend-meta">
+                                    <h4><a href="time-line.html" title="">Allen</a></h4>
+                                    <a href="#" title="" class="underline">Add Friend</a>
+                                    </div>
+                                    </li>
+                                    </ul>
+                                    </div><!-- who's following --> *@
 								</aside>
 							</div><!-- sidebar -->
 							<div class="col-lg-6">
-									@* <div class="central-meta item"> *@
-									<div class="user-post">
+								@* <div class="central-meta item"> *@
+								<div class="user-post">
 
-										@* <div class="newpst-input"> *@
-													@if (!string.IsNullOrEmpty(userToken))
+									@* <div class="newpst-input"> *@
+									@if (!string.IsNullOrEmpty(userToken))
+									{
+										<div class="card p-3 mb-3 shadow-sm rounded">
+											<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
+												<div class="d-flex align-items-center">
+													@if (Model.Profile?.UserMetaData != null)
 													{
-														<div class="card p-3 mb-3 shadow-sm rounded">
-															<button type="button" class="btn btn-light rounded-pill w-100 text-start" data-bs-toggle="modal" data-bs-target="#createPostModal">
-																<div class="d-flex align-items-center">
-																	<img src="images/resources/friend-avatar9.jpg" class="rounded-circle me-2" width="40" height="40" />
-																	<span class="text-muted">what are you thinking?</span>
-																</div>
-															</button>
-
-															<hr class="my-2" />
-
-															<div class="d-flex justify-content-between text-center">
-																<div class="text-danger" style="cursor: pointer;">
-																	<i class="fa fa-video-camera me-1"></i>
-																	Live video
-																</div>
-																<div class="text-success" style="cursor: pointer;">
-																	<i class="fa fa-image me-1"></i>
-																	Photos/videos
-																</div>
-																<div class="text-warning" style="cursor: pointer;">
-																	<i class="bi bi-emoji-smile"></i>
-																	Feelings/Activities
-																</div>
-															</div>
-														</div>
+														<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
+															 alt="Avatar"
+															 class="rounded-circle"
+															 width="40"
+															 height="40"
+															 style="margin-right: 2%;" />
 													}
+													<span class="text-muted">what are you thinking?</span>
+												</div>
+											</button>
 
-													<!-- Modal -->
-													<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
-														<div class="modal-dialog modal-dialog-centered">
-															<div class="modal-content rounded">
-																<div class="modal-header">
-																	<h5 class="modal-title" id="createPostModalLabel">Create new post</h5>
-																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
-																</div>
-																<div class="modal-body">
-																	<div class="d-flex align-items-center mb-3">
-																		<img src="images/resources/friend-avatar9.jpg" class="rounded-circle" width="40" height="40" />
-																		<div class="ms-2">
-																			@* <strong>Nguyễn Bình</strong><br /> *@
-																		</div>
-																	</div>
+											@* <hr class="my-2" /> *@
 
-																	<form method="post">
-																		<div class="form-group">
-																			<input asp-for="NewPost.Title" type="text" placeholder="Enter Post Title" class="form-control" required />
-																		</div>
+											@* <div class="d-flex justify-content-between text-center">
+                                                <div class="text-danger" style="cursor: pointer;">
+                                                    <i class="fa fa-video-camera me-1"></i>
+                                                    Live video
+                                                </div>
+                                                <div class="text-success" style="cursor: pointer;">
+                                                    <i class="fa fa-image me-1"></i>
+                                                    Photos/videos
+                                                </div>
+                                                <div class="text-warning" style="cursor: pointer;">
+                                                    <i class="bi bi-emoji-smile"></i>
+                                                    Feelings/Activities
+                                                </div>
+                                            </div> *@
+										</div>
+									}
 
-																		<div class="form-group mb-1 p-1">
-																			<textarea asp-for="NewPost.Content" rows="2" placeholder="Write something..." class="form-control" required></textarea>
-																		</div>
-
-																		<!-- Category Selection -->
-																		<div class="form-group mb-3 category-selector-container" style="margin-top: -5px;">
-																			<!-- Hidden input để lưu CategoryId cho form submission -->
-																			<input type="hidden" asp-for="NewPost.CategoryId" id="selectedCategoryId" />
-
-																			<!-- Selected Categories Display -->
-																			<div class="selected-categories" id="selectedCategories">
-																				<!-- Categories will be displayed here as tags -->
-																			</div>
-
-																			<!-- Add Category Button (shown when no category selected) -->
-																			<div class="add-category-btn" id="addCategoryBtn" onclick="showCategoryDropdown()">
-																				<i>+</i> Add category
-																			</div>
-
-																			<!-- Category Dropdown -->
-																			<div class="category-dropdown hidden" id="categoryDropdown">
-																				<input type="text" id="categorySearch" placeholder=" Search..." class="form-control mb-2" onkeyup="filterCategories()" />
-																				<ul class="category-list list-unstyled mb-0" id="categoryList">
-																					@foreach (var category in Model.Categories)
-																					{
-																						<li class="category-option" onclick="selectCategory('@category.CategoryId', '@category.Title')">
-																							@category.Title
-																						</li>
-																					}
-																				</ul>
-																			</div>
-																		</div>
-
-																		@* imagePreview *@
-																		<!-- Image Preview Area -->
-																		<div id="imagePreview" class="position-relative mb-3" style="display: none;">
-																			<!-- Nút chức năng -->
-																			<div id="imageButtons" class="position-absolute top-0 start-0 z-3 d-flex gap-2 p-2" style="z-index: 10;">
-																				<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnEdit" style="cursor: pointer;">
-																					<i class="fa fa-pencil me-1"></i> Chỉnh sửa tất cả
-																					<input type="file" accept="image/*" hidden onchange="replaceImages(event)" />
-																				</label>
-
-																				<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnAddMore" style="cursor: pointer;">
-																					<i class="fa fa-plus me-1"></i> Thêm ảnh/video
-																					<input type="file" multiple accept="image/*" hidden onchange="addMoreImages(event)" />
-																				</label>
-																			</div>
-
-																			<!-- Nút xóa tất cả ảnh -->
-																			<button id="btnCloseAll" class="btn-close position-absolute top-0 end-0 m-2 z-3" style="z-index: 10;" onclick="clearAllImages()"></button>
-
-																			<!-- Container ảnh -->
-																			<div id="imageContainer" class="border rounded p-2 d-flex flex-wrap gap-2 mt-2" style="min-height: 100px;"></div>
-																		</div>
-																		<!-- Image Preview Area -->
-
-																		<div class="d-flex justify-content-around border-top pt-2">
-																			<label class="btn btn-light">
-																				<i class="fa fa-image text-success"></i> Photos/videos
-																				<input type="file" name="Images" accept="image/*" hidden onchange="previewImage(event)" />
-																			</label>
-																			<label class="btn btn-light">
-																				<i class="bi bi-emoji-smile text-warning"></i>Feeling																				
-																				<input type="file" hidden />
-																			</label>
-																			<label class="btn btn-light">
-																				<i class="bi bi-geo-alt text-danger"></i>Location
-																				<input type="file" hidden />
-																			</label>
-																		</div>
-																		<div class="mt-3">
-																			<button type="submit" class="btn btn-primary w-100">Publish</button>
-																		</div>
-																	</form>
-																</div>
+									<!-- Modal -->
+									<div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel" aria-hidden="true">
+										<div class="modal-dialog modal-dialog-centered">
+											<div class="modal-content rounded">
+												<div class="modal-header">
+													<h5 class="modal-title" id="createPostModalLabel">Create new post</h5>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+												</div>
+												<div class="modal-body">
+													<div class="d-flex align-items-center mb-3">
+														@if (Model.Profile?.UserMetaData != null)
+														{
+															<img src="@Model.Profile.UserMetaData?.Avatar ?? " https://cdn-icons-png.flaticon.com/512/149/149071.png""
+																 alt="Avatar" class="rounded-circle" width="40" height="40"/>
+															<div style="color: #088dcd;" class="ms-2">
+																@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 															</div>
+														}
+														@* <img href="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="rounded-circle" width="40" height="40" /> *@
+														<div class="ms-2">
+															@* <strong>Nguyễn Bình</strong><br /> *@
 														</div>
 													</div>
-													<!-- add post new box -->
 
-												@if (!string.IsNullOrWhiteSpace(Model.Query))
+													<form method="post" enctype="multipart/form-data">
+														<div class="form-group">
+															<input asp-for="NewPost.Title" type="text" placeholder="Enter Post Title" class="form-control" required />
+														</div>
+
+														<div class="form-group mb-1 p-1">
+															<textarea asp-for="NewPost.Content" rows="2" placeholder="Write something..." class="form-control" required></textarea>
+														</div>
+
+														<!-- Category Selection -->
+														<div class="form-group mb-3 category-selector-container" style="margin-top: 15px; display: flex;">
+															<!-- Hidden input để lưu CategoryId cho form submission -->
+															<input type="hidden" asp-for="NewPost.CategoryId" id="selectedCategoryId" />
+
+															<!-- Selected Categories Display -->
+															<div class="selected-categories" id="selectedCategories">
+																<!-- Categories will be displayed here as tags -->
+															</div>
+
+															<!-- Add Category Button (shown when no category selected) -->
+															<div class="add-category-btn" id="addCategoryBtn" onclick="showCategoryDropdown()">
+																<i>+</i> Add category
+															</div>
+
+															<!-- Category Dropdown -->
+															<div class="category-dropdown hidden" id="categoryDropdown">
+																<input type="text" id="categorySearch" placeholder=" Search..." class="form-control mb-2" onkeyup="filterCategories()" />
+																<ul class="category-list list-unstyled mb-0" id="categoryList">
+																	@foreach (var category in Model.Categories.Items)
+																	{
+																		<li class="category-option" onclick="selectCategory('@category.CategoryId', '@category.Title')">
+																			@category.Title
+																		</li>
+																	}
+																</ul>
+															</div>
+															<!-- Photos/Videos Button -->
+															<div class="flex-shrink-0">
+																<label class="btn btn-outline-success rounded-pill px-2 py-1 d-flexalign-items-start" style="cursor: pointer; white-space: nowrap; margin-left: 2%; margin-top: 3%;">
+																	<i class="fa fa-image me-1"></i>
+																	<span class="d-none d-sm-inline">Photos/videos</span>
+																	<span class="d-inline d-sm-none">Photos</span>
+																	<input type="file" asp-for="NewPost.PostFileLinks" accept="image/*,video/*" multiple hidden onchange="previewImage(event)" />
+																</label>
+															</div>
+														</div>
+
+														@* imagePreview *@
+														<!-- Image Preview Area -->
+														<div id="imagePreview" class="position-relative mb-3" style="display: none;">
+															<!-- Nút chức năng -->
+															<div id="imageButtons" class="position-absolute top-0 start-0 z-3 d-flex gap-2 p-2" style="z-index: 10;">
+																<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnEdit" style="cursor: pointer;">
+																	<i class="fa fa-pencil me-1"></i> Edit all
+																	<input type="file" accept="image/*" hidden onchange="replaceImages(event)" />
+																</label>
+
+																<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnAddMore" style="cursor: pointer;">
+																	<i class="fa fa-plus me-1"></i> Add photos/videos
+																	<input type="file" multiple accept="image/*" hidden onchange="addMoreImages(event)" />
+																</label>
+															</div>
+
+															<!-- Nút xóa tất cả ảnh -->
+															<button id="btnCloseAll" class="btn-close position-absolute top-0 end-0 m-2 z-3" style="z-index: 10;" onclick="clearAllImages()"></button>
+
+															<!-- Container ảnh -->
+															<div id="imageContainer" class="border rounded p-2 d-flex flex-wrap gap-2 mt-2" style="min-height: 100px;"></div>
+														</div>
+														<!-- Image Preview Area -->
+
+														@*  <div class="d-flex justify-content-around border-top pt-2">
+                                                            <label class="btn btn-light">
+                                                                <i class="fa fa-image text-success"></i> Photos/videos
+                                                                <input type="file" name="Images" accept="image/*" hidden onchange="previewImage(event)" />
+                                                            </label>
+                                                            <label class="btn btn-light">
+                                                                <i class="bi bi-emoji-smile text-warning"></i>Feeling
+                                                                <input type="file" hidden />
+                                                            </label>
+                                                            <label class="btn btn-light">
+                                                                <i class="bi bi-geo-alt text-danger"></i>Location
+                                                                <input type="file" hidden />
+                                                            </label>
+                                                        </div> *@
+														<hr class="my-2" />
+														<div class="mt-3">
+															<button type="submit" class="btn btn-primary w-100">Publish</button>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- add post new box -->
+									@if (!string.IsNullOrWhiteSpace(Model.Query))
+									{
+										<h3>Search results for: "@Model.Query"</h3>
+									}
+									<!-- Posts container -->
+									<div class="container my-4">
+										<h4 class="fw-bold mb-3">🎓 Workshops:</h4>
+
+										<div class="swiper mySwiper">
+											<div class="swiper-wrapper">
+												@if (Model?.WorkShops?.Items != null)
 												{
-													<h3>Search results for: "@Model.Query"</h3>
+													foreach (var ws in Model.WorkShops.Items)
+													{
+														<div class="swiper-slide">
+															<a href="/WorkshopDetail/@ws.WorkShopId" class="text-decoration-none">
+																<div class="card text-center p-3" style="width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: space-between;">
+																	<div class="card-body d-flex flex-column justify-content-between">
+																		<h6 class="fw-bold text-dark text-truncate" title="@ws.Decription">
+																			@(ws.Decription.Length > 50 ? ws.Decription.Substring(0, 50) + "..." : ws.Decription)
+																		</h6>
+																		<p class="text-muted"><i class="bi bi-calendar"></i> @ws.UpdateAt.ToString("dd/MM/yyyy")</p>
+																		<button class="btn btn-outline-primary btn-sm mt-2">Join now</button>
+																	</div>
+																</div>
+															</a>
+														</div>
+													}
 												}
+											</div>
+
+											<!-- Navigation buttons -->
+											<div class="swiper-button-next"></div>
+											<div class="swiper-button-prev"></div>
+										</div>
+									</div>
+									<h4 class="fw-bold mb-3">👥 Communicate:</h4>
+
+									<!-- Posts container -->
+									<div class="posts-container">
+										@if (Model.Posts != null && Model.Posts.Items.Any())
+										{
+											@foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
+											{
+												<!-- Single post container -->
+												<div class="card p-3 mb-3 shadow-sm rounded">
+													<!-- Post content -->
+													<div class="friend-info">
+														<figure>
+															<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
+																 alt="User Avatar">
+
+														</figure>
+
+														<div class="post-meta">
+															<div class="mb-2">
+																@{
+																	var category = Model.Categories.Items.FirstOrDefault(c => c.CategoryId == post.CategoryId);
+																}
+																@if (category != null)
+																{
+																	<span class="badge bg-primary text-white px-2 py-1 rounded-pill">#@category.Title</span>
+																}
+															</div>
+															<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+																@post.Title
+															</p>
+														</div>
+
+														<div class="friend-name">
+															<ins>
+																<a href="time-line.html" title="">
+																	@((post.User?.UserMetaData != null) ? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}" : post.User?.Email)
+																</a>
+															</ins>
+															<span>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 
 
-												<!-- Posts container -->
-												<div class="posts-container">
-												@if (Model.Posts != null && Model.Posts.Items.Any())
-												{
-														@foreach (var post in Model.Posts.Items.OrderByDescending(p => p.CreateAt))
-														{
-														<!-- Single post container -->
-														<div class="card p-3 mb-3 shadow-sm rounded">
-																<!-- Post content -->
-																<div class="friend-info">
-																	<figure>
-																		<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-																		alt="User Avatar">
-
-																	</figure>
-
-																	<div class="post-meta">
-																		<div class="mb-2">
-																			@{
-																				var category = Model.Categories.FirstOrDefault(c => c.CategoryId == post.CategoryId);
-																			}
-																			@if (category != null)
+															@if (!string.IsNullOrEmpty(token))
+															{
+																<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
+																	<div class="dropdown">
+																		<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+																			<i class="fa fa-ellipsis-v"></i>
+																		</button>
+																		<ul class="dropdown-menu">
+																			<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
+																			<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
+																			@if (post.User != null && post.User.UserId.ToString() == Model.CurrentUserId)
 																			{
-																				<span class="badge bg-primary text-white px-2 py-1 rounded-pill">#@category.Title</span>
+																				@* <li>
+																					<a class="dropdown-item text-primary update-post"
+																					   href="#"
+																					   data-bs-toggle="modal"
+																					   data-bs-target="#editPostModal"
+																					   data-post-id="@post.PostId">
+																						Update Post
+																					</a>
+																				</li> *@
+																				<li>
+																					<form method="post" asp-page-handler="Delete" asp-route-postId="@post.PostId"
+																						  onsubmit="return confirm('Are you sure you want to delete this post?');">
+																						<button type="submit" class="dropdown-item text-danger delete-post">Delete Post</button>
+																					</form>
+																				</li>
 																			}
-																		</div>
-																		<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
-																			@post.Title
-																		</p>												
-																	</div>
-
-																	<div class="friend-name">
-																		<ins>
-																			<a href="time-line.html" title="">
-																				@((post.User?.UserMetaData != null)? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}": post.User?.Email)
-																			</a>
-																		</ins>
-																		<span>@post.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-															
-
-																		@if (!string.IsNullOrEmpty(token))
-																		{
-																			<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
-																				<div class="dropdown">
-																					<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-																						<i class="fa fa-ellipsis-v"></i>
-																					</button>
-																					<ul class="dropdown-menu">
-																						<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
-																						<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
-																					</ul>
-																				</div>
-																			</div>
-																		}
-
-																	</div>
-
-
-																	<div class="post-meta">
-																	@* 	@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
-																		{
-																			@foreach (var file in Model.PostFilesByPost[post.PostId])
-																			{
-																				@if (file.PostFileType.ToLower() == "image")
-																				{
-																					<img src="@file.FileUrl" alt="Post Image" width="400" />
-																				}
-																				else if (file.PostFileType.ToLower() == "video")
-																				{
-																					<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-																				}
-																			}
-																		} *@
-																		@* 	else
-																		{
-																			<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
-																				 alt="Default Post Image" width="400" />
-																		} *@
-
-																		@if (post.PostFiles != null && post.PostFiles.Any())
-																		{
-																			foreach (var postFile in post.PostFiles)
-																			{
-																				if (postFile.PostFileType.ToLower() == "image")
-																				{
-																					<img src="@postFile.FileUrl" alt="Post Image" width="400" />
-																				}
-																				else
-																				{
-																					<iframe src="@postFile.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-																				}
-																			}
-																		}
-
-																		<div class="description">
-																			<p>@post.Content</p>
-																		</div>
-																	</div>
-
-																	<!-- Comment section -->
-																	<div class="comments-section" id="commentList-@post.PostId">
-																		@if (Model.CommentsByPost.ContainsKey(post.PostId))
-																		{
-																			var comments = Model.CommentsByPost[post.PostId];
-																			var parentComments = comments.Where(c => c.ParentCommentId == null).OrderBy(c => c.CreateAt);
-
-																			foreach (var parent in parentComments)
-																			{
-																				// Comment gốc
-																				var user = parent.User;
-																				var userMeta = user?.UserMetaData;
-																				var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar;
-																				var displayName = userMeta != null ? $"{userMeta.FirstName} {userMeta.LastName}" : user?.Email;
-
-																				<div class="comment" data-comment-id="@parent.CommentId">
-																					<div class="comet-avatar">
-																						<img src="@avatar" alt="User Avatar">
-																					</div>
-																					<div class="we-comment">
-																						<div class="coment-head">
-																							<h5><a href="#">@displayName</a></h5>
-																							<span>@parent.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																							@if (!string.IsNullOrEmpty(token))
-																							{
-																								<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply"></i></a>
-																								<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-																									<div class="dropdown">
-																										<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-																											<i class="fa fa-ellipsis-v"></i>
-																										</button>
-																										<ul class="dropdown-menu">
-																											<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
-																											<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																										</ul>
-																									</div>
-																								</div>
-																							}
-																							
+																		</ul>
+																		<!-- Modal cập nhật -->
+																		<div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+																			<div class="modal-dialog">
+																				<form method="post" asp-page-handler="UpdatePost" enctype="multipart/form-data">
+																					<!-- hoặc form handler phù hợp -->
+																					<div class="modal-content">
+																						<div class="modal-header">
+																							<h5 class="modal-title">Update Post</h5>
+																							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																						</div>
-																							
-																						<p>@parent.Content</p>
+																						<div class="modal-body">
+																							<input type="hidden" id="editPostId" asp-for="NewPost.PostId" />
+																							<div class="mb-3">
+																								<label asp-for="NewPost.Title" class="form-label"></label>
+																								<input asp-for="NewPost.Title" class="form-control" />
+																							</div>
+																							<div class="mb-3">
+																								<label asp-for="NewPost.Content" class="form-label"></label>
+																								<textarea asp-for="NewPost.Content" class="form-control"></textarea>
+																							</div>
+																							<div class="mb-3">
+																								<label asp-for="NewPost.CategoryId" class="form-label">Category</label>
+																								<select asp-for="NewPost.CategoryId" class="form-control">
+																									<option value="">-- Select Category --</option>
+																									@if (Model.Categories?.Items != null)
+																									{
+																										foreach (var category in Model.Categories.Items)
+																										{
+																											<option value="@category.CategoryId">
+																												@category.Title
+																											</option>
+																										}
+																									}
+																								</select>
+																							</div>
+																							<div class="mb-3">
+																								<label class="form-label">Add Files (optional)</label>
+																								<input type="file" asp-for="NewPost.PostFileLinks" accept="image/*,video/*" multiple class="form-control" />
+																							</div>
+																						</div>
+																						<div class="modal-footer">
+																							<button type="submit" class="btn btn-primary">Update Post</button>
+																							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																						</div>
+																					</div>
+																				</form>
+																			</div>
+																		</div>
+
+																	</div>
+																</div>
+															}
+
+														</div>
+
+
+														<div class="post-meta">
+															@* 	@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
+                                                    {
+                                                    @foreach (var file in Model.PostFilesByPost[post.PostId])
+                                                    {
+                                                    @if (file.PostFileType.ToLower() == "image")
+                                                    {
+                                                    <img src="@file.FileUrl" alt="Post Image" width="400" />
+                                                    }
+                                                    else if (file.PostFileType.ToLower() == "video")
+                                                    {
+                                                    <iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+                                                    }
+                                                    }
+                                                    } *@
+															@* 	else
+                                                    {
+                                                    <img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
+                                                    alt="Default Post Image" width="400" />
+                                                    } *@
+
+															@if (post.PostFiles != null && post.PostFiles.Any())
+															{
+																foreach (var postFile in post.PostFiles)
+																{
+																	if (postFile.PostFileType.ToLower() == "image")
+																	{
+																		<img src="@postFile.FileUrl" alt="Post Image" width="400" />
+																	}
+																	else
+																	{
+																		<video width="100%" height="315" controls>
+																			<source src="@postFile.FileUrl" type="video/mp4">
+																			Your browser does not support the video tag.
+																		</video>
+
+																	}
+																}
+															}
+
+															<div class="description">
+																<p>@post.Content</p>
+															</div>
+														</div>
+
+														<!-- Comment section -->
+														<div class="comments-section" id="commentList-@post.PostId">
+															@if (Model.CommentsByPost.ContainsKey(post.PostId))
+															{
+																var comments = Model.CommentsByPost[post.PostId];
+																var parentComments = comments.Where(c => c.ParentCommentId == null).OrderBy(c => c.CreateAt);
+
+																foreach (var parent in parentComments)
+																{
+																	// Comment gốc
+																	var user = parent.User;
+																	var userMeta = user?.UserMetaData;
+																	var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar;
+																	var displayName = userMeta != null ? $"{userMeta.FirstName} {userMeta.LastName}" : user?.Email;
+
+																	<div class="comment" data-comment-id="@parent.CommentId">
+																		<div class="comet-avatar">
+																			<img src="@avatar" alt="User Avatar">
+																		</div>
+																		<div class="we-comment">
+																			<div class="coment-head">
+																				<h5><a href="#">@displayName</a></h5>
+																				<span>@parent.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																				@if (!string.IsNullOrEmpty(token))
+																				{
+																					<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply"></i></a>
+																					<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+																						<div class="dropdown">
+																							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+																								<i class="fa fa-ellipsis-v"></i>
+																							</button>
+																							<ul class="dropdown-menu">
+																								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
+																								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																							</ul>
+																						</div>
+																					</div>
+																				}
+
+																			</div>
+
+																			<p>@parent.Content</p>
+																			@if (!string.IsNullOrEmpty(token))
+																			{
+																				<div class="reply-form" style="display:none; margin-top: 10px;">
+																					<form class="comment-form">
+																						<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																						<input type="hidden" name="NewComment.ParentCommentId" value="@parent.CommentId" />
+																						<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																						<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																					</form>
+																				</div>
+																			}
+																		</div>
+																	</div>
+
+																	// Hiển thị reply cấp 1
+																	var firstLevelReplies = comments.Where(c => c.ParentCommentId == parent.CommentId).OrderBy(c => c.CreateAt);
+																	foreach (var reply in firstLevelReplies)
+																	{
+																		var replyUser = reply.User;
+																		var replyMeta = replyUser?.UserMetaData;
+																		var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
+																		var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
+
+																		<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
+																			<div class="comet-avatar">
+																				<img src="@replyAvatar" alt="User Avatar">
+																			</div>
+																			<div class="we-comment">
+																				<div class="coment-head">
+																					<h5><a href="#">@replyName</a></h5>
+																					<span>@reply.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
+																					@if (!string.IsNullOrEmpty(token))
+																					{
+																						<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply"></i></a>
+																						<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+																							<div class="dropdown">
+																								<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+																									<i class="fa fa-ellipsis-v"></i>
+																								</button>
+																								<ul class="dropdown-menu">
+																									<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
+																									<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																								</ul>
+																							</div>
+																						</div>
+																					}
+																				</div>
+																				<p>@reply.Content</p>
+																				@if (!string.IsNullOrEmpty(token))
+																				{
+																					<div class="reply-form" style="display:none; margin-top: 10px;">
+																						<form class="comment-form">
+																							<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																							<input type="hidden" name="NewComment.ParentCommentId" value="@reply.CommentId" />
+																							<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																							<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																						</form>
+																					</div>
+																				}
+																			</div>
+																		</div>
+
+																		// reply of reply
+																		var secondLevelReplies = comments.Where(c => c.ParentCommentId == reply.CommentId).OrderBy(c => c.CreateAt);
+																		foreach (var level2 in secondLevelReplies)
+																		{
+																			var level2User = level2.User;
+																			var level2Meta = level2User?.UserMetaData;
+																			var level2Avatar = string.IsNullOrEmpty(level2Meta?.Avatar) ? "images/resources/friend-avatar9.jpg" : level2Meta.Avatar;
+																			var level2Name = level2Meta != null ? $"{level2Meta.FirstName} {level2Meta.LastName}" : level2User?.Email;
+
+																			<div class="comment reply-comment ms-5" data-comment-id="@level2.CommentId" data-parent-id="@level2.ParentCommentId">
+																				<div class="comet-avatar">
+																					<img src="@level2Avatar" alt="User Avatar">
+																				</div>
+																				<div class="we-comment">
+																					<div class="coment-head">
+																						<h5><a href="#">@level2Name</a></h5>
+																						<span>@level2.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 																						@if (!string.IsNullOrEmpty(token))
 																						{
-																							<div class="reply-form" style="display:none; margin-top: 10px;">
-																								<form class="comment-form">
-																									<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
-																									<input type="hidden" name="NewComment.ParentCommentId" value="@parent.CommentId" />
-																									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-																									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-																								</form>
+																							<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply"></i></a>
+																							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+																								<div class="dropdown">
+																									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+																										<i class="fa fa-ellipsis-v"></i>
+																									</button>
+																									<ul class="dropdown-menu">
+																										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
+																										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																									</ul>
+																								</div>
 																							</div>
 																						}
 																					</div>
-																				</div>
-
-																				// Hiển thị reply cấp 1
-																				var firstLevelReplies = comments.Where(c => c.ParentCommentId == parent.CommentId).OrderBy(c => c.CreateAt);
-																				foreach (var reply in firstLevelReplies)
-																				{
-																					var replyUser = reply.User;
-																					var replyMeta = replyUser?.UserMetaData;
-																					var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
-																					var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
-
-																					<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
-																						<div class="comet-avatar">
-																							<img src="@replyAvatar" alt="User Avatar">
-																						</div>
-																						<div class="we-comment">
-																							<div class="coment-head">
-																								<h5><a href="#">@replyName</a></h5>
-																								<span>@reply.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																								@if (!string.IsNullOrEmpty(token))
-																								{
-																									<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply"></i></a>
-																									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-																										<div class="dropdown">
-																											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-																												<i class="fa fa-ellipsis-v"></i>
-																											</button>
-																											<ul class="dropdown-menu">
-																												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
-																												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																											</ul>
-																										</div>
-																									</div>
-																								}
-																							</div>
-																							<p>@reply.Content</p>
-																							@if (!string.IsNullOrEmpty(token))
-																							{
-																								<div class="reply-form" style="display:none; margin-top: 10px;">
-																									<form class="comment-form">
-																										<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
-																										<input type="hidden" name="NewComment.ParentCommentId" value="@reply.CommentId" />
-																										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-																										<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-																									</form>
-																								</div>
-																							}
-																						</div>
-																					</div>
-
-																					// reply of reply
-																					var secondLevelReplies = comments.Where(c => c.ParentCommentId == reply.CommentId).OrderBy(c => c.CreateAt);
-																					foreach (var level2 in secondLevelReplies)
+																					<p>@level2.Content</p>
+																					@if (!string.IsNullOrEmpty(token))
 																					{
-																						var level2User = level2.User;
-																						var level2Meta = level2User?.UserMetaData;
-																						var level2Avatar = string.IsNullOrEmpty(level2Meta?.Avatar) ? "images/resources/friend-avatar9.jpg" : level2Meta.Avatar;
-																						var level2Name = level2Meta != null ? $"{level2Meta.FirstName} {level2Meta.LastName}" : level2User?.Email;
-
-																						<div class="comment reply-comment ms-5" data-comment-id="@level2.CommentId" data-parent-id="@level2.ParentCommentId">
-																							<div class="comet-avatar">
-																								<img src="@level2Avatar" alt="User Avatar">
-																							</div>
-																							<div class="we-comment">
-																								<div class="coment-head">
-																									<h5><a href="#">@level2Name</a></h5>
-																									<span>@level2.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
-																									@if (!string.IsNullOrEmpty(token))
-																									{
-																										<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply"></i></a>
-																											<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-																												<div class="dropdown">
-																													<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-																														<i class="fa fa-ellipsis-v"></i>
-																													</button>
-																													<ul class="dropdown-menu">
-																														<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
-																														<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																													</ul>
-																												</div>
-																											</div>
-																									}
-																								</div>
-																								<p>@level2.Content</p>
-																								@if (!string.IsNullOrEmpty(token))
-																								{
-																									<div class="reply-form" style="display:none; margin-top: 10px;">
-																										<form class="comment-form">
-																											<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
-																											<input type="hidden" name="NewComment.ParentCommentId" value="@level2.CommentId" />
-																											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-																											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-																										</form>
-																									</div>
-																								}
-																							</div>
+																						<div class="reply-form" style="display:none; margin-top: 10px;">
+																							<form class="comment-form">
+																								<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																								<input type="hidden" name="NewComment.ParentCommentId" value="@level2.CommentId" />
+																								<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+																								<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+																							</form>
 																						</div>
 																					}
-																				}
-																			}
+																				</div>
+																			</div>
 																		}
-																		else
-																		{
-																			<p>No comments available.</p>
-																		}
-																	</div>
-
-																	<!-- Comment input form -->
-																	@if (!string.IsNullOrEmpty(token))
-																	{
-																		<!-- Comment input form -->
-																		<div class="coment-area">
-																			<ul class="we-comet">
-																				<li class="post-comment">
-																					<div class="comet-avatar">
-																						<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
-																					</div>
-																					<div class="post-comt-box">
-																						<form class="comment-form">
-																							<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
-																							<input type="hidden" name="NewComment.ParentCommentId" />
-																							<label>Comment:</label>
-																							<textarea name="NewComment.Content" placeholder="Write a comment..."></textarea>
-																							<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
-																						</form>
-																					</div>
-
-																				</li>
-																			</ul>
-																		</div>
 																	}
-																</div>
+																}
+															}
+															else
+															{
+																<p>No comments available.</p>
+															}
 														</div>
+
+														<!-- Comment input form -->
+														@if (!string.IsNullOrEmpty(token))
+														{
+															<!-- Comment input form -->
+															<div class="coment-area">
+																<ul class="we-comet">
+																	<li class="post-comment">
+																		<div class="comet-avatar">
+																			<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																		</div>
+																		<div class="post-comt-box">
+																			<form class="comment-form">
+																				<input type="hidden" name="NewComment.PostId" value="@post.PostId" />
+																				<input type="hidden" name="NewComment.ParentCommentId" />
+																				<label>Comment:</label>
+																				<textarea name="NewComment.Content" placeholder="Write a comment..."></textarea>
+																				<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+																			</form>
+																		</div>
+
+																	</li>
+																</ul>
+															</div>
 														}
-														@* <div class="pagination mt-3">
-															<p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
-															<!-- Add pagination controls here if needed -->
-														</div> *@
-												}
-												else
-												{
-													<div class="alert alert-info">No posts available.</div>
-												}	
-											</div>
-										</div>
-									<button class="btn-view btn-load-more">Load More</button>
-								</div><!-- centerl meta -->
-								<div class="col-lg-3">
-									<aside class="sidebar">
-										<div class="widget">
-											<h4 class="widget-title">Your page</h4>
-											<div class="your-page">
-												<figure>
-													<a href="#" title=""><img src="images/resources/friend-avatar9.jpg" alt=""></a>
-												</figure>
-												<div class="page-meta">
-													<a href="#" title="" class="underline">My page</a>
-													<span><i class="ti-comment"></i><a href="insight.html" title="">Messages <em>9</em></a></span>
-													<span><i class="ti-bell"></i><a href="insight.html" title="">Notifications <em>2</em></a></span>
-												</div>
-												<div class="page-likes">
-													<ul class="nav nav-tabs likes-btn">
-														<li class="nav-item"><a class="active" href="#link1" data-toggle="tab">likes</a></li>
-														<li class="nav-item"><a class="" href="#link2" data-toggle="tab">views</a></li>
-													</ul>
-													<!-- Tab panes -->
-													<div class="tab-content">
-														<div class="tab-pane active fade show " id="link1">
-															<span><i class="ti-heart"></i>884</span>
-															<a href="#" title="weekly-likes">35 new likes this week</a>
-															<div class="users-thumb-list">
-																<a href="#" title="Anderw" data-toggle="tooltip">
-																	<img src="images/resources/userlist-1.jpg" alt="">
-																</a>
-																<a href="#" title="frank" data-toggle="tooltip">
-																	<img src="images/resources/userlist-2.jpg" alt="">
-																</a>
-																<a href="#" title="Sara" data-toggle="tooltip">
-																	<img src="images/resources/userlist-3.jpg" alt="">
-																</a>
-																<a href="#" title="Amy" data-toggle="tooltip">
-																	<img src="images/resources/userlist-4.jpg" alt="">
-																</a>
-																<a href="#" title="Ema" data-toggle="tooltip">
-																	<img src="images/resources/userlist-5.jpg" alt="">
-																</a>
-																<a href="#" title="Sophie" data-toggle="tooltip">
-																	<img src="images/resources/userlist-6.jpg" alt="">
-																</a>
-																<a href="#" title="Maria" data-toggle="tooltip">
-																	<img src="images/resources/userlist-7.jpg" alt="">
-																</a>
-															</div>
-														</div>
-														<div class="tab-pane fade" id="link2">
-															<span><i class="ti-eye"></i>440</span>
-															<a href="#" title="weekly-likes">440 new views this week</a>
-															<div class="users-thumb-list">
-																<a href="#" title="Anderw" data-toggle="tooltip">
-																	<img src="images/resources/userlist-1.jpg" alt="">
-																</a>
-																<a href="#" title="frank" data-toggle="tooltip">
-																	<img src="images/resources/userlist-2.jpg" alt="">
-																</a>
-																<a href="#" title="Sara" data-toggle="tooltip">
-																	<img src="images/resources/userlist-3.jpg" alt="">
-																</a>
-																<a href="#" title="Amy" data-toggle="tooltip">
-																	<img src="images/resources/userlist-4.jpg" alt="">
-																</a>
-																<a href="#" title="Ema" data-toggle="tooltip">
-																	<img src="images/resources/userlist-5.jpg" alt="">
-																</a>
-																<a href="#" title="Sophie" data-toggle="tooltip">
-																	<img src="images/resources/userlist-6.jpg" alt="">
-																</a>
-																<a href="#" title="Maria" data-toggle="tooltip">
-																	<img src="images/resources/userlist-7.jpg" alt="">
-																</a>
-															</div>
-														</div>
 													</div>
 												</div>
-											</div>
-										</div><!-- page like widget -->
-										<div class="widget">
-											<div class="banner medium-opacity bluesh">
-												<div class="bg-image" style="background-image: url(images/resources/baner-widgetbg.jpg)"></div>
-												<div class="baner-top">
-													<span><img alt="" src="images/book-icon.png"></span>
-													<i class="fa fa-ellipsis-h"></i>
-												</div>
-												<div class="banermeta">
-													<p>
-														create your own favourit page.
-													</p>
-													<span>like them all</span>
-													<a data-ripple="" title="" href="#">start now!</a>
-												</div>
-											</div>
-										</div>						
-									</aside>
-								</div><!-- sidebar -->
-							</div>
+											}
+											@* <div class="pagination mt-3">
+                                        <p>Page @Model.Posts.CurrentPage / @Model.Posts.TotalPages</p>
+                                        <!-- Add pagination controls here if needed -->
+                                        </div> *@
+										}
+										else
+										{
+											<div class="alert alert-info">No posts available.</div>
+										}
+									</div>
+								</div>
+								<button class="btn-view btn-load-more">Load More</button>
+							</div><!-- centerl meta -->
+							<div class="col-lg-3">
+								<aside class="sidebar">
+									<div class="widget">
+										<div class="advertisment-box">
+											<figure>
+												<a href="#" title="Advertisment"><img src="https://nisteducation.com/wp-content/uploads/2025/01/136-1.jpg" alt=""></a>
+											</figure>
+										</div>
+									</div>
+									<div class="widget">
+										<div class="advertisment-box">
+											<h4 class=""></h4>
+											<figure>
+												<a href="#" title="Advertisment"><img src="https://media.licdn.com/dms/image/v2/D4D22AQEUnXKj6NtXgA/feedshare-shrink_2048_1536/feedshare-shrink_2048_1536/0/1695712692412?e=2147483647&v=beta&t=3LYX7m3F3jFsaL9iouoMmkqIl2AbCIGWLZO31X1h1T4" alt=""></a>
+											</figure>
+										</div>
+									</div>
+								</aside>
+							</div><!-- sidebar -->
 						</div>
 					</div>
 				</div>
 			</div>
-		</section>
+		</div>
+	</section>
 </div>
 
-	<!-- Report Post Modal -->
-	<div class="modal fade" id="reportPostModal" tabindex="-1" aria-labelledby="reportPostModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="reportPostModalLabel">Report Post</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<form id="reportPostForm">
-						<input type="hidden" id="reportPostId" name="PostId">
-						<input type="hidden" id="reportPostUserId" name="UserId" value="@Model.CurrentUserId">
-						<div class="mb-3">
-							<label for="reportPostContent" class="form-label">Why are you reporting this post?</label>
-							<textarea class="form-control" id="reportPostContent" name="Content" rows="4" required></textarea>
-						</div>
-						<div class="d-grid">
-							<button type="submit" class="btn btn-danger">Submit Report</button>
-						</div>
-					</form>
-				</div>
+<!-- Report Post Modal -->
+<div class="modal fade" id="reportPostModal" tabindex="-1" aria-labelledby="reportPostModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="reportPostModalLabel">Report Post</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="reportPostForm">
+					<input type="hidden" id="reportPostId" name="PostId">
+					<input type="hidden" id="reportPostUserId" name="UserId" value="@Model.CurrentUserId">
+					<div class="mb-3">
+						<label for="reportPostContent" class="form-label">Why are you reporting this post?</label>
+						<textarea class="form-control" id="reportPostContent" name="Content" rows="4" required></textarea>
+					</div>
+					<div class="d-grid">
+						<button type="submit" class="btn btn-danger">Submit Report</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
+</div>
 
-	<!-- Report Comment Modal -->
-	<div class="modal fade" id="reportCommentModal" tabindex="-1" aria-labelledby="reportCommentModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="reportCommentModalLabel">Report Comment</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<form id="reportCommentForm">
+<!-- Report Comment Modal -->
+<div class="modal fade" id="reportCommentModal" tabindex="-1" aria-labelledby="reportCommentModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="reportCommentModalLabel">Report Comment</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="reportCommentForm">
 					<input type="hidden" id="reportCommentId" name="CommentId">
-						<input type="hidden" id="reportCommentUserId" name="UserId" value="@Model.CurrentUserId">
-						<div class="mb-3">
-							<label for="reportCommentContent" class="form-label">Why are you reporting this comment?</label>
-							<textarea class="form-control" id="reportCommentContent" name="Content" rows="4" required></textarea>
-						</div>
-						<div class="d-grid">
-							<button type="submit" class="btn btn-danger">Submit Report</button>
-						</div>
-					</form>
-				</div>
+					<input type="hidden" id="reportCommentUserId" name="UserId" value="@Model.CurrentUserId">
+					<div class="mb-3">
+						<label for="reportCommentContent" class="form-label">Why are you reporting this comment?</label>
+						<textarea class="form-control" id="reportCommentContent" name="Content" rows="4" required></textarea>
+					</div>
+					<div class="d-grid">
+						<button type="submit" class="btn btn-danger">Submit Report</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
+</div>
 
-	<!-- Report User Modal -->
-	<div class="modal fade" id="reportUserModal" tabindex="-1" aria-labelledby="reportUserModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="reportUserModalLabel">Report User</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<form id="reportUserForm">
-						<input type="hidden" id="reportUserreportedId" name="UserreportedId">
-						<input type="hidden" id="reportUserUserId" name="UserId" value="@Model.CurrentUserId">
-						<div class="mb-3">
-							<label for="reportUserContent" class="form-label">Why are you reporting this user?</label>
-							<textarea class="form-control" id="reportUserContent" name="Content" rows="4" required></textarea>
-						</div>
-						<div class="d-grid">
-							<button type="submit" class="btn btn-danger">Submit Report</button>
-						</div>
-					</form>
-				</div>
+<!-- Report User Modal -->
+<div class="modal fade" id="reportUserModal" tabindex="-1" aria-labelledby="reportUserModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="reportUserModalLabel">Report User</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<form id="reportUserForm">
+					<input type="hidden" id="reportUserreportedId" name="UserreportedId">
+					<input type="hidden" id="reportUserUserId" name="UserId" value="@Model.CurrentUserId">
+					<div class="mb-3">
+						<label for="reportUserContent" class="form-label">Why are you reporting this user?</label>
+						<textarea class="form-control" id="reportUserContent" name="Content" rows="4" required></textarea>
+					</div>
+					<div class="d-grid">
+						<button type="submit" class="btn btn-danger">Submit Report</button>
+					</div>
+				</form>
 			</div>
 		</div>
 	</div>
+</div>
 
 @* 	<script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 	<script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
 	<script src="js/map-init.js"></script> *@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 	<script>
+		var swiper = new Swiper(".mySwiper", {
+			slidesPerView: 3,
+			spaceBetween: 15,
+			navigation: {
+				nextEl: ".swiper-button-next",
+				prevEl: ".swiper-button-prev",
+			},
+		});
+	</script>
+	<script>
+
 		document.addEventListener('DOMContentLoaded', () => {
 			// Configuration
 			currentUserId = "@Model.CurrentUserId"
@@ -797,7 +854,7 @@
 				if (!id) return { avatar: defaultAvatar, name: defaultName };
 
 				try {
-				const res = await fetch(`${BaseUrl}/User/GetUserById/${id}`, { credentials: 'include' });
+					const res = await fetch(`${BaseUrl}/User/GetUserById/${id}`, { credentials: 'include' });
 					if (res.ok) {
 						const u = await res.json();
 						return {
@@ -856,16 +913,16 @@
 				const categoryInfo = await getCategoryInfo(post.categoryId);
 				const { avatar, name } = userInfo;
 				const d = new Date(post.createAt).toLocaleString();
-				const hasAuth = token && token !== '' && token !== '@token';				
+				const hasAuth = token && token !== '' && token !== '@token';
 
 				// Create category badge HTML
 				let categoryBadgeHTML = '';
 				if (categoryInfo && categoryInfo.title) {
 					categoryBadgeHTML = `
-						<div class="mb-2">
-							<span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${categoryInfo.title}</span>
-						</div>
-					`;
+								<div class="mb-2">
+									<span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${categoryInfo.title}</span>
+								</div>
+							`;
 				}
 
 				// Handle file attachments
@@ -901,47 +958,47 @@
 					for (const comment of parentComments) {
 						const commentUserInfo = await getUserInfo(comment.userId);
 						const replyFormHTML = `
-							<div class="reply-form" style="display:none; margin-top: 10px;">
-								<form class="comment-form">
-									<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
-									<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
-									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-								</form>
-							</div>
-						`;
+									<div class="reply-form" style="display:none; margin-top: 10px;">
+										<form class="comment-form">
+											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+											<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+										</form>
+									</div>
+								`;
 
-						const commentOptionsHTML =  `
-							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-								<div class="dropdown">
-									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="fa fa-ellipsis-v"></i>
-									</button>
-									<ul class="dropdown-menu">
-										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
-										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
-									</ul>
-								</div>
-							</div>
-						` ;
+						const commentOptionsHTML = `
+									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+										<div class="dropdown">
+											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+												<i class="fa fa-ellipsis-v"></i>
+											</button>
+											<ul class="dropdown-menu">
+												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+											</ul>
+										</div>
+									</div>
+								` ;
 
 						commentsHTML += `
-							<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
-								<div class="comet-avatar">
-									<img src="${commentUserInfo.avatar}" alt="User Avatar">
-								</div>
-								<div class="we-comment">
-									<div class="coment-head">
-										<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
-										<span>${d}</span>
-										${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-										${commentOptionsHTML}
+									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+										<div class="comet-avatar">
+											<img src="${commentUserInfo.avatar}" alt="User Avatar">
+										</div>
+										<div class="we-comment">
+											<div class="coment-head">
+												<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
+												<span>${d}</span>
+												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+												${commentOptionsHTML}
+											</div>
+											<p>${comment.content}</p>
+											${replyFormHTML}
+										</div>
 									</div>
-									<p>${comment.content}</p>
-									${replyFormHTML}
-								</div>
-							</div>
-						`;
+								`;
 
 						// Add replies
 						const replies = post.comments.filter(c => c.parentCommentId === comment.commentId);
@@ -950,47 +1007,47 @@
 							for (const reply of replies) {
 								const replyUserInfo = await getUserInfo(reply.userId);
 								const replyFormHTML = `
-									<div class="reply-form" style="display:none; margin-top: 10px;">
-										<form class="comment-form">
-											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
-											<input type="hidden" name="NewComment.ParentCommentId" value="${reply.commentId}" />
-											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-										</form>
-									</div>
-								` ;
+											<div class="reply-form" style="display:none; margin-top: 10px;">
+												<form class="comment-form">
+													<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+													<input type="hidden" name="NewComment.ParentCommentId" value="${reply.commentId}" />
+													<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+													<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+												</form>
+											</div>
+										` ;
 
 								const replyOptionsHTML = `
-									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-										<div class="dropdown">
-											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-												<i class="fa fa-ellipsis-v"></i>
-											</button>
-											<ul class="dropdown-menu">
-												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
-												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
-											</ul>
-										</div>
-									</div>
-								`;
+											<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+												<div class="dropdown">
+													<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+														<i class="fa fa-ellipsis-v"></i>
+													</button>
+													<ul class="dropdown-menu">
+														<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
+														<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
+													</ul>
+												</div>
+											</div>
+										`;
 
 								commentsHTML += `
-									<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
-										<div class="comet-avatar">
-											<img src="${replyUserInfo.avatar}" alt="User Avatar">
-										</div>
-										<div class="we-comment">
-											<div class="coment-head">
-												<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
-												<span>${d}</span>
-												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-												${replyOptionsHTML}
+											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
+												<div class="comet-avatar">
+													<img src="${replyUserInfo.avatar}" alt="User Avatar">
+												</div>
+												<div class="we-comment">
+													<div class="coment-head">
+														<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
+														<span>${d}</span>
+														${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+														${replyOptionsHTML}
+													</div>
+													<p>${reply.content}</p>
+													${replyFormHTML}
+												</div>
 											</div>
-											<p>${reply.content}</p>
-											${replyFormHTML}
-										</div>
-									</div>
-								`;
+										`;
 							}
 							commentsHTML += `</div>`;
 						}
@@ -998,73 +1055,73 @@
 				}
 
 				// Generate options menu for authenticated users
-				const optionsMenuHTML =  `
-					<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
-						<div class="dropdown">
-							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fa fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="${post.postId}">Report Post</a></li>
-								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${post.userId}">Report User</a></li>
-							</ul>
-						</div>
-					</div>
-				` ;
+				const optionsMenuHTML = `
+							<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
+								<div class="dropdown">
+									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa fa-ellipsis-v"></i>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="${post.postId}">Report Post</a></li>
+										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${post.userId}">Report User</a></li>
+									</ul>
+								</div>
+							</div>
+						` ;
 
 				// Generate comment form for authenticated users
 				const commentFormHTML = `
-					<div class="coment-area">
-						<ul class="we-comet">
-							<li class="post-comment">
-								<div class="comet-avatar">
-									<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
-								</div>
-								<div class="post-comt-box">
-									<form class="comment-form">
-										<input type="hidden" name="NewComment.PostId" value="${post.postId}">
-										<input type="hidden" name="NewComment.ParentCommentId">
-										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-										<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
-									</form>
-								</div>
-							</li>
-						</ul>
-					</div>
-				` ;
+							<div class="coment-area">
+								<ul class="we-comet">
+									<li class="post-comment">
+										<div class="comet-avatar">
+											<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+										</div>
+										<div class="post-comt-box">
+											<form class="comment-form">
+												<input type="hidden" name="NewComment.PostId" value="${post.postId}">
+												<input type="hidden" name="NewComment.ParentCommentId">
+												<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+												<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+											</form>
+										</div>
+									</li>
+								</ul>
+							</div>
+						` ;
 
-					return `
-					<div id="post-${post.postId}">
-					<div class="card p-3 mb-3 shadow-sm rounded">
-						<div class="friend-info">
-							<figure>
-								<img src="${avatar}" alt="User Avatar">
-							</figure>
-							<div class="friend-name">
-								<ins><a href="time-line.html" title="">${name}</a></ins>
-								<span>${d}</span>
-								${optionsMenuHTML}								
-							</div>
-							<div class="post-meta">
-								${categoryBadgeHTML}
-								<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
-									${post.title}
-								</p>
-							</div>
-							<div class="post-meta">
-								${mediaContent}
-								<div class="description">
-									<p>${post.content}</p>
+				return `
+							<div id="post-${post.postId}">
+							<div class="card p-3 mb-3 shadow-sm rounded">
+								<div class="friend-info">
+									<figure>
+										<img src="${avatar}" alt="User Avatar">
+									</figure>
+									<div class="friend-name">
+										<ins><a href="time-line.html" title="">${name}</a></ins>
+										<span>${d}</span>
+										${optionsMenuHTML}
+									</div>
+									<div class="post-meta">
+										${categoryBadgeHTML}
+										<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+											${post.title}
+										</p>
+									</div>
+									<div class="post-meta">
+										${mediaContent}
+										<div class="description">
+											<p>${post.content}</p>
+										</div>
+									</div>
+									<div class="comments-section" id="commentList-${post.postId}">
+										${commentsHTML}
+									</div>
+									${commentFormHTML}
 								</div>
-							</div>
-							<div class="comments-section" id="commentList-${post.postId}">
-								${commentsHTML}
-							</div>
-							${commentFormHTML}
-						</div>
-						</div>
-					</div>`;
-				}
+								</div>
+							</div>`;
+			}
 
 			// Function to create comment HTML
 			function createCommentHtml(comment, avatar, name) {
@@ -1079,47 +1136,47 @@
 				const d = `${formattedDate} ${formattedTime}`;
 				const hasAuth = token && token !== '' && token !== '@token';
 
-				const optionsHTML =  `
-					<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-						<div class="dropdown">
-							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fa fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
-								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
-							</ul>
-						</div>
-					</div>
-				` ;
+				const optionsHTML = `
+							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+								<div class="dropdown">
+									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa fa-ellipsis-v"></i>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+									</ul>
+								</div>
+							</div>
+						` ;
 
-				const replyFormHTML =  `
-					<div class="reply-form" style="display: none; margin-top: 10px;">
-						<form class="comment-form">
-							<input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
-							<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
-							<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-							<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-						</form>
-					</div>
-				` ;
+				const replyFormHTML = `
+							<div class="reply-form" style="display: none; margin-top: 10px;">
+								<form class="comment-form">
+									<input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
+									<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+								</form>
+							</div>
+						` ;
 
 				return `
-				<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
-					<div class="comet-avatar">
-						<img src="${avatar}" alt="User Avatar">
-					</div>
-					<div class="we-comment">
-						<div class="coment-head">
-							<h5><a href="time-line.html" title="">${name}</a></h5>
-							<span>${d}</span>
-							${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-							${optionsHTML}
-						</div>
-						<p>${comment.content}</p>
-						${replyFormHTML}
-					</div>
-				</div>`;
+						<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+							<div class="comet-avatar">
+								<img src="${avatar}" alt="User Avatar">
+							</div>
+							<div class="we-comment">
+								<div class="coment-head">
+									<h5><a href="time-line.html" title="">${name}</a></h5>
+									<span>${d}</span>
+									${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+									${optionsHTML}
+								</div>
+								<p>${comment.content}</p>
+								${replyFormHTML}
+							</div>
+						</div>`;
 			}
 
 			// Enhanced function to load more posts
@@ -1436,326 +1493,326 @@
 
 		// Create toast notification system - replaces the old alert system
 		function showToast(message, type = "success") {
-		  // Create toast container if it doesn't exist yet
-		  let toastContainer = document.getElementById("toast-container");
-		  if (!toastContainer) {
-			toastContainer = document.createElement("div");
-			toastContainer.id = "toast-container";
-			toastContainer.className = "position-fixed bottom-0 end-0 p-3";
-			toastContainer.style.zIndex = "1050";
-			document.body.appendChild(toastContainer);
-		  }
+			// Create toast container if it doesn't exist yet
+			let toastContainer = document.getElementById("toast-container");
+			if (!toastContainer) {
+				toastContainer = document.createElement("div");
+				toastContainer.id = "toast-container";
+				toastContainer.className = "position-fixed bottom-0 end-0 p-3";
+				toastContainer.style.zIndex = "1050";
+				document.body.appendChild(toastContainer);
+			}
 
-		  // Create unique ID for this toast
-		  const toastId = "toast-" + Date.now();
+			// Create unique ID for this toast
+			const toastId = "toast-" + Date.now();
 
-		  // Create the toast element with auto-hide enabled
-		  const toastEl = document.createElement("div");
-		  toastEl.id = toastId;
-		  toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-		  toastEl.setAttribute("role", "alert");
-		  toastEl.setAttribute("aria-live", "assertive");
-		  toastEl.setAttribute("aria-atomic", "true");
-		  toastEl.setAttribute("data-bs-autohide", "true");
-		  toastEl.setAttribute("data-bs-delay", "3000");
+			// Create the toast element with auto-hide enabled
+			const toastEl = document.createElement("div");
+			toastEl.id = toastId;
+			toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+			toastEl.setAttribute("role", "alert");
+			toastEl.setAttribute("aria-live", "assertive");
+			toastEl.setAttribute("aria-atomic", "true");
+			toastEl.setAttribute("data-bs-autohide", "true");
+			toastEl.setAttribute("data-bs-delay", "3000");
 
-		  // Create toast content (without close button for auto-closing)
-		  toastEl.innerHTML = `
-			<div class="d-flex">
-			  <div class="toast-body">
-				${message}
-			  </div>
-			</div>
-		  `;
+			// Create toast content (without close button for auto-closing)
+			toastEl.innerHTML = `
+					<div class="d-flex">
+					  <div class="toast-body">
+						${message}
+					  </div>
+					</div>
+				  `;
 
-		  // Add to container
-		  toastContainer.appendChild(toastEl);
+			// Add to container
+			toastContainer.appendChild(toastEl);
 
-		  // Initialize and show the toast using jQuery if available
-		  if (typeof $ !== 'undefined') {
-			$(toastEl).toast('show');
-		  } else {
-			// Use the bootstrap object if available
-			if (typeof bootstrap !== 'undefined' && typeof bootstrap.Toast !== 'undefined') {
-			  const bsToast = new bootstrap.Toast(toastEl, {
-				autohide: true,
-				delay: 3000
-			  });
-			  bsToast.show();
+			// Initialize and show the toast using jQuery if available
+			if (typeof $ !== 'undefined') {
+				$(toastEl).toast('show');
 			} else {
-			  // Last resort - manual display if Bootstrap JS is not properly loaded
-			  toastEl.classList.add('show');
-			  setTimeout(() => {
-				toastEl.classList.remove('show');
-				setTimeout(() => toastEl.remove(), 150);
-			  }, 3000);
+				// Use the bootstrap object if available
+				if (typeof bootstrap !== 'undefined' && typeof bootstrap.Toast !== 'undefined') {
+					const bsToast = new bootstrap.Toast(toastEl, {
+						autohide: true,
+						delay: 3000
+					});
+					bsToast.show();
+				} else {
+					// Last resort - manual display if Bootstrap JS is not properly loaded
+					toastEl.classList.add('show');
+					setTimeout(() => {
+						toastEl.classList.remove('show');
+						setTimeout(() => toastEl.remove(), 150);
+					}, 3000);
+				}
 			}
-		  }
 
-		  // Ensure toast is removed after 3.5 seconds regardless of BS implementation
-		  setTimeout(() => {
-			if (document.getElementById(toastId)) {
-			  document.getElementById(toastId).remove();
-			}
-		  }, 3500);
+			// Ensure toast is removed after 3.5 seconds regardless of BS implementation
+			setTimeout(() => {
+				if (document.getElementById(toastId)) {
+					document.getElementById(toastId).remove();
+				}
+			}, 3500);
 		}
 
 		// Handle Report Post Form Submission
-		document.getElementById("reportPostForm").addEventListener("submit", async function(event) {
-		  event.preventDefault(); // Prevent form submission (page refresh)
+		document.getElementById("reportPostForm").addEventListener("submit", async function (event) {
+			event.preventDefault(); // Prevent form submission (page refresh)
 
-		  const postId = parseInt(document.getElementById("reportPostId").value);
-		  const userId = '@Model.CurrentUserId';
-		  const content = document.getElementById("reportPostContent").value;
+			const postId = parseInt(document.getElementById("reportPostId").value);
+			const userId = '@Model.CurrentUserId';
+			const content = document.getElementById("reportPostContent").value;
 
-		  if (!content.trim()) {
-			showToast("Please provide a reason for reporting this post.", "danger");
-			return;
-		  }
-
-		  try {
-			const response = await fetch(`${BASE_URL}/ReportPost`, {
-			  method: "POST",
-			  headers: {
-				"Content-Type": "application/json"
-			  },
-			  body: JSON.stringify({
-				reportId: 0, // The server will assign this
-				postId: postId,
-				userId: userId,
-				content: content
-			  })
-			});
-
-			if (response.ok) {
-			  // Close modal using jQuery if available (compatible with most Bootstrap versions)
-			  if (typeof $ !== 'undefined') {
-				$("#reportPostModal").modal('hide');
-			  } else {
-				// Direct DOM manipulation fallback
-				const modalElement = document.getElementById("reportPostModal");
-				modalElement.classList.remove('show');
-				modalElement.setAttribute('aria-hidden', 'true');
-				modalElement.style.display = 'none';
-
-				// Remove backdrop if it exists
-				const backdrop = document.querySelector('.modal-backdrop');
-				if (backdrop) backdrop.remove();
-
-				// Clean up body
-				document.body.classList.remove('modal-open');
-				document.body.style.overflow = '';
-				document.body.style.paddingRight = '';
-			  }
-
-			  // Clear the form for future use
-			  document.getElementById("reportPostContent").value = "";
-
-			  // Show success message
-			  showToast("Post reported successfully!");
-			} else {
-			  const errorData = await response.json();
-			  showToast(`Error reporting post: ${errorData.message || response.statusText}`, "danger");
+			if (!content.trim()) {
+				showToast("Please provide a reason for reporting this post.", "danger");
+				return;
 			}
-		  } catch (error) {
-			showToast(`Error reporting post: ${error.message}`, "danger");
-		  }
+
+			try {
+				const response = await fetch(`${BASE_URL}/ReportPost`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						reportId: 0, // The server will assign this
+						postId: postId,
+						userId: userId,
+						content: content
+					})
+				});
+
+				if (response.ok) {
+					// Close modal using jQuery if available (compatible with most Bootstrap versions)
+					if (typeof $ !== 'undefined') {
+						$("#reportPostModal").modal('hide');
+					} else {
+						// Direct DOM manipulation fallback
+						const modalElement = document.getElementById("reportPostModal");
+						modalElement.classList.remove('show');
+						modalElement.setAttribute('aria-hidden', 'true');
+						modalElement.style.display = 'none';
+
+						// Remove backdrop if it exists
+						const backdrop = document.querySelector('.modal-backdrop');
+						if (backdrop) backdrop.remove();
+
+						// Clean up body
+						document.body.classList.remove('modal-open');
+						document.body.style.overflow = '';
+						document.body.style.paddingRight = '';
+					}
+
+					// Clear the form for future use
+					document.getElementById("reportPostContent").value = "";
+
+					// Show success message
+					showToast("Post reported successfully!");
+				} else {
+					const errorData = await response.json();
+					showToast(`Error reporting post: ${errorData.message || response.statusText}`, "danger");
+				}
+			} catch (error) {
+				showToast(`Error reporting post: ${error.message}`, "danger");
+			}
 		});
 
 		// Handle Report Comment Form Submission
-		document.getElementById("reportCommentForm").addEventListener("submit", async function(event) {
-		  event.preventDefault(); // Prevent form submission (page refresh)
+		document.getElementById("reportCommentForm").addEventListener("submit", async function (event) {
+			event.preventDefault(); // Prevent form submission (page refresh)
 
-		  const commentId = parseInt(document.getElementById("reportCommentId").value);
-		  const userId = '@Model.CurrentUserId';
-		  const content = document.getElementById("reportCommentContent").value;
+			const commentId = parseInt(document.getElementById("reportCommentId").value);
+			const userId = '@Model.CurrentUserId';
+			const content = document.getElementById("reportCommentContent").value;
 
-		  if (!content.trim()) {
-			showToast("Please provide a reason for reporting this comment.", "danger");
-			return;
-		  }
-
-		  try {
-			const response = await fetch(`${BASE_URL}/ReportComment`, {
-			  method: "POST",
-			  headers: {
-				"Content-Type": "application/json"
-			  },
-			  body: JSON.stringify({
-				commentId: commentId, // The server will assign this
-				userId: userId,
-				content: content
-			  })
-			});
-
-			if (response.ok) {
-			  // Close modal using jQuery if available (compatible with most Bootstrap versions)
-			  if (typeof $ !== 'undefined') {
-				$("#reportCommentModal").modal('hide');
-			  } else {
-				// Direct DOM manipulation fallback
-				const modalElement = document.getElementById("reportCommentModal");
-				modalElement.classList.remove('show');
-				modalElement.setAttribute('aria-hidden', 'true');
-				modalElement.style.display = 'none';
-
-				// Remove backdrop if it exists
-				const backdrop = document.querySelector('.modal-backdrop');
-				if (backdrop) backdrop.remove();
-
-				// Clean up body
-				document.body.classList.remove('modal-open');
-				document.body.style.overflow = '';
-				document.body.style.paddingRight = '';
-			  }
-
-			  // Clear the form for future use
-			  document.getElementById("reportCommentContent").value = "";
-
-			  // Show success message
-			  showToast("Comment reported successfully!");
-			} else {
-			  const errorData = await response.json();
-			  showToast(`Error reporting comment: ${errorData.message || response.statusText}`, "danger");
+			if (!content.trim()) {
+				showToast("Please provide a reason for reporting this comment.", "danger");
+				return;
 			}
-		  } catch (error) {
-			showToast(`Error reporting comment: ${error.message}`, "danger");
-		  }
+
+			try {
+				const response = await fetch(`${BASE_URL}/ReportComment`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						commentId: commentId, // The server will assign this
+						userId: userId,
+						content: content
+					})
+				});
+
+				if (response.ok) {
+					// Close modal using jQuery if available (compatible with most Bootstrap versions)
+					if (typeof $ !== 'undefined') {
+						$("#reportCommentModal").modal('hide');
+					} else {
+						// Direct DOM manipulation fallback
+						const modalElement = document.getElementById("reportCommentModal");
+						modalElement.classList.remove('show');
+						modalElement.setAttribute('aria-hidden', 'true');
+						modalElement.style.display = 'none';
+
+						// Remove backdrop if it exists
+						const backdrop = document.querySelector('.modal-backdrop');
+						if (backdrop) backdrop.remove();
+
+						// Clean up body
+						document.body.classList.remove('modal-open');
+						document.body.style.overflow = '';
+						document.body.style.paddingRight = '';
+					}
+
+					// Clear the form for future use
+					document.getElementById("reportCommentContent").value = "";
+
+					// Show success message
+					showToast("Comment reported successfully!");
+				} else {
+					const errorData = await response.json();
+					showToast(`Error reporting comment: ${errorData.message || response.statusText}`, "danger");
+				}
+			} catch (error) {
+				showToast(`Error reporting comment: ${error.message}`, "danger");
+			}
 		});
 
 		// Handle Report User Form Submission
-		document.getElementById("reportUserForm").addEventListener("submit", async function(event) {
-		  event.preventDefault(); // Prevent form submission (page refresh)
+		document.getElementById("reportUserForm").addEventListener("submit", async function (event) {
+			event.preventDefault(); // Prevent form submission (page refresh)
 
-		  const userreportedId = '@Model.CurrentUserId';
-		  const userId = document.getElementById("reportUserreportedId").value;
-		  const content = document.getElementById("reportUserContent").value;
+			const userreportedId = '@Model.CurrentUserId';
+			const userId = document.getElementById("reportUserreportedId").value;
+			const content = document.getElementById("reportUserContent").value;
 
-		  if (!content.trim()) {
-			showToast("Please provide a reason for reporting this user.", "danger");
-			return;
-		  }
-
-		  try {
-			const response = await fetch(`${BASE_URL}/ReportUser`, {
-			  method: "POST",
-			  headers: {
-				"Content-Type": "application/json"
-			  },
-			  body: JSON.stringify({
-				userreportedId: userreportedId, // The server will assign this
-				userId: userId,
-				content: content
-			  })
-			});
-
-			if (response.ok) {
-			  // Close modal using jQuery if available (compatible with most Bootstrap versions)
-			  if (typeof $ !== 'undefined') {
-				$("#reportUserModal").modal('hide');
-			  } else {
-				// Direct DOM manipulation fallback
-				const modalElement = document.getElementById("reportUserModal");
-				modalElement.classList.remove('show');
-				modalElement.setAttribute('aria-hidden', 'true');
-				modalElement.style.display = 'none';
-
-				// Remove backdrop if it exists
-				const backdrop = document.querySelector('.modal-backdrop');
-				if (backdrop) backdrop.remove();
-
-				// Clean up body
-				document.body.classList.remove('modal-open');
-				document.body.style.overflow = '';
-				document.body.style.paddingRight = '';
-			  }
-
-			  // Clear the form for future use
-			  document.getElementById("reportUserContent").value = "";
-
-			  // Show success message
-			  showToast("User reported successfully!");
-			} else {
-			  const errorData = await response.json();
-			  showToast(`Error reporting user: ${errorData.message || response.statusText}`, "danger");
+			if (!content.trim()) {
+				showToast("Please provide a reason for reporting this user.", "danger");
+				return;
 			}
-		  } catch (error) {
-			showToast(`Error reporting user: ${error.message}`, "danger");
-		  }
+
+			try {
+				const response = await fetch(`${BASE_URL}/ReportUser`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						userreportedId: userreportedId, // The server will assign this
+						userId: userId,
+						content: content
+					})
+				});
+
+				if (response.ok) {
+					// Close modal using jQuery if available (compatible with most Bootstrap versions)
+					if (typeof $ !== 'undefined') {
+						$("#reportUserModal").modal('hide');
+					} else {
+						// Direct DOM manipulation fallback
+						const modalElement = document.getElementById("reportUserModal");
+						modalElement.classList.remove('show');
+						modalElement.setAttribute('aria-hidden', 'true');
+						modalElement.style.display = 'none';
+
+						// Remove backdrop if it exists
+						const backdrop = document.querySelector('.modal-backdrop');
+						if (backdrop) backdrop.remove();
+
+						// Clean up body
+						document.body.classList.remove('modal-open');
+						document.body.style.overflow = '';
+						document.body.style.paddingRight = '';
+					}
+
+					// Clear the form for future use
+					document.getElementById("reportUserContent").value = "";
+
+					// Show success message
+					showToast("User reported successfully!");
+				} else {
+					const errorData = await response.json();
+					showToast(`Error reporting user: ${errorData.message || response.statusText}`, "danger");
+				}
+			} catch (error) {
+				showToast(`Error reporting user: ${error.message}`, "danger");
+			}
 		});
 
 		// This is the key fix: Add event listeners to modal events
-		document.addEventListener('DOMContentLoaded', function() {
-		  // Listen for Post reporting modal show event
-		  document.getElementById('reportPostModal').addEventListener('show.bs.modal', function (event) {
-			// Get the button that triggered the modal
-			const button = event.relatedTarget;
-			// Extract post ID from data attribute
-			const postId = button.getAttribute('data-post-id');
-			// Update the modal's hidden input with this ID
-			document.getElementById('reportPostId').value = postId;
-		  });
-
-		  // Listen for Comment reporting modal show event
-		  document.getElementById('reportCommentModal').addEventListener('show.bs.modal', function (event) {
-			// Get the button that triggered the modal
-			const button = event.relatedTarget;
-			// Extract comment ID from data attribute
-			const commentId = button.getAttribute('data-comment-id');
-			// Update the modal's hidden input with this ID
-			document.getElementById('reportCommentId').value = commentId;
-		  });
-
-		  // Listen for User reporting modal show event
-		  document.getElementById('reportUserModal').addEventListener('show.bs.modal', function (event) {
-			// Get the button that triggered the modal
-			const button = event.relatedTarget;
-			// Extract user ID from data attribute
-			const userId = button.getAttribute('data-user-id');
-			// Update the modal's hidden input with this ID
-			document.getElementById('reportUserreportedId').value = userId;
-		  });
-
-		  // Add click event listeners to all report buttons as a backup method
-		  document.querySelectorAll('.report-post').forEach(button => {
-			button.addEventListener('click', function() {
-			  const postId = this.getAttribute('data-post-id');
-			  document.getElementById('reportPostId').value = postId;
+		document.addEventListener('DOMContentLoaded', function () {
+			// Listen for Post reporting modal show event
+			document.getElementById('reportPostModal').addEventListener('show.bs.modal', function (event) {
+				// Get the button that triggered the modal
+				const button = event.relatedTarget;
+				// Extract post ID from data attribute
+				const postId = button.getAttribute('data-post-id');
+				// Update the modal's hidden input with this ID
+				document.getElementById('reportPostId').value = postId;
 			});
-		  });
 
-		  document.querySelectorAll('.report-comment').forEach(button => {
-			button.addEventListener('click', function() {
-			  const commentId = this.getAttribute('data-comment-id');
-			  document.getElementById('reportCommentId').value = commentId;
+			// Listen for Comment reporting modal show event
+			document.getElementById('reportCommentModal').addEventListener('show.bs.modal', function (event) {
+				// Get the button that triggered the modal
+				const button = event.relatedTarget;
+				// Extract comment ID from data attribute
+				const commentId = button.getAttribute('data-comment-id');
+				// Update the modal's hidden input with this ID
+				document.getElementById('reportCommentId').value = commentId;
 			});
-		  });
 
-		  document.querySelectorAll('.report-user').forEach(button => {
-			button.addEventListener('click', function() {
-			  const userId = this.getAttribute('data-user-id');
-			  document.getElementById('reportUserreportedId').value = userId;
+			// Listen for User reporting modal show event
+			document.getElementById('reportUserModal').addEventListener('show.bs.modal', function (event) {
+				// Get the button that triggered the modal
+				const button = event.relatedTarget;
+				// Extract user ID from data attribute
+				const userId = button.getAttribute('data-user-id');
+				// Update the modal's hidden input with this ID
+				document.getElementById('reportUserreportedId').value = userId;
 			});
-		  });
+
+			// Add click event listeners to all report buttons as a backup method
+			document.querySelectorAll('.report-post').forEach(button => {
+				button.addEventListener('click', function () {
+					const postId = this.getAttribute('data-post-id');
+					document.getElementById('reportPostId').value = postId;
+				});
+			});
+
+			document.querySelectorAll('.report-comment').forEach(button => {
+				button.addEventListener('click', function () {
+					const commentId = this.getAttribute('data-comment-id');
+					document.getElementById('reportCommentId').value = commentId;
+				});
+			});
+
+			document.querySelectorAll('.report-user').forEach(button => {
+				button.addEventListener('click', function () {
+					const userId = this.getAttribute('data-user-id');
+					document.getElementById('reportUserreportedId').value = userId;
+				});
+			});
 		});
 
 		// For backwards compatibility, keep these functions (but they shouldn't be needed anymore)
 		function openReportPostModal(postId) {
-		  document.getElementById("reportPostId").value = postId;
-		  const reportPostModal = new bootstrap.Modal(document.getElementById("reportPostModal"));
-		  reportPostModal.show();
+			document.getElementById("reportPostId").value = postId;
+			const reportPostModal = new bootstrap.Modal(document.getElementById("reportPostModal"));
+			reportPostModal.show();
 		}
 
 		function openReportCommentModal(commentId) {
-		  document.getElementById("reportCommentId").value = commentId;
-		  const reportCommentModal = new bootstrap.Modal(document.getElementById("reportCommentModal"));
-		  reportCommentModal.show();
+			document.getElementById("reportCommentId").value = commentId;
+			const reportCommentModal = new bootstrap.Modal(document.getElementById("reportCommentModal"));
+			reportCommentModal.show();
 		}
 
 		function openReportUserModal(userreportedId) {
-		  document.getElementById("reportUserreportedId").value = userreportedId;
-		  const reportUserModal = new bootstrap.Modal(document.getElementById("reportUserModal"));
-		  reportUserModal.show();
+			document.getElementById("reportUserreportedId").value = userreportedId;
+			const reportUserModal = new bootstrap.Modal(document.getElementById("reportUserModal"));
+			reportUserModal.show();
 		}
 	</script>
 
@@ -1764,71 +1821,71 @@
 		let allImages = [];
 
 		function previewImage(event) {
-		  const files = event.target.files;
-		  if (files.length === 0) return;
-		  allImages = [files[0]];
-		  renderImages();
+			const files = event.target.files;
+			if (files.length === 0) return;
+			allImages = [files[0]];
+			renderImages();
 		}
 
 		function replaceImages(event) {
-		  const files = Array.from(event.target.files);
-		  if (files.length === 0) return;
-		  allImages = files;
-		  renderImages();
+			const files = Array.from(event.target.files);
+			if (files.length === 0) return;
+			allImages = files;
+			renderImages();
 		}
 
 		function addMoreImages(event) {
-		  const files = Array.from(event.target.files);
-		  if (files.length === 0) return;
-		  allImages = [...allImages, ...files];
-		  renderImages();
+			const files = Array.from(event.target.files);
+			if (files.length === 0) return;
+			allImages = [...allImages, ...files];
+			renderImages();
 		}
 
 		function clearAllImages() {
-		  allImages = [];
-		  renderImages();
+			allImages = [];
+			renderImages();
 		}
 
 		function renderImages() {
-		  const previewContainer = document.getElementById('imagePreview');
-		  const imageContainer = document.getElementById('imageContainer');
-		  const btnEdit = document.getElementById('btnEdit');
-		  const btnAddMore = document.getElementById('btnAddMore');
-		  const btnCloseAll = document.getElementById('btnCloseAll');
+			const previewContainer = document.getElementById('imagePreview');
+			const imageContainer = document.getElementById('imageContainer');
+			const btnEdit = document.getElementById('btnEdit');
+			const btnAddMore = document.getElementById('btnAddMore');
+			const btnCloseAll = document.getElementById('btnCloseAll');
 
-		  const hasImages = allImages.length > 0;
-		  previewContainer.style.display = hasImages ? 'block' : 'none';
-		  btnEdit.style.display = btnAddMore.style.display = btnCloseAll.style.display = hasImages ? 'inline-flex' : 'none';
+			const hasImages = allImages.length > 0;
+			previewContainer.style.display = hasImages ? 'block' : 'none';
+			btnEdit.style.display = btnAddMore.style.display = btnCloseAll.style.display = hasImages ? 'inline-flex' : 'none';
 
-		  imageContainer.innerHTML = '';
-		  const maxToShow = 5;
-		  const total = allImages.length;
-		  const imagesToShow = allImages.slice(0, maxToShow);
+			imageContainer.innerHTML = '';
+			const maxToShow = 5;
+			const total = allImages.length;
+			const imagesToShow = allImages.slice(0, maxToShow);
 
-		  imagesToShow.forEach((file, index) => {
-			const reader = new FileReader();
-			reader.onload = function (e) {
-			  const wrapper = document.createElement('div');
-			  wrapper.className = 'image-thumb-wrapper';
+			imagesToShow.forEach((file, index) => {
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					const wrapper = document.createElement('div');
+					wrapper.className = 'image-thumb-wrapper';
 
-			  const img = document.createElement('img');
-			  img.src = e.target.result;
-			  img.className = 'image-thumb';
+					const img = document.createElement('img');
+					img.src = e.target.result;
+					img.className = 'image-thumb';
 
-			  wrapper.appendChild(img);
+					wrapper.appendChild(img);
 
-			  // Overlay nếu là ảnh cuối và có nhiều hơn 5 ảnh
-			  if (index === maxToShow - 1 && total > maxToShow) {
-				const overlay = document.createElement('div');
-				overlay.className = 'image-thumb-overlay';
-				overlay.textContent = `+${total - maxToShow}`;
-				wrapper.appendChild(overlay);
-			  }
+					// Overlay nếu là ảnh cuối và có nhiều hơn 5 ảnh
+					if (index === maxToShow - 1 && total > maxToShow) {
+						const overlay = document.createElement('div');
+						overlay.className = 'image-thumb-overlay';
+						overlay.textContent = `+${total - maxToShow}`;
+						wrapper.appendChild(overlay);
+					}
 
-			  imageContainer.appendChild(wrapper);
-			};
-			reader.readAsDataURL(file);
-		  });
+					imageContainer.appendChild(wrapper);
+				};
+				reader.readAsDataURL(file);
+			});
 		}
 	</script>
 
@@ -2460,7 +2517,7 @@
 			const searchBox = document.getElementById('categorySearch');
 
 			dropdown.classList.add('hidden');
-			if (searchBox) searchBox.value = ''; 
+			if (searchBox) searchBox.value = '';
 			if (!selectedCategory) addBtn.style.display = 'inline-flex';
 		}
 
@@ -2503,13 +2560,13 @@
 
 			if (selectedCategory) {
 				container.innerHTML = `
-					<div class="category-tag">
-						<span>#${selectedCategory.title}</span>
-						<button type="button" class="remove-btn" onclick="removeCategory()" title="Xóa danh mục">
-							×
-						</button>
-					</div>
-				`;
+							<div class="category-tag">
+								<span>#${selectedCategory.title}</span>
+								<button type="button" class="remove-btn" onclick="removeCategory()" title="Xóa danh mục">
+									×
+								</button>
+							</div>
+						`;
 				addBtn.style.display = 'none';
 			}
 		}
@@ -2537,7 +2594,7 @@
 
 
 		// Khởi tạo khi trang load
-		document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', function () {
 			// Kiểm tra nếu có giá trị từ server (khi edit)
 			const existingCategoryId = document.getElementById('selectedCategoryId').value;
 			if (existingCategoryId) {
@@ -2562,7 +2619,33 @@
 		}
 	</script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var editModal = document.getElementById('editPostModal');
+			editModal.addEventListener('show.bs.modal', async function (event) {
+				var button = event.relatedTarget;
+				var postId = button.getAttribute('data-post-id');
+
+				try {
+					// Gọi đến handler OnGetPostByIdAsync
+				const response = await fetch(`/Index?handler=PostById&postId=${postId}`);
+					if (!response.ok) throw new Error('Lỗi khi fetch dữ liệu bài viết');
+
+					const post = await response.json();
+
+					// Fill vào modal
+					document.getElementById('editPostId').value = post.postId;
+					document.querySelector('[name="NewPost.Title"]').value = post.title;
+					document.querySelector('[name="NewPost.Content"]').value = post.content;
+				document.querySelector('[name="NewPost.CategoryId"]').value = post.categoryId;
+
+				} catch (error) {
+					console.error('Lỗi khi tải bài viết:', error);
+				}
+			});
+		});
+	</script>
 
 	<style>
 		/*category-tag*/
@@ -2585,37 +2668,37 @@
 			transition: all 0.2s ease;
 		}
 
-		.category-tag:hover {
-			background-color: #bbdefb;
-		}
+			.category-tag:hover {
+				background-color: #bbdefb;
+			}
 
-		.category-tag .remove-btn {
-			margin-left: 8px;
-			background: none;
-			border: none;
-			color: #1976d2;
-			font-size: 16px;
-			cursor: pointer;
-			padding: 0;
-			width: 18px;
-			height: 18px;
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			transition: all 0.2s ease;
-		}
+			.category-tag .remove-btn {
+				margin-left: 8px;
+				background: none;
+				border: none;
+				color: #1976d2;
+				font-size: 16px;
+				cursor: pointer;
+				padding: 0;
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.2s ease;
+			}
 
-		.category-tag .remove-btn:hover {
-			background-color: #1976d2;
-			color: white;
-		}
+				.category-tag .remove-btn:hover {
+					background-color: #1976d2;
+					color: white;
+				}
 
 		.category-dropdown {
 			transition: all 0.3s ease;
 			opacity: 1;
 			visibility: visible;
-			position: fixed;
+			position: absolute;
 			background: #fff;
 			border: 1px solid #ccc;
 			border-radius: 8px;
@@ -2623,6 +2706,8 @@
 			width: 100%;
 			max-width: 300px;
 			z-index: 1000;
+			top: 100%;
+			left: 0;
 		}
 
 		.category-list {
@@ -2639,13 +2724,9 @@
 			transition: background 0.2s ease;
 		}
 
-		.category-option:hover {
-			background-color: #f1f1f1;
-		}
-
-		.category-selector-container {
-			position: relative;
-		}
+			.category-option:hover {
+				background-color: #f1f1f1;
+			}
 
 		.category-dropdown.hidden {
 			opacity: 0;
@@ -2671,18 +2752,50 @@
 			font-size: 14px;
 			cursor: pointer;
 			transition: all 0.2s ease;
+			white-space: nowrap;
+			margin-top: -1%;
 		}
 
-		.add-category-btn:hover {
-			background-color: #e0e0e0;
-			border-color: #999;
+			.add-category-btn:hover {
+				background-color: #e0e0e0;
+				border-color: #999;
+			}
+
+			.add-category-btn i {
+				margin-right: 5px;
+			}
+
+		.category-photos-row {
+			gap: 10px;
+			align-items: flex-start;
 		}
 
-		.add-category-btn i {
-			margin-right: 5px;
+		.category-selector-container {
+			position: relative;
+			min-width: 0; /* Allow flex item to shrink */
 		}
 		/*category-tag-end*/
 
+		/* Responsive adjustments */
+		@@media (max-width: 576px) {
+			.category-photos-row {
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.category-selector-container {
+				width: 100%;
+			}
+
+			.flex-shrink-0 {
+				align-self: stretch;
+			}
+
+			.btn-outline-success {
+				width: 100%;
+				justify-content: center;
+			}
+		}
 
 		section {
 			margin-top: -20px;
@@ -2706,7 +2819,9 @@
 
 		.reply-comment {
 			margin-bottom: 15px;
-		}.comment {
+		}
+
+		.comment {
 			margin-bottom: 20px;
 			padding-bottom: 10px;
 			border-bottom: 1px solid #eee;
@@ -2757,3 +2872,4 @@
 		}
 		/* addimage-end */
 	</style>
+

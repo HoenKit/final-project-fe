@@ -8,12 +8,44 @@
             public string QuestionType { get; set; }
             public List<AnswerDto> Answers { get; set; }
         }
+        public class LessonContentResponseDto
+        {
+            public List<QuestionDto> QuizQuestions { get; set; }
+            public LessonDetailDto LessonDetail { get; set; }
+        }
 
+        public class UserAssignmentDto
+        {
+            public int AssignmentId { get; set; }  
+            public string UserId { get; set; }
+            public string? FirstName { get; set; }
+            public string? LastName { get; set; }
+            public bool IsScored { get; set; }
+            public bool IsPresented { get; set; }
+        }
         public class AnswerDto
         {
             public string AnswerId { get; set; }
             public string Text { get; set; }
             public bool IsCorrect { get; set; }
+        }
+        public class SubmissionDto
+        {
+            public int AssignmentId { get; set; }
+            public string UserId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string? Content { get; set; }
+            public bool IsScored { get; set; }
+            public bool IsPresented { get; set; }
+        }
+        public class GradeInput
+        {
+            public string UserId { get; set; }
+            public int LessonId { get; set; }
+            public int AssignmentId { get; set; }
+            public double Mark { get; set; }
+            public bool IsPassed { get; set; }
         }
     }
 }

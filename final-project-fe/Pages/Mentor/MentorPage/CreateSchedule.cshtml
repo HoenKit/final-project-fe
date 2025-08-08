@@ -1,0 +1,1022 @@
+﻿@page
+@using Newtonsoft.Json
+@model final_project_fe.Pages.Mentor.CreateScheduleModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý lịch Mentor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .calendar-container {
+            background: linear-gradient(135deg, #747474 0%, #000000 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 12px;
+            background: rgb(0 0 0 / 50%);
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .calendar-day:hover {
+                background: rgba(255,255,255,0.2);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            }
+
+            .calendar-day.selected {    
+                background: linear-gradient(45deg, #ff8600, #ff3400);
+                box-shadow: 0 8px 25px rgba(255,107,107,0.4);
+            }
+
+            .calendar-day.available {
+                background: linear-gradient(45deg, #b9c9d1, #0079ff);
+                box-shadow: 0 8px 25px rgba(0,210,211,0.4);
+            }
+
+        .calendar-day-header {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .schedule-form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #747474 0%, #000000 100%);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+
+            .btn-primary-custom:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 12px 25px rgba(102,126,234,0.4);
+            }
+
+        .schedule-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .schedule-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+            .schedule-item:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+            .nav-btn:hover {
+                background: rgba(255,255,255,0.3);
+                transform: scale(1.1);
+            }
+
+        .page-header {
+            background: linear-gradient(135deg, #747474 0%, #000000 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            border-radius: 0 0 30px 30px;
+        }
+
+        .form-floating label {
+            color: #6c757d;
+        }
+
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .loading {
+            display: none;
+        }
+
+            .loading.show {
+                display: inline-block;
+            }
+
+        .time-display {
+            background: linear-gradient(135deg, #747474 0%, #000000 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2"><i class="fas fa-calendar-alt me-3"></i>Manage Mentor Schedule</h1>
+                    <p class="mb-0 opacity-90">Create and manage your meeting calendar so students can book appointments.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                        <span class="badge bg-light text-dark p-2">
+                            <i class="fas fa-clock me-1"></i>Today: <span id="currentDate"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="nav-btn" onclick="previousMonth()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentMonth" class="mb-0"></h3>
+                        <button class="nav-btn" onclick="nextMonth()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="calendar-grid" id="calendar">
+                        <!-- Calendar will be generated by JavaScript -->
+                    </div>
+
+                    <div class="text-center">
+                        <div class="d-inline-flex gap-4 align-items-center">
+                            <div><span class="calendar-day" style="width:20px;height:20px;display:inline-block;"></span> Can Choose</div>
+                            <div><span class="calendar-day selected" style="width:20px;height:20px;display:inline-block;"></span> Selecting</div>
+                            <div><span class="calendar-day available" style="width:20px;height:20px;display:inline-block;"></span> Scheduled</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="schedule-form-container" id="scheduleForm" style="display:none;">
+                    <h4 class="mb-4"><i class="fas fa-plus-circle me-2 text-primary"></i>Create a new meeting schedule</h4>
+
+                    <form id="createScheduleForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="scheduleName" placeholder="Name of schedule" required>
+                                    <label for="scheduleName">Name of schedule</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="courseSelect" required>
+                                        <option value="">-- Select course --</option>
+                                        @foreach (var course in Model.Course)
+                                        {
+                                            <option value="@course.CourseId">@course.CourseName</option>
+                                        }
+                                    </select>
+                                    <label for="courseSelect">Courses</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="date" class="form-control" id="mentorDay" required>
+                                    <label for="mentorDay">Meeting date</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="time" class="form-control" id="mentorTime" required>
+                                    <label for="mentorTime">Meeting time</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mentor info will be loaded automatically -->
+                        <div class="alert alert-light border mb-4" id="mentorInfo">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-user-tie fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Mentor: <span id="mentorName">@Model.Mentor.FirstName @Model.Mentor.LastName</span></h6>
+                                </div>
+                                <input type="hidden" id="mentorId" name="mentorId" value="@Model.Mentor.MentorId" />
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info alert-custom">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Selected information:</strong><br>
+                            <span id="selectedInfo">No date has been selected yet</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary-custom">
+                                <i class="fas fa-save me-2"></i>Create meeting schedule
+                                <span class="loading ms-2">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="schedule-list">
+                    <h5 class="mb-3"><i class="fas fa-list me-2 text-success"></i>Meeting schedule created</h5>
+                    <div id="schedulesList">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-calendar-times fa-2x mb-2 opacity-50"></i>
+                            <p>No meeting scheduled yet</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshSchedules()">
+                            <i class="fas fa-sync me-2"></i>Reload
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6><i class="fas fa-info-circle me-2 text-info"></i>Instruct</h6>
+                    <ul class="small mb-0">
+                        <li>Click on the date on the calendar to select</li>
+                        <li>Fill in meeting schedule information</li>
+                        <li>Select course and meeting time</li>
+                        <li>Click "Create schedule" to complete</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="customConfirm" class="modal" style="display:none; position:fixed; top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:9999;">
+        <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:8px; text-align:center;">
+            <p id="confirmMessage">Bạn có chắc muốn xóa lịch meeting này?</p>
+            <button id="confirmYes" class="btn btn-danger">Xác nhận</button>
+            <button id="confirmNo" class="btn btn-secondary">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        let existingSchedules = [];
+        let currentMentor = null;
+
+        // Data from Razor PageModel - these will be set from your PageModel
+        let API_BASE_URL = '@Model.BaseUrl';
+        let AUTH_TOKEN = null;
+
+        // Get mentor data from PageModel
+        const MENTOR_DATA = {
+            mentorId: @Model.Mentor.MentorId,
+            firstName: '@Model.Mentor.FirstName',
+            lastName: '@Model.Mentor.LastName'
+        };
+
+        // Get courses data from PageModel
+        const COURSES_DATA = [
+            @foreach (var course in Model.Course)
+            {
+                    <text>{
+                        courseId: @course.CourseId,
+                        courseName: '@Html.Raw(Json.Serialize(course.CourseName))'
+                    },</text>
+            }
+        ];
+
+        function showToast(message, type = 'info') {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                showBootstrapToast(message, type);
+            } else {
+                showSimpleToast(message, type);
+            }
+        }
+
+        function showBootstrapToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) return;
+
+            const toastId = 'toast-' + Date.now();
+            const bgClass = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-info';
+
+            const iconClass = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            }[type] || 'fa-info-circle';
+
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast align-items-center text-white ${bgClass} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${iconClass} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            try {
+                const bsToast = new bootstrap.Toast(toast, {
+                    autohide: true,
+                    delay: 4000
+                });
+                bsToast.show();
+
+                toast.addEventListener('hidden.bs.toast', () => {
+                    toast.remove();
+                });
+            } catch (error) {
+                console.error('Bootstrap Toast error:', error);
+                toast.remove();
+                showSimpleToast(message, type);
+            }
+        }
+
+        function showSimpleToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${getToastColor(type)};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 9999;
+                max-width: 400px;
+                word-wrap: break-word;
+                transition: all 0.3s ease;
+                opacity: 0;
+                transform: translateX(100%);
+            `;
+
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas ${getToastIcon(type)}"></i>
+                    <span>${message}</span>
+                    <button style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: auto;" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        function getToastColor(type) {
+            const colors = {
+                'success': '#10b981',
+                'error': '#ef4444',
+                'warning': '#f59e0b',
+                'info': '#3b82f6'
+            };
+            return colors[type] || colors.info;
+        }
+
+        function getToastIcon(type) {
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            return icons[type] || icons.info;
+        }
+
+        function initializePage() {
+            // Get auth token from cookies
+            AUTH_TOKEN = getCookie('AccessToken');
+
+            if (!AUTH_TOKEN) {
+                showToast('Authentication token not found. Please log in again.', 'error');
+                return;
+            }
+
+            if (!MENTOR_DATA || !MENTOR_DATA.mentorId) {
+                showToast('Mentor information not found', 'error');
+                return;
+            }
+
+            if (!API_BASE_URL) {
+                showToast('Invalid API configuration', 'error');
+                return;
+            }
+
+            updateCurrentDate();
+            setupMentorInfo();
+            generateCalendar();
+            loadExistingSchedules();
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function updateCurrentDate() {
+            const today = new Date();
+            const currentDateElement = document.getElementById('currentDate');
+            if (currentDateElement) {
+                currentDateElement.textContent = formatDateShort(today);
+            }
+        }
+
+        function setupMentorInfo() {
+            if (MENTOR_DATA && MENTOR_DATA.mentorId) {
+                currentMentor = {
+                    id: MENTOR_DATA.mentorId,
+                    name: `${MENTOR_DATA.firstName || ''} ${MENTOR_DATA.lastName || ''}`.trim()
+                };
+
+                // The mentor info is already set in HTML from PageModel
+                // We just store it for JavaScript usage
+            } else {
+                showToast('Mentor information not found', 'error');
+            }
+        }
+
+        function generateCalendar() {
+            const calendar = document.getElementById('calendar');
+            if (!calendar) return; // Calendar might not exist on all pages
+
+            const monthYear = document.getElementById('currentMonth');
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            if (monthYear) {
+                monthYear.textContent = `Tháng ${month + 1}, ${year}`;
+            }
+
+            calendar.innerHTML = '';
+
+            // Add day headers
+            const dayHeaders = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendar.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('button');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const currentDateObj = new Date(year, month, day);
+
+                // Disable past dates
+                if (currentDateObj < today.setHours(0,0,0,0)) {
+                    dayElement.disabled = true;
+                    dayElement.style.opacity = '0.3';
+                } else {
+                    dayElement.onclick = () => selectDate(dateStr);
+
+                    // Check if there's existing schedule for this date
+                    const hasSchedule = existingSchedules.some(schedule =>
+                        schedule.mentorDay && schedule.mentorDay.startsWith(dateStr)
+                    );
+
+                    if (hasSchedule) {
+                        dayElement.classList.add('available');
+                    }
+
+                    if (selectedDate === dateStr) {
+                        dayElement.classList.add('selected');
+                    }
+                }
+
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            document.getElementById('mentorDay').value = dateStr;
+
+            const scheduleForm = document.getElementById('scheduleForm');
+            if (scheduleForm) {
+                scheduleForm.style.display = 'block';
+                // Scroll to form
+                scheduleForm.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            updateSelectedInfo();
+            generateCalendar(); // Refresh to show selection
+        }
+
+        function updateSelectedInfo() {
+            const info = document.getElementById('selectedInfo');
+            if (!info) return;
+
+            if (selectedDate) {
+                const date = new Date(selectedDate);
+                info.innerHTML = `
+                    <strong>Selected date:</strong> ${formatDate(date)}<br>
+                    <span class="small text-muted">Please fill in meeting information to continue.</span>
+                `;
+            } else {
+                info.textContent = 'No date has been selected yet';
+            }
+        }
+
+        function cancelForm() {
+            selectedDate = null;
+            const scheduleForm = document.getElementById('scheduleForm');
+            if (scheduleForm) {
+                scheduleForm.style.display = 'none';
+            }
+            document.getElementById('createScheduleForm').reset();
+            generateCalendar();
+        }
+
+        // Fixed API call to use correct endpoint
+        async function createSchedule(scheduleData) {
+            try {
+                console.log('Sending schedule data to /Schedule/Create:', scheduleData);
+
+                const response = await fetch(`${API_BASE_URL}/Schedule/Create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    },
+                    body: JSON.stringify(scheduleData)
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    let errorMessage = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errorData = await response.text();
+                        console.log('Error response body:', errorData);
+                        if (errorData) {
+                            try {
+                                const errorJson = JSON.parse(errorData);
+                                errorMessage += `, message: ${errorJson.message || errorJson.title || errorData}`;
+                            } catch {
+                                errorMessage += `, message: ${errorData}`;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error reading error response:', e);
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const result = await response.json();
+                console.log('Success response:', result);
+                return result;
+            } catch (error) {
+                console.error('Error creating schedule:', error);
+                throw error;
+            }
+        }
+
+        // Form submit handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createScheduleForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    const loading = submitBtn.querySelector('.loading');
+
+                    try {
+                        // Show loading
+                        submitBtn.disabled = true;
+                        loading.classList.add('show');
+
+                        // Get form data
+                        const scheduleName = document.getElementById('scheduleName').value.trim();
+                        const courseId = parseInt(document.getElementById('courseSelect').value);
+                        const mentorDay = document.getElementById('mentorDay').value;
+                        const mentorTime = document.getElementById('mentorTime').value;
+                        const mentorId = parseInt(document.getElementById('mentorId').value);
+
+                        // Validate inputs
+                        if (!scheduleName) {
+                            throw new Error('Please enter meeting schedule name');
+                        }
+                        if (!courseId || isNaN(courseId)) {
+                            throw new Error('Please select a course');
+                        }
+                        if (!mentorDay) {
+                            throw new Error('Please select meeting date');
+                        }
+                        if (!mentorTime) {
+                            throw new Error('Please select meeting time');
+                        }
+                        if (!mentorId || isNaN(mentorId)) {
+                            throw new Error('Mentor information not found');
+                        }
+
+                        // Combine date and time into ISO string
+                        const mentorDateTime = new Date(`${mentorDay}T${mentorTime}:00`);
+
+                        // Validate date is not in the past
+                        if (mentorDateTime < new Date()) {
+                            throw new Error('Cannot create meeting schedule in the past');
+                        }
+
+                        const scheduleData = {
+                            mentorId: mentorId,
+                            scheduleName: scheduleName,
+                            mentorDay: mentorDateTime.toISOString(),
+                            createAt: new Date().toISOString(),
+                            courseId: courseId
+                        };
+
+                        console.log('Preparing to create schedule:', scheduleData);
+
+                        // Call API with the correct endpoint
+                        const result = await createSchedule(scheduleData);
+
+                        // Show success message
+                        showToast('Create meeting schedule successfully!', 'success');
+
+                        // Add new schedule to local array to avoid page reload
+                        const newSchedule = {
+                            ...scheduleData,
+                            scheduleId: result.scheduleId, // sử dụng đúng scheduleId
+                            courseName: getCourseName(scheduleData.courseId)
+                        }
+                        existingSchedules.push(newSchedule);
+
+                        // Update UI without page reload
+                        updateSchedulesList();
+                        generateCalendar();
+
+                        // Reset form and hide it
+                        this.reset();
+                        cancelForm();
+
+                    } catch (error) {
+                        console.error('Error creating schedule:', error);
+                        showToast(error.message || 'Có lỗi xảy ra khi tạo lịch meeting', 'error');
+                    } finally {
+                        // Hide loading
+                        submitBtn.disabled = false;
+                        loading.classList.remove('show');
+                    }
+                });
+            }
+        });
+
+        async function loadExistingSchedules() {
+            try {
+                if (!MENTOR_DATA?.mentorId) {
+                    console.warn('Mentor ID not available, skipping schedule loading');
+                    return;
+                }
+
+                // Call API to get existing schedules
+                const response = await fetch(`${API_BASE_URL}/Schedule/by-Mentor?MentorId=${MENTOR_DATA.mentorId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // No schedules found, that's okay
+                        existingSchedules = [];
+                        updateSchedulesList();
+                        generateCalendar();
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const scheduleData = await response.json();
+                existingSchedules = Array.isArray(scheduleData) ? scheduleData : (scheduleData.items || []);
+
+                // Enrich schedule data with course names
+                existingSchedules = existingSchedules.map(schedule => ({
+                    ...schedule,
+                    courseName: schedule.courseName || getCourseName(schedule.courseId)
+                }));
+
+                updateSchedulesList();
+                generateCalendar();
+
+            } catch (error) {
+                console.error('Error loading schedules:', error);
+                existingSchedules = [];
+                updateSchedulesList();
+                generateCalendar();
+
+                // Only show error if it's not a network issue
+                if (error.message.includes('Failed to fetch')) {
+                    showToast('Không thể kết nối đến server', 'warning');
+                } else {
+                    showToast('Không thể tải danh sách lịch meeting', 'error');
+                }
+            }
+        }
+
+        function getCourseName(courseId) {
+            const course = COURSES_DATA.find(c => c.courseId === courseId);
+            return course ? course.courseName : `Khóa học #${courseId}`;
+        }
+
+        function updateSchedulesList() {
+            const container = document.getElementById('schedulesList');
+            if (!container) return; // Schedules list might not exist on all pages
+
+            if (existingSchedules.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-calendar-times fa-2x mb-2 opacity-50"></i>
+                        <p>Chưa có lịch meeting nào</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+
+            existingSchedules
+                .sort((a, b) => new Date(a.mentorDay) - new Date(b.mentorDay))
+                .forEach(schedule => {
+                    console.log("Schedule:", schedule);
+                    const scheduleDate = new Date(schedule.mentorDay);
+                    const item = document.createElement('div');
+                    item.className = 'schedule-item';
+                    item.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-video me-2 text-primary"></i>
+                                    ${schedule.scheduleName}
+                                </h6>
+                                <div class="small text-muted mb-2">
+                                    <i class="fas fa-book me-1"></i>
+                                    ${schedule.courseName || getCourseName(schedule.courseId)}
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="time-display">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        ${formatDateShort(scheduleDate)}
+                                    </span>
+                                    <span class="time-display">
+                                        <i class="fas fa-clock me-1"></i>
+                                        ${formatTime(scheduleDate)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ms-2">
+                                <button class="btn btn-outline-danger btn-sm"
+                                onclick="deleteSchedule(${schedule.scheduleId})"
+                                title="Xóa lịch meeting">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+        }
+
+        function customConfirm(message) {
+            return new Promise((resolve) => {
+                const popup = document.getElementById('customConfirm');
+                const messageBox = document.getElementById('confirmMessage');
+                const btnYes = document.getElementById('confirmYes');
+                const btnNo = document.getElementById('confirmNo');
+
+                messageBox.textContent = message;
+                popup.style.display = 'block';
+
+                btnYes.onclick = () => {
+                    popup.style.display = 'none';
+                    resolve(true);
+                };
+
+                btnNo.onclick = () => {
+                    popup.style.display = 'none';
+                    resolve(false);
+                };
+            });
+        }
+        window.confirm = customConfirm;
+        async function deleteSchedule(scheduleId) {
+             console.log('Deleting scheduleId:', scheduleId);
+            if (!confirm('Bạn có chắc muốn xóa lịch meeting này?')) {
+                return;
+            }
+
+            try {
+                // Call API to delete schedule
+                const response = await fetch(`${API_BASE_URL}/Schedule/${scheduleId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AUTH_TOKEN}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Remove from local array without page reload
+                existingSchedules = existingSchedules.filter(s => (s.id || s.scheduleId) !== scheduleId);
+
+                updateSchedulesList();
+                generateCalendar();
+                showToast('Đã xóa lịch meeting', 'success');
+
+            } catch (error) {
+                console.error('Error deleting schedule:', error);
+                showToast('Không thể xóa lịch meeting', 'error');
+            }
+        }
+
+        function refreshSchedules() {
+            loadExistingSchedules();
+            showToast('Đã tải lại danh sách', 'info');
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+        }
+
+        function formatDate(date) {
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            return date.toLocaleDateString('vi-VN', options);
+        }
+
+        function formatDateShort(date) {
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for Bootstrap to fully load
+            setTimeout(() => {
+                initializePage();
+
+                // Only show success message if initialization was successful
+                if (AUTH_TOKEN && MENTOR_DATA && API_BASE_URL) {
+                    showToast('Trang đã được tải thành công!', 'success');
+                }
+            }, 100);
+        });
+
+        // Additional check for Bootstrap availability
+        window.addEventListener('load', function() {
+            if (typeof bootstrap === 'undefined' || !bootstrap.Toast) {
+                console.warn('Bootstrap not fully loaded, using fallback toast system');
+            }
+        });
+    </script>
+    </body>
+
+</html>

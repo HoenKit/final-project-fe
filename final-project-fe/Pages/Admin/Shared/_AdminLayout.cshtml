@@ -162,6 +162,11 @@
                                             <span class="sub-item">Comments</span>
                                         </a>
                                     </li>
+                                    <li class="@(ViewData["ActivePage"] as string == "ReportManager.Courses" ? "active" : "")">
+                                        <a asp-page="/Admin/ReportManager/CourseReport/Index">
+                                            <span class="sub-item">Courses</span>
+                                        </a>
+                                    </li>
                                     <li class="@(ViewData["ActivePage"] as string == "ReportManager.Workshops" ? "active" : "")">
                                         <a asp-page="/Admin/ReportManager/WorkshopsReport/Index">
                                             <span class="sub-item">Workshops</span>
@@ -188,7 +193,7 @@
                                 <ul class="nav nav-collapse">
                                     <li class="@(ViewData["ActivePage"] as string == "CourseManager.ListConrse" ? "active" : "")">
                                         <a asp-page="/Admin/CourseManager/Index">
-                                            <span class="sub-item">List Conrse</span>
+                                            <span class="sub-item">List Course</span>
                                         </a>
                                     </li>
                                     <li class="@(ViewData["ActivePage"] as string == "CourseManager.ListPending" ? "active" : "")">

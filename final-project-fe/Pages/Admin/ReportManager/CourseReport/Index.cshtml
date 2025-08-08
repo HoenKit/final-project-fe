@@ -1,0 +1,261 @@
+﻿@page
+@model final_project_fe.Pages.Admin.ReportManager.CoursesReport.IndexModel
+@{
+    ViewData["ActivePage"] = "ReportManager.Courses";
+}
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Report Manager - Courses</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a asp-page="/Admin/Dashboard/Index">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a>Report Manager</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a asp-page="/Admin/ReportManager/CoursesReport/Index">Courses Report</a>
+        </li>
+    </ul>
+</div>
+
+<partial name="_ConfirmDialog" />
+<div class="container mt-4">
+    @if (Model.GroupedReportCourses?.Items != null && Model.GroupedReportCourses.Items.Any())
+    {
+        @foreach (var group in Model.GroupedReportCourses.Items)
+        {
+            var courses = Model.Courses?.Items?.FirstOrDefault(u => u.CourseId == group.Id);
+            string courseName = courses.CourseName;
+            string collapseId = $"collapsePost{group.Id}";
+            string coursesDate = courses?.CreateAt?.ToString("dd/MM/yyyy") ?? "N/A";
+            int reportCount = group.ReportCount;
+
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="cursor-pointer"
+                         data-bs-toggle="collapse"
+                         href="#@collapseId"
+                         role="button"
+                         aria-expanded="false"
+                         aria-controls="@collapseId">
+                        <strong>@courseName</strong>
+                        <small class="text-muted">(Creation: @coursesDate)</small>
+                        <i class="fas fa-chevron-down ms-2 collapse-icon"></i>
+                    </div>
+                    <div style="display: flex;flex-wrap: nowrap;align-items: center;justify-content: space-between;flex-direction: row;">
+                        <span class="badge bg-danger me-3">@reportCount Report(s)</span>
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="/Mentor/MentorPage/CourseDetail?courseId=@courses.CourseId">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="collapse" id="@collapseId">
+                    <div class="card-body">
+                        @if (Model.DetailedReports.ContainsKey(group.Id) && Model.DetailedReports[group.Id].Any())
+                        {
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Report details (@Model.DetailedReports[group.Id].Count)
+                                    </h6>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                @foreach (var detailedReport in Model.DetailedReports[group.Id])
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border-left-danger h-100">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title text-danger mb-0">
+                                                        <i class="fas fa-flag"></i> Report #@detailedReport.ReportId
+                                                    </h6>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <p class="card-text mb-1">
+                                                        <strong>Report content:</strong>
+                                                    </p>
+                                                    <div class="alert alert-light p-2 mb-0">
+                                                        @if (!string.IsNullOrEmpty(detailedReport.Content))
+                                                        {
+                                                            @detailedReport.Content
+                                                        }
+                                                        else
+                                                        {
+                                                            <em class="text-muted">No content</em>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-info-circle text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2">No report details are loaded.</p>
+                            </div>
+                        }
+
+                        <!-- Action buttons -->
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="d-flex justify-content-end gap-2">
+                                <form method="post" asp-page-handler="Warning" class="d-inline">
+                                    <input type="hidden" name="courseId" value="@courses?.CourseId" />
+                                    <input type="hidden" name="title" value="@courseName" />
+                                    <button class="btn btn-sm btn-warning"
+                                            onclick="event.preventDefault(); showConfirm({
+                                    type: 'info' ,
+                                    title: 'Send Alerts' ,
+                                    message: 'Are you sure you want to send a warning to the user?' ,
+                                    confirmText: 'Send' ,
+                                    cancelText: 'Cancel' ,
+                                    onConfirm: ()=>
+                                this.closest('form').submit()
+                                })">
+                                        <i class="fas fa-exclamation-triangle"></i> Warning
+                                    </button>
+                                </form>
+                                <form method="post" asp-page="/Admin/ReportManager/CourseReport/DeleteReport" asp-page-handler="DeleteReport" asp-route-id="@group.Id" class="d-inline">
+                                    <button class="btn btn-sm btn-success"
+                                            onclick="event.preventDefault(); showConfirm({
+                                    type: 'info' ,
+                                    title: 'Ignore reports' ,
+                                    message: 'Are you sure you want to delete these reports?' ,
+                                    confirmText: 'Delete' ,
+                                    cancelText: 'Cancel' ,
+                                    onConfirm: ()=>
+                                this.closest('form').submit()
+                                })">
+                                        <i class="fas fa-check"></i> Ignore reports
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+            <h5 class="text-muted mt-3">No reports</h5>
+            <p class="text-muted">There are currently no reported users.</p>
+        </div>
+    }
+</div>
+
+<!-- Phân trang -->
+@if (Model.GroupedReportCourses?.TotalPages > 1)
+{
+    <div class="card-body">
+        <div class="demo">
+            <ul class="pagination pg-primary justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.GroupedReportCourses.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-page="Index" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.CurrentPage == Model.GroupedReportCourses.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+}
+
+<style>
+    .border-left-danger {
+        border-left: 4px solid #dc3545 !important;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .alert-light {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+        .cursor-pointer:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+    .collapse-icon {
+        transition: transform 0.2s ease;
+        font-size: 0.8rem;
+    }
+
+    .collapsed .collapse-icon {
+        transform: rotate(-90deg);
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const collapseElements = document.querySelectorAll('.collapse');
+
+        collapseElements.forEach(function (collapseEl) {
+            const trigger = document.querySelector(`[href="#${collapseEl.id}"]`);
+            const icon = trigger?.querySelector('.collapse-icon');
+
+            if (!icon) return;
+
+            collapseEl.addEventListener('shown.bs.collapse', () => {
+                icon.classList.remove('collapsed');
+                icon.style.transform = 'rotate(180deg)';
+            });
+
+            collapseEl.addEventListener('hidden.bs.collapse', () => {
+                icon.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
+            });
+        });
+    });
+</script>
