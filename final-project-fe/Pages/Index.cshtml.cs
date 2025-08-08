@@ -8,10 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using System.Xml.Linq;
 
 namespace final_project_fe.Pages
@@ -36,14 +38,17 @@ namespace final_project_fe.Pages
         public string Query { get; set; } = string.Empty;
         public PageResult<CommentDto> Comments { get; set; }
         public PageResult<PostDto> Posts { get; set; }
-        public List<CategoryDto> Categories { get; set; } = new();
+        public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
 
         [BindProperty]
-        public PostCreateDto NewPost { get; set; }
+        public PostCreateDto NewPost { get; set; } = new PostCreateDto();
         public Dictionary<int, List<CommentDto>> CommentsByPost { get; set; } = new();
         public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
+        public User Profile { get; set; } = new();
 
+        [BindProperty]
+        public List<IFormFile> PostFileLinks { get; set; } = new List<IFormFile>();
         public string HubUrl { get; set; }
         public string BaseUrl { get; set; }
         public string CurrentUserId { get; set; }
@@ -156,22 +161,49 @@ namespace final_project_fe.Pages
                         }
                     }
                 }
-
-                var categoryResponse = await _httpClient.GetAsync(categoryApiUrl);
-                if (categoryResponse.IsSuccessStatusCode)
+                if (!string.IsNullOrEmpty(CurrentUserId))
                 {
-                    string categoryJson = await categoryResponse.Content.ReadAsStringAsync();
-                    var categoryResult = JsonSerializer.Deserialize<PageResult<CategoryDto>>(categoryJson, new JsonSerializerOptions
+                    try
                     {
-                        PropertyNameCaseInsensitive = true
-                    });
+                        // Gọi API để lấy thông tin Profile của user hiện tại
+                        HttpResponseMessage profileResponse = await _httpClient.GetAsync(userApiUrl + CurrentUserId);
+                        if (profileResponse.IsSuccessStatusCode)
+                        {
+                            var profileJson = await profileResponse.Content.ReadAsStringAsync();
+                            Profile = JsonSerializer.Deserialize<User>(profileJson, new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            }) ?? new User();
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Không thể lấy Profile user. Status: {profileResponse.StatusCode}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Lỗi khi lấy Profile user: {ex.Message}");
+                    }
+                }
 
-                    Categories = categoryResult?.Items?.ToList() ?? new List<CategoryDto>();
+                // Get Category
+                var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
+                var categoryQuery = HttpUtility.ParseQueryString(string.Empty);
+                categoryQuery["page"] = "1";
+                categoryQuery["pageSize"] = "100";
+                categoryUrl.Query = categoryQuery.ToString();
+
+                var cateResponse = await _httpClient.GetAsync(categoryUrl.ToString());
+                if (cateResponse.IsSuccessStatusCode)
+                {
+                    var categoryJson = await cateResponse.Content.ReadAsStringAsync();
+                    Categories = JsonSerializer.Deserialize<PageResult<CategoryDto>>(categoryJson,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                        ?? new PageResult<CategoryDto>(new List<CategoryDto>(), 0, 1, 10);
                 }
                 else
                 {
-                    _logger.LogError("Không thể lấy danh sách Category. Status: " + categoryResponse.StatusCode);
-                    Categories = new List<CategoryDto>();
+                    _logger.LogWarning("Không thể lấy danh mục. Status: " + cateResponse.StatusCode);
                 }
 
                 // 1️ Gọi API lấy danh sách Posts
@@ -322,22 +354,57 @@ namespace final_project_fe.Pages
             }
         }
 
+        public async Task<IActionResult> OnGetPostByIdAsync(int postId)
+        {
+            try
+            {
+                string postApiUrl = $"{_apiSettings.BaseUrl}/Post/{postId}";
+                var response = await _httpClient.GetAsync(postApiUrl);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError($"Không thể lấy Post theo Id. Status: {response.StatusCode}");
+                    return NotFound();
+                }
+
+                string postJson = await response.Content.ReadAsStringAsync();
+                var post = JsonSerializer.Deserialize<PostCreateDto>(postJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (post == null)
+                {
+                    _logger.LogWarning("Không tìm thấy Post theo Id.");
+                    return NotFound();
+                }
+
+                return new JsonResult(post);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Lỗi khi lấy Post theo Id: {ex.Message}");
+                return StatusCode(500);
+            }
+        }
+
         //Create Post
         public async Task<IActionResult> OnPostAsync()
         {
-            if (NewPost.Title == null || NewPost.Content == null)
+            // Kiểm tra dữ liệu đầu vào
+            if (string.IsNullOrWhiteSpace(NewPost.Title) || string.IsNullOrWhiteSpace(NewPost.Content))
             {
                 await OnGetAsync(currentPage);
-                _logger.LogError("Invalid model state");
+                _logger.LogError("Tiêu đề hoặc nội dung bị thiếu.");
                 return Page();
             }
 
+            // Lấy UserId từ AccessToken
             string token = Request.Cookies["AccessToken"];
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-            var userId = jsonToken.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
+            var userId = jsonToken?.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
             {
@@ -345,22 +412,52 @@ namespace final_project_fe.Pages
                 return Page();
             }
 
-            var requestData = new
+            var form = new MultipartFormDataContent
             {
-                UserId = userId,
-                Title = NewPost.Title,
-                Content = NewPost.Content,
-                /*CategoryId = 3,*/
-                CategoryId = NewPost.CategoryId,
+                { new StringContent(userId), "UserId" },
+                { new StringContent(NewPost.Title), "Title" },
+                { new StringContent(NewPost.Content), "Content" },
+                { new StringContent(NewPost.CategoryId.ToString()), "CategoryId" }
             };
 
-            var jsonContent = JsonSerializer.Serialize(requestData);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            if (NewPost.PostFileLinks != null && NewPost.PostFileLinks.Count > 0)
+            {
+                _logger.LogInformation($"Đang xử lý {NewPost.PostFileLinks.Count} file(s)");
+
+                foreach (var file in NewPost.PostFileLinks)
+                {
+                    if (file != null && file.Length > 0)
+                    {
+                        var allowedTypes = new[] {
+                    "image/jpeg", "image/jpg", "image/png", "image/gif",
+                    "video/mp4", "video/avi", "video/mov"
+                };
+
+                        if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                        {
+                            _logger.LogWarning($"File {file.FileName} có định dạng không được hỗ trợ: {file.ContentType}");
+                            continue;
+                        }
+
+                        if (file.Length > 10 * 1024 * 1024)
+                        {
+                            _logger.LogWarning($"File {file.FileName} vượt quá kích thước cho phép (10MB)");
+                            continue;
+                        }
+
+                        var stream = file.OpenReadStream();
+                        var fileContent = new StreamContent(stream);
+                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                        form.Add(fileContent, "PostFileLinks", file.FileName);
+
+                        _logger.LogInformation($"Đã thêm file: {file.FileName} ({file.Length} bytes)");
+                    }
+                }
+            }
 
             try
             {
-                var response = await _httpClient.PostAsync($"{_apiSettings.BaseUrl}/Post", content);
-
+                var response = await _httpClient.PostAsync($"{_apiSettings.BaseUrl}/Post", form);
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Bài viết đã được tạo thành công.");
@@ -369,21 +466,146 @@ namespace final_project_fe.Pages
                 else
                 {
                     string errorMessage = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Lỗi khi tạo bài viết: {StatusCode}, Nội dung lỗi: {ErrorMessage}",
-                                     response.StatusCode, errorMessage);
+                    _logger.LogError("Tạo bài viết thất bại - Mã lỗi: {StatusCode}, Nội dung: {Error}",
+                        response.StatusCode, errorMessage);
                 }
-            }
-            catch (HttpRequestException httpEx)
-            {
-                _logger.LogError(httpEx, "Lỗi HTTP khi gửi yêu cầu tạo bài viết.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi không xác định khi tạo bài viết.");
+                _logger.LogError(ex, "Lỗi khi gửi yêu cầu tạo bài viết.");
+            }
+            finally
+            {
+                // Đảm bảo dispose các stream
+                form?.Dispose();
             }
 
             await OnGetAsync(currentPage);
             return Page();
+        }
+
+        //Update Post
+        public async Task<IActionResult> OnPostUpdatePostAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+
+            try
+            {
+                // Lấy token từ cookie
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                // Giải mã token
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                }
+
+                // Tạo form data gửi lên API
+                /* var form = new MultipartFormDataContent();
+                 form.Add(new StringContent(NewPost.PostId.ToString()), "PostId");
+                 form.Add(new StringContent(NewPost.Title ?? ""), "Title");
+                 form.Add(new StringContent(NewPost.Content ?? ""), "Content");
+                 form.Add(new StringContent(NewPost.CategoryId.ToString()), "CategoryId");
+                 form.Add(new StringContent(CurrentUserId ?? ""), "UserId");*/
+
+                var form = new MultipartFormDataContent
+                {
+                    { new StringContent(CurrentUserId), "UserId" },
+                    { new StringContent(NewPost.Title), "Title" },
+                    { new StringContent(NewPost.Content), "Content" },
+                    { new StringContent(NewPost.CategoryId.ToString()), "CategoryId" },
+                    { new StringContent(NewPost.PostId.ToString()), "PostId" }
+                };
+
+                if (NewPost.PostFileLinks != null)
+                {
+                    foreach (var file in NewPost.PostFileLinks)
+                    {
+                        var stream = file.OpenReadStream();
+                        var fileContent = new StreamContent(stream);
+                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+                        form.Add(fileContent, "PostFileLinks", file.FileName);
+                    }
+                }
+
+                // Gửi PUT request
+                var response = await _httpClient.PutAsync($"{BaseUrl}/Post", form);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Update post successfully!";
+                    return RedirectToPage(); // hoặc gọi lại OnGetAsync nếu cần reload dữ liệu
+                }
+                else
+                {
+                    _logger.LogError("Update post failed. Status: " + response.StatusCode);
+                    ModelState.AddModelError("", "Failed to update post.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating post.");
+                ModelState.AddModelError("", "Unexpected error occurred.");
+            }
+
+            return Page();
+        }
+
+        //Delete Post
+        public async Task<IActionResult> OnPostDeleteAsync(int postId)
+        {
+            try
+            {
+                // Kiểm tra Token
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                // Lấy thông tin người dùng từ token
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jwtToken != null)
+                {
+                    CurrentUserId = jwtToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "nameid")?.Value;
+                }
+
+                // Có thể check role nếu cần (VD: chỉ cho phép xóa nếu là chính chủ bài viết)
+                // if (!UserRoles.Contains("User")) return RedirectToPage("/Index");
+
+                if (postId <= 0)
+                {
+                    ModelState.AddModelError("", "Invalid Post ID.");
+                    return Page();
+                }
+
+                // Gọi API toggle delete
+                var response = await _httpClient.PutAsync($"{_apiSettings.BaseUrl}/Post/toggle-deleted/{postId}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Post deleted successfully.";
+                    return RedirectToPage("/UserPage");
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to delete post. Status: {Status}, Error: {Error}", response.StatusCode, error);
+                    ModelState.AddModelError("", "Failed to delete post.");
+                    TempData["ErrorMessage"] = "Failed to delete post.";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while deleting post.");
+                ModelState.AddModelError("", "Unexpected error occurred.");
+                TempData["ErrorMessage"] = "Unexpected error occurred.";
+                return Page();
+            }
         }
 
     }
