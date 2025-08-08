@@ -1397,7 +1397,26 @@
                                                                                             <label class="form-label fw-bold">Assignment Question</label>
                                                                                             <textarea class="form-control" name="Assignment.Content" rows="3" placeholder="This Assignment's essay questions and the requirements you want." required></textarea>
                                                                                         </div>
-
+                                                                                        <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                                        <div class="row">
+                                                                                            <div class="col-12">
+                                                                                                <div class="mb-4">
+                                                                                                    <label class="form-label fw-bold fs-6 text-dark">
+                                                                                                        <i class="bi bi-camera-video me-2"></i>
+                                                                                                        Meeting Link
+                                                                                                    </label>
+                                                                                                    <input type="url"
+                                                                                                           class="form-control form-control-lg border-dark"
+                                                                                                           name="EditAssignment.MeetLink"
+                                                                                                           style="border: 2px solid #000;"
+                                                                                                           placeholder="https://meet.google.com/xxx-xxxx-xxx" />
+                                                                                                    <div class="form-text text-muted">
+                                                                                                        <i class="bi bi-info-circle me-1"></i>
+                                                                                                        Important: If you do not enter this field, we will automatically generate a sample meeting link that will expire in 1 hour. This will impact your experience!
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
                                                                                         <div class="d-flex justify-content-end gap-2">
                                                                                             <button type="submit" class="btn btn-success btn-sm">
                                                                                                 <i class="fa fa-check me-1"></i> Create Assignment

@@ -5,6 +5,7 @@
 
 @using Newtonsoft.Json
 @using final_project_fe.Dtos.Lesson
+
 @{
     var modulesData = new Dictionary<int, object>();
     int idx = 1;
@@ -592,7 +593,6 @@
     </style>
 </head>
 <body>
-
     <div class="app-container">
         <div class="sidebar">
             <div class="course-header">
@@ -601,7 +601,7 @@
                          ? $"{Model.Course.CoursesImage}?{Model.ImageKey}"
                          : "https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg")"
                      alt="Course Image" />
-                <div class="course-title">@Model.Course.CourseName</div>
+                <div class="course-title">@Model.Course?.CourseName</div>
                 <div class="course-provider">
                     <i class='fas fa-chalkboard-teacher'></i>
                     @Model.MentorFullName
@@ -675,6 +675,10 @@
         const BaseUrl = "@Model.BaseUrl";
         const modules = @Html.Raw(modulesJson);
         const userId = "@Model.UserId";
+        const imageKey = "@Model.ImageKey";
+        const courseId = "@Model.Course?.CourseId";
+
+        document.addEventListener("DOMContentLoaded", () => loadModule(1));
 
         function extractMinutes(text) {
             const match = text.match(/(\d+)\s*min/);
@@ -685,14 +689,13 @@
             const content = document.getElementById("courseContent");
             content.innerHTML = "";
 
-            let totalMinutes = 0;
             const section = modules[moduleNumber];
-
             if (!section) {
                 content.innerHTML = "<p>Module not found.</p>";
                 return;
             }
 
+            let totalMinutes = 0;
             const sectionEl = document.createElement("div");
             sectionEl.className = "module-section";
 
@@ -700,8 +703,7 @@
             header.className = "module-header";
             header.innerHTML = `
                 <div class="module-title">
-                    <i class="fas fa-chevron-down"></i>
-                    ${section.title}
+                    <i class="fas fa-chevron-down"></i> ${section.title}
                 </div>
                 <div class="module-stats">
                     <span>${Math.round(section.percentage)}% Complete</span>
@@ -719,14 +721,12 @@
                 const lessonButton = document.createElement("button");
                 lessonButton.className = `lesson-button ${lesson.completed ? 'completed' : ''}`;
                 lessonButton.type = "button";
-                lessonButton.setAttribute('data-lesson-id', lesson.lessonId);
+                lessonButton.dataset.lessonId = lesson.lessonId;
                 lessonButton.onclick = () => openLesson(lesson.lessonId);
 
                 lessonButton.innerHTML = `
                     <div class="lesson-content">
-                        <div class="lesson-icon">
-                            <i class="fas ${lesson.completed ? 'fa-check' : 'fa-play'}"></i>
-                        </div>
+                        <div class="lesson-icon"><i class="fas ${lesson.completed ? 'fa-check' : 'fa-play'}"></i></div>
                         <div class="lesson-text">${lesson.text}</div>
                         ${lesson.completed ? '<div class="completion-badge"><i class="fas fa-check"></i> Completed</div>' : ''}
                     </div>
@@ -734,12 +734,13 @@
 
                 lessonEl.appendChild(lessonButton);
                 lessonsContainer.appendChild(lessonEl);
+
                 totalMinutes += extractMinutes(lesson.text);
             });
 
             header.addEventListener("click", () => {
                 lessonsContainer.classList.toggle("hidden");
-                const icon = header.querySelector('.fa-chevron-down');
+                const icon = header.querySelector('.fa-chevron-down, .fa-chevron-right');
                 icon.classList.toggle('fa-chevron-down');
                 icon.classList.toggle('fa-chevron-right');
             });
@@ -750,13 +751,12 @@
 
             document.getElementById("durationDisplay").textContent = `Total duration: ${totalMinutes} minutes`;
 
-            // Update active sidebar item
             document.querySelectorAll(".module-item").forEach((li, idx) => {
                 li.classList.toggle("active", idx + 1 === moduleNumber);
             });
         }
 
-                async function openLesson(lessonId) {
+        async function openLesson(lessonId) {
             const popup = document.getElementById("lessonPopup");
             const content = document.getElementById("lessonContent");
             content.innerHTML = "<p><i class='fas fa-spinner fa-spin'></i> Loading...</p>";
@@ -770,116 +770,118 @@
                     }
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
                 const data = await response.json();
+                const { lesson, quiz, hasQuiz, hasAssignment, assignmentId } = data;
 
-                // Debug: Log chi tiết response
-                console.log("Raw response:", data);
-                console.log("Response type:", typeof data);
-                console.log("Is array:", Array.isArray(data));
-                console.log("Response length:", data?.length);
-
-                if (data && data.length > 0) {
-                    console.log("First item:", data[0]);
-                    console.log("First item keys:", Object.keys(data[0]));
-                }
-
-                // Kiểm tra xem có phải là quiz không
-                const isQuiz = Array.isArray(data) && data.length > 0 &&
-                              (data[0].questionText || data[0].QuestionText);
-
-                console.log("Is quiz:", isQuiz);
-
-                if (isQuiz) {
-                    renderQuiz(data, lessonId);
-                } else if (data && (data.title || data.videoLink || data.documentLink)) {
-                    renderDocOrVideo(data, lessonId);
+                // ✅ Kiểm tra và gọi đúng thứ tự
+                if (hasAssignment) {
+                    renderAssignmentPopup(lesson, assignmentId, lessonId);
+                } else if (hasQuiz) {
+                    renderQuiz(quiz, lessonId, lesson);
                 } else {
-                    console.error("Unexpected data structure:", data);
-                    content.innerHTML = `
-                        <p>No content available for this lesson.</p>
-                        <pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px; overflow-x: auto;">
-                            Debug info: ${JSON.stringify(data, null, 2)}
-                        </pre>
-                    `;
+                    renderDocOrVideo(lesson, lessonId, true);
                 }
+
             } catch (error) {
-                console.error('Error loading lesson:', error);
                 content.innerHTML = `<p style="color: red;">Failed to load lesson: ${error.message}</p>`;
             }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function renderLessonMaterials(lesson) {
+            let html = '';
+
+            if (lesson.description) html += `<p>${lesson.description}</p>`;
+            if (lesson.videoLink) {
+                const embedUrl = lesson.videoLink.replace("watch?v=", "embed/");
+                html += `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
+            }
+            if (lesson.documentLink) {
+                const docLink = lesson.documentLink + (imageKey ? `?${imageKey}` : '');
+                html += `<a href="${docLink}" target="_blank"><i class="fas fa-file-alt"></i> View Document</a>`;
+            }
+
+            return html;
         }
 
-        function renderQuiz(questions, lessonId) {
+        function renderAssignmentPopup(lesson, assignmentId, lessonId) {
+            const content = document.getElementById("lessonContent");
+            document.getElementById("lessonTitle").textContent = lesson?.title || 'Lesson with Assignment';
+
+            let html = '<div class="assignment-lesson-container">';
+            html += renderLessonMaterials(lesson);
+            html += `
+            <hr>
+            <div class="assignment-info">
+                <h3><i class="fas fa-tasks"></i> Assignment Available</h3>
+                <p>This lesson includes an assignment. Please choose how you'd like to proceed:</p>
+                <div class="assignment-actions" style="display: flex; justify-content: space-between; gap: 10px;">
+                    <button type="button" class="action-button assignment-button" onclick="goToAssignment(${assignmentId || lessonId})">
+                        <i class="fas fa-pencil-alt"></i> Do Assignment Now
+                    </button>
+                    <button type="button" class="action-button schedule-button" onclick="goToSchedule(${assignmentId || lessonId})">
+                        <i class="fas fa-calendar-alt"></i> Schedule Assignment
+                    </button>
+                </div>
+            </div>`;
+
+            content.innerHTML = html;
+        }
+
+        function renderQuiz(questions, lessonId, lesson) {
             const content = document.getElementById("lessonContent");
             document.getElementById("lessonTitle").textContent = "Quiz";
 
-            // Debug: Log dữ liệu để kiểm tra
-            console.log("Questions received:", questions);
-            console.log("First question:", questions[0]);
-
             let html = '<div class="quiz-container">';
+            html += renderLessonMaterials(lesson);
+            html += '<hr><h3>Quiz Questions</h3>';
 
             questions.forEach((question, qIdx) => {
-                console.log(`Processing question ${qIdx}:`, question);
-
-                html += `
-                    <div class="quiz-question">
-                        <div class="question-text">${qIdx + 1}. ${question.questionText || question.QuestionText || 'No question text'}</div>
-                `;
-
-                const inputType = (question.questionType === "MultipleChoice" || question.QuestionType === "MultipleChoice") ? "checkbox" : "radio";
+                const qText = question.questionText || question.QuestionText || 'No question text';
+                const inputType = (question.questionType || question.QuestionType) === "MultipleChoice" ? "checkbox" : "radio";
                 const nameAttr = inputType === "checkbox" ? `q${qIdx}[]` : `q${qIdx}`;
+                const answers = question.answers || question.Answers || question.options || question.Options || [];
 
-                // Thử nhiều cách để truy cập answers
-                let answers = question.answers || question.Answers || question.options || question.Options || [];
-
-                console.log(`Answers for question ${qIdx}:`, answers);
-
-                if (answers && Array.isArray(answers) && answers.length > 0) {
+                html += `<div class="quiz-question"><div class="question-text">${qIdx + 1}. ${qText}</div>`;
+                if (answers.length > 0) {
                     answers.forEach((answer, aIdx) => {
-                        console.log(`Processing answer ${aIdx}:`, answer);
-
-                        // Thử nhiều property names khác nhau
-                        const answerText = answer.text || answer.Text || answer.answerText || answer.AnswerText || answer.content || answer.Content || `Answer ${aIdx + 1}`;
-                        const answerId = answer.answerId || answer.AnswerId || answer.id || answer.Id || aIdx;
-
-                        // Escape HTML để tránh browser hiểu nhầm là HTML tags
-                        const escapedAnswerText = escapeHtml(answerText);
-
+                        const answerText = answer.text || answer.Text || answer.answerText || answer.AnswerText || `Answer ${aIdx + 1}`;
+                        const answerId = answer.answerId || answer.AnswerId || aIdx;
                         html += `
                             <div class="answer-option">
                                 <label class="answer-label">
                                     <input type="${inputType}" name="${nameAttr}" value="${answerId}">
-                                    <span>${escapedAnswerText}</span>
+                                    <span>${escapeHtml(answerText)}</span>
                                 </label>
                             </div>
                         `;
                     });
                 } else {
-                    console.error(`No valid answers found for question ${qIdx}:`, question);
-                    html += '<p style="color: red; font-style: italic;">No answer options available for this question.</p>';
+                    html += '<p style="color: red;">No answer options.</p>';
                 }
-
                 html += '</div>';
             });
 
-            html += `
-                <button type="button" class="action-button submit-button" onclick="submitQuiz(${lessonId})">
-                    <i class="fas fa-paper-plane"></i>
-                    Submit Quiz
-                </button>
-            </div>`;
+            html += `<button type="button" class="action-button submit-button" onclick="submitQuiz(${lessonId})">
+                        <i class="fas fa-paper-plane"></i> Submit Quiz
+                     </button></div>`;
 
-            console.log("Final HTML:", html);
+            content.innerHTML = html;
+        }
+
+        function renderDocOrVideo(lesson, lessonId, showCompleteButton = false) {
+            const content = document.getElementById("lessonContent");
+            document.getElementById("lessonTitle").textContent = lesson?.title || 'Lesson';
+
+            let html = renderLessonMaterials(lesson);
+
+            if (showCompleteButton) {
+                html += `<button type="button" class="action-button" onclick="markLessonCompleted(${lessonId})">
+                            <i class="fas fa-check"></i> Mark as Completed
+                         </button>`;
+            }
+
             content.innerHTML = html;
         }
 
@@ -887,7 +889,6 @@
             try {
                 const selectedInputs = Array.from(document.querySelectorAll("#lessonContent input:checked"));
                 const answerIds = selectedInputs.map(input => parseInt(input.value));
-
                 const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
                 const response = await fetch(`?handler=SubmitQuiz`, {
@@ -896,92 +897,38 @@
                         "Content-Type": "application/json",
                         "RequestVerificationToken": token
                     },
-                    body: JSON.stringify({
-                        userId: userId,
-                        lessonId: lessonId,
-                        answerIds: answerIds
-                    })
+                    body: JSON.stringify({ userId, lessonId, answerIds })
                 });
 
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${text}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const result = await response.json();
+                alert(result.isPassed
+                    ? `🎉 You passed the quiz with ${result.score} points!`
+                    : `❌ You failed. Score: ${result.score}. Try again!`);
 
-                if (result.success) {
-                    const message = result.isPassed
-                        ? `🎉 Congratulations! You passed the quiz with ${result.score} points!`
-                        : `❌ You didn't pass this time. You scored ${result.score} points. Try again!`;
-
-                    alert(message);
-
-                    if (result.isPassed) {
-                        updateLessonCompletionStatus(lessonId, true);
-                    }
-
-                    closePopup();
-                } else {
-                    alert("Failed to submit quiz: " + (result.error || "Unknown error"));
-                }
-
-            } catch (error) {
-                console.error("Error submitting quiz:", error);
-                alert("Failed to submit quiz: " + error.message);
+                if (result.isPassed) updateLessonCompletionStatus(lessonId, true);
+                closePopup();
+            } catch (e) {
+                alert("Quiz submission failed: " + e.message);
             }
-        }
-
-        function renderDocOrVideo(lesson, lessonId) {
-            const content = document.getElementById("lessonContent");
-            document.getElementById("lessonTitle").textContent = lesson.title || 'Lesson';
-
-            let html = '';
-
-            if (lesson.description) {
-                html += `<p>${lesson.description}</p>`;
-            }
-
-            if (lesson.videoLink) {
-                let embedUrl = lesson.videoLink.replace("watch?v=", "embed/");
-                html += `<iframe src="${embedUrl}" allowfullscreen></iframe>`;
-            }
-                    const key = "@Model.ImageKey";
-                    const docLink = lesson.documentLink?.[key];
-            if (lesson.documentLink) {
-                html += `<a href="${docLink}" target="_blank">
-                    <i class="fas fa-file-alt"></i>
-                    View Document
-                </a>`;
-            }
-
-            html += `
-                <button type="button" class="action-button" onclick="markLessonCompleted(${lessonId})">
-                    <i class="fas fa-check"></i>
-                    Mark as Completed
-                </button>
-            `;
-
-            content.innerHTML = html;
         }
 
         async function markLessonCompleted(lessonId) {
             try {
-                const payload = {
-                    userId: userId,
-                    lessonId: lessonId,
-                    completedAt: new Date().toISOString(),
-                    mark: 100,
-                    isPassed: true
-                };
-
                 const response = await fetch(`?handler=CompleteLesson`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        userId,
+                        lessonId,
+                        completedAt: new Date().toISOString(),
+                        mark: 100,
+                        isPassed: true
+                    })
                 });
 
                 const result = await response.json();
@@ -991,113 +938,68 @@
                     updateLessonCompletionStatus(lessonId, true);
                     closePopup();
                 } else {
-                    alert("Failed to mark lesson as completed: " + (result.error || "Unknown error"));
+                    alert("Failed to complete lesson: " + (result.error || "Unknown error"));
                 }
             } catch (error) {
-                console.error('Error completing lesson:', error);
-                alert("Failed to complete lesson: " + error.message);
+                alert("Error completing lesson: " + error.message);
             }
         }
 
         function updateLessonCompletionStatus(lessonId, isCompleted) {
-            const lessonButtons = document.querySelectorAll('.lesson-button');
+            document.querySelectorAll('.lesson-button').forEach(button => {
+                if (parseInt(button.dataset.lessonId) === lessonId) {
+                    button.classList.toggle('completed', isCompleted);
+                    const icon = button.querySelector('.lesson-icon i');
+                    icon.className = `fas ${isCompleted ? 'fa-check' : 'fa-play'}`;
 
-            lessonButtons.forEach(button => {
-                const buttonLessonId = getLessonIdFromButton(button);
-
-                if (buttonLessonId === lessonId) {
-                    if (isCompleted) {
-                        button.classList.add('completed');
-                        const icon = button.querySelector('.lesson-icon i');
-                        const badge = button.querySelector('.completion-badge');
-
-                        if (icon) {
-                            icon.className = 'fas fa-check';
-                        }
-
-                        if (!badge) {
-                            const lessonContent = button.querySelector('.lesson-content');
-                            lessonContent.innerHTML += '<div class="completion-badge"><i class="fas fa-check"></i> Completed</div>';
-                        }
-                    } else {
-                        button.classList.remove('completed');
-                        const icon = button.querySelector('.lesson-icon i');
-                        const badge = button.querySelector('.completion-badge');
-
-                        if (icon) {
-                            icon.className = 'fas fa-play';
-                        }
-
-                        if (badge) {
-                            badge.remove();
-                        }
+                    const badge = button.querySelector('.completion-badge');
+                    if (isCompleted && !badge) {
+                        button.querySelector('.lesson-content').insertAdjacentHTML('beforeend', '<div class="completion-badge"><i class="fas fa-check"></i> Completed</div>');
+                    } else if (!isCompleted && badge) {
+                        badge.remove();
                     }
                 }
             });
 
-            updateModulesData(lessonId, isCompleted);
-        }
-
-        function getLessonIdFromButton(button) {
-            const lessonId = button.getAttribute('data-lesson-id');
-            if (lessonId) {
-                return parseInt(lessonId);
-            }
-
-            const onclickStr = button.getAttribute('onclick') || button.onclick?.toString() || '';
-            const match = onclickStr.match(/openLesson\((\d+)\)/);
-            return match ? parseInt(match[1]) : null;
-        }
-
-        function updateModulesData(lessonId, isCompleted) {
-            Object.keys(modules).forEach(moduleKey => {
-                const module = modules[moduleKey];
-                if (module.lessons) {
-                    const lesson = module.lessons.find(l => l.lessonId === lessonId);
-                    if (lesson) {
-                        lesson.completed = isCompleted;
-                    }
-                }
+            Object.values(modules).forEach(module => {
+                const lesson = module.lessons.find(l => l.lessonId === lessonId);
+                if (lesson) lesson.completed = isCompleted;
             });
         }
 
         function closePopup() {
-            document.getElementById("lessonPopup").classList.remove("show");
+            const popup = document.getElementById("lessonPopup");
+            popup.classList.remove("show");
             document.getElementById("lessonContent").innerHTML = "";
             document.getElementById("lessonTitle").textContent = "Lesson Content";
         }
 
-        // Initialize the page
-        document.addEventListener("DOMContentLoaded", function () {
-            // Add CSRF token for POST requests if not already present
-            if (!document.querySelector('input[name="__RequestVerificationToken"]')) {
-                const tokenInput = document.createElement('input');
-                tokenInput.type = 'hidden';
-                tokenInput.name = '__RequestVerificationToken';
-                tokenInput.value = '@Html.AntiForgeryToken()';
-                document.body.appendChild(tokenInput);
-            }
+        function goToAssignment(assignmentId) {
+            window.location.href = `/DoAssignment/${assignmentId}`;
+        }
 
-            loadModule(1);
+        function goToSchedule(assignmentId) {
+            window.location.href = `/RegistSchedule/${courseId}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById("lessonPopup").addEventListener("click", function (e) {
+            if (e.target === this) closePopup();
         });
 
-        // Close popup when clicking outside
-        document.getElementById("lessonPopup").addEventListener("click", function(e) {
-            if (e.target === this) {
-                closePopup();
-            }
-        });
-
-        // Add smooth scrolling for better UX
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
             });
         });
     </script>
+
 
     @Html.AntiForgeryToken()
 </body>

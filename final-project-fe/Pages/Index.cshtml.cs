@@ -3,6 +3,7 @@ using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Comment;
 using final_project_fe.Dtos.Post;
 using final_project_fe.Dtos.Users;
+using final_project_fe.Dtos.WorkShop;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -53,7 +54,7 @@ namespace final_project_fe.Pages
         public string BaseUrl { get; set; }
         public string CurrentUserId { get; set; }
         public int currentPage { get; set; }
-
+        public PageResult<WorkShopDto>? WorkShops { get; set; } 
         //Search Post
         public async Task<IActionResult> OnGetSearchPostAsync()
         {
@@ -124,7 +125,7 @@ namespace final_project_fe.Pages
             string postFileApiUrl = $"{_apiSettings.BaseUrl}/PostFile";
 
             string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category?";
-
+            string workshopApiUrl = $"{_apiSettings.BaseUrl}/WorkShop";
 
             try
             {
@@ -208,6 +209,34 @@ namespace final_project_fe.Pages
 
                 // 1️ Gọi API lấy danh sách Posts
                 HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
+				if (postsResponse.IsSuccessStatusCode)
+				{
+					string postsJsonResponse = await postsResponse.Content.ReadAsStringAsync();
+					Posts = JsonSerializer.Deserialize<PageResult<PostDto>>(postsJsonResponse, new JsonSerializerOptions
+					{
+						PropertyNameCaseInsensitive = true
+					}) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
+				}
+				else
+				{
+					_logger.LogError($"Lỗi API Post: {postsResponse.StatusCode}");
+					return;
+				}
+                // API danh sach WorkShop"
+                HttpResponseMessage workshopResponse = await _httpClient.GetAsync(workshopApiUrl);
+                if (workshopResponse.IsSuccessStatusCode)
+                {
+                    string workshopJsonResponse = await workshopResponse.Content.ReadAsStringAsync();
+                    WorkShops = JsonSerializer.Deserialize<PageResult<WorkShopDto>>(workshopJsonResponse, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    }) ?? new PageResult<WorkShopDto>(new List<WorkShopDto>(), 0, 1, 10);
+                }
+                else
+                {
+                    _logger.LogError($"Lỗi API Post: {postsResponse.StatusCode}");
+                    return;
+                }
                 if (postsResponse.IsSuccessStatusCode)
                 {
                     string postsJsonResponse = await postsResponse.Content.ReadAsStringAsync();
@@ -240,6 +269,7 @@ namespace final_project_fe.Pages
                 var userTasks = new List<Task>();
                 var postFileTasks = new List<Task>();
                 var commentTasks = new List<Task>();
+
 
                 foreach (var post in Posts.Items)
                 {
@@ -333,16 +363,17 @@ namespace final_project_fe.Pages
                                     }
                                 });
 
-                                await Task.WhenAll(commentUserTasks);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError($"Lỗi khi lấy comments {post.PostId}: {ex.Message}");
-                        }
-                    }));
-                }
+								await Task.WhenAll(commentUserTasks);
+							}
+						}
+						catch (Exception ex)
+						{
+							_logger.LogError($"Lỗi khi lấy comments {post.PostId}: {ex.Message}");
+						}
 
+					}));
+				}
+                                
                 // 3️ Chờ tất cả các task hoàn thành
                 await Task.WhenAll(userTasks);
                 await Task.WhenAll(postFileTasks);

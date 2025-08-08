@@ -122,7 +122,7 @@ namespace final_project_fe.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return RedirectToPage("/Index");
+                    return RedirectToPage("/Logout");
                 }
 
                 _logger.LogError($"Lỗi API Đăng Ký: {response.StatusCode}");
