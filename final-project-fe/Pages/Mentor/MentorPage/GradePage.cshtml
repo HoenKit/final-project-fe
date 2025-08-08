@@ -1,0 +1,617 @@
+﻿@page
+@model final_project_fe.Pages.Mentor.MentorPage.GradePageModel
+@{
+    ViewData["Title"] = "Assignment scoring";
+}
+
+<style>
+    :root {
+        --primary-black: #000000;
+        --soft-black: #1a1a1a;
+        --medium-gray: #404040;
+        --light-gray: #e5e5e5;
+        --white: #ffffff;
+        --hover-gray: #f8f9fa;
+        --border-gray: #dee2e6;
+    }
+
+    body {
+        background-color: var(--white);
+        color: var(--primary-black);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--primary-black) 0%, var(--soft-black) 100%);
+        color: var(--white);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+        letter-spacing: 0.5px;
+    }
+
+    .assignment-selector {
+        background: var(--white);
+        border: 2px solid var(--border-gray);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+        .assignment-selector:hover {
+            border-color: var(--medium-gray);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--primary-black);
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .form-select {
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-gray);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: var(--white);
+        color: var(--primary-black);
+    }
+
+        .form-select:focus {
+            border-color: var(--primary-black);
+            box-shadow: 0 0 0 0.2rem rgba(0,0,0,0.15);
+            outline: none;
+        }
+
+    .question-display {
+        background: var(--hover-gray);
+        border: 1px solid var(--border-gray);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .question-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-black);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-gray);
+    }
+
+    .question-content {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 1.5rem;
+        color: var(--primary-black);
+        line-height: 1.6;
+    }
+
+    .submissions-table {
+        background: var(--white);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        border: 1px solid var(--border-gray);
+    }
+
+    .table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .table thead th {
+            background: var(--primary-black);
+            color: var(--white);
+            font-weight: 600;
+            padding: 1.25rem 1rem;
+            border: none;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: var(--hover-gray);
+            }
+
+            .table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    .student-name {
+        font-weight: 600;
+        color: var(--primary-black);
+    }
+
+    .submission-content {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--medium-gray);
+        line-height: 1.5;
+    }
+
+    .form-control {
+        border: 2px solid var(--border-gray);
+        border-radius: 6px;
+        padding: 0.75rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-align: center;
+        font-weight: 600;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-black);
+            box-shadow: 0 0 0 0.2rem rgba(0,0,0,0.15);
+            outline: none;
+        }
+
+    .btn-grade {
+        background: var(--primary-black);
+        color: var(--white);
+        border: 2px solid var(--primary-black);
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+        .btn-grade:hover:not(:disabled) {
+            background: var(--white);
+            color: var(--primary-black);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-grade:disabled {
+            background: var(--medium-gray);
+            border-color: var(--medium-gray);
+            color: var(--white);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+    .alert-warning {
+        background: var(--hover-gray);
+        color: var(--primary-black);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .alert-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--white);
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 0.5rem;
+    }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .graded-row {
+        background-color: var(--hover-gray) !important;
+        opacity: 0.8;
+    }
+
+    .submission-link {
+        cursor: pointer;
+        color: var(--medium-gray);
+        transition: color 0.2s ease;
+        text-decoration: none;
+    }
+
+        .submission-link:hover {
+            color: var(--primary-black);
+            text-decoration: underline;
+        }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background-color: var(--white);
+        margin: 5% auto;
+        padding: 0;
+        border: none;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 80vh;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        animation: modalSlideIn 0.3s ease;
+        overflow: hidden;
+    }
+
+    @@keyframes modalSlideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .modal-header {
+        background: var(--primary-black);
+        color: var(--white);
+        padding: 1.5rem 2rem;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: var(--white);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+        .close-btn:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+    .modal-body {
+        padding: 2rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        line-height: 1.6;
+        color: var(--primary-black);
+        font-size: 1rem;
+    }
+
+    .student-info {
+        background: var(--hover-gray);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-black);
+    }
+
+        .student-info strong {
+            color: var(--primary-black);
+        }
+
+    @@media (max-width: 768px) {
+        .page-title
+
+    {
+        font-size: 1.5rem;
+    }
+
+    .assignment-selector,
+    .question-display {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+
+        .table thead th,
+        .table tbody td {
+            padding: 1rem 0.75rem;
+        }
+
+    .submission-content {
+        max-width: 200px;
+    }
+
+    }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">Chấm điểm Assignment</h1>
+    </div>
+</div>
+
+<!-- Modal for viewing full submission -->
+<div id="submissionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Câu trả lời chi tiết</h3>
+            <button class="close-btn" onclick="closeSubmissionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="student-info">
+                <strong>Học viên:</strong> <span id="modalStudentName"></span>
+            </div>
+            <div id="modalSubmissionContent"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="assignment-selector">
+        <form method="get">
+            <div class="mb-3">
+                <label for="assignmentSelect" class="form-label">Chọn Assignment:</label>
+                <select id="assignmentSelect" name="SelectedAssignmentId" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Chọn Assignment --</option>
+                    @foreach (var assignment in Model.Assignments)
+                    {
+                        <option value="@assignment.AssignmentId" selected="@(assignment.AssignmentId == Model.SelectedAssignmentId ? "selected" : null)">
+                            @assignment.Title
+                        </option>
+                    }
+                </select>
+            </div>
+        </form>
+    </div>
+
+    @if (Model.SelectedAssignmentId.HasValue)
+    {
+        var selectedAssignment = Model.Assignments.FirstOrDefault(a => a.AssignmentId == Model.SelectedAssignmentId);
+        if (selectedAssignment != null)
+        {
+            <div class="question-display">
+                <h3 class="question-title">Assignment Questions</h3>
+                <div class="question-content">
+                    @Html.Raw(selectedAssignment.Content)
+                </div>
+            </div>
+        }
+    }
+
+    @if (Model.Submissions != null && Model.Submissions.Any())
+    {
+        <div class="submissions-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Learner's Answer</th>
+                        <th style="width: 120px;">
+                            Mark
+                        </th>
+                        <th style="width: 150px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Submissions.Count; i++)
+                    {
+                        var sub = Model.Submissions[i];
+                        var assignment = Model.Assignments.FirstOrDefault(a => a.AssignmentId == sub.AssignmentId);
+                        var question = assignment?.Content ?? "";
+                        var lessonId = assignment?.LessonId ?? 0;
+
+                        <tr id="row-@i">
+                            <td>
+                                <div class="student-name">@sub.FirstName @sub.LastName</div>
+                            </td>
+                            <td>
+                                <div class="submission-content submission-link"
+                                     title="Click to view full answer"
+                                     onclick='showSubmissionModal(@Html.Raw(Json.Serialize($"{sub.FirstName} {sub.LastName}")), @Html.Raw(Json.Serialize(sub.Content)))'>
+                                    @sub.Content
+                                </div>
+                            </td>
+                            <td>
+                                <input type="number" id="mark-@i" class="form-control" min="0" max="10" step="0.1" placeholder="0.0" required />
+                            </td>
+                            <td>
+                                <button type="button"
+                                        class="btn-grade"
+                                        onclick="submitGrade(@i, '@sub.UserId', @sub.AssignmentId, @lessonId)">
+                                    <span class="loading-spinner" id="spinner-@i"></span>
+                                    <span id="btn-text-@i">Score</span>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (Model.SelectedAssignmentId.HasValue)
+    {
+        <div class="alert-warning">
+            <span class="alert-icon">⚠</span>
+            No submissions for this assignment.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const baseUrl = "@Model.BaseUrl";
+        const accessToken = "@Model.AccessToken";
+
+                async function submitGrade(index, userId, SelectedAssignmentId, lessonId) {
+            const markInput = document.getElementById(`mark-${index}`);
+            const mark = markInput.value;
+            const button = document.querySelector(`#row-${index} .btn-grade`);
+            const spinner = document.getElementById(`spinner-${index}`);
+            const buttonText = document.getElementById(`btn-text-${index}`);
+
+            if (!mark) {
+                showNotification("Please enter the score.", "warning");
+                markInput.focus();
+                return;
+            }
+
+            // Show loading state
+            button.disabled = true;
+            spinner.style.display = 'inline-block';
+            buttonText.textContent = 'Grading...';
+
+            const data = {
+                userId: userId,
+                lessonId: lessonId,
+                assignmentId: SelectedAssignmentId,
+                mark: parseFloat(mark),
+                isPassed: true
+            };
+
+            try {
+                const response = await fetch(`${baseUrl}/Learning/grade`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const row = document.getElementById(`row-${index}`);
+                    row.classList.add('graded-row');
+
+                    buttonText.textContent = 'Graded';
+                    markInput.disabled = true;
+
+                    showNotification("Grading successful!", "success");
+                } else {
+                    button.disabled = false;
+                    buttonText.textContent = 'Grade';
+
+                    const errorText = await response.text();
+                    showNotification("Grading failed: " + errorText, "error");
+                }
+            } catch (error) {
+                button.disabled = false;
+                buttonText.textContent = 'Grade';
+
+                console.error("Error:", error);
+                showNotification("An error occurred while submitting the data.", "error");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+
+        // Add enter key support for grade input
+        document.addEventListener('DOMContentLoaded', function() {
+            const markInputs = document.querySelectorAll('input[id^="mark-"]');
+            markInputs.forEach((input, index) => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const button = document.querySelector(`#row-${index} .btn-grade`);
+                        if (button && !button.disabled) {
+                            button.click();
+                        }
+                    }
+                });
+            });
+        });
+
+        // Modal functions
+        function showSubmissionModal(studentName, submissionContent) {
+            document.getElementById('modalStudentName').textContent = studentName;
+            document.getElementById('modalSubmissionContent').innerHTML = submissionContent;
+            document.getElementById('submissionModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSubmissionModal() {
+            document.getElementById('submissionModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('submissionModal');
+            if (event.target === modal) {
+                closeSubmissionModal();
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeSubmissionModal();
+            }
+        });
+    </script>
+}

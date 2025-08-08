@@ -2,6 +2,7 @@
 @using System.Security.Claims
 @{
 	var roles = new List<string>();
+	decimal userPoints = 0;
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
 	if (!string.IsNullOrEmpty(token))
@@ -12,6 +13,21 @@
 					.Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
 					.Select(c => c.Value)
 					.ToList();
+
+		var pointsClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "points");
+		if (pointsClaim != null)
+		{
+			var pointsValue = pointsClaim.Value;
+
+			// Thêm debug này để xem chính xác
+			var debugInfo = $"pointsValue: '{pointsValue}' | IsNull: {pointsValue == null} | IsEmpty: {string.IsNullOrEmpty(pointsValue)} | Length: {pointsValue?.Length ?? -1}";
+
+			// Sau đó parse
+			if (pointsValue != null && decimal.TryParse(pointsValue, out var points))
+			{
+				userPoints = points;
+			}
+		}
 	}
 
 	bool isMentor = roles.Contains("Mentor");
@@ -282,10 +298,16 @@
 					</li>
 				</ul>
 				<div class="user-img" id="userImg">
-					<img src="images/resources/admin.jpg" alt="">
+					<img src="~/images/fav_icon.png" alt="">
 					<div class="custom-user-menu" id="userMenu">
 						@if (isAuthenticated)
 						{
+							@* <text>
+								<a asp-page="#" id="userPointsLink">
+									<i class="bi bi-p-circle"></i>
+									<span id="userPoints">@userPoints.ToString("N0")</span>
+								</a>
+							</text> *@
 							if (!isMentor)
 							{
 								<text>
@@ -489,7 +511,6 @@
 			});
 		});
 	</script>
-
 
 	@await RenderSectionAsync("Scripts", required: false)
 </body>

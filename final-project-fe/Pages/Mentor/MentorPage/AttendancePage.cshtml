@@ -295,8 +295,8 @@
 
 <div class="attendance-container">
     <div class="page-header">
-        <h2>📋 Điểm Danh Sinh Viên</h2>
-        <p>Quản lý điểm danh cho các assignment của bạn</p>
+        <h2> 📋 Student Attendance </h2>
+        <p>Manage attendance for your assignments</p>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -307,12 +307,12 @@
     }
 
     <div class="form-card">
-        <h3 style="margin-top: 0; color: #2c3e50; margin-bottom: 20px;">🎯 Chọn Assignment</h3>
+        <h3 style="margin-top: 0; color: #2c3e50; margin-bottom: 20px;">🎯 Select Assignment</h3>
         <form method="post" asp-page-handler="Load">
             <div class="form-group">
                 <label for="assignmentSelect" class="form-label">Assignment:</label>
                 <select id="assignmentSelect" name="SelectedAssignmentId" class="form-select" required>
-                    <option value="">-- Chọn Assignment để điểm danh --</option>
+                    <option value="">-- Select Assignment to check in --</option>
                     @foreach (var assignment in Model.Assignments)
                     {
                         var selected = Model.SelectedAssignmentId == assignment.AssignmentId ? "selected" : "";
@@ -324,7 +324,7 @@
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">
-                📥 Tải danh sách sinh viên
+                📥 Download student list
             </button>
         </form>
     </div>
@@ -333,12 +333,12 @@
     {
         <div class="stats-card">
             <div class="stats-number">@Model.NotPresentUsers.Count</div>
-            <div class="stats-label">sinh viên chưa được điểm danh</div>
+            <div class="stats-label">Students not yet taken attendance</div>
         </div>
 
         <div class="attendance-table">
             <div class="table-header">
-                <h3>👥 Danh Sách Sinh Viên Chưa Điểm Danh</h3>
+                <h3>👥 List of Students Not Attending</h3>
             </div>
             
             <form method="post" asp-page-handler="Mark">
@@ -347,8 +347,8 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width: 70%;">👤 Sinh Viên</th>
-                            <th style="width: 30%; text-align: center;">✅ Điểm Danh</th>
+                            <th style="width: 70%;">👤 Learner</th>
+                            <th style="width: 30%; text-align: center;">✅ Attendance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -371,7 +371,7 @@
                 
                 <div class="table-actions">
                     <button type="submit" class="btn btn-success">
-                        ✅ Điểm danh các sinh viên đã chọn
+                        ✅ Attendance
                     </button>
                 </div>
             </form>
@@ -382,8 +382,8 @@
         <div class="form-card">
             <div class="empty-state">
                 <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-                <h3 style="color: #28a745;">Tất cả sinh viên đã được điểm danh!</h3>
-                <p style="color: #6c757d;">Không có sinh viên nào cần điểm danh cho assignment này.</p>
+                <h3 style="color: #28a745;">All students have been checked in!</h3>
+                <p style="color: #6c757d;">There are no students to check in for this assignment.</p>
             </div>
         </div>
     }
@@ -409,12 +409,12 @@
         selectAllBtn.type = 'button';
         selectAllBtn.className = 'btn btn-outline-primary';
         selectAllBtn.style.marginRight = '10px';
-        selectAllBtn.innerHTML = '☑️ Chọn tất cả';
+        selectAllBtn.innerHTML = '☑️ Select All';
         selectAllBtn.onclick = function() {
             const checkboxes = document.querySelectorAll('input[name="SelectedUserIds"]');
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
             checkboxes.forEach(cb => cb.checked = !allChecked);
-            this.innerHTML = allChecked ? '☑️ Chọn tất cả' : '🔲 Bỏ chọn tất cả';
+            this.innerHTML = allChecked ? '☑️ Select All' : '🔲 Deselect All';
         };
 
         const tableActions = document.querySelector('.table-actions');

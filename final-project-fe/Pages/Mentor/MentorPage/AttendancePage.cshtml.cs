@@ -85,7 +85,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             if (string.IsNullOrEmpty(token))
             {
                 ModelState.AddModelError(string.Empty, "Token missing.");
-                return Page();
+                return RedirectToPage("/Login");
             }
 
             var client = _httpClientFactory.CreateClient();
@@ -117,7 +117,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         {
             BaseUrl = _apiSettings.BaseUrl;
             var token = Request.Cookies["AccessToken"];
-            if (string.IsNullOrEmpty(token)) return;
+            if (string.IsNullOrEmpty(token)) {
+                RedirectToPage("/Login"); 
+            }
+                
 
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
