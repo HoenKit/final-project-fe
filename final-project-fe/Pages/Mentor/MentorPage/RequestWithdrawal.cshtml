@@ -186,17 +186,17 @@
                             <input type="number"
                                    id="points"
                                    name="points"
-                                   min="1"
+                                   min="50"
                                    max="@Model.User?.Point"
                                    step="1"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                   placeholder="Enter points"
+                                   placeholder="Enter points (minimum 50)"
                                    required>
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <span class="text-gray-500 text-sm">points</span>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-500 mt-1">Maximum: @((Model.User?.Point ?? 0).ToString("N0")) points</p>
+                        <p class="text-sm text-gray-500 mt-1">Minimum: 50 points | Maximum: @((Model.User?.Point ?? 0).ToString("N0")) points</p>
                     </div>
 
                     <div>
@@ -224,7 +224,7 @@
                         <div>
                             <h4 class="font-medium text-blue-900">Important Notes:</h4>
                             <ul class="text-sm text-blue-800 mt-2 space-y-1">
-                                <li>• Minimum withdrawal amount is 1 point (1,000₫)</li>
+                                <li>• Minimum withdrawal amount is 50 points (50,000₫)</li>
                                 <li>• Processing time: 1-3 business days</li>
                             </ul>
                         </div>
@@ -525,8 +525,8 @@
                         updateAmount();
                     }
                     
-                    if (currentPoints < 1 && this.value !== '') {
-                        this.value = 1;
+                    if (currentPoints < 50 && this.value !== '') {
+                        this.value = 50;
                         updateAmount();
                     }
                 });
