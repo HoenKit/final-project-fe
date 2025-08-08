@@ -37,18 +37,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         [BindProperty(SupportsGet = true)]
         public int? SelectedAssignmentId { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             var token = Request.Cookies["AccessToken"];
             AccessToken = token;
             if (string.IsNullOrEmpty(token))
-                 RedirectToPage("/Login");
+                return RedirectToPage("/Login"); 
+
             await LoadAssignmentsAsync();
 
             if (SelectedAssignmentId.HasValue)
             {
                 await LoadSubmissionsAsync(SelectedAssignmentId.Value);
             }
+
+            return Page(); 
         }
 
         private async Task LoadAssignmentsAsync()
@@ -84,7 +87,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             var token = Request.Cookies["AccessToken"];
             AccessToken = token;
             if (string.IsNullOrEmpty(token)) 
-                return ;
+                RedirectToPage("/Login") ;
 
             var client = _httpClientFactory.CreateClient();
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Learning/submissions?assignmentId={assignmentId}");
