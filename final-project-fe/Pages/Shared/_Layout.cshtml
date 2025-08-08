@@ -31,6 +31,7 @@
 	}
 
 	bool isMentor = roles.Contains("Mentor");
+	bool isUser = roles.Contains("User");
 	bool isAdmin = roles.Contains("Admin");
 }
 <!DOCTYPE html>
@@ -201,7 +202,7 @@
 					</li>
 					@if (isMentor)
 					{
-						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+						<li >
 							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
 						</li>
 					}
@@ -209,6 +210,15 @@
 					{
 						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
 							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
+						</li>
+					}
+					@if (isUser && isMentor)
+					{
+						<li>
+							<a asp-page="/UserPage">My page</a>
+						</li>
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/CourseRecommend">Recommend Course</a>
 						</li>
 					}
 				</ul>
@@ -308,14 +318,19 @@
 									<span id="userPoints">@userPoints.ToString("N0")</span>
 								</a>
 							</text> *@
-							if (!isMentor)
+							if (isUser)
 							{
 								<text>
 									<a asp-page="/MentorRegulations"><i class="bi bi-person-vcard"></i> Become a Mentor</a>
 								</text>
 							}
 							<text>
-								<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+								@if(isUser && isMentor)
+								{
+									<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
+									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
+								}
 								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
 							</text>
 						}
