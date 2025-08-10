@@ -1,4 +1,4 @@
-using final_project_fe.Dtos.Mentors;
+﻿using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.WorkShop;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +35,34 @@ namespace final_project_fe.Pages
             public int? CurrentMentorId;
             public async Task<IActionResult> OnGetAsync(int id)
             {
-                BaseUrl = _apiSettings.BaseUrl;
+
+            //Lưu trang trước đấy
+            const string sessionKey = "PageHistory";
+            var history = HttpContext.Session.GetString(sessionKey);
+            List<string> pageHistory;
+
+            if (string.IsNullOrEmpty(history))
+            {
+                pageHistory = new List<string>();
+            }
+            else
+            {
+                pageHistory = JsonSerializer.Deserialize<List<string>>(history);
+            }
+
+            // Lấy URL hiện tại
+            var currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
+
+            // Chỉ thêm nếu khác trang cuối cùng
+            if (pageHistory.Count == 0 || pageHistory.Last() != currentUrl)
+            {
+                pageHistory.Add(currentUrl);
+            }
+
+            // Lưu lại vào session
+            HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
+
+            BaseUrl = _apiSettings.BaseUrl;
 
                 var token = Request.Cookies["AccessToken"];
                 string? userId = null;
