@@ -59,22 +59,26 @@ namespace final_project_fe.Pages
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }
 
-                // Step 1: Get current Mentor if userId is available
-                if (!string.IsNullOrEmpty(userId))
+            // Step 1: Get current Mentor if userId is available
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
+                if (mentorResponse.IsSuccessStatusCode)
                 {
-                    var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
-                    if (mentorResponse.IsSuccessStatusCode)
+                    var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+
+                    if (!string.IsNullOrWhiteSpace(mentorJson) && mentorJson != "null")
                     {
-                        var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
                         Mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         });
                     }
                 }
-                CurrentMentorId = Mentor?.MentorId;
-                // Step 2: Get Workshop by Id (this is always required)
-                var workshopResponse = await client.GetAsync($"{BaseUrl}/WorkShop/{id}");
+            }
+            CurrentMentorId = Mentor?.MentorId;
+            // Step 2: Get Workshop by Id (this is always required)
+            var workshopResponse = await client.GetAsync($"{BaseUrl}/WorkShop/{id}");
                 if (!workshopResponse.IsSuccessStatusCode)
                 {
                     ModelState.AddModelError(string.Empty, "Failed to retrieve workshop info.");
