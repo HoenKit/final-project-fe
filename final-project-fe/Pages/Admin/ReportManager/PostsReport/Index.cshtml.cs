@@ -70,7 +70,7 @@ namespace final_project_fe.Pages.Admin.ReportManager.PostsReport
             CurrentPage = pageNumber;
 
             string groupedUrl = $"{_apiSettings.BaseUrl}/ReportPost/grouped?page={pageNumber}";
-            string postApiUrl = $"{_apiSettings.BaseUrl}/Post/";
+            string postApiUrl = $"{_apiSettings.BaseUrl}/Post?pageSize=100";
 
             try
             {
