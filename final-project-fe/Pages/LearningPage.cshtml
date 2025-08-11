@@ -960,20 +960,20 @@
                 });
 
                 const result = await response.json();
+                if (result.success) {
+                    updateLessonCompletionStatus(lessonId, true);
+                    if (typeof closePopup === 'function') closePopup(); // ✅ Đóng ngay
 
-            if (result.success) {
-                updateLessonCompletionStatus(lessonId, true);
-                if (typeof closePopup === 'function') closePopup(); // ✅ Đóng ngay
-
-                const dialog = new ConfirmDialog();
-                dialog.show({
-                    type: 'success',
-                    title: 'Lesson Completed',
-                    message: '✅ Lesson marked as completed!',
-                    confirmText: 'OK',
-                    cancelText: 'Close'
-                });
-            } else {
+                    const dialog = new ConfirmDialog();
+                    dialog.show({
+                        type: 'success',
+                        title: 'Lesson Completed',
+                        message: '✅ Lesson marked as completed!',
+                        confirmText: 'OK',
+                        cancelText: 'Close'
+                    });
+                } else {
+                if (typeof closePopup === 'function') closePopup(); 
                 const dialog = new ConfirmDialog();
                 dialog.show({
                     type: 'danger',
