@@ -33,6 +33,7 @@ namespace final_project_fe.Pages
         public string UserId { get; set; }
         public bool IsPresented { get; set; } = true;
         public bool IsUserAssignmentCreated { get; set; } = false;
+        public bool IsAlreadyDone { get; set; } = false;
         public string BaseUrl { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -69,6 +70,15 @@ namespace final_project_fe.Pages
                     {
                         Assignment = existing;
                         IsPresented = existing.IsPresented;
+
+                        // 🚫 Nếu đã có content thì đánh dấu là đã làm xong
+                        if (!string.IsNullOrWhiteSpace(existing.Content))
+                        {
+                            IsAlreadyDone = true;
+                            shouldCreateAssignment = false; // Không tạo mới nữa
+                        }
+
+                        // ✅ Nếu chưa chấm điểm thì đánh dấu đã có UserAssignment
                         if (!existing.IsScored)
                         {
                             IsUserAssignmentCreated = true;
@@ -77,11 +87,11 @@ namespace final_project_fe.Pages
                     }
                 }
             }
-
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi kiểm tra UserAssignment.");
+                _logger.LogError(ex, "Error while checking UserAssignment.");
             }
+
             try
             {
                 var assignmentResponse = await _httpClient.GetAsync($"{BaseUrl}/Assignment/{id}");
@@ -94,7 +104,7 @@ namespace final_project_fe.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin Assignment.");
+                _logger.LogError(ex, "Error retrieving Exercise information.");
             }
 
             if (shouldCreateAssignment)
@@ -110,7 +120,7 @@ namespace final_project_fe.Pages
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Lỗi khi tạo UserAssignment.");
+                    _logger.LogError(ex, "Error creating UserAssignment.");
                 }
             }
 
@@ -126,14 +136,15 @@ namespace final_project_fe.Pages
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin người dùng.");
+                _logger.LogError(ex, "Error while getting user information.");
             }
 
             return Page();
         }
+
         public IActionResult OnGetErrorSubmit()
         {
-            TempData["ErrorMessage"] = "Nộp bài thất bại.";
+            TempData["ErrorMessage"] = "Submission failed.";
             return RedirectToPage("/DoAssignment", new { id = assignmentid });
         }
     }

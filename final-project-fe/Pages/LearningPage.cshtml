@@ -607,9 +607,15 @@
                     @Model.MentorFullName
                 </div>
                 <div>
-                    <a href="/UserCourse" class="back-button">
+                    <a href="/UserCourse" class="back-button" style="display:inline-block; margin-bottom: 10px;">
                         <i class="fas fa-arrow-left"></i>
                         Back to Courses
+                    </a>
+                </div>
+                <div>
+                    <a href="/Chatting?partnerId=@Model.MentorUserId" class="back-button">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        Chat With Mentor
                     </a>
                 </div>
             </div>
@@ -891,6 +897,16 @@
                 const answerIds = selectedInputs.map(input => parseInt(input.value));
                 const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
+                // Đóng popup quiz ngay lập tức (nếu là Bootstrap modal)
+                const quizModalEl = document.getElementById('quizModal');
+                if (quizModalEl) {
+                    const quizModal = bootstrap.Modal.getInstance(quizModalEl) || new bootstrap.Modal(quizModalEl);
+                    quizModal.hide();
+                } else {
+                    // Nếu dùng hàm custom
+                    if (typeof closePopup === 'function') closePopup();
+                }
+
                 const response = await fetch(`?handler=SubmitQuiz`, {
                     method: "POST",
                     headers: {
@@ -903,12 +919,24 @@
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const result = await response.json();
-                alert(result.isPassed
-                    ? `🎉 You passed the quiz with ${result.score} points!`
-                    : `❌ You failed. Score: ${result.score}. Try again!`);
 
-                if (result.isPassed) updateLessonCompletionStatus(lessonId, true);
-                closePopup();
+                const dialog = new ConfirmDialog();
+                dialog.show({
+                    type: result.isPassed ? 'success' : 'danger',
+                    title: result.isPassed ? 'Quiz Passed!' : 'Quiz Failed',
+                    message: result.isPassed
+                        ? `🎉 You passed the quiz with ${result.score} points!`
+                        : `❌ You failed. Score: ${result.score}. Try again!`,
+                    confirmText: 'OK',
+                    cancelText: 'Close',
+                    onConfirm: () => {
+                        if (result.isPassed) updateLessonCompletionStatus(lessonId, true);
+                    },
+                    onCancel: () => {
+                        if (result.isPassed) updateLessonCompletionStatus(lessonId, true);
+                    }
+                });
+
             } catch (e) {
                 alert("Quiz submission failed: " + e.message);
             }
@@ -933,13 +961,28 @@
 
                 const result = await response.json();
 
-                if (result.success) {
-                    alert("✅ Lesson marked as completed!");
-                    updateLessonCompletionStatus(lessonId, true);
-                    closePopup();
-                } else {
-                    alert("Failed to complete lesson: " + (result.error || "Unknown error"));
-                }
+            if (result.success) {
+                updateLessonCompletionStatus(lessonId, true);
+                if (typeof closePopup === 'function') closePopup(); // ✅ Đóng ngay
+
+                const dialog = new ConfirmDialog();
+                dialog.show({
+                    type: 'success',
+                    title: 'Lesson Completed',
+                    message: '✅ Lesson marked as completed!',
+                    confirmText: 'OK',
+                    cancelText: 'Close'
+                });
+            } else {
+                const dialog = new ConfirmDialog();
+                dialog.show({
+                    type: 'danger',
+                    title: 'Error',
+                    message: '❌ Failed to complete lesson: ' + (result.error || 'Unknown error'),
+                    confirmText: 'OK',
+                    cancelText: 'Close'
+                });
+            }
             } catch (error) {
                 alert("Error completing lesson: " + error.message);
             }

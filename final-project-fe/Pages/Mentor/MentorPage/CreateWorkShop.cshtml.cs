@@ -25,7 +25,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             _apiSettings = apiSettings.Value;
             _httpClient = httpClient;
         }
-        public string BaseUrl { get; set; } 
+        public string BaseUrl { get; set; }
         public string CurrentUserId { get; set; }
         public int MentorId { get; set; }
         [BindProperty]
@@ -66,7 +66,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 if (mentor != null)
                 {
-                    MentorId = mentor.MentorId; 
+                    MentorId = mentor.MentorId;
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "Workshop created successfully.";
-                    return RedirectToPage("/Index"); 
+                    return RedirectToPage("/Index");
                 }
                 else
                 {

@@ -35,7 +35,7 @@ namespace final_project_fe.Pages.Mentor
 
         public CourseResponseDto Course { get; set; }
         public string MentorFullName { get; set; }
-
+        public Guid MentorUserId { get; set; }
         public string BaseUrl { get; set; }
         public string ImageKey { get; set; }
         public List<ModuleProgressDto> Modules { get; set; } = new();
@@ -80,6 +80,7 @@ namespace final_project_fe.Pages.Mentor
                 var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
                 var mentor = JsonConvert.DeserializeObject<MentorDto>(mentorJson);
                 MentorFullName = $"{mentor.FirstName} {mentor.LastName}";
+                MentorUserId = mentor.UserId;
             }
 
 

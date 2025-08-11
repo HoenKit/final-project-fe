@@ -315,16 +315,14 @@
                     <option value="">-- Select Assignment to check in --</option>
                     @foreach (var assignment in Model.Assignments)
                     {
-                        var selected = Model.SelectedAssignmentId == assignment.AssignmentId ? "selected" : "";
-
-                        <option value="@assignment.AssignmentId" selected="@selected">
+                        <option value="@assignment.AssignmentId" selected="@(Model.SelectedAssignmentId == assignment.AssignmentId)">
                             @assignment.Title
                         </option>
                     }
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">
-                📥 Download student list
+                📥 Load student list
             </button>
         </form>
     </div>

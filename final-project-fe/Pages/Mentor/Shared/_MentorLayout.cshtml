@@ -153,26 +153,33 @@
 
 			<div class="top-area">
 				<ul class="main-menu">
+
 					<li>
 						<a asp-area="" asp-page="/Index" title="">Home</a>
 					</li>
 					<li>
 						<a asp-page="/Mentor/MentorPage/Index" title="">Course</a>
-					</li>
-					@* <li>
-						<a href="#" title="">more pages</a>
-						<ul>
+						@* <ul>
 							<li>
-								<a class="nav-link text-dark" asp-area="" asp-page="/PointTransaction">Point Transaction</a>
+								<a class="nav-link text-dark" asp-area="" asp-page="/PointTransaction">Buy Point</a>
+							</li>
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
+							</li>
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/TransactionHistory">Transaction History</a>
 							</li>
 							<li>
 								<a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
 							</li>
-						</ul>
-					</li> *@
+							<li>
+								<a class="nav-link text-dark" asp-area="" asp-page="/ErrorPage">404</a>
+							</li>
+						</ul> *@
+					</li>
 					@if (isMentor)
 					{
-						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+						<li>
 							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
 						</li>
 					}
@@ -182,14 +189,17 @@
 							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
 						</li>
 					}
-					@if (isUser && isMentor)
+					@if (isAuthenticated)
 					{
-						<li>
-							<a asp-page="/UserPage">My page</a>
-						</li>
-						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
-							<a asp-page="/CourseRecommend">Recommend Course</a>
-						</li>
+						@if (!isAdmin)
+						{
+							<li>
+								<a asp-page="/UserPage">My page</a>
+							</li>
+							<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+								<a asp-page="/CourseRecommend">Recommend Course</a>
+							</li>
+						}
 					}
 				</ul>
 				<ul class="setting-area">
@@ -280,31 +290,30 @@
 				<div class="user-img" id="userImg">
 					<img src="~/images/fav_icon.png" alt="">
 					<div class="custom-user-menu" id="userMenu">
-						@if (isAuthenticated)
+@if (isMentor)
+					{
+						<li>
+							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
+						</li>
+					}
+					@if (isAdmin)
+					{
+						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
+						</li>
+					}
+					@if (isAuthenticated)
+					{
+						@if (!isAdmin)
 						{
-							if (!isMentor)
-							{
-								<text>
-									<a asp-page="/MentorRegulations"><i class="bi bi-person-vcard"></i> Become a Mentor</a>
-								</text>
-							}
-							<text>
-								@if (isUser && isMentor)
-								{
-									<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
-									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
-									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
-								}
-								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
-							</text>
+							<li>
+								<a asp-page="/UserPage">My page</a>
+							</li>
+							<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+								<a asp-page="/CourseRecommend">Recommend Course</a>
+							</li>
 						}
-						else
-						{
-							<text>
-								<a asp-page="/Login"><i class="bi bi-box-arrow-in-right" style="font-size: 118%;"></i> Login</a>
-								<a asp-page="/Register"><i class="bi bi-pencil-square"></i> Register</a>
-							</text>
-						}
+					}
 					</div>
 				</div>
 			</div>

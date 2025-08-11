@@ -64,7 +64,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             if (!response.IsSuccessStatusCode)
             {
-                ModelState.AddModelError(string.Empty, "Không thể lấy danh sách chưa điểm danh.");
+                ModelState.AddModelError(string.Empty, "Unable to get the list of unchecked attendance.");
                 return Page();
             }
 
@@ -102,12 +102,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             if (response.IsSuccessStatusCode)
             {
-                TempData["SuccessMessage"] = "Điểm danh thành công!";
+                TempData["SuccessMessage"] = "Attendance successful!";
             }
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Lỗi khi điểm danh: {error}");
+                ModelState.AddModelError(string.Empty, $"Error when taking attendance: {error}");
             }
 
             return RedirectToPage(); // reload lại

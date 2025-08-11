@@ -27,7 +27,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             _apiSettings = apiSettings.Value;
             _httpClientFactory = httpClientFactory;
         }
-
+        public List<CourseWithAssignmentsDto> CoursesWithAssignments { get; set; } = new();
         public string? UserId { get; set; }
         public string BaseUrl { get; set; }
         public string? AccessToken { get; set; }
