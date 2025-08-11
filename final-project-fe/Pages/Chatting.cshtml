@@ -98,6 +98,19 @@
             cursor: pointer;
         }
 
+        .empty-chat-message {
+            display: flex;
+            justify-content: center; /* Căn ngang */
+            align-items: center; /* Căn dọc */
+            height: 100%; /* Chiếm toàn bộ chiều cao khung cha */
+            font-size: 1.2rem; /* Chữ lớn hơn một chút */
+            font-style: italic; /* Chữ nghiêng */
+            color: #666; /* Màu chữ nhạt */
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f9f9f9; /* Nền nhẹ */
+        }
         /* Main Content */
         .main-content {
             flex: 1;
@@ -1170,9 +1183,9 @@
                     const container = document.querySelector('.messages-container');
                     if (container) {
                         container.innerHTML = `
-                            <div class="empty-chat-message">
-                                Start your conversation with ${fullName}...
-                            </div>
+                        <div class="empty-chat-message">
+                            💬 Start your conversation with <strong>${fullName}</strong>...
+                        </div>
                         `;
                     }
                 },
