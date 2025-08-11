@@ -492,6 +492,7 @@ namespace final_project_fe.Pages
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Bài viết đã được tạo thành công.");
+                    TempData["SuccessMessage"] = "Create Post successful!";
                     return RedirectToPage("/Index");
                 }
                 else
