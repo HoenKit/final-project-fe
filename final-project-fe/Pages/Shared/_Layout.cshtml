@@ -202,7 +202,7 @@
 					</li>
 					@if (isMentor)
 					{
-						<li >
+						<li>
 							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
 						</li>
 					}
@@ -212,14 +212,17 @@
 							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
 						</li>
 					}
-					@if (isUser && isMentor)
+					@if (isAuthenticated)
 					{
-						<li>
-							<a asp-page="/UserPage">My page</a>
-						</li>
-						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
-							<a asp-page="/CourseRecommend">Recommend Course</a>
-						</li>
+						@if (!isAdmin)
+						{
+							<li>
+								<a asp-page="/UserPage">My page</a>
+							</li>
+							<li style="all: unset; list-style: none; padding: 0; margin: 0;">
+								<a asp-page="/CourseRecommend">Recommend Course</a>
+							</li>
+						}
 					}
 				</ul>
 				<ul class="setting-area">
@@ -313,19 +316,19 @@
 						@if (isAuthenticated)
 						{
 							@* <text>
-								<a asp-page="#" id="userPointsLink">
-									<i class="bi bi-p-circle"></i>
-									<span id="userPoints">@userPoints.ToString("N0")</span>
-								</a>
-							</text> *@
-							if (isUser)
+                            <a asp-page="#" id="userPointsLink">
+                                <i class="bi bi-p-circle"></i>
+                                <span id="userPoints">@userPoints.ToString("N0")</span>
+                            </a>
+                        </text> *@
+							if (!isAdmin && !isMentor)
 							{
 								<text>
 									<a asp-page="/MentorRegulations"><i class="bi bi-person-vcard"></i> Become a Mentor</a>
 								</text>
 							}
 							<text>
-								@if(isUser && isMentor)
+								@if (!isAdmin)
 								{
 									<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
 									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
@@ -384,6 +387,7 @@
 		<main role="main" class="pb-3">
 			@RenderBody()
 			@Html.Partial("_Notification")
+			@Html.Partial("_ConfirmDialog")
 		</main>
 	</div>
 

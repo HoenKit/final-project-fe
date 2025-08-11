@@ -44,20 +44,20 @@ namespace final_project_fe.Pages.Admin.ReportManager.PostsReport
                 var response = await _httpClient.DeleteAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Xóa báo cáo thành công.";
+                    TempData["SuccessMessage"] = "Report deleted successfully.";
                     return RedirectToPage("/Admin/ReportManager/PostsReport/Index");
                 }
                 else
                 {
-                    _logger.LogError($"Xóa báo cáo thất bại: {response.StatusCode}");
-                    TempData["ErrorMessage"] = "Xóa báo cáo thất bại.";
+                    _logger.LogError($"Delete failed report: {response.StatusCode}");
+                    TempData["ErrorMessage"] = "Delete report failed.";
                     return RedirectToPage();
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Lỗi API khi xóa báo cáo: {ex.Message}");
-                TempData["ErrorMessage"] = "Lỗi khi gọi API.";
+                _logger.LogError($"API error when deleting report: {ex.Message}");
+                TempData["ErrorMessage"] = "Error calling API.";
                 return RedirectToPage();
             }
         }

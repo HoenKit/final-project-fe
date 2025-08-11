@@ -94,23 +94,28 @@ namespace final_project_fe.Pages
 
                 Mentor.UserId = userId;
 
+
                 // 📤 Gọi API đăng ký mentor
                 string mentorApiUrl = $"{_apiSettings.BaseUrl}/Mentor";
-                var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-                var formContent = new MultipartFormDataContent();
-                formContent.Add(new StringContent(Mentor.UserId.ToString()), "UserId");
-                formContent.Add(new StringContent(Mentor.Introduction ?? ""), "Introduction");
-                formContent.Add(new StringContent(Mentor.JobTitle ?? ""), "JobTitle");
-                formContent.Add(new StringContent(Mentor.FirstName ?? ""), "FirstName");
-                formContent.Add(new StringContent(Mentor.LastName ?? ""), "LastName");
-                formContent.Add(new StringContent(Mentor.StudyLevel ?? ""), "StudyLevel");
-                formContent.Add(new StringContent(Mentor.CitizenID ?? ""), "CitizenID");
-                formContent.Add(new StringContent(Mentor.IssuePlace ?? ""), "IssuePlace");
-                formContent.Add(new StringContent(Mentor.IssueDate?.ToString("yyyy-MM-dd") ?? ""), "IssueDate");
-                formContent.Add(new StringContent(Mentor.ExpiredDate?.ToString("yyyy-MM-dd") ?? ""), "ExpiredDate");
-                formContent.Add(new StringContent(Mentor.CreateAt.ToString("o")), "CreateAt");
-                formContent.Add(new StringContent(Mentor.UpdateAt.ToString("o")), "UpdateAt");
 
+                // Tạo Multipart form-data
+                var formContent = new MultipartFormDataContent
+{
+    { new StringContent(Mentor.UserId.ToString()), "UserId" },
+    { new StringContent(Mentor.Introduction ?? ""), "Introduction" },
+    { new StringContent(Mentor.JobTitle ?? ""), "JobTitle" },
+    { new StringContent(Mentor.FirstName ?? ""), "FirstName" },
+    { new StringContent(Mentor.LastName ?? ""), "LastName" },
+    { new StringContent(Mentor.StudyLevel ?? ""), "StudyLevel" },
+    { new StringContent(Mentor.CitizenID ?? ""), "CitizenID" },
+    { new StringContent(Mentor.IssuePlace ?? ""), "IssuePlace" },
+    { new StringContent(Mentor.IssueDate?.ToString("yyyy-MM-dd") ?? ""), "IssueDate" },
+    { new StringContent(Mentor.ExpiredDate?.ToString("yyyy-MM-dd") ?? ""), "ExpiredDate" },
+    { new StringContent(Mentor.CreateAt.ToString("o")), "CreateAt" },
+    { new StringContent(Mentor.UpdateAt.ToString("o")), "UpdateAt" }
+};
+
+                // Thêm file chữ ký nếu có
                 if (Mentor.Signature != null && Mentor.Signature.Length > 0)
                 {
                     var streamContent = new StreamContent(Mentor.Signature.OpenReadStream());
@@ -118,15 +123,27 @@ namespace final_project_fe.Pages
                     formContent.Add(streamContent, "Signature", Mentor.Signature.FileName);
                 }
 
-                HttpResponseMessage response = await _httpClient.PostAsync(mentorApiUrl, formContent);
+                // Gửi request với token
+                using var requestPost = new HttpRequestMessage(HttpMethod.Post, mentorApiUrl)
+                {
+                    Content = formContent
+                };
+                requestPost.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Thực thi request
+                HttpResponseMessage response = await _httpClient.SendAsync(requestPost);
 
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToPage("/Logout");
                 }
-
-                _logger.LogError($"Lỗi API Đăng Ký: {response.StatusCode}");
-                ModelState.AddModelError(string.Empty, "Đăng ký thất bại! Vui lòng kiểm tra lại thông tin.");
+                else
+                {
+                    var errorMsg = await response.Content.ReadAsStringAsync();
+                    ModelState.AddModelError(string.Empty, $"API Error: {errorMsg}");
+                    return Page();
+                }
+                
             }
             catch (Exception ex)
             {

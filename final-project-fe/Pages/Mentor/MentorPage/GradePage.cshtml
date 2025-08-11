@@ -392,7 +392,7 @@
 
 <div class="page-header">
     <div class="container">
-        <h1 class="page-title">Chấm điểm Assignment</h1>
+        <h1 class="page-title">Assignment scoring</h1>
     </div>
 </div>
 
@@ -400,12 +400,12 @@
 <div id="submissionModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Câu trả lời chi tiết</h3>
+            <h3 class="modal-title">Detailed Answer</h3>
             <button class="close-btn" onclick="closeSubmissionModal()">&times;</button>
         </div>
         <div class="modal-body">
             <div class="student-info">
-                <strong>Học viên:</strong> <span id="modalStudentName"></span>
+                <strong>Learner:</strong> <span id="modalStudentName"></span>
             </div>
             <div id="modalSubmissionContent"></div>
         </div>
@@ -416,9 +416,9 @@
     <div class="assignment-selector">
         <form method="get">
             <div class="mb-3">
-                <label for="assignmentSelect" class="form-label">Chọn Assignment:</label>
+                <label for="assignmentSelect" class="form-label">Select Assignment:</label>
                 <select id="assignmentSelect" name="SelectedAssignmentId" class="form-select" onchange="this.form.submit()">
-                    <option value="">-- Chọn Assignment --</option>
+                    <option value="">-- Select Assignment --</option>
                     @foreach (var assignment in Model.Assignments)
                     {
                         <option value="@assignment.AssignmentId" selected="@(assignment.AssignmentId == Model.SelectedAssignmentId ? "selected" : null)">

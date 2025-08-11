@@ -1,4 +1,4 @@
-using final_project_fe.Dtos.Mentors;
+﻿using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.WorkShop;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +35,34 @@ namespace final_project_fe.Pages
             public int? CurrentMentorId;
             public async Task<IActionResult> OnGetAsync(int id)
             {
-                BaseUrl = _apiSettings.BaseUrl;
+
+            //Lưu trang trước đấy
+            const string sessionKey = "PageHistory";
+            var history = HttpContext.Session.GetString(sessionKey);
+            List<string> pageHistory;
+
+            if (string.IsNullOrEmpty(history))
+            {
+                pageHistory = new List<string>();
+            }
+            else
+            {
+                pageHistory = JsonSerializer.Deserialize<List<string>>(history);
+            }
+
+            // Lấy URL hiện tại
+            var currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
+
+            // Chỉ thêm nếu khác trang cuối cùng
+            if (pageHistory.Count == 0 || pageHistory.Last() != currentUrl)
+            {
+                pageHistory.Add(currentUrl);
+            }
+
+            // Lưu lại vào session
+            HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
+
+            BaseUrl = _apiSettings.BaseUrl;
 
                 var token = Request.Cookies["AccessToken"];
                 string? userId = null;
@@ -59,22 +86,26 @@ namespace final_project_fe.Pages
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }
 
-                // Step 1: Get current Mentor if userId is available
-                if (!string.IsNullOrEmpty(userId))
+            // Step 1: Get current Mentor if userId is available
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
+                if (mentorResponse.IsSuccessStatusCode)
                 {
-                    var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
-                    if (mentorResponse.IsSuccessStatusCode)
+                    var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+
+                    if (!string.IsNullOrWhiteSpace(mentorJson) && mentorJson != "null")
                     {
-                        var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
                         Mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         });
                     }
                 }
-                CurrentMentorId = Mentor?.MentorId;
-                // Step 2: Get Workshop by Id (this is always required)
-                var workshopResponse = await client.GetAsync($"{BaseUrl}/WorkShop/{id}");
+            }
+            CurrentMentorId = Mentor?.MentorId;
+            // Step 2: Get Workshop by Id (this is always required)
+            var workshopResponse = await client.GetAsync($"{BaseUrl}/WorkShop/{id}");
                 if (!workshopResponse.IsSuccessStatusCode)
                 {
                     ModelState.AddModelError(string.Empty, "Failed to retrieve workshop info.");

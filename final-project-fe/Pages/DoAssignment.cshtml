@@ -319,22 +319,36 @@
                 }
             </div>
 
-            @if (!Model.IsUserAssignmentCreated)
+            @if (Model.IsAlreadyDone)
             {
-                <div class="alert-custom alert-warning-custom">⚠ Unable to initialize assignment.</div>
+                <div class="alert-custom alert-info-custom">
+                    ✅ You have already submitted this assignment.
+                </div>
+            }
+            else if (!Model.IsUserAssignmentCreated)
+            {
+                <div class="alert-custom alert-warning-custom">
+                    ⚠ Unable to initialize assignment.
+                </div>
             }
             else if (!Model.IsPresented)
             {
-                <div class="alert-custom alert-danger-custom">🔒 You are not allowed to take the test yet. Please wait until the test starts.</div>
-            }
-            else
-            {
+                <div class="alert-custom alert-danger-custom mb-3">
+                    🔒 You are not allowed to take the test yet. Please wait until the test starts.
+                </div>
                 <div class="text-end">
                     <a id="meetLink" href="@Model?.MeetingLink" target="_blank" class="btn-custom btn-outline-custom">
                         📹 Join the meeting
                     </a>
                 </div>
-
+            }
+            else
+            {
+                <div class="text-end mb-4">
+                    <a id="meetLink" href="@Model?.MeetingLink" target="_blank" class="btn-custom btn-outline-custom">
+                        📹 Join the meeting
+                    </a>
+                </div>
                 <div class="text-center mt-4">
                     <button id="btnLamBai" class="btn-custom btn-dark-custom btn-lg px-4 d-none">Do Assignment</button>
                     <button id="btnStartTest" class="btn-custom btn-success-custom btn-lg px-4 d-none">Start Test</button>
