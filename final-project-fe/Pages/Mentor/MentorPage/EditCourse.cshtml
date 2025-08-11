@@ -895,14 +895,14 @@
                                                                                                                         </span>
                                                                                                                     </div>
                                                                                                                     <div class="btn-group">
-                                                                                                                        @* <button class="btn-sm btn-outline-secondary"
+                                                                                                                        <button class="btn-sm btn-outline-secondary"
                                                                                                                                 onclick="editAnswer(@answer.AnswerId,
                                                                                                                                  '@Html.Raw(JavaScriptEncoder.Default.Encode(answer.Text))',
                                                                                                                                  @answer.Is_correct.ToString().ToLower())"
                                                                                                                                 title="Update">
                                                                                                                             <i class="fa fa-edit" style="padding-left: 20%;"></i>
-                                                                                                                        </button> *@
-                                                                                                                       @*  <form method="post" asp-page-handler="DeleteAnswer"
+                                                                                                                        </button>
+                                                                                                                        <form method="post" asp-page-handler="DeleteAnswer"
                                                                                                                               asp-route-id="@answer.AnswerId"
                                                                                                                               asp-route-questionId="@question.QuestionId"
                                                                                                                               asp-route-courseId="@Model.Course.CourseId"
@@ -912,7 +912,7 @@
                                                                                                                                     title="Delete">
                                                                                                                                 <i class="fa fa-trash" style="padding-left: 15%;"></i>
                                                                                                                             </button>
-                                                                                                                        </form> *@
+                                                                                                                        </form>
                                                                                                                     </div>
                                                                                                                 </div>
 
@@ -2863,7 +2863,7 @@
 
             // Progress tracking - Updated to show completion status without blocking
             function updateProgress() {
-                const totalSteps = 8;
+                const totalSteps = 9;
                 const completedSteps = document.querySelectorAll('.step-number i.fa-check').length;
                 const progressPercentage = (completedSteps / totalSteps) * 100;
 

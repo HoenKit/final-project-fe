@@ -1318,7 +1318,86 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             return Page();
         }
 
+        //Handler Update Answer
+        public async Task<IActionResult> OnPostEditAnswerAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
 
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(Answer),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Gọi API tạo Answer
+                var response = await _httpClient.PutAsync($"{BaseUrl}/Answer", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var updateAnswer = JsonSerializer.Deserialize<AnswerResponseDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Answer update successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Update Answer failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to update answer: " + errorContent;
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while update question");
+                TempData["ErrorMessage"] = "An error occurred while update the question: " + ex.Message;
+                return Page();
+            }
+        }
 
         //Handler Delete Answer
         public async Task<IActionResult> OnPostDeleteAnswerAsync(int id)
