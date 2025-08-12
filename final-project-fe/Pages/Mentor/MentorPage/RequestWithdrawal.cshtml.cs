@@ -193,6 +193,9 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     System.Text.Encoding.UTF8, "application/json");
 
                 string apiUrl = $"{_apiSettings.BaseUrl}/Withdraw";
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var response = await _httpClient.PostAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
