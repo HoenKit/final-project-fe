@@ -1,0 +1,547 @@
+﻿@page
+@model final_project_fe.Pages.Mentor.MentorPage.AddCouponPageModel
+@{
+    ViewData["Title"] = "Add Coupon";
+    Layout = null;
+}
+<title>Add Coupon</title>
+<link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
+@Html.Partial("_Notification")
+<style>
+    :root {
+        --primary-black: #1a1a1a;
+        --secondary-black: #2c2c2c;
+        --accent-black: #000000;
+        --light-gray: #f8f9fa;
+        --medium-gray: #6c757d;
+        --border-gray: #e9ecef;
+        --white: #ffffff;
+        --success-color: #28a745;
+        --hover-gray: #f1f3f4;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.2);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f8f9fa 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        color: var(--primary-black);
+    }
+
+    /* Back Button */
+    .back-section {
+        margin-bottom: 24px;
+    }
+
+    .back-btn {
+        background: var(--white);
+        border: 2px solid var(--border-gray);
+        color: var(--primary-black);
+        padding: 12px 20px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-sm);
+    }
+
+        .back-btn:hover {
+            background: var(--primary-black);
+            color: var(--white);
+            border-color: var(--primary-black);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+        .back-btn i {
+            font-size: 0.9em;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover i {
+            transform: translateX(-2px);
+        }
+
+    /* Main Container */
+    .page-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .main-container {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        border: 1px solid var(--border-gray);
+    }
+
+    /* Header */
+    .header-section {
+        background: linear-gradient(135deg, var(--accent-black) 0%, var(--primary-black) 50%, var(--secondary-black) 100%);
+        color: var(--white);
+        padding: 40px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 2px, transparent 2px), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px, 20px 20px;
+            opacity: 0.3;
+        }
+
+        .header-section h2 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.025em;
+        }
+
+    .header-icon {
+        font-size: 1.1em;
+        margin-right: 12px;
+        opacity: 0.95;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    /* Form Content */
+    .form-content {
+        padding: 48px 40px;
+        background: var(--white);
+    }
+
+    .form-group {
+        margin-bottom: 36px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 16px;
+        font-weight: 700;
+        color: var(--primary-black);
+        font-size: 1.1rem;
+        position: relative;
+        letter-spacing: -0.01em;
+    }
+
+        .form-label::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-black), var(--primary-black));
+            border-radius: 2px;
+        }
+
+    /* Form Controls */
+    .form-select, .form-control {
+        width: 100%;
+        padding: 18px 24px;
+        border: 2px solid var(--border-gray);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--white);
+        color: var(--primary-black);
+        box-shadow: var(--shadow-sm);
+    }
+
+        .form-select:focus, .form-control:focus {
+            outline: none;
+            border-color: var(--accent-black);
+            box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1), var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .form-select:hover, .form-control:hover {
+            border-color: var(--primary-black);
+            box-shadow: var(--shadow-md);
+        }
+
+    /* Checkbox Container */
+    .checkbox-container {
+        background: linear-gradient(145deg, var(--white), var(--light-gray));
+        border-radius: var(--radius-md);
+        padding: 28px;
+        border: 2px solid var(--border-gray);
+        max-height: 350px;
+        overflow-y: auto;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .form-check {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        cursor: pointer;
+        position: relative;
+    }
+
+        .form-check:hover {
+            background: var(--hover-gray);
+            transform: translateX(6px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--primary-black);
+        }
+
+        .form-check:last-child {
+            margin-bottom: 0;
+        }
+
+    /* Custom Checkbox */
+    .form-check-input {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--primary-black);
+        border-radius: 4px;
+        margin-right: 16px;
+        cursor: pointer;
+        position: relative;
+        background: var(--white);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        flex-shrink: 0;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+        .form-check-input:hover {
+            border-color: var(--accent-black);
+            box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.1);
+        }
+
+        .form-check-input:checked {
+            background: var(--accent-black);
+            border-color: var(--accent-black);
+        }
+
+            .form-check-input:checked::before {
+                content: '✓';
+                color: var(--white);
+                font-size: 12px;
+                font-weight: bold;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                line-height: 1;
+            }
+
+    .form-check-label {
+        font-weight: 600;
+        color: var(--primary-black);
+        cursor: pointer;
+        flex: 1;
+        margin: 0;
+        line-height: 1.4;
+        font-size: 0.95rem;
+        transition: color 0.3s ease;
+        padding-left: 4px;
+    }
+
+    .form-check:hover .form-check-label {
+        color: var(--accent-black);
+    }
+
+    /* Submit Button */
+    .submit-section {
+        text-align: center;
+        padding-top: 24px;
+        border-top: 1px solid var(--border-gray);
+        margin-top: 20px;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--accent-black) 0%, var(--primary-black) 50%, var(--secondary-black) 100%);
+        color: var(--white);
+        border: none;
+        padding: 20px 48px;
+        border-radius: var(--radius-md);
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: var(--shadow-md);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 220px;
+        letter-spacing: 0.025em;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, var(--primary-black) 0%, var(--accent-black) 50%, var(--primary-black) 100%);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .btn-icon {
+        margin-right: 10px;
+        font-size: 1.1em;
+        transition: transform 0.3s ease;
+    }
+
+    .submit-btn:hover .btn-icon {
+        transform: rotate(90deg);
+    }
+
+    /* Scrollbar Styling */
+    .checkbox-container::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .checkbox-container::-webkit-scrollbar-track {
+        background: var(--light-gray);
+        border-radius: 5px;
+        margin: 4px 0;
+    }
+
+    .checkbox-container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--medium-gray), var(--primary-black));
+        border-radius: 5px;
+        border: 2px solid var(--light-gray);
+    }
+
+        .checkbox-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-black);
+        }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        body
+
+    {
+        padding: 12px;
+    }
+
+    .form-content {
+        padding: 32px 24px;
+    }
+
+    .header-section {
+        padding: 32px 24px;
+    }
+
+        .header-section h2 {
+            font-size: 1.8rem;
+        }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .checkbox-container {
+        max-height: 280px;
+        padding: 20px;
+    }
+
+    .form-check {
+        padding: 14px 16px;
+    }
+
+    .submit-btn {
+        min-width: 200px;
+        padding: 18px 36px;
+    }
+
+    .back-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .header-section h2
+
+    {
+        font-size: 1.6rem;
+    }
+
+    .form-content {
+        padding: 24px 20px;
+    }
+
+    .checkbox-container {
+        max-height: 250px;
+        padding: 16px;
+    }
+
+    }
+
+    /* Loading Animation */
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .main-container {
+        animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Focus visible for accessibility */
+    .form-check-input:focus-visible,
+    .submit-btn:focus-visible,
+    .back-btn:focus-visible {
+        outline: 3px solid rgba(26, 26, 26, 0.3);
+        outline-offset: 2px;
+    }
+</style>
+
+<div class="page-container">
+    <div class="back-section">
+        <a class="back-btn" href="/Mentor/MentorPage/Dashboard">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <div class="main-container">
+        <div class="header-section">
+            <h2>
+                <i class="fas fa-ticket header-icon"></i>
+                Add Coupon for Courses
+            </h2>
+        </div>
+
+        <div class="form-content">
+            <form method="post">
+                <!-- Select Coupon -->
+                <div class="form-group">
+                    <label class="form-label">Select Coupon</label>
+                    <select asp-for="AddCoupon.CouponId" class="form-select" required>
+                        <option value="">-- Choose a coupon --</option>
+                        @foreach (var coupon in Model.AvailableCoupons)
+                        {
+                            @if (coupon.CouponId != 11)
+                            {
+                                <option value="@coupon.CouponId">@coupon.CouponName (@coupon.Discount%)</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Select Courses -->
+                <div class="form-group">
+                    <label class="form-label">Select Courses</label>
+                    <div class="checkbox-container">
+                        @foreach (var course in Model.AvailableCourses)
+                        {
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       name="AddCoupon.CourseIds"
+                                       value="@course.CourseId"
+                                       id="course_@course.CourseId" />
+                                <label class="form-check-label" for="course_@course.CourseId">
+                                    @course.CourseName
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Expired Date -->
+                <div class="form-group">
+                    <label class="form-label">Expiration Date</label>
+                    <input asp-for="AddCoupon.ExpiredAt" type="date" class="form-control" id="expirationDate" required />
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-plus btn-icon"></i>
+                        Add Coupon
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy ngày hiện tại
+        const today = new Date();
+
+        // Định dạng ngày thành YYYY-MM-DD cho input type="date"
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        const formattedDate = `${year}-${month}-${day}`;
+
+        // Gán giá trị cho input
+        const dateInput = document.getElementById('expirationDate');
+        if (dateInput) {
+            dateInput.value = formattedDate;
+        }
+    });
+</script>

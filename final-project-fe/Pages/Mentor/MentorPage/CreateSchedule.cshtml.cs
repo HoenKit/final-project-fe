@@ -43,58 +43,71 @@ namespace final_project_fe.Pages.Mentor
                 return;
             }
 
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-            var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub");
-            if (userIdClaim == null)
+            string userId;
+            try
             {
-                ModelState.AddModelError(string.Empty, "User ID not found in token.");
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    ModelState.AddModelError(string.Empty, "User ID not found in token.");
+                    return;
+                }
+            }
+            catch
+            {
+                ModelState.AddModelError(string.Empty, "Invalid token.");
                 return;
             }
-
-            string userId = userIdClaim.Value;
 
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            // Step 1: Get mentor info
-            var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
-            if (!mentorResponse.IsSuccessStatusCode)
+            try
             {
-                ModelState.AddModelError(string.Empty, "Failed to retrieve mentor info.");
-                return;
+                // Step 1: Get mentor info
+                var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to retrieve mentor info.");
+                    return;
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                Mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (Mentor == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Mentor data is null.");
+                    return;
+                }
+
+                // Step 2: Get approved courses for this mentor
+                var courseResponse = await client.GetAsync($"{BaseUrl}/Course?mentorId={Mentor.MentorId}&statuses=Approved");
+                if (!courseResponse.IsSuccessStatusCode)
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to retrieve courses.");
+                    return;
+                }
+
+                var courseJson = await courseResponse.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<PageResult<ListCourseDto>>(courseJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                Course = result?.Items?.ToList() ?? new List<ListCourseDto>();
             }
-
-            var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
-            var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+            catch (Exception ex)
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (mentor == null)
-            {
-                ModelState.AddModelError(string.Empty, "Mentor data is null.");
-                return;
+                _logger.LogError(ex, "Error loading mentor or courses.");
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while loading data.");
             }
-
-            Mentor = mentor;
-
-            // Step 2: Get courses for this mentor
-            var courseResponse = await client.GetAsync($"{BaseUrl}/Course?mentorId={mentor.MentorId}&statuses=Approved");
-            if (!courseResponse.IsSuccessStatusCode)
-            {
-                ModelState.AddModelError(string.Empty, "Failed to retrieve courses.");
-                return;
-            }
-
-            var courseJson = await courseResponse.Content.ReadAsStringAsync();
-
-            var result = JsonSerializer.Deserialize<PageResult<ListCourseDto>>(courseJson, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            Course = result?.Items?.ToList() ?? new List<ListCourseDto>();
         }
     }
 }

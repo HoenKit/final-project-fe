@@ -5,132 +5,446 @@
 }
 
 <div id="certificate">
-    <div class="cert-title">CERTIFICATE OF PARTICIPATION</div>
-    <div class="cert-subtitle">This certificate is proudly presented to</div>
-    <div class="cert-name">@Model.UserFullName</div>
-    <div class="cert-course">For successfully completing the course:</div>
-    <div class="cert-course-title">@Model.CourseName</div>
+    <!-- Tiêu đề -->
+    <div class="cert-title">CERTIFICATE</div>
+    <div class="cert-subtitle-banner">of Recognition</div>
 
+    <!-- Giới thiệu -->
+    <div class="cert-intro">THE FOLLOWING AWARD IS GIVEN TO</div>
+
+    <!-- Tên người nhận -->
+    <div class="cert-name-banner">
+        <div class="cert-name">@Model.UserFullName</div>
+    </div>
+
+    <!-- Khóa học -->
+    <div class="cert-course">Course: @Model.CourseName</div>
+    <div class="cert-course" style="top: 440px">
+        This certificate is given to @Model.UserFullName to confirm that he/she has passed this course.
+    </div>
+
+    <!-- Footer -->
     <div class="cert-footer">
-        <div class="cert-org">
-            <hr />
-            Phronesis Learning
+        <div class="cert-left">
+            <div class="cert-org">PHRONESIS LEARNING</div>
+            <div class="cert-org-sub">LEARNING SYSTEM</div>
         </div>
-        <div class="cert-mentor">
-            <hr />
-            @Model.MentorSignature<br />Mentor
+        <div class="cert-right">
+            <div class="cert-mentor">
+                @if (!string.IsNullOrEmpty(Model.MentorSignature))
+                {
+                    if (Model.MentorSignature.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <img src="@Model.MentorSignature"
+                             alt="Mentor Signature"
+                             crossorigin="anonymous" />
+                        <span>@Model.MentorFullName</span>
+                    }
+                    else
+                    {
+                        <span>@Model.MentorSignature</span>
+                    }
+                }
+            </div>
+            <div class="cert-mentor-sub">MENTOR</div>
         </div>
     </div>
 </div>
-<button type="button" onclick="downloadCertificate()">📄 Download Certificate</button>
+
+@if (Model.IsCurrentUser)
+{
+    <div class="certificate-buttons">
+        <div class="cert-actions">
+            <!-- Loading indicator -->
+            <div id="uploadingIndicator" class="upload-indicator">
+                <div class="loading-spinner"></div>
+                <span class="upload-text">Loading certificate...</span>
+            </div>
+
+            <!-- Success/Error message -->
+            <div id="uploadResult" class="upload-result" style="display: none;"></div>
+
+            <!-- Nút Download (sẽ hiện sau khi upload xong) -->
+            <button type="button" class="cert-btn download-btn" id="downloadBtn" onclick="downloadCertificate()" style="display: none;">
+                <span class="btn-icon">📄</span>
+                <span class="btn-text">Download Certificate</span>
+            </button>
+
+            <!-- Form ẩn để upload -->
+            <form id="uploadForm" method="post" enctype="multipart/form-data" style="display: none;">
+                <input type="hidden" name="UserId" value="@Model.UserId" />
+                <input type="hidden" name="CourseId" value="@Model.CourseId" />
+                <input type="file" name="CertificateFile" id="certificateInput" hidden />
+            </form>
+        </div>
+    </div>
+}
+
 <style>
     #certificate {
         width: 1123px;
         height: 794px;
-        background-image: url('@Url.Content("~/images/certificate-bg.png")');
+        background-image: url('/images/certificate-bg.png');
         background-size: cover;
-        background-repeat: no-repeat;
-        font-family: 'Georgia', serif;
-        position: relative;
+        background-position: center;
         margin: 0 auto;
-        box-shadow: 0 0 30px rgba(0,0,0,0.3);
-        padding: 60px;
-        color: #fff;
+        font-family: 'Times New Roman', Times, serif;
+        color: #000;
+        position: relative;
     }
 
+    .cert-mentor img {
+        max-width: 200px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        transform: translateY(-10px);
+    }
+
+    /* Tiêu đề */
     .cert-title {
+        position: absolute;
+        top: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 64px;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    /* Banner đen: of Recognition */
+    .cert-subtitle-banner {
+        position: absolute;
+        top: 220px;
+        left: 50%;
+        transform: translateX(-50%);
         font-size: 36px;
         font-weight: bold;
-        color: gold;
-        text-align: center;
-        margin-top: 100px;
+        color: #fff;
+        padding: 5px 20px;
     }
 
-    .cert-subtitle {
+    /* Giới thiệu */
+    .cert-intro {
+        position: absolute;
+        top: 300px;
+        width: 100%;
         text-align: center;
         font-size: 18px;
-        margin-top: 20px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    /* Banner tên người nhận */
+    .cert-name-banner {
+        position: absolute;
+        top: 320px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 40px;
     }
 
     .cert-name {
-        font-size: 48px;
+        font-size: 42px;
         font-weight: bold;
-        color: #f8d776;
-        text-align: center;
-        margin-top: 40px;
+        color: #c3a258;
+        white-space: nowrap;
     }
 
+    /* Tên khóa học */
     .cert-course {
-        font-size: 20px;
+        position: absolute;
+        top: 400px;
+        width: 100%;
         text-align: center;
-        margin-top: 20px;
+        font-size: 18px;
     }
 
-    .cert-course-title {
-        font-size: 24px;
-        text-align: center;
-        font-weight: bold;
-        color: #ffffff;
-        margin-top: 10px;
-    }
-
+    /* Footer */
     .cert-footer {
         position: absolute;
         bottom: 80px;
-        left: 60px;
-        right: 60px;
+        width: 100%;
         display: flex;
         justify-content: space-between;
-        color: gold;
+        padding: 0 240px;
+        text-align: center;
+    }
+
+    .cert-org {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .cert-org-sub,
+    .cert-mentor-sub {
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+
+    .cert-mentor {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    /* ===== STYLING CHO CÁC NÚT VÀ INDICATOR ===== */
+    .cert-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        margin: 30px 0;
+        padding: 20px;
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .upload-indicator {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .upload-result {
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .upload-result.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .upload-result.error {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+        }
+
+    .cert-btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        min-width: 200px;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        background-clip: padding-box;
+    }
+
+        .cert-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .cert-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+    .btn-icon {
+        font-size: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .cert-btn:hover .btn-icon {
+        transform: scale(1.1);
+    }
+
+    .btn-text {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Nút Download - Xanh lá cây */
+    .download-btn {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        border: 2px solid transparent;
+    }
+
+        .download-btn:hover {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        .download-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.5);
+        }
+
+    @@keyframes spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .cert-actions
+
+    {
+        padding: 15px;
+    }
+
+    .cert-btn {
+        min-width: 250px;
+        padding: 18px 25px;
+        font-size: 15px;
+    }
+
+    .upload-indicator {
+        padding: 18px 25px;
+        font-size: 15px;
+    }
+
+    }
+
+    @@media (max-width: 480px) {
+        .cert-btn
+
+    {
+        min-width: 200px;
+        padding: 16px 20px;
         font-size: 14px;
     }
 
-    .cert-org, .cert-mentor {
-        text-align: center;
-        margin-left: 90px;
-        margin-right: 200px;
+    .btn-icon {
+        font-size: 16px;
     }
 
-        .cert-org hr, .cert-mentor hr {
-            width: 150px;
-            border: 1px solid gold;
-            margin-bottom: 5px;
-        }
-</style>
+    .upload-indicator {
+        padding: 16px 20px;
+        font-size: 14px;
+    }
 
-<!-- Upload Form -->
-@* <form id="uploadForm" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="UserId" value="@Model.UserId" />
-    <input type="hidden" name="CourseId" value="@Model.CourseId" />
-    <input type="file" name="CertificateFile" id="certificateInput" hidden />
-    <button type="button" id="generateButton" onclick="generateAndSubmit()">📄 Generate & Upload</button>
-</form> *@
+    }
+
+    .pb-3 {
+        background-color: #faf3e0;
+    }
+</style>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        async function generateAndSubmit() {
-            const { jsPDF } = window.jspdf;
-            const certificate = document.getElementById("certificate");
+        const BaseUrl = "@Model.BaseUrl";
+        const token = "@Request.Cookies["AccessToken"]";
 
-            const canvas = await html2canvas(certificate, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL("image/png");
+        async function autoUploadCertificate() {
+            const uploadIndicator = document.getElementById('uploadingIndicator');
+            const uploadResult = document.getElementById('uploadResult');
+            const downloadBtn = document.getElementById('downloadBtn');
 
-            const pdf = new jsPDF("landscape", "pt", [canvas.width, canvas.height]);
-            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+            try {
+                await waitForResources();
 
-            const blob = pdf.output("blob");
+                const { jsPDF } = window.jspdf;
+                const certificate = document.getElementById("certificate");
 
-            const file = new File([blob], "certificate.pdf", { type: "application/pdf" });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            const fileInput = document.getElementById("certificateInput");
-            fileInput.files = dataTransfer.files;
+                const canvas = await html2canvas(certificate, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false,
+                    width: certificate.offsetWidth,
+                    height: certificate.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0
+                });
 
-            document.getElementById("uploadForm").submit();
+                const imgData = canvas.toDataURL("image/png", 1.0);
+                const pdf = new jsPDF("landscape", "pt", [canvas.width, canvas.height]);
+                pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+                const blob = pdf.output("blob");
+
+                const formData = new FormData();
+                formData.append("UserId", "@Model.UserId");
+                formData.append("CourseId", "@Model.CourseId");
+                formData.append("CertificateFile", new File([blob], "certificate.pdf", { type: "application/pdf" }));
+
+                const response = await fetch(`${BaseUrl}/Learning/upload`, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}` // ✅ thêm token
+                    },
+                    body: formData
+                });
+
+                uploadIndicator.style.display = 'none';
+
+                if (response.ok) {
+                    const result = await response.json();
+                    uploadResult.innerHTML = `✅ Certificate loaded successfully!`;
+                    uploadResult.className = 'upload-result success';
+                    uploadResult.style.display = 'block';
+                    downloadBtn.style.display = 'inline-flex';
+                    showNotification(result.message || "Certificate uploaded successfully!", "success");
+                } else {
+                    const err = await response.json();
+                    uploadResult.innerHTML = `❌ Upload failed: ${err.message || 'Unknown error occurred'}`;
+                    uploadResult.className = 'upload-result error';
+                    uploadResult.style.display = 'block';
+                    downloadBtn.style.display = 'inline-flex';
+                    console.error("Upload error:", err);
+                    showNotification(err.message || "Upload failed!", "error");
+                }
+            } catch (error) {
+                console.error("Error auto-uploading certificate:", error);
+                uploadIndicator.style.display = 'none';
+                uploadResult.innerHTML = `❌ Error: ${error.message || 'Failed to generate or upload certificate'}`;
+                uploadResult.className = 'upload-result error';
+                uploadResult.style.display = 'block';
+                downloadBtn.style.display = 'inline-flex';
+                showNotification(error.message || "Unexpected error while uploading certificate", "error");
+            }
+        }
+
+        @if (Model.IsCurrentUser)
+        {
+                <text>
+                autoUploadCertificate();
+                </text>
         }
     </script>
 }

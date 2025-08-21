@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
@@ -31,7 +32,7 @@ namespace final_project_fe.Pages
         public UserAssignmentDto? Assignment { get; set; }
         public UserDto? UserDetail { get; set; }
         public string UserId { get; set; }
-        public bool IsPresented { get; set; } = true;
+        public bool IsPresented { get; set; } = false;
         public bool IsUserAssignmentCreated { get; set; } = false;
         public bool IsAlreadyDone { get; set; } = false;
         public string BaseUrl { get; set; }
@@ -53,37 +54,44 @@ namespace final_project_fe.Pages
             if (string.IsNullOrEmpty(UserId))
                 return RedirectToPage("/Login");
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = _httpClient;
 
             var checkUrl = $"{BaseUrl}/Learning/user?assignmentId={id}&userId={UserId}";
             var shouldCreateAssignment = true;
 
             try
             {
-                var response = await _httpClient.GetAsync(checkUrl);
+                var request = new HttpRequestMessage(HttpMethod.Get, checkUrl);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await client.SendAsync(request);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    var existing = JsonSerializer.Deserialize<UserAssignmentDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var existing = JsonSerializer.Deserialize<UserAssignmentDto>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                     if (existing != null)
                     {
                         Assignment = existing;
                         IsPresented = existing.IsPresented;
 
-                        // 🚫 Nếu đã có content thì đánh dấu là đã làm xong
                         if (!string.IsNullOrWhiteSpace(existing.Content))
                         {
                             IsAlreadyDone = true;
                             shouldCreateAssignment = false; // Không tạo mới nữa
                         }
-
-                        // ✅ Nếu chưa chấm điểm thì đánh dấu đã có UserAssignment
-                        if (!existing.IsScored)
+                        else if (!existing.IsScored)
                         {
                             IsUserAssignmentCreated = true;
-                            shouldCreateAssignment = false;
+                            shouldCreateAssignment = false; // Không tạo mới nữa
                         }
+                    }
+                    else
+                    {
+                        IsUserAssignmentCreated = false;
+                        IsPresented = false;   // đánh dấu chưa điểm danh
+                        shouldCreateAssignment = false;
                     }
                 }
             }
@@ -94,11 +102,15 @@ namespace final_project_fe.Pages
 
             try
             {
-                var assignmentResponse = await _httpClient.GetAsync($"{BaseUrl}/Assignment/{id}");
+                var requestAssignment = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Assignment/{id}");
+                requestAssignment.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var assignmentResponse = await client.SendAsync(requestAssignment);
                 if (assignmentResponse.IsSuccessStatusCode)
                 {
                     var json = await assignmentResponse.Content.ReadAsStringAsync();
-                    var assignment = JsonSerializer.Deserialize<AssignmentDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var assignment = JsonSerializer.Deserialize<AssignmentDto>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     MeetingLink = assignment?.meetLink;
                 }
             }
@@ -115,7 +127,13 @@ namespace final_project_fe.Pages
                     var payload = new { UserId, assignmentId = id };
                     var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-                    var result = await _httpClient.PostAsync(postUrl, content);
+                    var requestPost = new HttpRequestMessage(HttpMethod.Post, postUrl)
+                    {
+                        Content = content
+                    };
+                    requestPost.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var result = await client.SendAsync(requestPost);
                     IsUserAssignmentCreated = result.IsSuccessStatusCode;
                 }
                 catch (Exception ex)
@@ -127,11 +145,15 @@ namespace final_project_fe.Pages
             // Load user info
             try
             {
-                var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{UserId}");
+                var requestUser = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/User/GetUserById/{UserId}");
+                requestUser.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var userResponse = await client.SendAsync(requestUser);
                 if (userResponse.IsSuccessStatusCode)
                 {
                     var json = await userResponse.Content.ReadAsStringAsync();
-                    UserDetail = JsonSerializer.Deserialize<UserDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    UserDetail = JsonSerializer.Deserialize<UserDto>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
             }
             catch (Exception ex)

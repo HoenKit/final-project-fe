@@ -1,12 +1,15 @@
-﻿﻿@using System.IdentityModel.Tokens.Jwt
+﻿@using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
 @using Microsoft.Extensions.Options
 @using final_project_fe.Utils
+@inject IOptions<SignalrSetting> SignalrSetting
 @inject IOptions<ApiSettings> ApiSettings
 @{
 	var roles = new List<string>();
 	decimal userPoints = 0;
+	Guid? userId = null;
 	var BaseUrl = ApiSettings.Value.BaseUrl;
+	var HubUrl = SignalrSetting.Value.HubUrl;
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
 	if (!string.IsNullOrEmpty(token))
@@ -31,6 +34,11 @@
 			{
 				userPoints = points;
 			}
+		}
+		var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+		if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedId))
+		{
+			userId = parsedId;
 		}
 	}
 
@@ -59,6 +67,15 @@
 			padding-left: 0;
 		}
 
+		.badge-new {
+			background-color: green;
+			color: white;
+			font-size: 10px;
+			font-weight: bold;
+			padding: 2px 4px;
+			border-radius: 4px;
+			margin-left: 6px;
+		}
 		.user-img {
 			position: relative;
 			display: inline-block;
@@ -175,7 +192,7 @@
 	<header>
 		<div class="topbar">
 			<div class="logo">
-				<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="images/Logoda.png" alt=""></a>
+				a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="~/images/Logoda.png" alt=""></a>
 			</div>
 
 			<div class="top-area">
@@ -244,77 +261,15 @@
 						</div>
 					</li>
 					@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
-					<li>
+					<li id="notificationDropdown">
 						<a href="#" title="Notification" data-ripple="">
-							<i class="ti-bell"></i><span>20</span>
+							<i class="ti-bell"></i><span id="notificationCount">0</span>
 						</a>
 						<div class="dropdowns">
-							<span>4 New Notifications</span>
-							<ul class="drops-menu">
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-1.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>sarah Loren</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag green">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-2.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Jhon doe</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag red">Reply</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-3.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Andrew</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag blue">Unseen</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-4.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Tom cruse</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-5.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Amy</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
+							<span id="notificationHeader">Notifications</span>
+							<ul class="drops-menu" id="notificationList">
+								<!-- JS sẽ render -->
 							</ul>
-							<a href="notifications.html" title="" class="more-mesg">view more</a>
-						</div>
-					</li>
-					<li>
-						<a href="#" title="Languages" data-ripple=""><i class="fa fa-globe"></i></a>
-						<div class="dropdowns languages">
-							<a href="#" title=""><i class="ti-check"></i>English</a>
-							<a href="#" title="">Vietnam</a>
 						</div>
 					</li>
 				</ul>
@@ -342,6 +297,7 @@
 									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
 									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
 								}
+								<a asp-page="/EventPage"><i class="bi bi-patch-check"></i> Event</a>
 								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
 							</text>
 						}
@@ -390,24 +346,24 @@
 			</ul>
 		</div><!-- side panel --> *@
 	</header>
-		<!-- Post Detail Modal -->
-		<div class="modal fade" id="postDetailModal" tabindex="-1" aria-labelledby="postDetailModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-xl" style="max-width: 50% !important;">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="postDetailModalLabel">Post Details</h5>
-						@* <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
-					</div>
-					<div class="modal-body" id="postModalBody">
-						<div class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
-							</div>
+	<!-- Post Detail Modal -->
+	<div class="modal fade" id="postDetailModal" tabindex="-1" aria-labelledby="postDetailModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" style="max-width: 50% !important;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="postDetailModalLabel">Post Details</h5>
+					@* <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
+				</div>
+				<div class="modal-body" id="postModalBody">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 	<div class="">
 		<main role="main" class="pb-3">
 			@RenderBody()
@@ -500,7 +456,168 @@
 	<script src="~/js/main.min.js"></script>
 	<script src="~/js/script.js"></script>
 	<script src="~/js/map-init.js"></script>
-	@* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8c55_YHLvDHGACkQscgbGLtLRdxBDCfI"></script> *@
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script>
+		const apiBaseUrl = "@BaseUrl";   // từ ApiSettings
+		const hubUrl = "@HubUrl";       // từ SignalrSetting
+		const userId = "@(userId?.ToString() ?? "")"; // từ JWT claim
+
+		// Render 1 item notification
+		function renderNotificationItem(notification, isNew = false) {
+			return `
+				<li data-id="${notification.notificationId}">
+					<a href="/notifications" title="">
+						<div class="mesg-meta">
+							<span>${notification.message}</span>
+							<i>${new Date(notification.createdAt).toLocaleString()}</i>
+						</div>
+					</a>
+					<span class="tag ${isNew ? "green" : ""}">${isNew ? "New" : ""}</span>
+				</li>
+			`;
+		}
+
+
+		// Load notification khi vừa load trang (chỉ render, không cộng count)
+		async function loadNotifications() {
+			if (!userId) return; // chưa login thì thoát
+			try {
+				console.log("🔄 Fetching notifications for user:", userId);
+
+				const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`);
+				if (!response.ok) throw new Error("Failed to fetch notifications");
+				const notifications = await response.json();
+
+				console.log("📥 Notifications loaded from API:", notifications);
+
+				const list = document.getElementById("notificationList");
+				if (!list) return; // tránh lỗi nếu element chưa có
+				list.innerHTML = "";
+
+				notifications.forEach(noti => {
+					list.insertAdjacentHTML("beforeend", renderNotificationItem(noti, false));
+				});
+
+				// Count = 0 khi mới load
+				document.getElementById("notificationCount").innerText = 0;
+				document.getElementById("notificationHeader").innerText =
+					notifications.length > 0
+						? `${notifications.length} Notifications`
+						: "No Notifications";
+
+			} catch (err) {
+				console.error("❌ Error loading notifications:", err);
+			}
+		}
+
+		// Khi mở dropdown thì reset badge
+		const dropdown = document.getElementById("notificationDropdown");
+		if (dropdown) {
+			dropdown.addEventListener("click", () => {
+				console.log("📌 Dropdown clicked → Reset badge count + clear NEW");
+				clearNewBadges();
+			});
+		}
+
+		// ---- SignalR connection ----
+		if (!window.signalRConnection) {
+			console.log("🚀 Creating new SignalR connection...");
+
+		window.signalRConnection = new signalR.HubConnectionBuilder()
+			.withUrl(`${hubUrl}/postHub?UserId=${userId}`)
+			.withAutomaticReconnect()
+			.build();
+
+			window.signalRConnection.on("ReceiveNotification", (notification) => {
+			console.log("📡 Raw SignalR data received:", notification);
+
+			// Nếu notification là string thì parse JSON
+			if (typeof notification === "string") {
+				try {
+					notification = JSON.parse(notification);
+					console.log("✅ Parsed notification object:", notification);
+				} catch (e) {
+					console.error("❌ Failed to parse notification JSON:", e);
+					return; // dừng luôn vì không parse được
+				}
+			}
+
+			if (!notification || !notification.notificationId) {
+				console.warn("⚠️ Notification object invalid:", notification);
+				return;
+			}
+
+			const list = document.getElementById("notificationList");
+			if (!list) {
+				console.warn("⚠️ No #notificationList element found, skipping render");
+				return;
+			}
+
+			// tăng số lượng chỉ khi có SignalR push
+			const countEl = document.getElementById("notificationCount");
+			let count = parseInt(countEl.innerText) || 0;
+			count++;
+			countEl.innerText = count;
+			console.log(`🔔 Notification count updated: ${count}`);
+
+			// thêm vào đầu danh sách
+			list.insertAdjacentHTML("afterbegin", renderNotificationItem(notification, true));
+			console.log("✅ Notification rendered at top of list");
+
+			// cập nhật header
+		const header = document.getElementById("notificationHeader");
+		header.innerText = `${list.children.length} Notifications`;
+		});
+
+			window.signalRConnection.start()
+				.then(() => console.log("✅ SignalR connected (only once)"))
+				.catch(err => console.error("❌ SignalR error:", err));
+		} else {
+			console.log("🔄 Using existing SignalR connection");
+		}
+				function clearNewBadges() {
+			// reset số đếm
+			document.getElementById("notificationCount").innerText = 0;
+
+			// xóa text "New" + class "green"
+			document.querySelectorAll("#notificationList li .tag").forEach(tag => {
+				tag.innerText = "";
+				tag.classList.remove("green");
+			});
+
+			// cập nhật lại header: nếu còn item thì ghi tổng số, nếu rỗng thì "No Notifications"
+			const list = document.getElementById("notificationList");
+			const header = document.getElementById("notificationHeader");
+			if (list && list.children.length > 0) {
+				header.innerText = `Notifications`;
+			} else {
+				header.innerText = "No Notifications";
+			}
+		}
+		// gọi khi load trang
+		loadNotifications();
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const userId = "@(userId?.ToString() ?? "")"; // lấy dynamic từ Razor
+			const BaseUrl = "@BaseUrl";
+			const apiUrl = `${BaseUrl}/User/GetUserById/${userId}`;
+
+			fetch(apiUrl)
+				.then(response => {
+					if (!response.ok) throw new Error("Network response was not ok");
+					return response.json();
+				})
+				.then(user => {
+					const point = user.point ?? 0;
+					document.getElementById("userPointBadge").textContent = point;
+				})
+				.catch(err => {
+					console.error("Failed to fetch user point:", err);
+					document.getElementById("userPointBadge").textContent = 0;
+				});
+		});
+	</script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const hasToken = document.cookie.includes('AccessToken=');
@@ -783,7 +900,7 @@
 													</div>
 													<p>${comment.content}</p>
 
-												
+
 												</div>
 											</div>
 										`;

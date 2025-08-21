@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using static final_project_fe.Dtos.Lesson.QuizDto;
@@ -51,138 +52,175 @@ namespace final_project_fe.Pages.Mentor
 
         public async Task<IActionResult> OnGetAsync(int CourseId)
         {
-
             ImageKey = _imagesettings.ImageKey;
             BaseUrl = _apiSettings.BaseUrl;
+
             string token = Request.Cookies["AccessToken"];
             if (string.IsNullOrEmpty(token))
-                return RedirectToPage("/Login"); // hoặc xử lý khác
+                return RedirectToPage("/Login");
 
             // 🔓 Giải mã token và lấy userId từ claim
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-            var userIdClaim = jsonToken?.Claims
-                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            UserId = userIdClaim;
-            string apiUrl = $"{_apiSettings.BaseUrl}/Progress/get-module-progress-by-course?userId={userIdClaim}&courseId={CourseId}";
-            var response = await _httpClient.GetFromJsonAsync<List<ModuleProgressDto>>(apiUrl);
+            UserId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            var courseResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Course/{CourseId}");
-            if (courseResponse.IsSuccessStatusCode)
+            if (string.IsNullOrEmpty(UserId))
+                return RedirectToPage("/Login");
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            try
             {
-                var courseJson = await courseResponse.Content.ReadAsStringAsync();
-                Course = JsonConvert.DeserializeObject<CourseResponseDto>(courseJson);
-            }
+                // 1️⃣ Lấy tiến độ module
+                var progressResponse = await client.GetAsync($"{BaseUrl}/Progress/get-module-progress-by-course?userId={UserId}&courseId={CourseId}");
+                if (progressResponse.IsSuccessStatusCode)
+                {
+                    var progressJson = await progressResponse.Content.ReadAsStringAsync();
+                    Modules = JsonConvert.DeserializeObject<List<ModuleProgressDto>>(progressJson);
+                }
 
-            var mentorResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Mentor/by-course/{CourseId}");
-            if (mentorResponse.IsSuccessStatusCode)
+                // 2️⃣ Lấy thông tin khóa học
+                var courseResponse = await client.GetAsync($"{BaseUrl}/Course/{CourseId}");
+                if (courseResponse.IsSuccessStatusCode)
+                {
+                    var courseJson = await courseResponse.Content.ReadAsStringAsync();
+                    Course = JsonConvert.DeserializeObject<CourseResponseDto>(courseJson);
+                }
+
+                // 3️⃣ Lấy thông tin mentor
+                var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/by-course/{CourseId}");
+                if (mentorResponse.IsSuccessStatusCode)
+                {
+                    var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                    var mentor = JsonConvert.DeserializeObject<MentorDto>(mentorJson);
+                    if (mentor != null)
+                    {
+                        MentorFullName = $"{mentor.FirstName} {mentor.LastName}";
+                        MentorUserId = mentor.UserId;
+                    }
+                }
+
+                return Page();
+            }
+            catch (Exception ex)
             {
-                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
-                var mentor = JsonConvert.DeserializeObject<MentorDto>(mentorJson);
-                MentorFullName = $"{mentor.FirstName} {mentor.LastName}";
-                MentorUserId = mentor.UserId;
+                _logger.LogError(ex, "Error loading course or modules");
+                TempData["ErrorMessage"] = "An error occurred while loading course data.";
+                return Page();
             }
-
-
-            if (response != null)
-                Modules = response;
-            return Page();
         }
 
         public async Task<IActionResult> OnGetLessonAsync(int lessonId)
         {
+            string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(); // Hoặc RedirectToPage("/Login")
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             try
             {
-                // Lấy thông tin lesson đầu tiên để kiểm tra có quiz và assignment không
-                var lessonRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Lesson/{lessonId}");
-                if (lessonRes.IsSuccessStatusCode)
+                // 1️⃣ Lấy thông tin lesson
+                var lessonRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Lesson/{lessonId}");
+                if (!lessonRes.IsSuccessStatusCode)
+                    return NotFound("Lesson not found");
+
+                var lessonJson = await lessonRes.Content.ReadAsStringAsync();
+                LessonDetail = JsonConvert.DeserializeObject<LessonDetailDto>(lessonJson);
+
+                // 2️⃣ Kiểm tra quiz
+                List<QuestionDto> quiz = null;
+                var quizRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Learning/{lessonId}");
+                if (quizRes.IsSuccessStatusCode)
                 {
-                    var json = await lessonRes.Content.ReadAsStringAsync();
-                    LessonDetail = JsonConvert.DeserializeObject<LessonDetailDto>(json);
+                    var quizJson = await quizRes.Content.ReadAsStringAsync();
+                    quiz = JsonConvert.DeserializeObject<List<QuestionDto>>(quizJson);
+                }
 
-                    // Kiểm tra có quiz không
-                    var quizRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Learning/{lessonId}");
-                    List<QuestionDto> quiz = null;
+                // 3️⃣ Kiểm tra assignment
+                bool hasAssignment = false;
+                int? assignmentId = null;
 
-                    if (quizRes.IsSuccessStatusCode)
+                try
+                {
+                    var assignmentRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Assignment/get-all-assignment-by-lesson/{lessonId}");
+                    if (assignmentRes.IsSuccessStatusCode)
                     {
-                        var quizJson = await quizRes.Content.ReadAsStringAsync();
-                        quiz = JsonConvert.DeserializeObject<List<QuestionDto>>(quizJson);
-                    }
-
-                    // Kiểm tra assignment thông qua API khác
-                    bool hasAssignment = false;
-                    int? assignmentId = null;
-
-                    try
-                    {
-                        var assignmentRes = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/Assignment/get-all-assignment-by-lesson/{lessonId}");
-                        if (assignmentRes.IsSuccessStatusCode)
+                        var assignmentJson = await assignmentRes.Content.ReadAsStringAsync();
+                        var assignmentArray = JsonConvert.DeserializeObject<JArray>(assignmentJson);
+                        if (assignmentArray != null && assignmentArray.Any())
                         {
-                            var assignmentJson = await assignmentRes.Content.ReadAsStringAsync();
-                            var assignmentArray = JsonConvert.DeserializeObject<JArray>(assignmentJson);
-
-                            if (assignmentArray != null && assignmentArray.Any())
-                            {
-                                var firstAssignment = assignmentArray.First;
-
-                                hasAssignment = true;
-                                assignmentId =
-                                    (int?)firstAssignment["assignmentId"] ??
-                                    (int?)firstAssignment["AssignmentId"] ??
-                                    (int?)firstAssignment["id"] ??
-                                    (int?)firstAssignment["Id"];
-                            }
+                            var firstAssignment = assignmentArray.First;
+                            hasAssignment = true;
+                            assignmentId =
+                                (int?)firstAssignment["assignmentId"] ??
+                                (int?)firstAssignment["AssignmentId"] ??
+                                (int?)firstAssignment["id"] ??
+                                (int?)firstAssignment["Id"];
                         }
                     }
-                    catch
-                    {
-                        // Nếu lỗi khi gọi API assignment, coi như không có
-                        hasAssignment = false;
-                    }
-
-                    // Tạo response object với đầy đủ thông tin
-                    var responseData = new
-                    {
-                        lesson = LessonDetail,
-                        quiz = quiz?.Any() == true ? quiz : null,
-                        hasQuiz = quiz?.Any() == true,
-                        hasAssignment = hasAssignment,
-                        assignmentId = assignmentId
-                    };
-
-                    return new JsonResult(responseData);
                 }
+                catch
+                {
+                    hasAssignment = false;
+                }
+
+                // 4️⃣ Trả về dữ liệu
+                var responseData = new
+                {
+                    lesson = LessonDetail,
+                    quiz = quiz?.Any() == true ? quiz : null,
+                    hasQuiz = quiz?.Any() == true,
+                    hasAssignment,
+                    assignmentId
+                };
+
+                return new JsonResult(responseData);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching lesson data");
                 return StatusCode(500, "Error loading lesson");
             }
-
-            return NotFound();
         }
 
 
 
         public async Task<IActionResult> OnPostCompleteLessonAsync([FromBody] LessonCompletionDto model)
         {
+            string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(); // Hoặc RedirectToPage("/Login")
+
+            // Đánh dấu bài học hoàn thành
             model.Mark = 100;
             model.IsPassed = true;
+
             var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             var json = JsonConvert.SerializeObject(model);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync($"{_apiSettings.BaseUrl}/Learning/complete-lesson", content);
 
             if (!response.IsSuccessStatusCode)
-                return new JsonResult(new { success = false, error = await response.Content.ReadAsStringAsync() });
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { success = false, error = errorMsg });
+            }
 
             return new JsonResult(new { success = true });
         }
 
         public async Task<IActionResult> OnPostSubmitQuizAsync()
         {
+            string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+                return Unauthorized(); // Hoặc RedirectToPage("/Login")
+
             using var reader = new StreamReader(Request.Body);
             var body = await reader.ReadToEndAsync();
 
@@ -202,6 +240,8 @@ namespace final_project_fe.Pages.Mentor
             }
 
             var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             var json = JsonConvert.SerializeObject(model);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -214,7 +254,6 @@ namespace final_project_fe.Pages.Mentor
             }
 
             var responseJson = await response.Content.ReadAsStringAsync();
-
             var result = JsonConvert.DeserializeObject<dynamic>(responseJson);
 
             return new JsonResult(new

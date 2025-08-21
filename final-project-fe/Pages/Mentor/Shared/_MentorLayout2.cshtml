@@ -1,14 +1,47 @@
-﻿<!DOCTYPE html>
+﻿@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@using final_project_fe.Utils
+@using Microsoft.Extensions.Options
+@inject IOptions<ApiSettings> ApiSettings
+@inject IOptions<SignalrSetting> SignalrSetting
+
+@{
+    var roles = new List<string>();
+    var token = Context.Request.Cookies["AccessToken"];
+    bool isAuthenticated = !string.IsNullOrEmpty(token);
+    Guid? userId = null;
+    var BaseUrl = ApiSettings.Value.BaseUrl;
+    var HubUrl = SignalrSetting.Value.HubUrl;
+
+    if (!string.IsNullOrEmpty(token))
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+
+        // Lấy claim UserId
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedId))
+        {
+            userId = parsedId;
+        }
+
+        // Nếu muốn lấy roles từ token
+        roles = jwtToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="~/images//fav_icon.png" type="image/x-icon" />
-
+    <title>@ViewData["Title"]</title>
     <!-- ========== All CSS files linkup ========= -->
     <link rel="stylesheet" href=@Url.Content("~/MentorAssets/css/bootstrap.min.css") />
-    <link rel="stylesheet" href=@Url.Content("~/MentorAssets/css/lineicons.css") rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
     <link rel="stylesheet" href=@Url.Content("~/MentorAssets/css/materialdesignicons.min.css") rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href=@Url.Content("~/MentorAssets/css/main.css") />
 </head>
@@ -101,6 +134,17 @@
                         <span class="text">Grading Page</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a asp-page="AddCouponPage">
+                        <span class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-receipt" viewBox="0 0 16 16">
+                                <path d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27m.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0z" />
+                                <path d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5" />
+                            </svg>
+                        </span>
+                        <span class="text">Add Coupon</span>
+                    </a>
+                </li>
                 <span class="divider"><hr /></span>
                 <li class="nav-item">
                     <a href="/Index">
@@ -137,57 +181,26 @@
                         <div class="header-right">
                             <!-- notification start -->
                             <div class="notification-box ml-15 d-none d-md-flex">
-                                <button class="dropdown-toggle" type="button" id="notification" data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M11 20.1667C9.88317 20.1667 8.88718 19.63 8.23901 18.7917H13.761C13.113 19.63 12.1169 20.1667 11 20.1667Z"
-                                              fill="" />
-                                        <path d="M10.1157 2.74999C10.1157 2.24374 10.5117 1.83333 11 1.83333C11.4883 1.83333 11.8842 2.24374 11.8842 2.74999V2.82604C14.3932 3.26245 16.3051 5.52474 16.3051 8.24999V14.287C16.3051 14.5301 16.3982 14.7633 16.564 14.9352L18.2029 16.6342C18.4814 16.9229 18.2842 17.4167 17.8903 17.4167H4.10961C3.71574 17.4167 3.5185 16.9229 3.797 16.6342L5.43589 14.9352C5.6017 14.7633 5.69485 14.5301 5.69485 14.287V8.24999C5.69485 5.52474 7.60672 3.26245 10.1157 2.82604V2.74999Z"
-                                              fill="" />
+                                <button class="dropdown-toggle position-relative" type="button" id="notificationDropdown"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <!-- Icon chuông -->
+                                    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11 20.1667C9.88317 20.1667 8.88718 19.63 8.23901 18.7917H13.761C13.113 19.63 12.1169 20.1667 11 20.1667Z" />
+                                        <path d="M10.1157 2.74999C10.1157 2.24374 10.5117 1.83333 11 1.83333C11.4883 1.83333 11.8842 2.24374 11.8842 2.74999V2.82604C14.3932 3.26245 16.3051 5.52474 16.3051 8.24999V14.287C16.3051 14.5301 16.3982 14.7633 16.564 14.9352L18.2029 16.6342C18.4814 16.9229 18.2842 17.4167 17.8903 17.4167H4.10961C3.71574 17.4167 3.5185 16.9229 3.797 16.6342L5.43589 14.9352C5.6017 14.7633 5.69485 14.5301 5.69485 14.287V8.24999C5.69485 5.52474 7.60672 3.26245 10.1157 2.82604V2.74999Z" />
                                     </svg>
-                                    <span></span>
+
+                                    <!-- Dot hiển thị new -->
+                                    <span id="notificationDot"
+                                          class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none">
+                                    </span>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notification">
-                                    <li>
-                                        <a href="#0">
-                                            <div class="image">
-                                                <img src=@Url.Content("~/MentorAssets/images/lead/lead-6.png") alt="" />
-                                            </div>
-                                            <div class="content">
-                                                <h6>
-                                                    John Doe
-                                                    <span class="text-regular">
-                                                        comment on a product.
-                                                    </span>
-                                                </h6>
-                                                <p>
-                                                    Lorem ipsum dolor sit amet, consect etur adipiscing
-                                                    elit Vivamus tortor.
-                                                </p>
-                                                <span>10 mins ago</span>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#0">
-                                            <div class="image">
-                                                <img src=@Url.Content("~/MentorAssets/images/lead/lead-1.png") alt="" />
-                                            </div>
-                                            <div class="content">
-                                                <h6>
-                                                    Jonathon
-                                                    <span class="text-regular">
-                                                        like on a product.
-                                                    </span>
-                                                </h6>
-                                                <p>
-                                                    Lorem ipsum dolor sit amet, consect etur adipiscing
-                                                    elit Vivamus tortor.
-                                                </p>
-                                                <span>10 mins ago</span>
-                                            </div>
-                                        </a>
-                                    </li>
+
+                                <!-- Dropdown danh sách thông báo -->
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notificationDropdown" id="notificationList">
+                                    <li class="dropdown-header fw-bold" id="notificationHeader">No Notifications</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <!-- Thông báo render động -->
                                 </ul>
                             </div>
                             <!-- notification end -->
@@ -238,6 +251,155 @@
     <script src=@Url.Content("~/MentorAssets/js/moment.min.js")></script>
     <script src=@Url.Content("~/MentorAssets/js/polyfill.js")></script>
     <script src=@Url.Content("~/MentorAssets/js/main.js")></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        const apiBaseUrl = "@BaseUrl";   // từ cấu hình
+        const hubUrl = "@HubUrl";        // từ cấu hình
+        const userId = "@(userId?.ToString() ?? "")"; // từ claim
+
+        // Render 1 item notification
+        function renderNotificationItem(notification, isNew = false) {
+            return `
+            <li class="notification-item ${isNew ? 'new' : ''} px-3 py-2 border-bottom">
+                <div class="message fw-medium">
+                    ${notification.message}
+                    ${isNew ? '<span class="badge bg-success ms-2">New</span>' : ''}
+                </div>
+                <div class="time text-muted small text-end mt-1">
+                    ${new Date(notification.createdAt).toLocaleString()}
+                </div>
+            </li>
+            `;
+        }
+
+        // Cập nhật số lượng vào header
+        function updateHeader() {
+            const count = document.querySelectorAll("#notificationList .notification-item").length;
+            const header = document.getElementById("notificationHeader");
+            header.innerText = count > 0 ? `${count} Notifications` : "No Notifications";
+        }
+
+        // Load khi mở trang
+        async function loadNotifications() {
+            if (!userId) return;
+            try {
+                const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`);
+                if (!response.ok) throw new Error("Failed to fetch notifications");
+                let notifications = await response.json();
+
+                // 👉 Sắp xếp mới nhất trước
+                notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                const list = document.getElementById("notificationList");
+                list.innerHTML = `
+                    <li class="dropdown-header fw-bold" id="notificationHeader">
+                        ${notifications.length > 0 ? `${notifications.length} Notifications` : "No Notifications"}
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                `;
+
+                // 👉 append lần lượt theo đúng thứ tự sau khi sort
+                notifications.forEach(noti => {
+                    list.insertAdjacentHTML("beforeend", renderNotificationItem(noti, false));
+                });
+
+                // ❌ Dot KHÔNG tự bật khi load cũ
+                const dot = document.getElementById("notificationDot");
+                if (dot) dot.classList.add("d-none");
+
+            } catch (err) {
+                console.error("❌ Error loading notifications:", err);
+            }
+        }
+
+        // Khi click dropdown → reset dot + clear NEW
+        document.getElementById("notificationDropdown")?.addEventListener("click", () => {
+            clearNewBadges();
+        });
+
+        function clearNewBadges() {
+            const dot = document.getElementById("notificationDot");
+            if (dot) dot.classList.add("d-none"); // ẩn dot
+
+            // Xóa badge "New"
+            document.querySelectorAll("#notificationList .notification-item .badge").forEach(b => b.remove());
+
+            updateHeader();
+        }
+
+        // ---- SignalR ----
+        if (!window.signalRConnection) {
+            window.signalRConnection = new signalR.HubConnectionBuilder()
+                .withUrl(`${hubUrl}/postHub?UserId=${userId}`)
+                .withAutomaticReconnect()
+                .build();
+
+            window.signalRConnection.on("ReceiveNotification", (notification) => {
+                if (typeof notification === "string") {
+                    try { notification = JSON.parse(notification); } catch { return; }
+                }
+
+                const list = document.getElementById("notificationList");
+                if (!list) return;
+
+                // ✅ Chỉ bật dot khi có thông báo mới
+                const dot = document.getElementById("notificationDot");
+                if (dot) dot.classList.remove("d-none");
+
+                // 👉 Thêm notification mới ngay sau header
+                const divider = list.querySelector(".dropdown-divider");
+                divider.insertAdjacentHTML("afterend", renderNotificationItem(notification, true));
+
+                updateHeader();
+            });
+
+            window.signalRConnection.start()
+                .then(() => console.log("✅ SignalR connected"))
+                .catch(err => console.error("❌ SignalR error:", err));
+        }
+
+        // Load lần đầu
+        loadNotifications();
+    </script>
+
+
+    <style>
+        .notification-item {
+            list-style: none;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-box {
+            display: flex;
+            flex-direction: column; /* sắp xếp dọc */
+            padding: 10px 15px;
+        }
+
+            .notification-box .message {
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                text-align: left; /* bên trái */
+            }
+
+            .notification-box .time {
+                font-size: 12px;
+                color: #888;
+                text-align: right; /* bên phải */
+                margin-top: 4px;
+            }
+
+        .notification-item.new .message {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .notification-item:hover {
+            background: #f5f7fa; /* hover hiệu ứng */
+            cursor: pointer;
+        }
+    </style>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

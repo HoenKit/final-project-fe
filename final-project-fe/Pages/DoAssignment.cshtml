@@ -325,13 +325,7 @@
                     ✅ You have already submitted this assignment.
                 </div>
             }
-            else if (!Model.IsUserAssignmentCreated)
-            {
-                <div class="alert-custom alert-warning-custom">
-                    ⚠ Unable to initialize assignment.
-                </div>
-            }
-            else if (!Model.IsPresented)
+            else if (!Model.IsUserAssignmentCreated || !Model.IsPresented)
             {
                 <div class="alert-custom alert-danger-custom mb-3">
                     🔒 You are not allowed to take the test yet. Please wait until the test starts.
@@ -387,7 +381,7 @@
     <script>
         const Baseurl = "@Model.BaseUrl";
         const assignmentId = "@Model.assignmentid";
-        const userId = "@Model.UserId";
+        const currentUserId = "@Model.UserId";
 
         const btnLamBai = document.getElementById("btnLamBai");
         const btnStartTest = document.getElementById("btnStartTest");
@@ -399,12 +393,20 @@
 
         let countdownTimer;
 
+        // Lấy token từ cookie
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('AccessToken='))
+            ?.split('=')[1];
+
+        if (!token) {
+            console.error("Token is missing. Please login again.");
+        }
+
         // Bắt buộc vào meeting trước khi làm bài
         meetLink?.addEventListener("click", () => {
             const confirmed = confirm("Are you joining the meeting now?");
-            if (confirmed) {
-                btnLamBai.classList.remove("d-none");
-            }
+            if (confirmed) btnLamBai.classList.remove("d-none");
         });
 
         btnLamBai?.addEventListener("click", () => {
@@ -420,19 +422,31 @@
 
         btnSubmit?.addEventListener("click", () => submitAssignment(false));
 
-        function loadAssignment() {
-            fetch(`${Baseurl}/Assignment/${assignmentId}`)
-                .then(res => res.json())
-                .then(data => {
-                    questionContent.textContent = data.content;
-                    examTimer.textContent = data.examTime;
-                    meetLink.href = data.meetLink;
-                    startCountdown(data.examTime);
-                })
-                .catch(err => {
-                    console.error("Error loading assignment:", err);
-                    showNotification("The assignment could not be loaded. Please try again later.", "error");
-                });
+        // Hàm fetch chung với token
+        async function fetchWithToken(url, options = {}) {
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Request failed");
+            }
+            return response.json();
+        }
+
+        async function loadAssignment() {
+            try {
+                const data = await fetchWithToken(`${Baseurl}/Assignment/${assignmentId}`);
+                questionContent.textContent = data.content;
+                examTimer.textContent = data.examTime;
+                meetLink.href = data.meetLink;
+                startCountdown(data.examTime);
+            } catch (err) {
+                console.error("Error loading assignment:", err);
+                showNotification("The assignment could not be loaded. Please try again later.", "error");
+            }
         }
 
         function startCountdown(timeStr) {
@@ -455,38 +469,30 @@
             }, 1000);
         }
 
-        function submitAssignment(auto = false) {
+        async function submitAssignment(auto = false) {
             const answer = document.getElementById("answerContent").value.trim();
             const payload = {
-                userId: userId,
+                userId: currentUserId,
                 assignmentId: assignmentId,
                 content: answer
             };
 
-            fetch(`${Baseurl}/Learning/submitAssignment`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => {
-                if (res.ok) {
-                    showNotification(
-                        auto ? "⏱ Time's up. The post has been automatically returned." : "✅ The article has been submitted successfully!",
-                        "success"
-                    );
-                    setTimeout(() => {
-                        window.location.href = "/UserCourse";
-                    }, 2000);
-                } else {
-                    return res.text().then(errMsg => {
-                        showNotification("❌ Failed submission: " + errMsg, "error");
-                    });
-                }
-            })
-            .catch(err => {
+            try {
+                await fetchWithToken(`${Baseurl}/Learning/submitAssignment`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                showNotification(
+                    auto ? "⏱ Time's up. The post has been automatically returned." : "✅ The article has been submitted successfully!",
+                    "success"
+                );
+                setTimeout(() => window.location.href = "/UserCourse", 2000);
+            } catch (err) {
                 console.error("Error when submitting assignment:", err);
-                showNotification("🚫 Server connection error. Please try again later.", "error");
-            });
+                showNotification("❌ Failed submission: " + err.message, "error");
+            }
         }
     </script>
 }

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Claims;
@@ -243,11 +244,6 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
         public async Task<IActionResult> OnPostAsync(int? courseId)
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             try
             {
                 string token = Request.Cookies["AccessToken"];
@@ -270,6 +266,9 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     CouponId = finalCouponId
                 };
 
+                // dùng trực tiếp _httpClient (đã được inject trong constructor)
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var api = $"{_apiSettings.BaseUrl}/Payment/buy-course";
                 var res = await _httpClient.PostAsJsonAsync(api, request);
 
@@ -281,20 +280,35 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var errorContent = await res.Content.ReadAsStringAsync();
 
-                if (errorContent.Contains("NotEnoughPoint", StringComparison.OrdinalIgnoreCase))
+                if (errorContent.Contains("Not enough points to purchase the course", StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["ErrorMessage"] = "You do not have enough points. Please recharge.";
-                    return RedirectToPage("/Transaction/Index");
+                    return RedirectToPage("/PointTransaction");
+                }
+                else if (errorContent.Contains("You have already purchased this course.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "You have already purchased this course.";
+                    return RedirectToPage("/UserCourse");
+                }
+                else if (errorContent.Contains("User or course not found.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "User or course not found.";
+                    return RedirectToPage("~/Mentor/MentorPage");
+                }
+                else if (errorContent.Contains("Mentor not found.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Mentor not found.";
+                    return RedirectToPage("~/Mentor/MentorPage");
                 }
 
-                ModelState.AddModelError("", "Purchase failed. Please try again.");
-                return RedirectToPage("/UserCourse");
+                ModelState.AddModelError("", "Unexpected error occurred while purchasing the course.");
+                return RedirectToPage("~/Mentor/MentorPage");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error during course purchase");
                 TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
-                return Page();
+                return RedirectToPage("/UserCourse");
             }
         }
 
