@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Web;
 using final_project_fe.Dtos;
 using final_project_fe.Dtos.Category;
@@ -35,6 +36,7 @@ namespace final_project_fe.Pages
             _signalrSetting = signalrSetting;
         }
         public string BaseUrl { get; set; }
+        public bool IsOwnUser { get; set; } = false;
         [BindProperty]
         public User Profile { get; set; } = new User();
         public string CurrentUserId { get; set; }
@@ -47,7 +49,7 @@ namespace final_project_fe.Pages
         public GetMentorDto? CurrentMentor { get; set; }
         public List<string> UserRoles { get; private set; } = new List<string>();
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
-        public async Task<IActionResult> OnGetAsync(int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
+        public async Task<IActionResult> OnGetAsync(string? userId, int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
         {
             BaseUrl = _apiSettings.BaseUrl;
             if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
@@ -73,96 +75,20 @@ namespace final_project_fe.Pages
                         .ToList();
 
                     _logger.LogInformation("User roles: {Roles}", string.Join(", ", UserRoles));
-
-                    /*if (!string.IsNullOrEmpty(token))
-                    {
-                        var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(token);
-                        IsMentor = jwt.Claims.Any(c =>
-                            (c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role") &&
-                            c.Value == "Mentor");
-                    }*/
                 }
 
-                // Gọi API để lấy thông tin user hiện tại
-                var response = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
-                if (!response.IsSuccessStatusCode)
+                // 🔹 XÁC ĐỊNH XEM CÓ PHẢI PROFILE CỦA CHÍNH MÌNH KHÔNG
+                IsOwnUser = string.IsNullOrEmpty(userId) || userId == CurrentUserId;
+
+                // Nếu không truyền userId hoặc userId == CurrentUserId → load profile của chính mình
+                if (IsOwnUser)
                 {
-                    _logger.LogError("Unable to get user information. Status: {StatusCode}", response.StatusCode);
-                    TempData["ErrorMessage"] = $"Error calling API: {response.StatusCode}";
-                    return Page();
-                }
-                var jsonContent = await response.Content.ReadAsStringAsync();
-                var userInfo = JsonSerializer.Deserialize<User>(jsonContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-                if (userInfo == null)
-                {
-                    ModelState.AddModelError("", "Can not find User Profile.");
-                    TempData["ErrorMessage"] = "Can not find Profile!";
-                    return Page();
-                }
-                Profile = userInfo;
-
-                // Check if user has Mentor role
-                IsMentor = UserRoles != null && UserRoles.Contains("Mentor");
-
-                if (IsMentor)
-                {
-                    // Try to get current mentor info
-                    var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
-                    if (mentorResponse.IsSuccessStatusCode)
-                    {
-                        var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
-                        CurrentMentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        });
-
-                        if (CurrentMentor != null)
-                        {
-                            // Set MentorId from CurrentMentor
-                            MentorId = CurrentMentor.MentorId;
-
-                            _logger.LogInformation("MentorId set to: {MentorId} from CurrentMentor for UserId: {CurrentUserId}",
-                                MentorId, CurrentUserId);
-
-                            //Load Category
-                            //await LoadCategoriesAsync();
-
-                            // Load courses for mentor
-                            await LoadCoursesAsync(currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Failed to deserialize mentor information for user: {UserId}. User will only see profile.", CurrentUserId);
-                            IsMentor = false; // Set to false so courses section won't show
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Cannot get mentor information for user: {UserId}. Status: {StatusCode}. User will only see profile.",
-                            CurrentUserId, mentorResponse.StatusCode);
-                        IsMentor = false; // Set to false so courses section won't show
-                    }
+                    await LoadCurrentUserProfile();
                 }
                 else
                 {
-                    _logger.LogInformation("User {UserId} does not have Mentor role. Only profile will be displayed.", CurrentUserId);
-                }
-
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Error connecting to API server.");
-                TempData["ErrorMessage"] = "Error connecting to server API.";
-                return Page();
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Error processing JSON data from API.");
-                TempData["ErrorMessage"] = "Error processing data from server.";
-                return Page();
+                    await LoadOtherUserProfile(userId);
+                }             
             }
             catch (Exception ex)
             {
@@ -172,6 +98,211 @@ namespace final_project_fe.Pages
             }
 
             return Page();
+        }
+
+        private async Task LoadCurrentUserProfile()
+        {
+            try
+            {
+                // Gọi API lấy thông tin user hiện tại
+                _httpClient.DefaultRequestHeaders.Clear();
+                if (Request.Cookies.TryGetValue("AccessToken", out var token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                var response = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
+
+                _logger.LogInformation("API Response Status: {StatusCode}", response.StatusCode);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Unable to get user information. Status: {StatusCode}", response.StatusCode);
+                    TempData["ErrorMessage"] = $"Error calling API: {response.StatusCode}";
+                    return;
+                }
+
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("API Response Content: {Content}", jsonContent);
+
+                // Kiểm tra xem response có rỗng không
+                if (string.IsNullOrWhiteSpace(jsonContent))
+                {
+                    _logger.LogError("Received empty response from API");
+                    TempData["ErrorMessage"] = "Received empty response from server";
+                    return;
+                }
+
+                // Kiểm tra xem response có phải JSON không
+                if (!jsonContent.TrimStart().StartsWith("{") && !jsonContent.TrimStart().StartsWith("["))
+                {
+                    _logger.LogError("Response is not valid JSON: {Content}", jsonContent);
+                    TempData["ErrorMessage"] = "Invalid response format from server";
+                    return;
+                }
+
+                var userInfo = JsonSerializer.Deserialize<User>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+
+                if (userInfo == null)
+                {
+                    _logger.LogError("Failed to deserialize user info");
+                    TempData["ErrorMessage"] = "Can not find Profile!";
+                    return;
+                }
+
+                Profile = userInfo;
+
+                // Nếu là mentor thì load thêm mentor info + courses
+                if (UserRoles.Contains("Mentor"))
+                {
+                    await LoadMentorInfo(CurrentUserId);
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, "JSON parsing error while loading current user profile");
+                TempData["ErrorMessage"] = "Error parsing server response. Please try again.";
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "Network error while loading current user profile");
+                TempData["ErrorMessage"] = "Network error. Please check your connection and try again.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while loading current user profile");
+                TempData["ErrorMessage"] = "An unexpected error occurred while loading profile.";
+            }
+        }
+
+        private async Task LoadOtherUserProfile(string userId)
+        {
+            try
+            {
+                // 🔹 Nếu truyền userId khác CurrentUserId → load profile user đó
+                _httpClient.DefaultRequestHeaders.Clear();
+                if (Request.Cookies.TryGetValue("AccessToken", out var token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                var response = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{userId}");
+
+                _logger.LogInformation("API Response Status for user {UserId}: {StatusCode}", userId, response.StatusCode);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Unable to get searched user information. Status: {StatusCode}", response.StatusCode);
+                    TempData["ErrorMessage"] = $"Error calling API: {response.StatusCode}";
+                    return;
+                }
+
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("API Response Content for user {UserId}: {Content}", userId, jsonContent);
+
+                // Kiểm tra xem response có rỗng không
+                if (string.IsNullOrWhiteSpace(jsonContent))
+                {
+                    _logger.LogError("Received empty response from API for user {UserId}", userId);
+                    TempData["ErrorMessage"] = "User not found";
+                    return;
+                }
+
+                // Kiểm tra xem response có phải JSON không
+                if (!jsonContent.TrimStart().StartsWith("{") && !jsonContent.TrimStart().StartsWith("["))
+                {
+                    _logger.LogError("Response is not valid JSON for user {UserId}: {Content}", userId, jsonContent);
+                    TempData["ErrorMessage"] = "Invalid response format from server";
+                    return;
+                }
+
+                var userInfo = JsonSerializer.Deserialize<User>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+
+                if (userInfo == null)
+                {
+                    _logger.LogError("Failed to deserialize user info for user {UserId}", userId);
+                    TempData["ErrorMessage"] = "Can not find searched user Profile!";
+                    return;
+                }
+
+                Profile = userInfo;
+
+                // 👉 Gọi thêm API check xem user đó có phải Mentor không
+                await LoadMentorInfo(userId);
+
+                _logger.LogInformation("Successfully loaded profile for user: {UserId}", userId);
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, "JSON parsing error while loading other user profile for {UserId}", userId);
+                TempData["ErrorMessage"] = "Error parsing server response. Please try again.";
+            }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "Network error while loading other user profile for {UserId}", userId);
+                TempData["ErrorMessage"] = "Network error. Please check your connection and try again.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while loading other user profile for {UserId}", userId);
+                TempData["ErrorMessage"] = "An unexpected error occurred while loading profile.";
+            }
+        }
+
+        private async Task LoadMentorInfo(string userId)
+        {
+            try
+            {
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
+
+                if (mentorResponse.IsSuccessStatusCode)
+                {
+                    var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+
+                    _logger.LogInformation("Mentor API Response for user {UserId}: {Content}", userId, mentorJson);
+
+                    // Kiểm tra mentor response
+                    if (!string.IsNullOrWhiteSpace(mentorJson) &&
+                        (mentorJson.TrimStart().StartsWith("{") || mentorJson.TrimStart().StartsWith("[")))
+                    {
+                        CurrentMentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        });
+
+                        if (CurrentMentor != null)
+                        {
+                            MentorId = CurrentMentor.MentorId;
+
+                            // Load courses
+                            await LoadCoursesAsync(null, null, null, null, null, null, null, null, null, null, null);
+                        }
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("User {UserId} is not a mentor. Status: {StatusCode}", userId, mentorResponse.StatusCode);
+                }
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, "JSON parsing error while loading mentor info for {UserId}", userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading mentor info for {UserId}", userId);
+            }
         }
 
         private async Task LoadCoursesAsync(int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
