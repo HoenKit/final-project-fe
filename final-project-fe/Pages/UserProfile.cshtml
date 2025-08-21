@@ -44,59 +44,62 @@
 					</div>
 				</div>
 			</div>
-			<div class="d-flex" style="width: 44%; margin-right: -3%;">
-				<!-- Points Card -->
-				<div class="col-5">
-					<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
-						<div style="color: #000;" class="card-body d-flex flex-column justify-content-between">
-							<div class="d-flex justify-content-between align-items-start">
-								<div>
-									<small>Your Points</small>
-									<h3 class="mt-1">@(Model.Profile?.Point?.ToString("N0") ?? "0")</h3>
-								</div>
-								<i style="font-size:150%" class="bi bi-p-circle"></i>
-							</div>
-							<a class="btn btn-outline-dark btn-sm rounded-pill mt-3 w-fit" asp-area="" asp-page="/PointTransaction">
-								Buy Points
-							</a>
-						</div>
-					</div>
-				</div>
-				<!-- MemberShip Card -->
-				<div class="col-6">
-					@if (Model.Profile.IsPremium)
-					{
-						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
-							<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
-								<div>
-									<small>MemberShip</small>
-								</div>
-								<i style="color:#ffff" class="bi bi-gem fs-2"></i>
-								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-									Premium Member
-								</a>
-							</div>
-						</div>
-					}
-					else
-					{
-						<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
-							<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+			@if (Model.IsOwnUser)
+			{
+				<div class="d-flex" style="width: 44%; margin-right: -3%;">
+					<!-- Points Card -->
+					<div class="col-5">
+						<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
+							<div style="color: #000;" class="card-body d-flex flex-column justify-content-between">
 								<div class="d-flex justify-content-between align-items-start">
 									<div>
-										<small>MemberShip</small>
-										<h3 class="mt-1">Free Member</h3>
+										<small>Your Points</small>
+										<h3 class="mt-1">@(Model.Profile?.Point?.ToString("N0") ?? "0")</h3>
 									</div>
-									<i class="bi bi-person-badge-fill fs-3"></i>
+									<i style="font-size:150%" class="bi bi-p-circle"></i>
 								</div>
-								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-									Upgrade to Premium
+								<a class="btn btn-outline-dark btn-sm rounded-pill mt-3 w-fit" asp-area="" asp-page="/PointTransaction">
+									Buy Points
 								</a>
 							</div>
 						</div>
-					}
-				</div>
+					</div>
+					<!-- MemberShip Card -->
+					<div class="col-6">
+						@if (Model.Profile.IsPremium)
+						{
+							<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
+								<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
+									<div>
+										<small>MemberShip</small>
+									</div>
+									<i style="color:#ffff" class="bi bi-gem fs-2"></i>
+									<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+										Premium Member
+									</a>
+								</div>
+							</div>
+						}
+						else
+						{
+							<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
+								<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+									<div class="d-flex justify-content-between align-items-start">
+										<div>
+											<small>MemberShip</small>
+											<h3 class="mt-1">Free Member</h3>
+										</div>
+										<i class="bi bi-person-badge-fill fs-3"></i>
+									</div>
+									<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+										Upgrade to Premium
+									</a>
+								</div>
+							</div>
+						}
+					</div>
 			</div>
+			}
 		</div>
 	</div>
 
@@ -109,59 +112,54 @@
 						<!-- Sidebar -->
 						<div class="col-lg-3">
 							<aside class="sidebar">
-								<div class="widget">
-									<h4 class="widget-title">Shortcuts</h4>
-									<ul class="naves">
-										<li>
-											<i class="ti-clipboard"></i>
-											<a asp-page="/Index" title="">News feed</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-mortarboard"></i>
-											<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-person"></i>
-											<a class="active" asp-page="/UserPage" title="" data-ripple="">My Page</a>
-										</li>
-										@* <li style="display:flex">
+									<div class="widget">
+										<h4 class="widget-title">Shortcuts</h4>
+										<ul class="naves">
+											<li>
+												<i class="ti-clipboard"></i>
+												<a asp-page="/Index" title="">News feed</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-mortarboard"></i>
+												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+											</li>
+											@if (Model.IsOwnUser)
+											{
+												<li style="display:flex">
+													<i class="bi bi-person"></i>
+													<a class="active" asp-page="/UserPage" title="" data-ripple="">My Page</a>
+												</li>
+											}
+											else
+											{
+												<li style="display:flex">
+													<i class="bi bi-person"></i>
+													<a class="active" asp-page="/UserPage" asp-route-userId="@Request.Query["userId"]" data-tab="Page">@Model.Profile?.UserMetaData?.FirstName Page</a>
+												</li>
+											}
+											@* <li style="display:flex">
 											<i class="bi bi-info-circle"></i>
 											<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
-										</li> *@
-										<li style="display:flex">
-											<i class="bi bi-bag"></i>
-											<a asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-wallet2"></i>
-											<a asp-area="" asp-page="/TransactionHistory">Transaction History</a>
-										</li>
-									</ul>
-								</div><!-- Shortcuts -->
+											</li> *@
+										@if (Model.IsOwnUser)
+										{
+											<li style="display:flex">
+												<i class="bi bi-bag"></i>
+												<a asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-wallet2"></i>
+												<a asp-area="" asp-page="/TransactionHistory">Transaction History</a>
+											</li>
+										}
+										</ul>
+									</div><!-- Shortcuts -->
 								<div class="widget">
-									<h4 class="widget-title">Recent Activity</h4>
-									<ul class="activitiez">
-										<li>
-											<div class="activity-meta">
-												<i>10 hours Ago</i>
-												<span><a href="#" title="">Commented on Video posted </a></span>
-												<h6>by <a href="time-line.html">black demon.</a></h6>
-											</div>
-										</li>
-										<li>
-											<div class="activity-meta">
-												<i>30 Days Ago</i>
-												<span><a href="#" title="">Posted your status. "Hello guys, how are you?"</a></span>
-											</div>
-										</li>
-										<li>
-											<div class="activity-meta">
-												<i>2 Years Ago</i>
-												<span><a href="#" title="">Share a video on her timeline.</a></span>
-												<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-											</div>
-										</li>
-									</ul>
+									<div class="advertisment-box">
+										<figure>
+											<a href="#" title="Advertisment"><img src="https://travarsa.com/wp-content/uploads/2023/04/Soft-Skills-Training-and-Certification%E2%80%8B.jpg" alt=""></a>
+										</figure>
+									</div>
 								</div><!-- recent activites -->
 							</aside>
 						</div><!-- sidebar -->
@@ -185,7 +183,10 @@
 										<div class="container">
 											<h2 class="section-title d-flex justify-content-between align-items-center">
 												About me
-												<i class="bi bi-pencil-square edit-icon" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile"></i>
+												@if (Model.IsOwnUser)
+												{
+													<i class="bi bi-pencil-square edit-icon" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile"></i>
+												}
 											</h2>
 											<div class="profile-details-grid">
 												<div class="profile-detail-item">
@@ -539,7 +540,7 @@
 							</div>
 
 							<!-- Courses Section -->
-							@if (Model.IsMentor)
+							@if (Model.CurrentMentor != null && Model.Courses != null)
 							{
 								<div class="courses-section">
 									<div class="container">

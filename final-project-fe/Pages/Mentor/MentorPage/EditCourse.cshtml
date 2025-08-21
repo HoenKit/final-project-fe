@@ -227,7 +227,7 @@
                     <!-- Main Form -->
                     <div class="col-lg-9">
                         <div class="course-content">
-                            <partial name="_Notification" />
+                            @* <partial name="_Notification" /> *@
 
                             <!-- Hidden Delete Form -->
                             <form id="deleteCourseForm" method="post" asp-page-handler="ToggleDeleteCourse" style="display: none;">
@@ -1349,6 +1349,10 @@
                                                                                                 <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
 
                                                                                                 <div class="mb-3">
+                                                                                                    <small class="text-danger">
+                                                                                                        <i class="bi bi-send-exclamation"></i>
+                                                                                                        Please fill out all course fields before using this feature (Only For Premium)!
+                                                                                                    </small>
                                                                                                     <label class="form-label">Topic/Content for AI Generation *</label>
                                                                                                     <textarea class="form-control" asp-for="Topic" rows="3" required
                                                                                                               placeholder="Enter the topic or content you want AI to generate questions about..."></textarea>
@@ -1649,7 +1653,7 @@
                                                         <div class="mb-3">
                                                             <small class="text-danger">
                                                             <i class="bi bi-send-exclamation"></i>
-                                                                Please fill out all course fields before using this feature!
+                                                                Please fill out all course fields before using this feature (Only For Premium)!
                                                             </small>
                                                             <div class="alert alert-info">
                                                                 <i class="fa fa-info-circle me-2"></i>

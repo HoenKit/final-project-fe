@@ -5,6 +5,7 @@
 }
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
+	var showPremium = TempData["ShowPremiumWarning"] as string;
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -17,66 +18,14 @@
 					<div class="col-lg-12">
 						<div class="row" id="page-contents">
 							<div class="col-lg-3">
-								<aside class="sidebar">
+								<aside class="sidebar">	
 									<div class="widget">
-										<h4 class="widget-title">Search</h4>
-										<ul class="naves">
-											<form style="margin-bottom: -15px;" method="get" asp-page-handler="SearchPost" class="d-flex">
-												<div class="input-group" style="margin-bottom: 40px">
-													<input type="text" asp-for="Query" placeholder="Search by title..." class="form-control" />
-													<button type="submit" class="btn btn-primary">
-														<i class="bi bi-search"></i>
-													</button>
-												</div>
-											</form>
-											@* @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
-
-											@{
-												var userToken = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
-											}
-
-											@if (!string.IsNullOrEmpty(userToken))
-											{
-												<li style="display:flex">
-													<i class="bi bi-person"></i>
-													<a asp-page="/UserPage" title="">My page</a>
-												</li>
-												<li style="display:flex">
-													<i class="ti-comments-smiley"></i>
-													<a asp-page="/CourseRecommend" title="">Recommend Course</a>
-												</li>
-												<li style="display:flex">
-													<i class="bi bi-wechat"></i>
-													<a href="/Chatting" title="">Chatting</a>
-												</li>
-											} *@
-											@* <li>
-                                            <i class="ti-comments-smiley"></i>
-                                            <a href="#" title="">Messages</a>
-                                            </li>
-                                            <li>
-                                            <i class="ti-mouse-alt"></i>
-                                            <a href="#" title="">Inbox</a>
-                                            </li>
-                                            <li>
-                                            <i class="ti-user"></i>
-                                            <a href="#" title="">friends</a>
-                                            </li>*@
-											@* <li style="display:flex">
-                                            <i class="bi bi-mortarboard"></i>
-                                            <a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-                                            </li> *@
-											@* <li>
-                                                <i class="ti-image"></i>
-                                                <a href="#" title="">images</a>
-                                            </li> *@
-											@* <li style="display:flex">
-												<i class="bi bi-book-half"></i>
-												<a href="/UserCourse" title="">My Own Course</a>
-											</li> *@
-
-										</ul>
-									</div><!-- Shortcuts -->
+										<div class="advertisment-box">
+											<figure>
+												<a href="#" title="Advertisment"><img src="https://travarsa.com/wp-content/uploads/2023/04/Soft-Skills-Training-and-Certification%E2%80%8B.jpg" alt=""></a>
+											</figure>
+										</div>
+									</div>
 									<div class="widget">
 										<div class="banner medium-opacity bluesh">
 											<div class="bg-image" style="background-image: url(images/resources/baner-widgetbg.jpg)"></div>
@@ -813,6 +762,7 @@
 	<script src="js/map-init.js"></script> *@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 	<script>
 		var swiper = new Swiper(".mySwiper", {
@@ -2497,6 +2447,18 @@
 		});
 	</script> *@
 
+	@section Scripts {
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				var showPremium = "@showPremium";
+
+				if (showPremium === "true") {
+					showPremiumWarning();
+				}
+			});
+		</script>
+	}
+
 	<!-- category script -->
 	<script>
 		let selectedCategory = null;
@@ -2595,18 +2557,19 @@
 
 		// Khởi tạo khi trang load
 		document.addEventListener('DOMContentLoaded', function () {
-			// Kiểm tra nếu có giá trị từ server (khi edit)
-			const existingCategoryId = document.getElementById('selectedCategoryId').value;
-			if (existingCategoryId) {
-				const selectElement = document.getElementById('category');
-				const option = selectElement.querySelector(`option[value="${existingCategoryId}"]`);
-				if (option) {
-					setSelectedCategory(existingCategoryId, option.text);
-				}
+		const existingCategoryId = document.getElementById('selectedCategoryId').value;
+		if (existingCategoryId) {
+			const option = document.querySelector(
+				`#categoryList .category-option[onclick*="'${existingCategoryId}'"]`
+			);
+			if (option) {
+				setSelectedCategory(existingCategoryId, option.textContent.trim());
 			}
+		}
 
-			hideCategoryDropdown();
-		});
+		hideCategoryDropdown();
+	});
+
 
 		// Function để set category từ server (khi edit bài viết)
 		function setSelectedCategory(categoryId, categoryTitle) {

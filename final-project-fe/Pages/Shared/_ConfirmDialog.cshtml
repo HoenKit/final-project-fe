@@ -493,6 +493,20 @@
                 }
             });
         }
+
+        function showPremiumWarning() {
+            showConfirm({
+                type: 'warning',
+                title: 'Request Premium',
+                message: 'Only Premium users can use this feature, click "Ok" to upgrade to Premium package',
+                confirmText: 'OK',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    window.location.href = '/#';
+                }
+            });
+        }
+
     </script>
 </body>
 </html>

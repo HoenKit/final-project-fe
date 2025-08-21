@@ -22,6 +22,7 @@ using System.Reflection;
 using final_project_fe.Dtos.Answer;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using final_project_fe.Dtos.Assignment;
+using final_project_fe.Dtos.Users;
 
 namespace final_project_fe.Pages.Mentor.MentorPage
 {
@@ -36,6 +37,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             _apiSettings = apiSettings.Value;
             _httpClient = httpClient;
         }
+        public User UserInfo { get; set; }
+        public bool IsPremium { get; set; } = false;
         [BindProperty]
         public CourseResponseDto Course { get; set; } = new CourseResponseDto();
 
@@ -435,6 +438,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
+
+                IsPremium = UserInfo?.IsPremium ?? false;
+                if (!IsPremium)
+                {
+                    TempData["ErrorMessage"] = "Only Premium users can use this feature, Please to upgrade to Premium package";
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
 
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
@@ -1258,7 +1268,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 TempData["ErrorMessage"] = "Number of questions must be greater than 0.";
                 return RedirectToPage(new { courseId = Module.CourseId });
             }
-
+            IsPremium = UserInfo?.IsPremium ?? false;
+            if (!IsPremium)
+            {
+                TempData["ErrorMessage"] = "Only Premium users can use this feature, Please to upgrade to Premium package";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
             try
             {
                 // Tạo request object

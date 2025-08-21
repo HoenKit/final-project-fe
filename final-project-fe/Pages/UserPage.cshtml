@@ -35,7 +35,9 @@
 					</div>
 				</div>
 			</div>
-			<div class="d-flex" style="width: 44%; margin-right: -3%;">
+			@if (Model.IsOwnUser)
+			{
+				<div class="d-flex" style="width: 44%; margin-right: -3%;">
 				<!-- Points Card -->
 				<div class="col-5">
 					<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
@@ -88,6 +90,7 @@
 					}
 				</div>
 			</div>
+			}
 		</div>
 	</div>
 	<section>
@@ -113,36 +116,30 @@
 												<i class="bi bi-person"></i>
 												<a class="active" asp-page="/UserPage" title="" data-ripple="">Page</a>
 											</li> *@
-											<li style="display:flex">
-												<i class="bi bi-info-circle"></i>
-												<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
-											</li>
+											@if (Model.IsOwnUser)
+											{
+												<!-- Nếu là trang của mình thì không cần truyền userId -->
+												<li style="display:flex">
+													<i class="bi bi-info-circle"></i>
+													<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
+												</li>
+											}
+											else
+											{
+												<!-- Nếu là trang của người khác thì truyền thêm userId -->
+												<li style="display:flex">
+													<i class="bi bi-info-circle"></i>
+													<a class="active" asp-page="/UserProfile" asp-route-userId="@Request.Query["userId"]" data-tab="about">About @Model.Profile?.UserMetaData?.FirstName</a>
+												</li>
+											}
 										</ul>
 									</div><!-- Shortcuts -->
 									<div class="widget">
-										<h4 class="widget-title">Recent Activity</h4>
-										<ul class="activitiez">
-											<li>
-												<div class="activity-meta">
-													<i>10 hours Ago</i>
-													<span><a href="#" title="">Commented on Video posted </a></span>
-													<h6>by <a href="time-line.html">black demon.</a></h6>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>30 Days Ago</i>
-													<span><a href="#" title="">Posted your status. “Hello guys, how are you?”</a></span>
-												</div>
-											</li>
-											<li>
-												<div class="activity-meta">
-													<i>2 Years Ago</i>
-													<span><a href="#" title="">Share a video on her timeline.</a></span>
-													<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-												</div>
-											</li>
-										</ul>
+											<div class="advertisment-box">
+												<figure>
+												<a href="#" title="Advertisment"><img src="https://travarsa.com/wp-content/uploads/2023/04/Soft-Skills-Training-and-Certification%E2%80%8B.jpg" alt=""></a>
+												</figure>
+											</div>
 									</div><!-- recent activites -->
 								</aside>
 							</div><!-- sidebar -->
@@ -202,21 +199,24 @@
 																			<!-- Nút bấm hiển thị modal -->
 																			@if (post.User != null && post.User.UserId.ToString() == Model.CurrentUserId)
 																			{
-																				<li>
-																					<a class="dropdown-item text-primary update-post"
-																					   href="#"
-																					   data-bs-toggle="modal"
-																					   data-bs-target="#editPostModal"
-																					   data-post-id="@post.PostId">
-																						Update Post
-																					</a>
-																				</li>
-																				<li>
-																					<form method="post" asp-page-handler="Delete" asp-route-postId="@post.PostId"
-																						  onsubmit="return confirm('Are you sure you want to delete this post?');">
-																						<button type="submit" class="dropdown-item text-danger delete-post">Delete Post</button>
-																					</form>
-																				</li>
+																				@if (Model.IsOwnUser)
+																				{
+																					<li>
+																						<a class="dropdown-item text-primary update-post"
+																						   href="#"
+																						   data-bs-toggle="modal"
+																						   data-bs-target="#editPostModal"
+																						   data-post-id="@post.PostId">
+																							Update Post
+																						</a>
+																					</li>
+																					<li>
+																						<form method="post" asp-page-handler="Delete" asp-route-postId="@post.PostId"
+																							  onsubmit="return confirm('Are you sure you want to delete this post?');">
+																							<button type="submit" class="dropdown-item text-danger delete-post">Delete Post</button>
+																						</form>
+																					</li>
+																				}
 																			}
 																		</ul>
 																		<!-- Modal cập nhật -->
@@ -595,7 +595,8 @@
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			var editModal = document.getElementById('editPostModal');
-			editModal.addEventListener('show.bs.modal', async function (event) {
+		if (!editModal) return;
+		editModal.addEventListener('show.bs.modal', async function (event) {
 				var button = event.relatedTarget;
 				var postId = button.getAttribute('data-post-id');
 
