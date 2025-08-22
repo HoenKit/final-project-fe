@@ -15,6 +15,7 @@ using System.Buffers.Text;
 using final_project_fe.Dtos.Category;
 using Microsoft.Extensions.Hosting;
 using System.Web;
+using Newtonsoft.Json.Linq;
 
 namespace final_project_fe.Pages
 {
@@ -100,6 +101,12 @@ namespace final_project_fe.Pages
                             CurrentUserId = null;
                         }
                     }
+                }
+
+                // 🔹 Gắn token cho tất cả request
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 }
 
                 // 🔹 XÁC ĐỊNH XEM CÓ PHẢI USERPAGE CỦA CHÍNH MÌNH KHÔNG
@@ -342,7 +349,14 @@ namespace final_project_fe.Pages
         {
             try
             {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return Unauthorized();
+
                 string postApiUrl = $"{_apiSettings.BaseUrl}/Post/{postId}";
+
+                var request = new HttpRequestMessage(HttpMethod.Get, postApiUrl);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var response = await _httpClient.GetAsync(postApiUrl);
 
                 if (!response.IsSuccessStatusCode)
@@ -421,6 +435,7 @@ namespace final_project_fe.Pages
                 }
 
                 // Gửi PUT request
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PutAsync($"{BaseUrl}/Post", form);
 
                 if (response.IsSuccessStatusCode)
@@ -442,7 +457,6 @@ namespace final_project_fe.Pages
 
             return Page();
         }
-
 
         //Delete Post
         public async Task<IActionResult> OnPostDeleteAsync(int postId)
@@ -472,6 +486,7 @@ namespace final_project_fe.Pages
                 }
 
                 // Gọi API toggle delete
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PutAsync($"{_apiSettings.BaseUrl}/Post/toggle-deleted/{postId}", null);
 
                 if (response.IsSuccessStatusCode)

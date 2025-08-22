@@ -105,6 +105,9 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
+                //Thêm Authorization Header vào HttpClient
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 // Get Category
                 var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
                 var categoryQuery = HttpUtility.ParseQueryString(string.Empty);
@@ -294,6 +297,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
                 {
@@ -389,6 +393,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 //Toogle Delete
                 var response = await _httpClient.PutAsync($"{_apiSettings.BaseUrl}/Course/toggle-deleted/{id}", null);
                 if (response.IsSuccessStatusCode)
@@ -445,6 +451,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     TempData["ErrorMessage"] = "Only Premium users can use this feature, Please to upgrade to Premium package";
                     return RedirectToPage(new { courseId = Module.CourseId });
                 }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
@@ -665,11 +673,26 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public async Task<IActionResult> OnPostDeleteModuleAsync(int id)
         {
             BaseUrl = _apiSettings.BaseUrl;
-
             try
             {
                 if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
                     return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
 
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
@@ -933,11 +956,26 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public async Task<IActionResult> OnPostDeleteLessonAsync(int id)
         {
             BaseUrl = _apiSettings.BaseUrl;
-
             try
             {
                 if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
                     return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
 
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
@@ -1138,6 +1176,22 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
                     return RedirectToPage("/Login");
 
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
@@ -1168,6 +1222,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public async Task<IActionResult> OnPostUploadExcel(IFormFile excelFile, int lessonId)
         {
             BaseUrl = _apiSettings.BaseUrl;
+            // Kiểm tra token trong cookie
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
             // Validate input
             if (excelFile == null || excelFile.Length == 0)
             {
@@ -1250,6 +1310,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public async Task<IActionResult> OnPostGenerateAIAsync()
         {
             BaseUrl = _apiSettings.BaseUrl;
+
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
             // Validate input
             if (string.IsNullOrWhiteSpace(Topic))
             {
@@ -1332,6 +1399,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             return Page();
         }
+
 
         //Handler Update Answer
         public async Task<IActionResult> OnPostEditAnswerAsync()
@@ -1424,6 +1492,22 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
                     return RedirectToPage("/Login");
 
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
                 _httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
@@ -1449,8 +1533,14 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             // Redirect lại trang hiện tại và giữ lại courseId nếu có
             return RedirectToPage(new { courseId = Module.CourseId });
         }
+
+
         public async Task<IActionResult> OnPostAddAssignmentAsync()
         {
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var requestPayload = new
             {
@@ -1469,9 +1559,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             ModelState.AddModelError(string.Empty, "Failed to create assignment.");
             return RedirectToPage(new { courseId = Module.CourseId });
         }
-
         public async Task<IActionResult> OnPostEditAssignmentAsync()
         {
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             // API yêu cầu full payload
             var requestPayload = new
@@ -1503,6 +1596,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         }
         public async Task<IActionResult> OnPostDeleteAssignmentAsync()
         {
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             try
             {
                 var response = await _httpClient.DeleteAsync($"{_apiSettings.BaseUrl}/Assignment/{DeleteAssignmentId}");
