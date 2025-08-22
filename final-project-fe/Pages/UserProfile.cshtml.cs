@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -76,6 +77,9 @@ namespace final_project_fe.Pages
 
                     _logger.LogInformation("User roles: {Roles}", string.Join(", ", UserRoles));
                 }
+
+                // 🔹 Thêm token vào request
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // 🔹 XÁC ĐỊNH XEM CÓ PHẢI PROFILE CỦA CHÍNH MÌNH KHÔNG
                 IsOwnUser = string.IsNullOrEmpty(userId) || userId == CurrentUserId;
@@ -263,6 +267,14 @@ namespace final_project_fe.Pages
         {
             try
             {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                {
+                    _logger.LogWarning("No token found in cookies while loading mentor info.");
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
 
                 if (mentorResponse.IsSuccessStatusCode)
@@ -359,6 +371,11 @@ namespace final_project_fe.Pages
                 courseUrl.Query = courseQuery.ToString();
                 _logger.LogInformation("Loading courses with URL: {Url}", courseUrl.ToString());
 
+                if (Request.Cookies.TryGetValue("AccessToken", out var token) && !string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+
                 var courseResponse = await _httpClient.GetAsync(courseUrl.ToString());
 
                 if (courseResponse.IsSuccessStatusCode)
@@ -444,6 +461,8 @@ namespace final_project_fe.Pages
                    "application/json"
                );
 
+                // 🔹 Thêm token vào request
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PutAsync($"{BaseUrl}/User/Update/{CurrentUserId}", jsonContent);
 
                 if (response.IsSuccessStatusCode)

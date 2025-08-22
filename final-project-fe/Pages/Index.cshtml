@@ -1771,9 +1771,9 @@
 		let allImages = [];
 
 		function previewImage(event) {
-			const files = event.target.files;
+			const files = Array.from(event.target.files); // ✅ Lấy tất cả files
 			if (files.length === 0) return;
-			allImages = [files[0]];
+			allImages = files; // ✅ Lưu tất cả files
 			renderImages();
 		}
 
@@ -1782,6 +1782,7 @@
 			if (files.length === 0) return;
 			allImages = files;
 			renderImages();
+			updateFileInput(); // ✅ Cập nhật input file
 		}
 
 		function addMoreImages(event) {
@@ -1789,11 +1790,30 @@
 			if (files.length === 0) return;
 			allImages = [...allImages, ...files];
 			renderImages();
+			updateFileInput(); // ✅ Cập nhật input file
 		}
 
 		function clearAllImages() {
 			allImages = [];
 			renderImages();
+			updateFileInput(); // ✅ Cập nhật input file
+		}
+
+		// ✅ Hàm mới: Cập nhật input file để đồng bộ với allImages
+		function updateFileInput() {
+			// Tạo DataTransfer object để tạo FileList mới
+			const dt = new DataTransfer();
+
+			// Thêm tất cả file từ allImages vào DataTransfer
+			allImages.forEach(file => {
+				dt.items.add(file);
+			});
+
+			// Cập nhật tất cả input file có name="NewPost.PostFileLinks"
+			const fileInputs = document.querySelectorAll('input[name="NewPost.PostFileLinks"]');
+			fileInputs.forEach(input => {
+				input.files = dt.files;
+			});
 		}
 
 		function renderImages() {
@@ -1808,6 +1828,7 @@
 			btnEdit.style.display = btnAddMore.style.display = btnCloseAll.style.display = hasImages ? 'inline-flex' : 'none';
 
 			imageContainer.innerHTML = '';
+
 			const maxToShow = 5;
 			const total = allImages.length;
 			const imagesToShow = allImages.slice(0, maxToShow);
@@ -1821,7 +1842,6 @@
 					const img = document.createElement('img');
 					img.src = e.target.result;
 					img.className = 'image-thumb';
-
 					wrapper.appendChild(img);
 
 					// Overlay nếu là ảnh cuối và có nhiều hơn 5 ảnh
@@ -1836,6 +1856,9 @@
 				};
 				reader.readAsDataURL(file);
 			});
+
+			// ✅ Cập nhật input file sau khi render
+			updateFileInput();
 		}
 	</script>
 
