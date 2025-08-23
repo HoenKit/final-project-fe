@@ -7,7 +7,7 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <title>Daily Event</title>
+    <title>Phronesis - Daily Event</title>
     <link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
 
     <!-- Bootstrap & FontAwesome -->
@@ -467,12 +467,12 @@
                     e.preventDefault(); // Ngăn form submit ngay lập tức
                     wheel.classList.add('spinning');
                     spinBtn.disabled = true;
-                    spinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang quay...';
+                    spinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spinning...';
 
                     setTimeout(() => {
                         wheel.classList.remove('spinning');
                         spinBtn.disabled = false;
-                        spinBtn.innerHTML = '<i class="fas fa-play"></i> QUAY NGAY!';
+                        spinBtn.innerHTML = '<i class="fas fa-play"></i> Spin Now!';
                         // Submit form sau khi animation kết thúc
                         spinBtn.closest('form').submit();
                     }, 2000);

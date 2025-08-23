@@ -152,11 +152,11 @@ namespace final_project_fe.Pages
                 // Create pool
                 var weightedPoints = new List<int>();
                 for (int i = 1; i <= 10; i++)
-                    weightedPoints.AddRange(Enumerable.Repeat(i, 50));
+                    weightedPoints.AddRange(Enumerable.Repeat(i, 70000));
                 for (int i = 11; i <= 20; i++)
-                    weightedPoints.AddRange(Enumerable.Repeat(i, 30));
+                    weightedPoints.AddRange(Enumerable.Repeat(i, 70000 + 19998));
                 for (int i = 21; i <= 39; i++)
-                    weightedPoints.AddRange(Enumerable.Repeat(i, 10));
+                    weightedPoints.AddRange(Enumerable.Repeat(i, 19998 + 10000));
                 for (int i = 40; i <= 50; i++)
                     weightedPoints.Add(i);
 

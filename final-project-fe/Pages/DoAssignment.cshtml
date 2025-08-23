@@ -1,7 +1,7 @@
 ﻿@page "{id:int}"
 @model final_project_fe.Pages.DoAssignmentModel
 @{
-    ViewData["Title"] = "Do Assignment";
+    ViewData["Title"] = "Phronesis - Do Assignment";
 }
 
 <style>
@@ -399,14 +399,11 @@
             .find(row => row.startsWith('AccessToken='))
             ?.split('=')[1];
 
-        if (!token) {
-            console.error("Token is missing. Please login again.");
-        }
+        if (!token) console.error("Token is missing. Please login again.");
 
         // Bắt buộc vào meeting trước khi làm bài
         meetLink?.addEventListener("click", () => {
-            const confirmed = confirm("Are you joining the meeting now?");
-            if (confirmed) btnLamBai.classList.remove("d-none");
+            if (confirm("Are you joining the meeting now?")) btnLamBai.classList.remove("d-none");
         });
 
         btnLamBai?.addEventListener("click", () => {
@@ -422,7 +419,7 @@
 
         btnSubmit?.addEventListener("click", () => submitAssignment(false));
 
-        // Hàm fetch chung với token
+        // Hàm fetch chung với token, hỗ trợ cả JSON và plain text
         async function fetchWithToken(url, options = {}) {
             options.headers = {
                 ...options.headers,
@@ -433,7 +430,12 @@
                 const errorText = await response.text();
                 throw new Error(errorText || "Request failed");
             }
-            return response.json();
+            const contentType = response.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+                return response.json();
+            } else {
+                return response.text();
+            }
         }
 
         async function loadAssignment() {
@@ -471,23 +473,18 @@
 
         async function submitAssignment(auto = false) {
             const answer = document.getElementById("answerContent").value.trim();
-            const payload = {
-                userId: currentUserId,
-                assignmentId: assignmentId,
-                content: answer
-            };
+            const payload = { userId: currentUserId, assignmentId, content: answer };
 
             try {
-                await fetchWithToken(`${Baseurl}/Learning/submitAssignment`, {
+                const result = await fetchWithToken(`${Baseurl}/Learning/submitAssignment`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                showNotification(
-                    auto ? "⏱ Time's up. The post has been automatically returned." : "✅ The article has been submitted successfully!",
-                    "success"
-                );
+                // result có thể là JSON hoặc plain text
+                const message = typeof result === "string" ? result : result.message || "Submitted successfully!";
+                showNotification(auto ? "⏱ Time's up. " + message : "✅ " + message, "success");
                 setTimeout(() => window.location.href = "/UserCourse", 2000);
             } catch (err) {
                 console.error("Error when submitting assignment:", err);

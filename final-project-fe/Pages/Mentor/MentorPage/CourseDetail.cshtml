@@ -1161,6 +1161,12 @@
     <script>
         // Show/Hide report modal
         function showReportModal() {
+            if (!isAuthenticated) {
+                // Nếu chưa đăng nhập thì redirect sang trang login
+                window.location.href = "/Login" + encodeURIComponent(window.location.pathname);
+                return;
+            }
+
             const modal = document.getElementById('reportCourseModal');
             const body = document.body;
 
@@ -1204,8 +1210,24 @@
         });
     </script>
      <script>
+        const isAuthenticated = @(User.Identity?.IsAuthenticated.ToString().ToLower());
         document.getElementById("buyForm").addEventListener("submit", function (e) {
-            e.preventDefault(); // chặn submit mặc định
+            e.preventDefault();
+
+            if (!isAuthenticated) {
+                showConfirm({
+                    type: 'warning',
+                    title: 'Not Logged In',
+                    message: 'You must login before buying this course.',
+                    confirmText: 'Login',
+                    cancelText: 'Cancel',
+                    onConfirm: () => {
+                        window.location.href = '/Login';
+                    }
+                });
+                return;
+            }
+
             showConfirm({
                 type: 'info',
                 title: 'Confirm Purchase',
@@ -1213,7 +1235,7 @@
                 confirmText: 'Yes, Buy',
                 cancelText: 'Cancel',
                 onConfirm: () => {
-                    e.target.submit(); // chỉ submit khi bấm Yes
+                    e.target.submit();
                 }
             });
         });
@@ -1257,11 +1279,14 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('updateReviewModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeUpdateModal();
+            const modal = document.getElementById('updateReviewModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeUpdateModal();
+                    }
+                });
             }
-        });
 
              function deleteReview(reviewId, courseId) {
             if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {

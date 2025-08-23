@@ -1,7 +1,7 @@
 ﻿@page
 @model final_project_fe.Pages.GenerateCertificateModel
 @{
-    ViewData["Title"] = "Generate Certificate";
+    ViewData["Title"] = "Phronesis - Certificate";
 }
 
 <div id="certificate">
@@ -440,11 +440,58 @@
             }
         }
 
+        // Add the missing downloadCertificate function
+        async function downloadCertificate() {
+            try {
+                await waitForResources();
+
+                const { jsPDF } = window.jspdf;
+                const certificate = document.getElementById("certificate");
+
+                const canvas = await html2canvas(certificate, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false,
+                    width: certificate.offsetWidth,
+                    height: certificate.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+
+                const imgData = canvas.toDataURL("image/png", 1.0);
+                const pdf = new jsPDF("landscape", "pt", [canvas.width, canvas.height]);
+                pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+
+                // Download the PDF
+                pdf.save("certificate.pdf");
+
+                showNotification("Certificate downloaded successfully!", "success");
+            } catch (error) {
+                console.error("Error downloading certificate:", error);
+                showNotification(error.message || "Failed to download certificate", "error");
+            }
+        }
+
+        async function waitForResources() {
+            const images = Array.from(document.images)
+                .filter(img => !img.complete || img.naturalHeight === 0);
+
+            if (images.length === 0) return;
+
+            await Promise.all(
+                images.map(img => new Promise(resolve => {
+                    img.onload = img.onerror = resolve;
+                }))
+            );
+        }
+
         @if (Model.IsCurrentUser)
         {
-                <text>
-                autoUploadCertificate();
-                </text>
+                    <text>
+                    autoUploadCertificate();
+                    </text>
         }
     </script>
 }

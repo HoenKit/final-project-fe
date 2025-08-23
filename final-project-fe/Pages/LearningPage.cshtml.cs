@@ -68,12 +68,15 @@ namespace final_project_fe.Pages.Mentor
                 return RedirectToPage("/Login");
 
             var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
             {
                 // 1️⃣ Lấy tiến độ module
-                var progressResponse = await client.GetAsync($"{BaseUrl}/Progress/get-module-progress-by-course?userId={UserId}&courseId={CourseId}");
+                var progressRequest = new HttpRequestMessage(HttpMethod.Get,
+                    $"{BaseUrl}/Progress/get-module-progress-by-course?userId={UserId}&courseId={CourseId}");
+                progressRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var progressResponse = await client.SendAsync(progressRequest);
                 if (progressResponse.IsSuccessStatusCode)
                 {
                     var progressJson = await progressResponse.Content.ReadAsStringAsync();
@@ -81,7 +84,11 @@ namespace final_project_fe.Pages.Mentor
                 }
 
                 // 2️⃣ Lấy thông tin khóa học
-                var courseResponse = await client.GetAsync($"{BaseUrl}/Course/{CourseId}");
+                var courseRequest = new HttpRequestMessage(HttpMethod.Get,
+                    $"{BaseUrl}/Course/{CourseId}");
+                courseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var courseResponse = await client.SendAsync(courseRequest);
                 if (courseResponse.IsSuccessStatusCode)
                 {
                     var courseJson = await courseResponse.Content.ReadAsStringAsync();
@@ -89,7 +96,11 @@ namespace final_project_fe.Pages.Mentor
                 }
 
                 // 3️⃣ Lấy thông tin mentor
-                var mentorResponse = await client.GetAsync($"{BaseUrl}/Mentor/by-course/{CourseId}");
+                var mentorRequest = new HttpRequestMessage(HttpMethod.Get,
+                    $"{BaseUrl}/Mentor/by-course/{CourseId}");
+                mentorRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var mentorResponse = await client.SendAsync(mentorRequest);
                 if (mentorResponse.IsSuccessStatusCode)
                 {
                     var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
@@ -115,15 +126,17 @@ namespace final_project_fe.Pages.Mentor
         {
             string token = Request.Cookies["AccessToken"];
             if (string.IsNullOrEmpty(token))
-                return Unauthorized(); // Hoặc RedirectToPage("/Login")
+                return Unauthorized(); // hoặc RedirectToPage("/Login")
 
             var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
             {
                 // 1️⃣ Lấy thông tin lesson
-                var lessonRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Lesson/{lessonId}");
+                var lessonRequest = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/Lesson/{lessonId}");
+                lessonRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var lessonRes = await client.SendAsync(lessonRequest);
                 if (!lessonRes.IsSuccessStatusCode)
                     return NotFound("Lesson not found");
 
@@ -132,7 +145,10 @@ namespace final_project_fe.Pages.Mentor
 
                 // 2️⃣ Kiểm tra quiz
                 List<QuestionDto> quiz = null;
-                var quizRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Learning/{lessonId}");
+                var quizRequest = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/Learning/{lessonId}");
+                quizRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var quizRes = await client.SendAsync(quizRequest);
                 if (quizRes.IsSuccessStatusCode)
                 {
                     var quizJson = await quizRes.Content.ReadAsStringAsync();
@@ -145,7 +161,11 @@ namespace final_project_fe.Pages.Mentor
 
                 try
                 {
-                    var assignmentRes = await client.GetAsync($"{_apiSettings.BaseUrl}/Assignment/get-all-assignment-by-lesson/{lessonId}");
+                    var assignmentRequest = new HttpRequestMessage(HttpMethod.Get,
+                        $"{_apiSettings.BaseUrl}/Assignment/get-all-assignment-by-lesson/{lessonId}");
+                    assignmentRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var assignmentRes = await client.SendAsync(assignmentRequest);
                     if (assignmentRes.IsSuccessStatusCode)
                     {
                         var assignmentJson = await assignmentRes.Content.ReadAsStringAsync();
@@ -185,6 +205,7 @@ namespace final_project_fe.Pages.Mentor
                 return StatusCode(500, "Error loading lesson");
             }
         }
+
 
 
 
@@ -263,6 +284,7 @@ namespace final_project_fe.Pages.Mentor
                 isPassed = (bool)result.isPassed
             });
         }
+      
 
     }
 

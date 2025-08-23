@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phronesis - Chatting</title>
+    <link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
     <style>
         * {
             margin: 0;
@@ -701,7 +702,12 @@
                     }
                 }
             },
-
+            getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return null;
+            },
             // SignalR Connection Management
             connection: {
                 async initialize() {
@@ -846,38 +852,49 @@
 
             // Chat Management
             chat: {
-                async loadChatPartners() {
-                    try {
-                        const response = await fetch(`${ChatApp.config.baseUrl}/Message/chat-rooms?userId=${ChatApp.config.currentUserId}`);
-                        const chatList = document.querySelector('.chat-list');
+                 async loadChatPartners() {
+            try {
+                const token = ChatApp.getCookie("access_token"); // lấy token từ cookie
 
-                        if (!chatList) return;
-
-                        chatList.innerHTML = '';
-
-                        if (response.ok) {
-                            const partners = await response.json();
-
-                            if (Array.isArray(partners) && partners.length > 0) {
-                                partners.forEach(partner => {
-                                    const chatItem = ChatApp.ui.createChatPartnerItem(partner);
-                                    chatList.appendChild(chatItem);
-                                });
-                            } else {
-                                chatList.innerHTML = '<div class="no-conversations">No conversations yet</div>';
-                            }
-                        } else {
-                            console.warn("Failed to load chat partners");
-                            chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
-                        }
-                    } catch (error) {
-                        console.error("Error loading chat partners:", error);
-                        const chatList = document.querySelector('.chat-list');
-                        if (chatList) {
-                            chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
-                        }
+                const response = await fetch(
+                    `${ChatApp.config.baseUrl}/Message/chat-rooms?userId=${ChatApp.config.currentUserId}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+                        },
+                        credentials: "include" // đảm bảo gửi cookie đi nếu server cần
                     }
-                },
+                );
+
+                const chatList = document.querySelector('.chat-list');
+                if (!chatList) return;
+
+                chatList.innerHTML = '';
+
+                if (response.ok) {
+                    const partners = await response.json();
+                    if (Array.isArray(partners) && partners.length > 0) {
+                        partners.forEach(partner => {
+                            const chatItem = ChatApp.ui.createChatPartnerItem(partner);
+                            chatList.appendChild(chatItem);
+                        });
+                    } else {
+                        chatList.innerHTML = '<div class="no-conversations">No conversations yet</div>';
+                    }
+                } else {
+                    console.warn("Failed to load chat partners");
+                    chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
+                }
+            } catch (error) {
+                console.error("Error loading chat partners:", error);
+                const chatList = document.querySelector('.chat-list');
+                if (chatList) {
+                    chatList.innerHTML = '<div class="no-conversations">Error loading conversations</div>';
+                }
+            }
+        },
 
                 async loadConversation(userId, fullName, avatar) {
                     // Reset state for new conversation
@@ -902,7 +919,18 @@
                     container.innerHTML = '';
 
                     try {
-                        const response = await fetch(`${ChatApp.config.baseUrl}/Message/Room?userId1=${ChatApp.config.currentUserId}&userId2=${userId}`);
+                        const token = ChatApp.getCookie("AccessToken");
+                                const response = await fetch(
+                                    `${ChatApp.config.baseUrl}/Message/Room?userId1=${ChatApp.config.currentUserId}&userId2=${userId}`,
+                                    {
+                                        method: "GET",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                            ...(token ? { "Authorization": `Bearer ${token}` } : {}) // gắn token nếu có
+                                        },
+                                        credentials: "include" // gửi kèm cookie nếu server cần
+                                    }
+                                );
                         let messages = [];
 
                         if (response.ok) {
@@ -1059,10 +1087,14 @@
 
                     try {
                         console.log("📤 Sending message:", payload);
-
+                        const token = ChatApp.getCookie("AccessToken");
                         const response = await fetch(`${ChatApp.config.baseUrl}/Message/sendMessage`, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                                    headers: {
+                                "Content-Type": "application/json",
+                                ...(token ? { "Authorization": `Bearer ${token}` } : {})
+                            },
+                            credentials: "include",
                             body: JSON.stringify(payload)
                         });
 

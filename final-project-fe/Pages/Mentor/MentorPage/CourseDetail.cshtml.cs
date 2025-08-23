@@ -247,16 +247,16 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             try
             {
                 string token = Request.Cookies["AccessToken"];
+                if (string.IsNullOrEmpty(token))
+                {
+                    TempData["ErrorMessage"] = "Please login before purchasing.";
+                    return RedirectToPage("/Login");
+                }
+
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
                 var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    ModelState.AddModelError("", "Please login before purchasing.");
-                    return RedirectToPage("/Login");
-                }
-
                 int finalCouponId = (SelectedCouponId.HasValue && SelectedCouponId.Value != 0) ? SelectedCouponId.Value : 11;
 
                 var request = new BuyCourseRequest
@@ -300,7 +300,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     TempData["ErrorMessage"] = "Mentor not found.";
                     return RedirectToPage("~/Mentor/MentorPage");
                 }
-
+                else if(request.UserId == null)
+                {
+                    TempData["ErrorMessage"] = "Please login before purchasing.";
+                    return RedirectToPage("/Login");
+                }
                 ModelState.AddModelError("", "Unexpected error occurred while purchasing the course.");
                 return RedirectToPage("~/Mentor/MentorPage");
             }

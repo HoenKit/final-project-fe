@@ -1,4 +1,4 @@
-using final_project_fe.Utils;
+﻿using final_project_fe.Utils;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,19 +17,19 @@ namespace final_project_fe.Pages
             _httpClientFactory = httpClientFactory;
             _apiSettings = apiSettings.Value;
         }
+
         [BindProperty]
         [Required, EmailAddress]
         public string Email { get; set; }
-        public string? Message { get; set; }
-        public bool IsSuccess { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (string.IsNullOrWhiteSpace(Email))
             {
-                Message = "Please enter your email.";
-                IsSuccess = false;
+                TempData["ErrorMessage"] = "Please enter your email.";
                 return Page();
             }
+
             var client = _httpClientFactory.CreateClient();
             try
             {
@@ -40,23 +40,21 @@ namespace final_project_fe.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Message = "A reset link has been sent to your email.";
-                    IsSuccess = true;
+                    TempData["SuccessMessage"] = "A reset link has been sent to your email.";
+                    return RedirectToPage(); 
                 }
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    Message = $"Error: {error}";
-                    IsSuccess = false;
+                    TempData["ErrorMessage"] = $"Error: {error}";
+                    return RedirectToPage();
                 }
             }
             catch (HttpRequestException ex)
             {
-                Message = $"Request failed: {ex.Message}";
-                IsSuccess = false;
+                TempData["ErrorMessage"] = $"Request failed: {ex.Message}";
+                return RedirectToPage();
             }
-
-            return Page();
         }
     }
 }

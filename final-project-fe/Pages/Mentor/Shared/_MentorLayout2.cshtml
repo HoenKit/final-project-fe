@@ -281,10 +281,23 @@
         }
 
         // Load khi mở trang
-        async function loadNotifications() {
+                async function loadNotifications() {
             if (!userId) return;
+
             try {
-                const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`);
+                // 👉 Lấy token từ cookie
+                const token = getCookie("AccessToken");
+                if (!token) {
+                    console.warn("⚠️ No access token found in cookies");
+                    return;
+                }
+
+                const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
                 if (!response.ok) throw new Error("Failed to fetch notifications");
                 let notifications = await response.json();
 
@@ -311,6 +324,12 @@
             } catch (err) {
                 console.error("❌ Error loading notifications:", err);
             }
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(";").shift();
         }
 
         // Khi click dropdown → reset dot + clear NEW

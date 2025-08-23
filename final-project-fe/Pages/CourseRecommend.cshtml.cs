@@ -1,7 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text.Json;
-using final_project_fe.Dtos;
+﻿using final_project_fe.Dtos;
 using final_project_fe.Dtos.Courses;
 using final_project_fe.Dtos.Payment;
 using final_project_fe.Dtos.Users;
@@ -9,6 +6,10 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace final_project_fe.Pages
 {
@@ -42,6 +43,8 @@ namespace final_project_fe.Pages
                     TempData["ErrorMessage"] = "Please login to access this page.";
                     return RedirectToPage("/Login");
                 }
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token);
 
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
@@ -143,6 +146,7 @@ namespace final_project_fe.Pages
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {

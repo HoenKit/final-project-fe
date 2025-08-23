@@ -482,7 +482,7 @@
 
 	<script>
 		const apiBaseUrl = "@BaseUrl";   // từ ApiSettings
-		const hubUrl = "@HubUrl";       // từ SignalrSetting
+		const hubUrl = "@HubUrl";        // từ SignalrSetting
 		const userId = "@(userId?.ToString() ?? "")"; // từ JWT claim
 
 		// Render 1 item notification
@@ -500,34 +500,51 @@
 			`;
 		}
 
+		function getCookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return parts.pop().split(";").shift();
+		}
 
 		// Load notification khi vừa load trang (chỉ render, không cộng count)
-		async function loadNotifications() {
-			if (!userId) return; // chưa login thì thoát
+				async function loadNotifications() {
+			if (!userId) {
+				console.log("👤 Guest user → skip loadNotifications");
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) headerEl.innerText = "No Notifications";
+				return;
+			}
 			try {
-				console.log("🔄 Fetching notifications for user:", userId);
+				const token = getCookie("AccessToken");
+				const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`, {
+					headers: {
+						"Authorization": `Bearer ${token}`,
+						"Content-Type": "application/json"
+					}
+				});
 
-				const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`);
 				if (!response.ok) throw new Error("Failed to fetch notifications");
 				const notifications = await response.json();
 
-				console.log("📥 Notifications loaded from API:", notifications);
-
 				const list = document.getElementById("notificationList");
-				if (!list) return; // tránh lỗi nếu element chưa có
+				if (!list) return;
 				list.innerHTML = "";
 
 				notifications.forEach(noti => {
 					list.insertAdjacentHTML("beforeend", renderNotificationItem(noti, false));
 				});
 
-				// Count = 0 khi mới load
-				document.getElementById("notificationCount").innerText = 0;
-				document.getElementById("notificationHeader").innerText =
-					notifications.length > 0
-						? `${notifications.length} Notifications`
-						: "No Notifications";
-
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) {
+					headerEl.innerText =
+						notifications.length > 0
+							? `${notifications.length} Notifications`
+							: "No Notifications";
+				}
 			} catch (err) {
 				console.error("❌ Error loading notifications:", err);
 			}
@@ -537,78 +554,53 @@
 		const dropdown = document.getElementById("notificationDropdown");
 		if (dropdown) {
 			dropdown.addEventListener("click", () => {
-				console.log("📌 Dropdown clicked → Reset badge count + clear NEW");
 				clearNewBadges();
 			});
 		}
 
 		// ---- SignalR connection ----
-		if (!window.signalRConnection) {
-			console.log("🚀 Creating new SignalR connection...");
+		if (userId) {
+			if (!window.signalRConnection) {
+				window.signalRConnection = new signalR.HubConnectionBuilder()
+					.withUrl(`${hubUrl}/postHub?UserId=${userId}`)
+					.withAutomaticReconnect()
+					.build();
 
-		window.signalRConnection = new signalR.HubConnectionBuilder()
-			.withUrl(`${hubUrl}/postHub?UserId=${userId}`)
-			.withAutomaticReconnect()
-			.build();
+				window.signalRConnection.on("ReceiveNotification", (notification) => {
+					if (typeof notification === "string") {
+						try {
+							notification = JSON.parse(notification);
+						} catch {
+							return;
+						}
+					}
+					if (!notification || !notification.notificationId) return;
 
-			window.signalRConnection.on("ReceiveNotification", (notification) => {
-			console.log("📡 Raw SignalR data received:", notification);
+					const list = document.getElementById("notificationList");
+					if (!list) return;
 
-			// Nếu notification là string thì parse JSON
-			if (typeof notification === "string") {
-				try {
-					notification = JSON.parse(notification);
-					console.log("✅ Parsed notification object:", notification);
-				} catch (e) {
-					console.error("❌ Failed to parse notification JSON:", e);
-					return; // dừng luôn vì không parse được
-				}
+					const countEl = document.getElementById("notificationCount");
+					let count = parseInt(countEl.innerText) || 0;
+					count++;
+					countEl.innerText = count;
+
+					list.insertAdjacentHTML("afterbegin", renderNotificationItem(notification, true));
+					const header = document.getElementById("notificationHeader");
+					header.innerText = `${list.children.length} Notifications`;
+				});
+
+				window.signalRConnection.start()
+					.then(() => console.log("✅ SignalR connected"))
+					.catch(err => console.error("❌ SignalR error:", err));
 			}
-
-			if (!notification || !notification.notificationId) {
-				console.warn("⚠️ Notification object invalid:", notification);
-				return;
-			}
-
-			const list = document.getElementById("notificationList");
-			if (!list) {
-				console.warn("⚠️ No #notificationList element found, skipping render");
-				return;
-			}
-
-			// tăng số lượng chỉ khi có SignalR push
-			const countEl = document.getElementById("notificationCount");
-			let count = parseInt(countEl.innerText) || 0;
-			count++;
-			countEl.innerText = count;
-			console.log(`🔔 Notification count updated: ${count}`);
-
-			// thêm vào đầu danh sách
-			list.insertAdjacentHTML("afterbegin", renderNotificationItem(notification, true));
-			console.log("✅ Notification rendered at top of list");
-
-			// cập nhật header
-		const header = document.getElementById("notificationHeader");
-		header.innerText = `${list.children.length} Notifications`;
-		});
-
-			window.signalRConnection.start()
-				.then(() => console.log("✅ SignalR connected (only once)"))
-				.catch(err => console.error("❌ SignalR error:", err));
-		} else {
-			console.log("🔄 Using existing SignalR connection");
 		}
-				function clearNewBadges() {
-			// reset số đếm
-			document.getElementById("notificationCount").innerText = 0;
 
-			// xóa text "New" + class "green"
+		function clearNewBadges() {
+			document.getElementById("notificationCount").innerText = 0;
 			document.querySelectorAll("#notificationList li .tag").forEach(tag => {
 				tag.innerText = "";
 				tag.classList.remove("green");
 			});
-
-			// cập nhật lại header: nếu còn item thì ghi tổng số, nếu rỗng thì "No Notifications"
 			const list = document.getElementById("notificationList");
 			const header = document.getElementById("notificationHeader");
 			if (list && list.children.length > 0) {
@@ -617,14 +609,17 @@
 				header.innerText = "No Notifications";
 			}
 		}
+
 		// gọi khi load trang
 		loadNotifications();
 	</script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
-			const userId = "@(userId?.ToString() ?? "")"; // lấy dynamic từ Razor
+			const CurrentuserId = "@(userId?.ToString() ?? "")";
 			const BaseUrl = "@BaseUrl";
-			const apiUrl = `${BaseUrl}/User/GetUserById/${userId}`;
+			const apiUrl = `${BaseUrl}/User/GetUserById/${CurrentuserId}`;
+
+			console.log("userId:", CurrentuserId, "apiUrl:", apiUrl); // debug
 
 			fetch(apiUrl)
 				.then(response => {
@@ -637,7 +632,8 @@
 				})
 				.catch(err => {
 					console.error("Failed to fetch user point:", err);
-					document.getElementById("userPointBadge").textContent = 0;
+					const badge = document.getElementById("userPointBadge");
+					if (badge) badge.textContent = 0;
 				});
 		});
 	</script>

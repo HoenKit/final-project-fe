@@ -3,7 +3,7 @@
 @using System.Security.Claims
 @model final_project_fe.Pages.DetailPostModel
 @{
-    ViewData["Title"] = "Post Details";
+    ViewData["Title"] = "Phronesis - Post Details";
     var roles = new List<string>();
     var token = HttpContext.Request.Cookies["AccessToken"];
     bool isAuthenticated = !string.IsNullOrEmpty(token);

@@ -55,8 +55,14 @@ namespace final_project_fe.Pages
         public string HubUrl { get; set; }
         public string BaseUrl { get; set; }
 
-        public async Task OnGetAsync(int? page, string? userId)
+        public async Task<IActionResult> OnGetAsync(int? page, string? userId)
         {
+            string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please login before Checkin.";
+                return RedirectToPage("/Login");
+            }
             int currentPage = page ?? 1;
             CommentsByPost = new Dictionary<int, List<CommentDto>>();
 
@@ -72,7 +78,6 @@ namespace final_project_fe.Pages
             try
             {
                 // Lay Current User dang dang nhap
-                string token = Request.Cookies["AccessToken"];
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
                 var currentUserId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -118,7 +123,7 @@ namespace final_project_fe.Pages
                 if (string.IsNullOrEmpty(targetUserId))
                 {
                     _logger.LogError("Không xác định được target user ID");
-                    return;
+                    return Page();
                 }
 
                 // Load Profile của user (có thể là mình hoặc người khác)
@@ -202,7 +207,7 @@ namespace final_project_fe.Pages
                 else
                 {
                     _logger.LogError($"Lỗi API Post: {postsResponse.StatusCode}");
-                    return;
+                    return RedirectToPage("/ErrorPage");
                 }
 
                 // 2️ Tạo danh sách task để gọi API song song
@@ -271,7 +276,7 @@ namespace final_project_fe.Pages
                     {
                         try
                         {
-                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment?postId={post.PostId}&page=1";
+                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment/GetByPostId?postId={post.PostId}&page=1";
                             HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
                             if (response.IsSuccessStatusCode)
                             {
@@ -343,6 +348,7 @@ namespace final_project_fe.Pages
             {
                 _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnGetPostByIdAsync(int postId)
