@@ -5,6 +5,7 @@ using final_project_fe.Dtos.Lesson;
 using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.Module;
 using final_project_fe.Dtos.Payment;
+using final_project_fe.Dtos.Question;
 using final_project_fe.Dtos.Reviews;
 using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
@@ -12,7 +13,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Web;
 
@@ -36,9 +41,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
         [BindProperty]
         public int? CourseId { get; set; }
+        public string CurrentUserId { get; set; }
         public List<CouponDto> AvailableCoupons { get; set; } = new();
         public GetMentorDto Mentor { get; set; }
         public CourseReviewPageResult Reviews { get; set; } = new(new List<ReviewResponseDto>(), 0, 1, 3, 0, 0);
+
+        [BindProperty]
+        public UpdateReviewDto Review { get; set; } = new UpdateReviewDto();
         public List<ModuleWithLessonsDto> Modules { get; set; } = new List<ModuleWithLessonsDto>();
         public string BaseUrl { get; set; }
         public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
@@ -235,24 +244,19 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
         public async Task<IActionResult> OnPostAsync(int? courseId)
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             try
             {
                 string token = Request.Cookies["AccessToken"];
+                if (string.IsNullOrEmpty(token))
+                {
+                    TempData["ErrorMessage"] = "Please login before purchasing.";
+                    return RedirectToPage("/Login");
+                }
+
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
                 var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    ModelState.AddModelError("", "Please login before purchasing.");
-                    return RedirectToPage("/Login");
-                }
-
                 int finalCouponId = (SelectedCouponId.HasValue && SelectedCouponId.Value != 0) ? SelectedCouponId.Value : 11;
 
                 var request = new BuyCourseRequest
@@ -261,6 +265,9 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     CourseId = CourseId ?? 0,
                     CouponId = finalCouponId
                 };
+
+                // dùng trực tiếp _httpClient (đã được inject trong constructor)
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var api = $"{_apiSettings.BaseUrl}/Payment/buy-course";
                 var res = await _httpClient.PostAsJsonAsync(api, request);
@@ -273,21 +280,180 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 var errorContent = await res.Content.ReadAsStringAsync();
 
-                if (errorContent.Contains("NotEnoughPoint", StringComparison.OrdinalIgnoreCase))
+                if (errorContent.Contains("Not enough points to purchase the course", StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["ErrorMessage"] = "You do not have enough points. Please recharge.";
-                    return RedirectToPage("/Transaction/Index");
+                    return RedirectToPage("/PointTransaction");
                 }
-
-                ModelState.AddModelError("", "Purchase failed. Please try again.");
-                return RedirectToPage("/UserCourse");
+                else if (errorContent.Contains("You have already purchased this course.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "You have already purchased this course.";
+                    return RedirectToPage("/UserCourse");
+                }
+                else if (errorContent.Contains("User or course not found.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "User or course not found.";
+                    return RedirectToPage("~/Mentor/MentorPage");
+                }
+                else if (errorContent.Contains("Mentor not found.", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["ErrorMessage"] = "Mentor not found.";
+                    return RedirectToPage("~/Mentor/MentorPage");
+                }
+                else if(request.UserId == null)
+                {
+                    TempData["ErrorMessage"] = "Please login before purchasing.";
+                    return RedirectToPage("/Login");
+                }
+                ModelState.AddModelError("", "Unexpected error occurred while purchasing the course.");
+                return RedirectToPage("~/Mentor/MentorPage");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error during course purchase");
                 TempData["ErrorMessage"] = "An unexpected error occurred. Please try again.";
-                return Page();
+                return RedirectToPage("/UserCourse");
             }
+        }
+
+
+        //Handler Update Review
+        public async Task<IActionResult> OnPostUpdateReviewAsync(int courseId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                }
+
+                // Đảm bảo CourseId được set đúng
+                if (Review == null)
+                {
+                    TempData["ErrorMessage"] = "Review data is missing.";
+                    return RedirectToPage(new { courseId = courseId });
+                }
+
+                // Set CourseId từ parameter nếu chưa có
+                if (Review.CourseId == 0 || Review.CourseId != courseId)
+                {
+                    Review.CourseId = courseId;
+                }
+
+                // Set UserId từ token nếu chưa có
+                if (Review.UserId == Guid.Empty && !string.IsNullOrEmpty(CurrentUserId))
+                {
+                    if (Guid.TryParse(CurrentUserId, out var userGuid))
+                    {
+                        Review.UserId = userGuid;
+                    }
+                }
+
+                // Log để debug
+                _logger.LogInformation($"Updating review - ReviewId: {Review.ReviewId}, CourseId: {Review.CourseId}, UserId: {Review.UserId}");
+
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(Review, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    }),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Set Authorization header
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API update Review
+                var response = await _httpClient.PutAsync($"{BaseUrl}/Review", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var updateReview = JsonSerializer.Deserialize<UpdateReviewDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Review updated successfully!";
+                    return RedirectToPage(new { courseId = courseId });
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Update Review failed! Status: {response.StatusCode}, Error: {errorContent}");
+
+                    // Parse error message if possible
+                    string errorMessage = "Failed to update Review.";
+                    try
+                    {
+                        var errorObj = JsonSerializer.Deserialize<JsonElement>(errorContent);
+                        if (errorObj.TryGetProperty("message", out var msgElement))
+                        {
+                            errorMessage = msgElement.GetString() ?? errorMessage;
+                        }
+                        else if (errorObj.TryGetProperty("title", out var titleElement))
+                        {
+                            errorMessage = titleElement.GetString() ?? errorMessage;
+                        }
+                    }
+                    catch
+                    {
+                        // If can't parse error, use default message
+                        errorMessage = $"Failed to update Review. Status: {response.StatusCode}";
+                    }
+
+                    TempData["ErrorMessage"] = errorMessage;
+                    return RedirectToPage(new { courseId = courseId });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error while updating Review for courseId: {courseId}");
+                TempData["ErrorMessage"] = "An error occurred while updating the Review: " + ex.Message;
+                return RedirectToPage(new { courseId = courseId });
+            }
+        }
+
+        //Handler Delete Review
+        public async Task<IActionResult> OnPostDeleteReviewAsync(int id, int courseId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+
+                var response = await _httpClient.PutAsync($"{_apiSettings.BaseUrl}/Review/toggle-deleted/{id}", null);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Review deleted successfully.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"Failed to delete Review. Status: {response.StatusCode}, Error: {error}");
+                    TempData["ErrorMessage"] = "Failed to delete Review.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while deleting review.");
+                TempData["ErrorMessage"] = "An unexpected error occurred while deleting the review.";
+            }
+
+            // Redirect lại trang hiện tại với courseId
+            return RedirectToPage(new { courseId = courseId });
         }
     }
 }

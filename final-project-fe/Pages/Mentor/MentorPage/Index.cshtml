@@ -2,7 +2,7 @@
 @model final_project_fe.Pages.Mentor.MentorPage.IndexModel
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    ViewData["Title"] = "Course Page";
+    ViewData["Title"] = "Phronesis - Course Page";
     var title = Request.Query["title"];
     var categoryId = Request.Query["categoryId"];
     var sortOption = Request.Query["sortOption"];
@@ -887,206 +887,173 @@
     <script>
         // Toggle filter section
         function toggleFilter(filterType) {
-            const titleElement = document.querySelector(`#${filterType}Filter`).previousElementSibling;
             const contentElement = document.getElementById(`${filterType}Filter`);
-            const toggleIcon = titleElement.querySelector('.toggle-icon');
-            
-            // Toggle classes
+            if (!contentElement) return;
+
+            const titleElement = contentElement.previousElementSibling;
+            if (!titleElement) return;
+
             titleElement.classList.toggle('expanded');
             contentElement.classList.toggle('expanded');
         }
 
-        // Initialize - expand Category filter by default
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleFilter('category');
-        });
-
         // Update price range display
         function updatePriceRange() {
-            const minPrice = document.getElementById('minPrice').value;
-            const maxPrice = document.getElementById('maxPrice').value;
-            document.getElementById('minPriceValue').textContent = minPrice;
-            document.getElementById('maxPriceValue').textContent = maxPrice;
+            const minPriceEl = document.getElementById('minPrice');
+            const maxPriceEl = document.getElementById('maxPrice');
+            const minValEl = document.getElementById('minPriceValue');
+            const maxValEl = document.getElementById('maxPriceValue');
+
+            if (minPriceEl && maxPriceEl) {
+                if (minValEl) minValEl.textContent = minPriceEl.value;
+                if (maxValEl) maxValEl.textContent = maxPriceEl.value;
+            }
         }
 
         // Update rating range display
         function updateRatingRange() {
-            const minRating = document.getElementById('minRating').value;
-            const maxRating = document.getElementById('maxRating').value;
-            document.getElementById('minRatingValue').textContent = parseFloat(minRating).toFixed(1);
-            document.getElementById('maxRatingValue').textContent = parseFloat(maxRating).toFixed(1);
+            const minRatingEl = document.getElementById('minRating');
+            const maxRatingEl = document.getElementById('maxRating');
+            const minValEl = document.getElementById('minRatingValue');
+            const maxValEl = document.getElementById('maxRatingValue');
+
+            if (minRatingEl && maxRatingEl) {
+                if (minValEl) minValEl.textContent = parseFloat(minRatingEl.value).toFixed(1);
+                if (maxValEl) maxValEl.textContent = parseFloat(maxRatingEl.value).toFixed(1);
+            }
         }
 
-        // Get selected categories
+        // Get selected options
         function getSelectedCategory() {
             return document.querySelector('input[name="category"]:checked')?.value || '';
         }
-
-        // Get selected languages
         function getSelectedLanguage() {
             return document.querySelector('input[name="language"]:checked')?.value || '';
         }
-
-        // Get selected level
         function getSelectedLevel() {
             return document.querySelector('input[name="level"]:checked')?.value || '';
         }
-
-        // Get sort option
         function getSortOption() {
-            return document.getElementById('sortSelect').value;
+            return document.getElementById('sortSelect')?.value || '';
         }
 
-        // Build query string from filters
+        // Build query string
         function buildQueryString() {
             const params = new URLSearchParams();
 
-            // Search term
-            const searchTerm = document.getElementById('searchInput').value;
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput?.value;
             if (searchTerm) params.set('title', searchTerm);
 
-            // Category
             const category = getSelectedCategory();
             if (category) params.set('categoryId', category);
 
-            // Language
             const language = getSelectedLanguage();
             if (language) params.set('language', language);
 
-            // Level
             const level = getSelectedLevel();
             if (level) params.set('level', level);
 
-            // Price range
-            const minPrice = document.getElementById('minPrice').value;
-            const maxPrice = document.getElementById('maxPrice').value;
+            const minPrice = document.getElementById('minPrice')?.value || 0;
+            const maxPrice = document.getElementById('maxPrice')?.value || 500;
             if (minPrice != 0) params.set('minCost', minPrice);
             if (maxPrice != 500) params.set('maxCost', maxPrice);
 
-            // Rating range
-            const minRating = document.getElementById('minRating').value;
-            const maxRating = document.getElementById('maxRating').value;
+            const minRating = document.getElementById('minRating')?.value || 0;
+            const maxRating = document.getElementById('maxRating')?.value || 5;
             if (minRating != 0) params.set('minRate', minRating);
             if (maxRating != 5) params.set('maxRate', maxRating);
 
-            // Sort option
             const sortOption = getSortOption();
             if (sortOption) params.set('sortOption', sortOption);
 
             return params.toString();
         }
 
-        // Search function
+        // Search
         function searchCourses() {
             const queryString = buildQueryString();
             window.location.href = '?' + queryString;
         }
 
-        // Clear all filters
+        // Clear filters
         function clearAllFilters() {
-            // Clear radio buttons
-            document.getElementById('cat_all').checked = true;
-            document.getElementById('lang_all').checked = true;
-            document.getElementById('level_all').checked = true;
+            const catAll = document.getElementById('cat_all');
+            const langAll = document.getElementById('lang_all');
+            const levelAll = document.getElementById('level_all');
+            if (catAll) catAll.checked = true;
+            if (langAll) langAll.checked = true;
+            if (levelAll) levelAll.checked = true;
 
-            // Reset ranges
-            document.getElementById('minPrice').value = 0;
-            document.getElementById('maxPrice').value = 500;
-            document.getElementById('minRating').value = 0;
-            document.getElementById('maxRating').value = 5;
+            if (document.getElementById('minPrice')) document.getElementById('minPrice').value = 0;
+            if (document.getElementById('maxPrice')) document.getElementById('maxPrice').value = 500;
+            if (document.getElementById('minRating')) document.getElementById('minRating').value = 0;
+            if (document.getElementById('maxRating')) document.getElementById('maxRating').value = 5;
 
-            // Reset search and sort
-            document.getElementById('searchInput').value = '';
-            document.getElementById('sortSelect').value = '';
+            if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+            if (document.getElementById('sortSelect')) document.getElementById('sortSelect').value = '';
 
-            // Update displays
             updatePriceRange();
             updateRatingRange();
 
-            // Close all filters
-            document.querySelectorAll('.filter-content').forEach(content => {
-                content.classList.remove('expanded');
-            });
-            document.querySelectorAll('.filter-title').forEach(title => {
-                title.classList.remove('expanded');
-            });
+            document.querySelectorAll('.filter-content').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('.filter-title').forEach(t => t.classList.remove('expanded'));
 
-            // Reopen category filter
             toggleFilter('category');
-
-            // Perform search immediately after clearing
             searchCourses();
         }
 
-        // Initialize range displays
-        updatePriceRange();
-        updateRatingRange();
+        // Init
+        document.addEventListener('DOMContentLoaded', function () {
+            updatePriceRange();
+            updateRatingRange();
 
-        // Set initial sort option from query string
-        const urlParams = new URLSearchParams(window.location.search);
-        const sortOption = urlParams.get('sortOption');
-        if (sortOption) {
-            document.getElementById('sortSelect').value = sortOption;
-        }
-
-        // Enter key search
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                searchCourses();
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortOption = urlParams.get('sortOption');
+            if (sortOption && document.getElementById('sortSelect')) {
+                document.getElementById('sortSelect').value = sortOption;
             }
-        });
 
-            // Initialize filter states based on current URL
-            document.addEventListener('DOMContentLoaded', function () {
-                // Close all filters first
-                document.querySelectorAll('.filter-content').forEach(content => {
-                    content.classList.remove('expanded');
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') searchCourses();
                 });
-                document.querySelectorAll('.filter-title').forEach(title => {
-                    title.classList.remove('expanded');
-                });
+            }
 
-                // Open filters that have active selections
-                const currentFilters = ['categoryId', 'language', 'level', 'minCost', 'maxCost', 'minRate', 'maxRate'];
-                let hasActiveFilter = false;
+            // Initialize filter states
+            document.querySelectorAll('.filter-content').forEach(c => c.classList.remove('expanded'));
+            document.querySelectorAll('.filter-title').forEach(t => t.classList.remove('expanded'));
 
-                currentFilters.forEach(filter => {
-                    if (urlParams.has(filter)) {
-                        let filterElement;
+            const currentFilters = ['categoryId', 'language', 'level', 'minCost', 'maxCost', 'minRate', 'maxRate'];
+            let hasActiveFilter = false;
 
-                        // Map URL parameters to filter sections
-                        if (filter === 'categoryId') {
-                            filterElement = document.getElementById('categoryFilter');
-                        } else if (filter === 'language') {
-                            filterElement = document.getElementById('languageFilter');
-                        } else if (filter === 'level') {
-                            filterElement = document.getElementById('levelFilter');
-                        } else if (filter === 'minCost' || filter === 'maxCost') {
-                            filterElement = document.getElementById('priceFilter');
-                        } else if (filter === 'minRate' || filter === 'maxRate') {
-                            filterElement = document.getElementById('ratingFilter');
-                        }
+            currentFilters.forEach(filter => {
+                if (urlParams.has(filter)) {
+                    let filterElement = null;
+                    if (filter === 'categoryId') filterElement = document.getElementById('categoryFilter');
+                    else if (filter === 'language') filterElement = document.getElementById('languageFilter');
+                    else if (filter === 'level') filterElement = document.getElementById('levelFilter');
+                    else if (filter === 'minCost' || filter === 'maxCost') filterElement = document.getElementById('priceFilter');
+                    else if (filter === 'minRate' || filter === 'maxRate') filterElement = document.getElementById('ratingFilter');
 
-                        if (filterElement) {
-                            filterElement.classList.add('expanded');
+                    if (filterElement) {
+                        filterElement.classList.add('expanded');
+                        if (filterElement.previousElementSibling)
                             filterElement.previousElementSibling.classList.add('expanded');
-                            hasActiveFilter = true;
-                        }
+                        hasActiveFilter = true;
                     }
-                });
-
-                // If no filters are active, open category filter by default
-                if (!hasActiveFilter) {
-                    toggleFilter('category');
                 }
             });
 
-        // Prevent radio buttons from toggling the filter section
-        document.querySelectorAll('.filter-option input[type="radio"]').forEach(radio => {
-            radio.addEventListener('click', function(e) {
-                e.stopPropagation();
+            if (!hasActiveFilter) toggleFilter('category');
+
+            // Prevent radio buttons from toggling the filter section
+            document.querySelectorAll('.filter-option input[type="radio"]').forEach(radio => {
+                radio.addEventListener('click', e => e.stopPropagation());
             });
         });
     </script>
+
 </body>
 </html>

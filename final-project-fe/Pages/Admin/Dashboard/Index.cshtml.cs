@@ -72,6 +72,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
                                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             }
 
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             if (role != "Admin")
                 return RedirectToPage("/Index");
 

@@ -1,7 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text.Json;
-using final_project_fe.Dtos;
+﻿using final_project_fe.Dtos;
 using final_project_fe.Dtos.Courses;
 using final_project_fe.Dtos.Payment;
 using final_project_fe.Dtos.Users;
@@ -9,6 +6,10 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace final_project_fe.Pages
 {
@@ -26,6 +27,7 @@ namespace final_project_fe.Pages
         }
 
         public User UserInfo { get; set; }
+        public bool IsPremium { get; set; } = false;
         public List<CourseRecommendDto> RecommendedCourses { get; set; } = new();
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
         public bool HasCompleteProfile { get; set; }
@@ -41,6 +43,8 @@ namespace final_project_fe.Pages
                     TempData["ErrorMessage"] = "Please login to access this page.";
                     return RedirectToPage("/Login");
                 }
+                _httpClient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", token);
 
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
@@ -65,6 +69,16 @@ namespace final_project_fe.Pages
                 {
                     PropertyNameCaseInsensitive = true
                 }) ?? new User();
+
+                IsPremium = UserInfo?.IsPremium ?? false;
+
+                _logger.LogInformation("User {UserId} Premium status: {IsPremium}", CurrentUserId, IsPremium);
+
+                if (!IsPremium)
+                {
+                    TempData["ShowPremiumWarning"] = "true";
+                    return RedirectToPage("/Index");
+                }
 
                 // Set HasCompleteProfile based on user data
                 HasCompleteProfile = UserInfo?.UserMetaData != null &&
@@ -132,6 +146,7 @@ namespace final_project_fe.Pages
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var userId = jsonToken?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId))
                 {

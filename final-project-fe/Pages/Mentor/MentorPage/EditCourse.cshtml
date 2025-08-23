@@ -2,7 +2,7 @@
 @using System.Text.Encodings.Web
 @model final_project_fe.Pages.Mentor.MentorPage.EditCourseModel
 @{
-    ViewData["Title"] = "Edit Course";
+    ViewData["Title"] = "Phronesis - Edit Course";
 }
 <div class="theme-layout">
     <!-- Header Section -->
@@ -227,7 +227,7 @@
                     <!-- Main Form -->
                     <div class="col-lg-9">
                         <div class="course-content">
-                            <partial name="_Notification" />
+                            @* <partial name="_Notification" /> *@
 
                             <!-- Hidden Delete Form -->
                             <form id="deleteCourseForm" method="post" asp-page-handler="ToggleDeleteCourse" style="display: none;">
@@ -698,7 +698,7 @@
                                                                                                                    style="max-height: 300px; object-fit: contain;"
                                                                                                                    preload="metadata"
                                                                                                                    id="video-@lesson.LessonId"
-                                                                                                                   poster="/images/video-placeholder.jpg"
+                                                                                                                   poster="#"
                                                                                                                    controlsList="nodownload noremoteplayback"
                                                                                                                    disablePictureInPicture
                                                                                                                    oncontextmenu="return false;">
@@ -955,11 +955,11 @@
                                                                                                         </div>
 
                                                                                                         <!-- Add New Answer Button -->
-                                                                                                        @* <div class="mt-2">
+                                                                                                        <div class="mt-2">
                                                                                                             <button class="btn btn-sm btn-outline-primary" onclick="showCreateAnswerForm(@question.QuestionId)">
                                                                                                                 <i class="fa fa-plus me-1"></i>Add New Answer
                                                                                                             </button>
-                                                                                                        </div> *@
+                                                                                                        </div>
 
                                                                                                         <!-- Create Answer Form -->
                                                                                                         <div id="create-answer-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
@@ -1349,6 +1349,10 @@
                                                                                                 <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
 
                                                                                                 <div class="mb-3">
+                                                                                                    <small class="text-danger">
+                                                                                                        <i class="bi bi-send-exclamation"></i>
+                                                                                                        Please fill out all course fields before using this feature (Only For Premium)!
+                                                                                                    </small>
                                                                                                     <label class="form-label">Topic/Content for AI Generation *</label>
                                                                                                     <textarea class="form-control" asp-for="Topic" rows="3" required
                                                                                                               placeholder="Enter the topic or content you want AI to generate questions about..."></textarea>
@@ -1649,7 +1653,7 @@
                                                         <div class="mb-3">
                                                             <small class="text-danger">
                                                             <i class="bi bi-send-exclamation"></i>
-                                                                Please fill out all course fields before using this feature!
+                                                                Please fill out all course fields before using this feature (Only For Premium)!
                                                             </small>
                                                             <div class="alert alert-info">
                                                                 <i class="fa fa-info-circle me-2"></i>
@@ -2705,7 +2709,7 @@
                     });
 
                     input.addEventListener('input', function() {
-                        clearFieldError(this);
+                        // clearFieldError(this);
                         // Update step completion status when fields change
                         const currentStep = getCurrentStep();
                         if (validateCurrentStep(currentStep)) {
@@ -3118,8 +3122,17 @@
             }
 
             try {
-                const response = await fetch(`/Assignment/${assignmentId}`, {
-                    method: 'DELETE'
+                // Lấy token từ cookie (hoặc nơi bạn lưu)
+                const token = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('AccessToken'))
+                    ?.split('=')[1];
+
+                const response = await fetch(`${BaseUrl}/Assignment/${assignmentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
 
                 if (response.ok) {
@@ -3191,24 +3204,32 @@
             formatInfo.style.display = formatInfo.style.display === 'none' ? 'block' : 'none';
         }
 
-        function toggleQuestionForms(lessonId, selectedOption, clickedButton) {
-            // Remove active class from all tab buttons in this lesson
-            const tabButtons = document.querySelectorAll(`[id*="${lessonId}"].tab-button`);
-            tabButtons.forEach(btn => {
-                btn.classList.remove('active');
-            });
+    function toggleQuestionForms(lessonId, selectedOption, clickedButton) {
+        // Remove active class from all tab buttons in this lesson
+        const tabButtons = document.querySelectorAll(`[id*="${lessonId}"].tab-button`);
+        tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
 
-            // Add active class to clicked tab button
+        // Add active class to clicked tab button (chỉ khi tồn tại)
+        if (clickedButton) {
             clickedButton.classList.add('active');
-
-            // Hide all forms for this lesson
-            document.getElementById(`manual-form-${lessonId}`).style.display = 'none';
-            document.getElementById(`excel-form-${lessonId}`).style.display = 'none';
-            document.getElementById(`ai-form-${lessonId}`).style.display = 'none';
-
-            // Show selected form
-            document.getElementById(`${selectedOption}-form-${lessonId}`).style.display = 'block';
         }
+
+        // Hide all forms for this lesson (chỉ khi tồn tại)
+        const manualForm = document.getElementById(`manual-form-${lessonId}`);
+        if (manualForm) manualForm.style.display = 'none';
+
+        const excelForm = document.getElementById(`excel-form-${lessonId}`);
+        if (excelForm) excelForm.style.display = 'none';
+
+        const aiForm = document.getElementById(`ai-form-${lessonId}`);
+        if (aiForm) aiForm.style.display = 'none';
+
+        // Show selected form (chỉ khi tồn tại)
+        const selectedForm = document.getElementById(`${selectedOption}-form-${lessonId}`);
+        if (selectedForm) selectedForm.style.display = 'block';
+    }
 
         
 
@@ -3379,8 +3400,7 @@
 
     </script>
 
- <!-- JavaScript for enhanced functionality -->
- <script>
+    <script>
         function toggleFullscreen(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
@@ -3395,44 +3415,96 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-        // Validation cho Document input trong Create Form (chỉ PDF)
-        const createDocumentInputs = document.querySelectorAll('input[asp-for="Document"]');
-        createDocumentInputs.forEach(function(input) {
-            // Chỉ áp dụng cho create form (id bắt đầu với "createDocument")
-            if (input.id && input.id.startsWith('createDocument')) {
+            // --- Validation for Create Form ---
+            const createDocumentInputs = document.querySelectorAll('input[asp-for="Document"]');
+            createDocumentInputs.forEach(function(input) {
+                if (input.id && input.id.startsWith('createDocument')) {
+                    input.addEventListener('change', function(e) {
+                        const file = this.files[0];
+                        const moduleId = this.id.split('-')[1];
+                        const errorDiv = document.getElementById('createDocumentError-' + moduleId);
+                        const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB
+
+                        if (file) {
+                            let isValid = true;
+                            let errorMessage = '';
+
+                            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                                isValid = false;
+                                errorMessage = 'Only PDF files are allowed.';
+                            }
+                            if (isValid && file.type !== 'application/pdf') {
+                                isValid = false;
+                                errorMessage = 'Invalid file type.';
+                            }
+                            if (isValid && file.size > maxSize) {
+                                isValid = false;
+                                errorMessage = `File too large. Max ${Math.round(maxSize/1024/1024)}MB.`;
+                            }
+                            if (isValid && file.size === 0) {
+                                isValid = false;
+                                errorMessage = 'File is empty.';
+                            }
+
+                            if (!isValid) {
+                                this.setCustomValidity(errorMessage);
+                                this.classList.add('is-invalid');
+                                errorDiv.textContent = errorMessage;
+                                errorDiv.style.display = 'block';
+                                this.value = '';
+                                e.preventDefault();
+                                return false;
+                            } else {
+                                this.setCustomValidity('');
+                                this.classList.remove('is-invalid');
+                                errorDiv.style.display = 'none';
+                            }
+                        }
+                    });
+
+                    // Drag & drop
+                    ['dragover', 'dragleave', 'drop'].forEach(evt => {
+                        input.addEventListener(evt, function(e) {
+                            e.preventDefault();
+                            if(evt === 'dragover') this.classList.add('drag-over');
+                            if(evt === 'dragleave' || evt === 'drop') this.classList.remove('drag-over');
+                            if(evt === 'drop' && e.dataTransfer.files.length > 0) {
+                                this.files = e.dataTransfer.files;
+                                this.dispatchEvent(new Event('change'));
+                            }
+                        });
+                    });
+                }
+            });
+
+            // --- Validation for other Document inputs (lesson) ---
+            const documentInputs = document.querySelectorAll('input[asp-for="Document"]');
+            documentInputs.forEach(function(input) {
                 input.addEventListener('change', function(e) {
                     const file = this.files[0];
-                    const moduleId = this.id.split('-')[1];
-                    const errorDiv = document.getElementById('createDocumentError-' + moduleId);
-                    const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB default
+                    const lessonId = this.id.split('-')[1];
+                    const errorDiv = document.getElementById('documentError-' + lessonId);
+                    const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB
 
                     if (file) {
                         let isValid = true;
                         let errorMessage = '';
 
-                        // Kiểm tra extension
-                        const fileName = file.name.toLowerCase();
-                        if (!fileName.endsWith('.pdf')) {
+                        if (!file.name.toLowerCase().endsWith('.pdf')) {
                             isValid = false;
-                            errorMessage = 'Only PDF files are allowed. Please select a .pdf file.';
+                            errorMessage = 'Only PDF files are allowed.';
                         }
-
-                        // Kiểm tra MIME type
                         if (isValid && file.type !== 'application/pdf') {
                             isValid = false;
-                            errorMessage = 'Invalid file type. Only PDF files are accepted.';
+                            errorMessage = 'Invalid file type.';
                         }
-
-                        // Kiểm tra file size
                         if (isValid && file.size > maxSize) {
                             isValid = false;
-                            errorMessage = `File size too large. Maximum allowed size is ${Math.round(maxSize/1024/1024)}MB.`;
+                            errorMessage = `File too large. Max ${Math.round(maxSize/1024/1024)}MB.`;
                         }
-
-                        // Kiểm tra file có rỗng không
                         if (isValid && file.size === 0) {
                             isValid = false;
-                            errorMessage = 'File is empty. Please select a valid PDF file.';
+                            errorMessage = 'File is empty.';
                         }
 
                         if (!isValid) {
@@ -3440,9 +3512,7 @@
                             this.classList.add('is-invalid');
                             errorDiv.textContent = errorMessage;
                             errorDiv.style.display = 'block';
-                            this.value = ''; // Clear the input
-
-                            // Prevent form submission
+                            this.value = '';
                             e.preventDefault();
                             return false;
                         } else {
@@ -3453,150 +3523,50 @@
                     }
                 });
 
-                // Validation khi drag & drop
-                input.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    this.classList.add('drag-over');
-                });
-
-                input.addEventListener('dragleave', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('drag-over');
-                });
-
-                input.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('drag-over');
-
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        this.files = files;
-                        // Trigger change event để validation chạy
-                        this.dispatchEvent(new Event('change'));
-                    }
-                });
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-        // Validation cho Document input (chỉ PDF)
-        const documentInputs = document.querySelectorAll('input[asp-for="Document"]');
-        documentInputs.forEach(function(input) {
-            input.addEventListener('change', function(e) {
-                const file = this.files[0];
-                const lessonId = this.id.split('-')[1];
-                const errorDiv = document.getElementById('documentError-' + lessonId);
-                const maxSize = parseInt(this.dataset.maxSize) || 10485760; // 10MB default
-
-                if (file) {
-                    let isValid = true;
-                    let errorMessage = '';
-
-                    // Kiểm tra extension
-                    const fileName = file.name.toLowerCase();
-                    if (!fileName.endsWith('.pdf')) {
-                        isValid = false;
-                        errorMessage = 'Only PDF files are allowed. Please select a .pdf file.';
-                    }
-
-                    // Kiểm tra MIME type
-                    if (isValid && file.type !== 'application/pdf') {
-                        isValid = false;
-                        errorMessage = 'Invalid file type. Only PDF files are accepted.';
-                    }
-
-                    // Kiểm tra file size
-                    if (isValid && file.size > maxSize) {
-                        isValid = false;
-                        errorMessage = `File size too large. Maximum allowed size is ${Math.round(maxSize/1024/1024)}MB.`;
-                    }
-
-                    // Kiểm tra file có rỗng không
-                    if (isValid && file.size === 0) {
-                        isValid = false;
-                        errorMessage = 'File is empty. Please select a valid PDF file.';
-                    }
-
-                    if (!isValid) {
-                        this.setCustomValidity(errorMessage);
-                        this.classList.add('is-invalid');
-                        errorDiv.textContent = errorMessage;
-                        errorDiv.style.display = 'block';
-                        this.value = ''; // Clear the input
-
-                        // Prevent form submission
+                ['dragover', 'dragleave', 'drop'].forEach(evt => {
+                    input.addEventListener(evt, function(e) {
                         e.preventDefault();
-                        return false;
-                    } else {
-                        this.setCustomValidity('');
-                        this.classList.remove('is-invalid');
-                        errorDiv.style.display = 'none';
-                    }
-                }
+                        if(evt === 'dragover') this.classList.add('drag-over');
+                        if(evt === 'dragleave' || evt === 'drop') this.classList.remove('drag-over');
+                        if(evt === 'drop' && e.dataTransfer.files.length > 0) {
+                            this.files = e.dataTransfer.files;
+                            this.dispatchEvent(new Event('change'));
+                        }
+                    });
+                });
             });
 
-            // Validation khi drag & drop
-            input.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('drag-over');
-            });
+            // --- Other functions ---
+            window.downloadMedia = function(url, filename) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
 
-            input.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-            });
+            window.openDocumentModal = function(lessonId) {
+                const modal = new bootstrap.Modal(document.getElementById('documentModal-' + lessonId));
+                modal.show();
+            };
 
-            input.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
+            window.printDocument = function(url) {
+                const printWindow = window.open(url, '_blank');
+                printWindow.addEventListener('load', function() { printWindow.print(); });
+            };
 
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    this.files = files;
-                    // Trigger change event để validation chạy
-                    this.dispatchEvent(new Event('change'));
-                }
-            });
-        });
-
-
-        function downloadMedia(url, filename) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function openDocumentModal(lessonId) {
-            const modal = new bootstrap.Modal(document.getElementById('documentModal-' + lessonId));
-            modal.show();
-        }
-
-        function printDocument(url) {
-            const printWindow = window.open(url, '_blank');
-            printWindow.addEventListener('load', function() {
-                printWindow.print();
-            });
-        }
-
-        // Auto-resize video elements
-        document.addEventListener('DOMContentLoaded', function() {
+            // --- Auto-resize videos ---
             const videos = document.querySelectorAll('.video-container video');
             videos.forEach(video => {
                 video.addEventListener('loadedmetadata', function() {
-                    // Auto-adjust height based on video aspect ratio
                     const aspectRatio = this.videoWidth / this.videoHeight;
-                    if (aspectRatio > 1.5) {
-                        this.style.height = '200px';
-                    } else {
-                        this.style.height = '300px';
-                    }
+                    this.style.height = aspectRatio > 1.5 ? '200px' : '300px';
                 });
             });
         });
     </script>
+
 
  <script>
     const sasToken = "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
@@ -3714,7 +3684,7 @@
             if (window.outerHeight - window.innerHeight > 200 ||
                 window.outerWidth - window.innerWidth > 200) {
                 // Dev tools might be open
-                console.clear();
+                //console.clear();
             }
         }, 500);
 

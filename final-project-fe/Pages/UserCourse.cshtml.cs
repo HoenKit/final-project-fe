@@ -49,7 +49,12 @@ namespace final_project_fe.Pages
                     return Unauthorized();
 
                 UserId = userIdClaim;
+
                 var client = _httpClientFactory.CreateClient();
+
+                // ✅ Gửi kèm token trong header
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 var statusParam = string.IsNullOrEmpty(Status) ? "" : $"&status={Status}";
                 var url = $"{_apiSettings.BaseUrl}/Course/status?userId={UserId}{statusParam}";

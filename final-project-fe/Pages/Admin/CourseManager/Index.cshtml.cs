@@ -1,13 +1,15 @@
-﻿using final_project_fe.Dtos.Category;
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Category;
 using final_project_fe.Dtos.Courses;
-using final_project_fe.Dtos;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Web;
 
 namespace final_project_fe.Pages.Admin.CourseManager
@@ -47,7 +49,7 @@ namespace final_project_fe.Pages.Admin.CourseManager
 
                 string token = Request.Cookies["AccessToken"];
                 string? role = JwtHelper.GetRoleFromToken(token);
-
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 if (role != "Admin")
                     return RedirectToPage("/Index");
 
@@ -98,6 +100,10 @@ namespace final_project_fe.Pages.Admin.CourseManager
         {
             try
             {
+                string token = Request.Cookies["AccessToken"];
+                string? role = JwtHelper.GetRoleFromToken(token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var categoryUrl = new UriBuilder($"{BaseUrl}/Category");
                 var categoryQuery = HttpUtility.ParseQueryString(string.Empty);
                 categoryQuery["page"] = "1";
@@ -132,6 +138,9 @@ namespace final_project_fe.Pages.Admin.CourseManager
                 var courseUrl = new UriBuilder($"{BaseUrl}/Course");
                 var courseQuery = HttpUtility.ParseQueryString(string.Empty);
 
+                string token = Request.Cookies["AccessToken"];
+                string? role = JwtHelper.GetRoleFromToken(token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 // Basic parameters
                 courseQuery["page"] = (currentPage ?? 1).ToString();
                 courseQuery["pageSize"] = "15";

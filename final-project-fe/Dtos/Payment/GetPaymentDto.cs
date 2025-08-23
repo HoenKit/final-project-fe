@@ -13,4 +13,12 @@
         public string ServiceType { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+    public class PremiumPackage
+    {
+        public int PlanId { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public object PaymentPlans { get; set; }
+    }
 }

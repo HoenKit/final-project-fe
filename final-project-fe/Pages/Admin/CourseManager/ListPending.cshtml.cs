@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Web;
+using System.Net.Http.Headers;
 
 namespace final_project_fe.Pages.Admin.CourseManager
 {
@@ -46,6 +47,7 @@ namespace final_project_fe.Pages.Admin.CourseManager
                 string token = Request.Cookies["AccessToken"];
                 string? role = JwtHelper.GetRoleFromToken(token);
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 if (role != "Admin")
                     return RedirectToPage("/Index");
 
@@ -132,6 +134,9 @@ namespace final_project_fe.Pages.Admin.CourseManager
         {
             try
             {
+                string token = Request.Cookies["AccessToken"];
+                string? role = JwtHelper.GetRoleFromToken(token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var courseUrl = new UriBuilder($"{BaseUrl}/Course");
                 var courseQuery = HttpUtility.ParseQueryString(string.Empty);
 
@@ -245,6 +250,9 @@ namespace final_project_fe.Pages.Admin.CourseManager
             decimal? minRating = null,
             decimal? maxRating = null)
         {
+            string token = Request.Cookies["AccessToken"];
+            string? role = JwtHelper.GetRoleFromToken(token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             try
             {
                 await LoadCourses(page, null, title, sortOption, false,

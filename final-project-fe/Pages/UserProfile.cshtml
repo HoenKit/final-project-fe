@@ -1,7 +1,7 @@
 ﻿@page
 @model final_project_fe.Pages.UserProfileModel
 @{
-	ViewData["Title"] = "UserProfile";
+	ViewData["Title"] = "Phronesis - User Profile";
 }
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
@@ -44,59 +44,62 @@
 					</div>
 				</div>
 			</div>
-			<div class="d-flex" style="width: 44%; margin-right: -3%;">
-				<!-- Points Card -->
-				<div class="col-5">
-					<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
-						<div style="color: #000;" class="card-body d-flex flex-column justify-content-between">
-							<div class="d-flex justify-content-between align-items-start">
-								<div>
-									<small>Your Points</small>
-									<h3 class="mt-1">@(Model.Profile?.Point?.ToString("N0") ?? "0")</h3>
-								</div>
-								<i style="font-size:150%" class="bi bi-p-circle"></i>
-							</div>
-							<a class="btn btn-outline-dark btn-sm rounded-pill mt-3 w-fit" asp-area="" asp-page="/PointTransaction">
-								Buy Points
-							</a>
-						</div>
-					</div>
-				</div>
-				<!-- MemberShip Card -->
-				<div class="col-6">
-					@if (Model.Profile.IsPremium)
-					{
-						<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
-							<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
-								<div>
-									<small>MemberShip</small>
-								</div>
-								<i style="color:#ffff" class="bi bi-gem fs-2"></i>
-								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-									Premium Member
-								</a>
-							</div>
-						</div>
-					}
-					else
-					{
-						<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
-							<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+			@if (Model.IsOwnUser)
+			{
+				<div class="d-flex" style="width: 44%; margin-right: -3%;">
+					<!-- Points Card -->
+					<div class="col-5">
+						<div class="card subscription-card bg-white text-dark shadow-sm h-100 mb-3">
+							<div style="color: #000;" class="card-body d-flex flex-column justify-content-between">
 								<div class="d-flex justify-content-between align-items-start">
 									<div>
-										<small>MemberShip</small>
-										<h3 class="mt-1">Free Member</h3>
+										<small>Your Points</small>
+										<h3 class="mt-1">@(Model.Profile?.Point?.ToString("N0") ?? "0")</h3>
 									</div>
-									<i class="bi bi-person-badge-fill fs-3"></i>
+									<i style="font-size:150%" class="bi bi-p-circle"></i>
 								</div>
-								<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
-									Upgrade to Premium
+								<a class="btn btn-outline-dark btn-sm rounded-pill mt-3 w-fit" asp-area="" asp-page="/PointTransaction">
+									Buy Points
 								</a>
 							</div>
 						</div>
-					}
-				</div>
+					</div>
+					<!-- MemberShip Card -->
+					<div class="col-6">
+						@if (Model.Profile.IsPremium)
+						{
+							<div class="card upgrade-card text-white text-decoration-none shadow-sm h-100">
+								<div style="color:#ffff" class="card-body d-flex flex-column justify-content-center align-items-center">
+									<div>
+										<small>MemberShip</small>
+									</div>
+									<i style="color:#ffff" class="bi bi-gem fs-2"></i>
+									<a href="#" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+										Premium Member
+									</a>
+								</div>
+							</div>
+						}
+						else
+						{
+							<div class="card subscription-card bg-dark text-white shadow-sm h-100 mb-3">
+								<div style="color: #ffff;" class="card-body d-flex flex-column justify-content-between">
+									<div class="d-flex justify-content-between align-items-start">
+										<div>
+											<small>MemberShip</small>
+											<h3 class="mt-1">Free Member</h3>
+										</div>
+										<i class="bi bi-person-badge-fill fs-3"></i>
+									</div>
+									<a href="/UpdatePremium" class="btn btn-outline-light btn-sm rounded-pill mt-3 w-fit">
+										Upgrade to Premium
+									</a>
+								</div>
+							</div>
+						}
+					</div>
 			</div>
+			}
 		</div>
 	</div>
 
@@ -109,59 +112,54 @@
 						<!-- Sidebar -->
 						<div class="col-lg-3">
 							<aside class="sidebar">
-								<div class="widget">
-									<h4 class="widget-title">Shortcuts</h4>
-									<ul class="naves">
-										<li>
-											<i class="ti-clipboard"></i>
-											<a asp-page="/Index" title="">News feed</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-mortarboard"></i>
-											<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-person"></i>
-											<a class="active" asp-page="/UserPage" title="" data-ripple="">My Page</a>
-										</li>
-										@* <li style="display:flex">
+									<div class="widget">
+										<h4 class="widget-title">Shortcuts</h4>
+										<ul class="naves">
+											<li>
+												<i class="ti-clipboard"></i>
+												<a asp-page="/Index" title="">News feed</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-mortarboard"></i>
+												<a asp-page="/Mentor/MentorPage/Index" title="">Courses</a>
+											</li>
+											@if (Model.IsOwnUser)
+											{
+												<li style="display:flex">
+													<i class="bi bi-person"></i>
+													<a class="active" asp-page="/UserPage" title="" data-ripple="">My Page</a>
+												</li>
+											}
+											else
+											{
+												<li style="display:flex">
+													<i class="bi bi-person"></i>
+													<a class="active" asp-page="/UserPage" asp-route-userId="@Request.Query["userId"]" data-tab="Page">@Model.Profile?.UserMetaData?.FirstName Page</a>
+												</li>
+											}
+											@* <li style="display:flex">
 											<i class="bi bi-info-circle"></i>
 											<a class="active" asp-page="/UserProfile" data-tab="about">About me</a>
-										</li> *@
-										<li style="display:flex">
-											<i class="bi bi-bag"></i>
-											<a asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
-										</li>
-										<li style="display:flex">
-											<i class="bi bi-wallet2"></i>
-											<a asp-area="" asp-page="/TransactionHistory">Transaction History</a>
-										</li>
-									</ul>
-								</div><!-- Shortcuts -->
+											</li> *@
+										@if (Model.IsOwnUser)
+										{
+											<li style="display:flex">
+												<i class="bi bi-bag"></i>
+												<a asp-area="" asp-page="/PurchaseHistory">Purchase History</a>
+											</li>
+											<li style="display:flex">
+												<i class="bi bi-wallet2"></i>
+												<a asp-area="" asp-page="/TransactionHistory">Transaction History</a>
+											</li>
+										}
+										</ul>
+									</div><!-- Shortcuts -->
 								<div class="widget">
-									<h4 class="widget-title">Recent Activity</h4>
-									<ul class="activitiez">
-										<li>
-											<div class="activity-meta">
-												<i>10 hours Ago</i>
-												<span><a href="#" title="">Commented on Video posted </a></span>
-												<h6>by <a href="time-line.html">black demon.</a></h6>
-											</div>
-										</li>
-										<li>
-											<div class="activity-meta">
-												<i>30 Days Ago</i>
-												<span><a href="#" title="">Posted your status. "Hello guys, how are you?"</a></span>
-											</div>
-										</li>
-										<li>
-											<div class="activity-meta">
-												<i>2 Years Ago</i>
-												<span><a href="#" title="">Share a video on her timeline.</a></span>
-												<h6>"<a href="#">you are so funny mr.been.</a>"</h6>
-											</div>
-										</li>
-									</ul>
+									<div class="advertisment-box">
+										<figure>
+											<a href="#" title="Advertisment"><img src="https://travarsa.com/wp-content/uploads/2023/04/Soft-Skills-Training-and-Certification%E2%80%8B.jpg" alt=""></a>
+										</figure>
+									</div>
 								</div><!-- recent activites -->
 							</aside>
 						</div><!-- sidebar -->
@@ -185,7 +183,10 @@
 										<div class="container">
 											<h2 class="section-title d-flex justify-content-between align-items-center">
 												About me
-												<i class="bi bi-pencil-square edit-icon" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile"></i>
+												@if (Model.IsOwnUser)
+												{
+													<i class="bi bi-pencil-square edit-icon" data-bs-toggle="modal" data-bs-target="#editProfileModal" title="Edit Profile"></i>
+												}
 											</h2>
 											<div class="profile-details-grid">
 												<div class="profile-detail-item">
@@ -402,135 +403,101 @@
 								<div class="certificates-section">
 									<div class="container">
 										<h2 class="section-title">My Certificates</h2>
+
+										<!-- Upload button (mentor only) -->
+										@if (Model.IsOwnUser)
+										{
+											<div class="text-end mb-3">
+												<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadCertificateModal">
+													Upload Certificate
+												</button>
+											</div>
+										}
+
 										<div class="certificates-content-wrapper">
 											<div class="certificates-content">
 												<div class="certificates-grid">
-													<!-- Certificate 1 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-award"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">Master of Computer Science</h3>
-															<p class="certificate-issuer">Stanford University</p>
-															<p class="certificate-date">Issued: June 2005</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Verified</span>
-															</div>
-														</div>
-													</div>
 
-													<!-- Certificate 2 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-patch-check"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">AWS Certified Solutions Architect</h3>
-															<p class="certificate-issuer">Amazon Web Services</p>
-															<p class="certificate-date">Issued: March 2023</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Professional</span>
+													<!-- Certificates hoàn thành -->
+													@if (Model.Certificates != null && Model.Certificates.Any())
+													{
+														@foreach (var cert in Model.Certificates)
+														{
+															<div class="certificate-card">
+																<div class="certificate-icon"><i class="bi bi-award"></i></div>
+																<div class="certificate-content">
+																	<h3 class="certificate-title">@cert.CourseName</h3>
+																	<p class="certificate-issuer">Mentor: @cert.MentorName</p>
+																	<p class="certificate-date">Completed: @cert.CompletedAt.ToString("MMMM yyyy")</p>
+																	<div class="certificate-badge"><span class="badge-text">@cert.Level</span></div>
+																	<div>
+																		<a asp-page="/GenerateCertificate"
+																		   asp-route-courseId="@cert.CourseId"
+																		   asp-route-userId="@cert.UserId"
+																		   target="_blank"
+																		   class="btn btn-sm btn-outline-primary mt-2">
+																			View Certificate
+																		</a>
+																	</div>
+																</div>
 															</div>
-														</div>
-													</div>
+														}
+													}
 
-													<!-- Certificate 3 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-trophy-fill"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">Oracle Java SE 11 Developer</h3>
-															<p class="certificate-issuer">Oracle Corporation</p>
-															<p class="certificate-date">Issued: January 2022</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Expert</span>
+													<!-- Certificates tự upload (mentor) -->
+													@if (Model.MentorCertificates != null && Model.MentorCertificates.Any())
+													{
+														@foreach (var mCert in Model.MentorCertificates)
+														{
+															<div class="certificate-card mentor-upload">
+																<div class="certificate-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+																<div class="certificate-content">
+																	<h3 class="certificate-title">@mCert.CertificateName</h3>
+																	<div>
+																		<a href="@mCert.FileUrl?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" target="_blank" class="btn btn-sm btn-outline-success mt-2">
+																			View PDF
+																		</a>
+																	</div>
+																</div>
 															</div>
-														</div>
-													</div>
+														}
+													}
 
-													<!-- Certificate 4 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-award"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">Microsoft Azure Fundamentals</h3>
-															<p class="certificate-issuer">Microsoft Corporation</p>
-															<p class="certificate-date">Issued: September 2023</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Fundamentals</span>
-															</div>
-														</div>
-													</div>
-
-													<!-- Certificate 5 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-star-fill"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">Google Cloud Professional Developer</h3>
-															<p class="certificate-issuer">Google Cloud Platform</p>
-															<p class="certificate-date">Issued: November 2023</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Professional</span>
-															</div>
-														</div>
-													</div>
-
-													<!-- Certificate 6 -->
-													<div class="certificate-card">
-														<div class="certificate-icon">
-															<i class="bi bi-mortarboard-fill"></i>
-														</div>
-														<div class="certificate-content">
-															<h3 class="certificate-title">Certified Scrum Master</h3>
-															<p class="certificate-issuer">Scrum Alliance</p>
-															<p class="certificate-date">Issued: April 2021</p>
-															<div class="certificate-badge">
-																<span class="badge-text">Certified</span>
-															</div>
-														</div>
-													</div>
+													<!-- No certificates -->
+													@if ((Model.Certificates == null || !Model.Certificates.Any()) && (Model.MentorCertificates == null || !Model.MentorCertificates.Any()))
+													{
+														<p>No certificates found.</p>
+													}
 												</div>
 											</div>
+										</div>
 
-											<div class="certificates-summary-card">
-												<div class="summary-icon">
-													<i class="bi bi-bar-chart-line-fill"></i>
-												</div>
-												<div class="summary-content">
-													<h3 class="summary-title">Certifications Summary</h3>
-													<div class="summary-stats">
-														<div class="stat-item">
-															<span class="stat-number">6</span>
-															<span class="stat-label">Total Certificates</span>
-														</div>
-														<div class="stat-item">
-															<span class="stat-number">4</span>
-															<span class="stat-label">Professional Level</span>
-														</div>
-														<div class="stat-item">
-															<span class="stat-number">2023</span>
-															<span class="stat-label">Latest Update</span>
-														</div>
+										<!-- Certificates Summary -->
+										<div class="certificates-summary-card mt-4">
+											<div class="summary-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
+											<div class="summary-content">
+												<h3 class="summary-title">Certifications Summary</h3>
+												<div class="summary-stats">
+													<div class="stat-item">
+														<span class="stat-number">
+															@( (Model.Certificates?.Count ?? 0) + (Model.MentorCertificates?.Count ?? 0) )
+														</span>
+														<span class="stat-label">Total Certificates</span>
 													</div>
-													@* <div class="achievement-badges">
-														<div class="achievement-badge">
-															<i class="fas fa-cloud"></i>
-															<span>Cloud Expert</span>
-														</div>
-														<div class="achievement-badge">
-															<i class="fas fa-code"></i>
-															<span>Programming Pro</span>
-														</div>
-														<div class="achievement-badge">
-															<i class="fas fa-users"></i>
-															<span>Team Leader</span>
-														</div>
-													</div> *@
+													<div class="stat-item">
+														<span class="stat-number">
+															@(Model.Certificates?.OrderByDescending(c => c.Level).FirstOrDefault()?.Level
+																														?? Model.MentorCertificates?.FirstOrDefault()?.CertificateName
+																														?? "N/A")
+														</span>
+														<span class="stat-label">Highest Level / Latest Uploaded</span>
+													</div>
+													<div class="stat-item">
+														<span class="stat-number">
+															@(Model.Certificates?.Any() == true ? Model.Certificates.Max(c => c.CompletedAt).Year : 0)
+														</span>
+														<span class="stat-label">Latest Update</span>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -538,8 +505,40 @@
 								</div>
 							</div>
 
+							<!-- Modal Upload Mentor Certificate -->
+							@if (Model.IsOwnUser)
+							{
+								<div class="modal fade" id="uploadCertificateModal" tabindex="-1" aria-labelledby="uploadCertificateModalLabel" aria-hidden="true">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title" id="uploadCertificateModalLabel">Upload New Certificate</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<form method="post" enctype="multipart/form-data" asp-page-handler="UploadMentorCertificate">
+												<div class="modal-body">
+													<div class="mb-3">
+														<label class="form-label">Certificate Name</label>
+														<input type="text" class="form-control" asp-for="MentorCertificateName" required />
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Select PDF File</label>
+														<input type="file" class="form-control" asp-for="MentorCertificateFile" accept=".pdf" required />
+													</div>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+													<button type="submit" class="btn btn-primary">Upload PDF</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							}
+
+
 							<!-- Courses Section -->
-							@if (Model.IsMentor)
+							@if (Model.CurrentMentor != null && Model.Courses != null)
 							{
 								<div class="courses-section">
 									<div class="container">

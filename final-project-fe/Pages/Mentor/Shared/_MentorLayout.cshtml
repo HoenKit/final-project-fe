@@ -1,17 +1,34 @@
-﻿@using System.IdentityModel.Tokens.Jwt
+﻿﻿@using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
+@using final_project_fe.Utils
+@using Microsoft.Extensions.Options
+@inject IOptions<ApiSettings> ApiSettings
+@inject IOptions<SignalrSetting> SignalrSetting
+
 @{
 	var roles = new List<string>();
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
+	Guid? userId = null;
+	var BaseUrl = ApiSettings.Value.BaseUrl;
+	var HubUrl = SignalrSetting.Value.HubUrl;
+
+	JwtSecurityToken jwtToken = null;
+
 	if (!string.IsNullOrEmpty(token))
 	{
 		var handler = new JwtSecurityTokenHandler();
-		var jwtToken = handler.ReadJwtToken(token);
+		jwtToken = handler.ReadJwtToken(token);
 		roles = jwtToken.Claims
 					.Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
 					.Select(c => c.Value)
 					.ToList();
+
+		var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+		if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedId))
+		{
+			userId = parsedId;
+		}
 	}
 
 	bool isMentor = roles.Contains("Mentor");
@@ -33,15 +50,13 @@
 	<link rel="stylesheet" href="~/css/strip.css">
  *@
 
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="" />
-	<meta name="keywords" content="" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>@ViewData["Title"]</title>
-	<link rel="icon" href="~/images/fav.png" type="image/png" sizes="16x16">
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
 	<link rel="stylesheet" href="~/css/main.min.css">
-	<link rel="stylesheet" href="~/css/strip.css">
 	<link rel="stylesheet" href="~/css/style.css">
 	<link rel="stylesheet" href="~/css/color.css">
 	<link rel="stylesheet" href="~/css/responsive.css">
@@ -142,6 +157,16 @@
 				.custom-user-menu a:hover i {
 					color: #007bff;
 				}
+
+		.badge-new {
+			background-color: green;
+			color: white;
+			font-size: 10px;
+			font-weight: bold;
+			padding: 2px 4px;
+			border-radius: 4px;
+			margin-left: 6px;
+		}
 	</style>
 </head>
 <body>
@@ -202,122 +227,116 @@
 						}
 					}
 				</ul>
-				<ul class="setting-area">
-					<li>
-						<a href="#" title="Home" data-ripple=""><i class="ti-search"></i></a>
-						<div class="searched">
-							<form method="post" class="form-search">
-								<input type="text" placeholder="Search Friend">
-								<button data-ripple><i class="ti-search"></i></button>
-							</form>
-						</div>
-					</li>
-					@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
-					<li>
-						<a href="#" title="Notification" data-ripple="">
-							<i class="ti-bell"></i><span>20</span>
-						</a>
-						<div class="dropdowns">
-							<span>4 New Notifications</span>
-							<ul class="drops-menu">
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-1.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>sarah Loren</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag green">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-2.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Jhon doe</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag red">Reply</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-3.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Andrew</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag blue">Unseen</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-4.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Tom cruse</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-5.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Amy</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-							</ul>
-							<a href="notifications.html" title="" class="more-mesg">view more</a>
-						</div>
-					</li>
-					<li>
-						<a href="#" title="Languages" data-ripple=""><i class="fa fa-globe"></i></a>
-						<div class="dropdowns languages">
-							<a href="#" title=""><i class="ti-check"></i>English</a>
-							<a href="#" title="">Vietnam</a>
-						</div>
-					</li>
-				</ul>
+									@if (isAuthenticated)
+				{
+					<ul class="setting-area">
+
+						<li id="pointDisplay">
+							<a href="#" title="Your Points" data-ripple="">
+								<span id="userPointBadge" style="
+							display: inline-flex;
+							align-items: center;
+							justify-content: center;
+							margin-left: 5px;
+							background-color: #ff9800;
+							color: #fff;
+							font-size: 13px;
+							font-weight: bold;
+							padding: 2px 10px;
+							border-radius: 20px;
+							min-width: 40px;
+							text-align: center;
+							line-height: 1.2;
+							margin-bottom: -13px;
+								">0</span>
+							</a>
+						</li>
+						@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
+						<li id="notificationDropdown">
+							<a href="#" title="Notification" data-ripple="">
+								<i class="ti-bell"></i><span id="notificationCount">0</span>
+							</a>
+							<div class="dropdowns">
+								<span id="notificationHeader">No New Notifications</span>
+								<ul class="drops-menu" id="notificationList">
+									<!-- JS sẽ render -->
+								</ul>
+								<a href="/notifications" title="" class="more-mesg">view more</a>
+							</div>
+						</li>
+					</ul>
+				}
 				<div class="user-img" id="userImg">
 					<img src="~/images/fav_icon.png" alt="">
 					<div class="custom-user-menu" id="userMenu">
-@if (isMentor)
-					{
-						<li>
-							<a asp-page="/Mentor/MentorPage/Dashboard">Mentor Page</a>
-						</li>
-					}
-					@if (isAdmin)
-					{
-						<li style="all: unset; list-style: none; padding: 0; margin: 0;">
-							<a asp-page="/Admin/Dashboard/Index">Admin Page</a>
-						</li>
-					}
-					@if (isAuthenticated)
-					{
-						@if (!isAdmin)
+						@if (isAuthenticated)
 						{
-							<li>
-								<a asp-page="/UserPage">My page</a>
-							</li>
-							<li style="all: unset; list-style: none; padding: 0; margin: 0;">
-								<a asp-page="/CourseRecommend">Recommend Course</a>
-							</li>
+							@* <text>
+                            <a asp-page="#" id="userPointsLink">
+                                <i class="bi bi-p-circle"></i>
+                                <span id="userPoints">@userPoints.ToString("N0")</span>
+                            </a>
+                        </text> *@
+							if (!isAdmin && !isMentor)
+							{
+								<text>
+									<a asp-page="/MentorRegulations"><i class="bi bi-person-vcard"></i> Become a Mentor</a>
+								</text>
+							}
+							<text>
+								@if (!isAdmin)
+								{
+									<a asp-page="/UserProfile"><i class="ti-user"></i> View Profile</a>
+									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
+									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
+								}
+								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
+							</text>
 						}
-					}
+						else
+						{
+							<text>
+								<a asp-page="/Login"><i class="bi bi-box-arrow-in-right" style="font-size: 118%;"></i> Login</a>
+								<a asp-page="/Register"><i class="bi bi-pencil-square"></i> Register</a>
+							</text>
+						}
 					</div>
 				</div>
+
+				@* <span class="ti-menu main-menu" data-ripple=""></span> *@
 			</div>
-		</div><!-- topbar -->	
+		</div><!-- topbar -->
+		@* 	<div class="side-panel">
+			<h4 class="panel-title">Account Manage</h4>
+			<ul class="navbar-nav flex-grow-1">
+				@if (isAuthenticated)
+				{
+
+					@if (!isMentor)
+					{
+						<li style="padding-bottom: 4%;">
+							<i class="bi bi-person-vcard"></i>
+							<a asp-page="/MentorRegulations">Become a Mentor</a>
+						</li>
+					}
+					<li>
+						<i style="font-size: 115%;" class="bi bi-box-arrow-in-left"></i>
+						<a asp-page="/Logout">Logout</a>
+					</li>
+				}
+				else
+				{
+					<li style="padding-bottom: 4%;">
+						<i style="font-size:118%;" class="bi bi-box-arrow-in-right"></i>
+						<a asp-page="/Login">Login</a>
+					</li>
+					<li style="padding-left: 2%;">
+						<i class="bi bi-pencil-square"></i>
+						<a asp-page="/Register">Register</a>
+					</li>
+				}
+			</ul>
+		</div><!-- side panel --> *@
 	</header>
 
     <div class="">
@@ -414,7 +433,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 	@* <script src="~/js/map-init.js"></script> *@
 	@* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8c55_YHLvDHGACkQscgbGLtLRdxBDCfI"></script> *@
-
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 	<script>
 				document.addEventListener('DOMContentLoaded', function () {
 			const hasToken = document.cookie.includes('AccessToken=');
@@ -461,6 +480,163 @@
 		});
 	</script>
 
+	<script>
+		const apiBaseUrl = "@BaseUrl";   // từ ApiSettings
+		const hubUrl = "@HubUrl";        // từ SignalrSetting
+		const userId = "@(userId?.ToString() ?? "")"; // từ JWT claim
+
+		// Render 1 item notification
+		function renderNotificationItem(notification, isNew = false) {
+			return `
+				<li data-id="${notification.notificationId}">
+					<a href="/notifications" title="">
+						<div class="mesg-meta">
+							<span>${notification.message}</span>
+							<i>${new Date(notification.createdAt).toLocaleString()}</i>
+						</div>
+					</a>
+					<span class="tag ${isNew ? "green" : ""}">${isNew ? "New" : ""}</span>
+				</li>
+			`;
+		}
+
+		function getCookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return parts.pop().split(";").shift();
+		}
+
+		// Load notification khi vừa load trang (chỉ render, không cộng count)
+				async function loadNotifications() {
+			if (!userId) {
+				console.log("👤 Guest user → skip loadNotifications");
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) headerEl.innerText = "No Notifications";
+				return;
+			}
+			try {
+				const token = getCookie("AccessToken");
+				const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`, {
+					headers: {
+						"Authorization": `Bearer ${token}`,
+						"Content-Type": "application/json"
+					}
+				});
+
+				if (!response.ok) throw new Error("Failed to fetch notifications");
+				const notifications = await response.json();
+
+				const list = document.getElementById("notificationList");
+				if (!list) return;
+				list.innerHTML = "";
+
+				notifications.forEach(noti => {
+					list.insertAdjacentHTML("beforeend", renderNotificationItem(noti, false));
+				});
+
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) {
+					headerEl.innerText =
+						notifications.length > 0
+							? `${notifications.length} Notifications`
+							: "No Notifications";
+				}
+			} catch (err) {
+				console.error("❌ Error loading notifications:", err);
+			}
+		}
+
+		// Khi mở dropdown thì reset badge
+		const dropdown = document.getElementById("notificationDropdown");
+		if (dropdown) {
+			dropdown.addEventListener("click", () => {
+				clearNewBadges();
+			});
+		}
+
+		// ---- SignalR connection ----
+		if (userId) {
+			if (!window.signalRConnection) {
+				window.signalRConnection = new signalR.HubConnectionBuilder()
+					.withUrl(`${hubUrl}/postHub?UserId=${userId}`)
+					.withAutomaticReconnect()
+					.build();
+
+				window.signalRConnection.on("ReceiveNotification", (notification) => {
+					if (typeof notification === "string") {
+						try {
+							notification = JSON.parse(notification);
+						} catch {
+							return;
+						}
+					}
+					if (!notification || !notification.notificationId) return;
+
+					const list = document.getElementById("notificationList");
+					if (!list) return;
+
+					const countEl = document.getElementById("notificationCount");
+					let count = parseInt(countEl.innerText) || 0;
+					count++;
+					countEl.innerText = count;
+
+					list.insertAdjacentHTML("afterbegin", renderNotificationItem(notification, true));
+					const header = document.getElementById("notificationHeader");
+					header.innerText = `${list.children.length} Notifications`;
+				});
+
+				window.signalRConnection.start()
+					.then(() => console.log("✅ SignalR connected"))
+					.catch(err => console.error("❌ SignalR error:", err));
+			}
+		}
+
+		function clearNewBadges() {
+			document.getElementById("notificationCount").innerText = 0;
+			document.querySelectorAll("#notificationList li .tag").forEach(tag => {
+				tag.innerText = "";
+				tag.classList.remove("green");
+			});
+			const list = document.getElementById("notificationList");
+			const header = document.getElementById("notificationHeader");
+			if (list && list.children.length > 0) {
+				header.innerText = `Notifications`;
+			} else {
+				header.innerText = "No Notifications";
+			}
+		}
+
+		// gọi khi load trang
+		loadNotifications();
+	</script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			const CurrentuserId = "@(userId?.ToString() ?? "")";
+			const BaseUrl = "@BaseUrl";
+			const apiUrl = `${BaseUrl}/User/GetUserById/${CurrentuserId}`;
+
+			console.log("userId:", CurrentuserId, "apiUrl:", apiUrl); // debug
+
+			fetch(apiUrl)
+				.then(response => {
+					if (!response.ok) throw new Error("Network response was not ok");
+					return response.json();
+				})
+				.then(user => {
+					const point = user.point ?? 0;
+					document.getElementById("userPointBadge").textContent = point;
+				})
+				.catch(err => {
+					console.error("Failed to fetch user point:", err);
+					const badge = document.getElementById("userPointBadge");
+					if (badge) badge.textContent = 0;
+				});
+		});
+	</script>
     @await RenderSectionAsync("Scripts", required: false)
 	
 

@@ -15,6 +15,7 @@ using System.Buffers.Text;
 using final_project_fe.Dtos.Category;
 using Microsoft.Extensions.Hosting;
 using System.Web;
+using Newtonsoft.Json.Linq;
 
 namespace final_project_fe.Pages
 {
@@ -49,73 +50,89 @@ namespace final_project_fe.Pages
         public Dictionary<int, List<PostFileDto>> PostFilesByPost { get; set; } = new();
 
         public int currentPage { get; set; }
+        public bool IsOwnUser { get; set; } = false;
         public string CurrentUserId { get; set; }
         public string HubUrl { get; set; }
         public string BaseUrl { get; set; }
 
-        public async Task OnGetAsync(int? page)
+        public async Task<IActionResult> OnGetAsync(int? page, string? userId)
         {
+            string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please login before Checkin.";
+                return RedirectToPage("/Login");
+            }
             int currentPage = page ?? 1;
             CommentsByPost = new Dictionary<int, List<CommentDto>>();
-
 
             //URL to Html
             HubUrl = _signalrSetting.HubUrl;
             BaseUrl = _apiSettings.BaseUrl;
 
-
-
             // URL Comment API
             string userApiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/";
-
             string postFileApiUrl = $"{_apiSettings.BaseUrl}/PostFile";
-
             string categoryApiUrl = $"{_apiSettings.BaseUrl}/Category?";
-
 
             try
             {
-
                 // Lay Current User dang dang nhap
-                string token = Request.Cookies["AccessToken"];
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-                var userId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                // URL Post by UserId API
-                string postsApiUrl = $"{_apiSettings.BaseUrl}/Post?userId={userId}";
+                var currentUserId = jsonToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-                var response = await _httpClient.GetAsync(postsApiUrl);
                 if (string.IsNullOrEmpty(token))
                 {
                     _logger.LogError("Lỗi không tìm thấy token");
-                    // Optionally, set a default or fallback value if token is missing
-                    CurrentUserId = null; // or other default value
+                    CurrentUserId = null;
                 }
                 else
                 {
                     if (jsonToken == null)
                     {
                         _logger.LogError("Lỗi không thể đọc token");
-                        CurrentUserId = null; // or other default value
+                        CurrentUserId = null;
                     }
                     else
                     {
-                        if (userId != null)
+                        if (currentUserId != null)
                         {
-                            CurrentUserId = userId;
+                            CurrentUserId = currentUserId;
                         }
                         else
                         {
                             _logger.LogError("Không tìm thấy userId trong token");
-                            CurrentUserId = null; // or other default value
+                            CurrentUserId = null;
                         }
                     }
+                }
 
-                    CurrentUserId = userId;
-                    var profileResponse = await _httpClient.GetAsync(userApiUrl + userId);
-                    if (profileResponse.IsSuccessStatusCode)
+                // 🔹 Gắn token cho tất cả request
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+
+                // 🔹 XÁC ĐỊNH XEM CÓ PHẢI USERPAGE CỦA CHÍNH MÌNH KHÔNG
+                IsOwnUser = string.IsNullOrEmpty(userId) || userId == CurrentUserId;
+        
+                // 🔹 XÁC ĐỊNH USER ID CẦN LOAD DATA
+                string targetUserId = IsOwnUser ? CurrentUserId : userId;
+
+                if (string.IsNullOrEmpty(targetUserId))
+                {
+                    _logger.LogError("Không xác định được target user ID");
+                    return Page();
+                }
+
+                // Load Profile của user (có thể là mình hoặc người khác)
+                var profileResponse = await _httpClient.GetAsync(userApiUrl + targetUserId);
+                if (profileResponse.IsSuccessStatusCode)
+                {
+                    var userJson = await profileResponse.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrWhiteSpace(userJson) && userJson.TrimStart().StartsWith("{"))
                     {
-                        var userJson = await profileResponse.Content.ReadAsStringAsync();
                         var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
@@ -126,8 +143,12 @@ namespace final_project_fe.Pages
                     }
                     else
                     {
-                        _logger.LogError("Unable to get user profile information. Status: " + profileResponse.StatusCode);
+                        _logger.LogError("Invalid JSON response for user profile");
                     }
+                }
+                else
+                {
+                    _logger.LogError("Unable to get user profile information. Status: " + profileResponse.StatusCode);
                 }
 
                 // Get Category
@@ -141,35 +162,43 @@ namespace final_project_fe.Pages
                 if (cateResponse.IsSuccessStatusCode)
                 {
                     var categoryJson = await cateResponse.Content.ReadAsStringAsync();
-                    Categories = JsonSerializer.Deserialize<PageResult<CategoryDto>>(categoryJson,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                        ?? new PageResult<CategoryDto>(new List<CategoryDto>(), 0, 1, 10);
+                    if (!string.IsNullOrWhiteSpace(categoryJson))
+                    {
+                        Categories = JsonSerializer.Deserialize<PageResult<CategoryDto>>(categoryJson,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                            ?? new PageResult<CategoryDto>(new List<CategoryDto>(), 0, 1, 10);
+                    }
                 }
                 else
                 {
                     _logger.LogWarning("Không thể lấy danh mục. Status: " + cateResponse.StatusCode);
                 }
 
+                // 🔹 URL Post by UserId API - Load posts của target user
+                string postsApiUrl = $"{_apiSettings.BaseUrl}/Post?userId={targetUserId}";
 
-                // 1️ Gọi API lấy danh sách Posts
+                // 1️ Gọi API lấy danh sách Posts của target user
                 HttpResponseMessage postsResponse = await _httpClient.GetAsync(postsApiUrl);
                 if (postsResponse.IsSuccessStatusCode)
                 {
                     string postsJsonResponse = await postsResponse.Content.ReadAsStringAsync();
-                    Posts = JsonSerializer.Deserialize<PageResult<PostDto>>(postsJsonResponse, new JsonSerializerOptions
+                    if (!string.IsNullOrWhiteSpace(postsJsonResponse))
                     {
-                        PropertyNameCaseInsensitive = true
-                    }) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
-
-                    if (Posts?.Items != null)
-                    {
-                        foreach (var post in Posts.Items)
+                        Posts = JsonSerializer.Deserialize<PageResult<PostDto>>(postsJsonResponse, new JsonSerializerOptions
                         {
-                            foreach (var postFile in post.PostFiles)
+                            PropertyNameCaseInsensitive = true
+                        }) ?? new PageResult<PostDto>(new List<PostDto>(), 0, 1, 10);
+
+                        if (Posts?.Items != null)
+                        {
+                            foreach (var post in Posts.Items)
                             {
-                                if (!string.IsNullOrWhiteSpace(postFile.FileUrl))
+                                foreach (var postFile in post.PostFiles)
                                 {
-                                    postFile.FileUrl = ImageUrlHelper.AppendSasTokenIfNeeded(postFile.FileUrl, SasToken);
+                                    if (!string.IsNullOrWhiteSpace(postFile.FileUrl))
+                                    {
+                                        postFile.FileUrl = ImageUrlHelper.AppendSasTokenIfNeeded(postFile.FileUrl, SasToken);
+                                    }
                                 }
                             }
                         }
@@ -178,7 +207,7 @@ namespace final_project_fe.Pages
                 else
                 {
                     _logger.LogError($"Lỗi API Post: {postsResponse.StatusCode}");
-                    return;
+                    return RedirectToPage("/ErrorPage");
                 }
 
                 // 2️ Tạo danh sách task để gọi API song song
@@ -197,11 +226,14 @@ namespace final_project_fe.Pages
                             if (userResponse.IsSuccessStatusCode)
                             {
                                 var userJson = await userResponse.Content.ReadAsStringAsync();
-                                var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                                if (!string.IsNullOrWhiteSpace(userJson) && userJson.TrimStart().StartsWith("{"))
                                 {
-                                    PropertyNameCaseInsensitive = true
-                                });
-                                post.User = apiResponse;
+                                    var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    });
+                                    post.User = apiResponse;
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -219,14 +251,17 @@ namespace final_project_fe.Pages
                             if (postFileResponse.IsSuccessStatusCode)
                             {
                                 string postFileJson = await postFileResponse.Content.ReadAsStringAsync();
-                                var files = JsonSerializer.Deserialize<List<PostFileDto>>(postFileJson, new JsonSerializerOptions
+                                if (!string.IsNullOrWhiteSpace(postFileJson))
                                 {
-                                    PropertyNameCaseInsensitive = true
-                                }) ?? new List<PostFileDto>();
+                                    var files = JsonSerializer.Deserialize<List<PostFileDto>>(postFileJson, new JsonSerializerOptions
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    }) ?? new List<PostFileDto>();
 
-                                lock (PostFilesByPost) // Đảm bảo thread-safe
-                                {
-                                    PostFilesByPost[post.PostId] = files;
+                                    lock (PostFilesByPost) // Đảm bảo thread-safe
+                                    {
+                                        PostFilesByPost[post.PostId] = files;
+                                    }
                                 }
                             }
                         }
@@ -241,44 +276,50 @@ namespace final_project_fe.Pages
                     {
                         try
                         {
-                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment?postId={post.PostId}&page=1";
+                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment/GetByPostId?postId={post.PostId}&page=1";
                             HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
                             if (response.IsSuccessStatusCode)
                             {
                                 string jsonResponse = await response.Content.ReadAsStringAsync();
-                                var comments = JsonSerializer.Deserialize<PageResult<CommentDto>>(jsonResponse, new JsonSerializerOptions
+                                if (!string.IsNullOrWhiteSpace(jsonResponse))
                                 {
-                                    PropertyNameCaseInsensitive = true
-                                })?.Items ?? new List<CommentDto>();
-
-                                lock (CommentsByPost) // Đảm bảo thread-safe
-                                {
-                                    CommentsByPost[post.PostId] = (List<CommentDto>)comments;
-                                }
-
-                                // Gọi API lấy User của mỗi comment
-                                var commentUserTasks = comments.Select(async comment =>
-                                {
-                                    try
+                                    var comments = JsonSerializer.Deserialize<PageResult<CommentDto>>(jsonResponse, new JsonSerializerOptions
                                     {
-                                        HttpResponseMessage userResponse = await _httpClient.GetAsync(userApiUrl + comment.UserId);
-                                        if (userResponse.IsSuccessStatusCode)
+                                        PropertyNameCaseInsensitive = true
+                                    })?.Items ?? new List<CommentDto>();
+
+                                    lock (CommentsByPost) // Đảm bảo thread-safe
+                                    {
+                                        CommentsByPost[post.PostId] = (List<CommentDto>)comments;
+                                    }
+
+                                    // Gọi API lấy User của mỗi comment
+                                    var commentUserTasks = comments.Select(async comment =>
+                                    {
+                                        try
                                         {
-                                            var userJson = await userResponse.Content.ReadAsStringAsync();
-                                            var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                                            HttpResponseMessage userResponse = await _httpClient.GetAsync(userApiUrl + comment.UserId);
+                                            if (userResponse.IsSuccessStatusCode)
                                             {
-                                                PropertyNameCaseInsensitive = true
-                                            });
-                                            comment.User = apiResponse;
+                                                var userJson = await userResponse.Content.ReadAsStringAsync();
+                                                if (!string.IsNullOrWhiteSpace(userJson) && userJson.TrimStart().StartsWith("{"))
+                                                {
+                                                    var apiResponse = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                                                    {
+                                                        PropertyNameCaseInsensitive = true
+                                                    });
+                                                    comment.User = apiResponse;
+                                                }
+                                            }
                                         }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _logger.LogError($"Lỗi khi lấy User {comment.UserId}: {ex.Message}");
-                                    }
-                                });
+                                        catch (Exception ex)
+                                        {
+                                            _logger.LogError($"Lỗi khi lấy User {comment.UserId}: {ex.Message}");
+                                        }
+                                    });
 
-                                await Task.WhenAll(commentUserTasks);
+                                    await Task.WhenAll(commentUserTasks);
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -292,18 +333,36 @@ namespace final_project_fe.Pages
                 await Task.WhenAll(userTasks);
                 await Task.WhenAll(postFileTasks);
                 await Task.WhenAll(commentTasks);
+
+                // Log thông tin để debug
+                if (IsOwnUser)
+                {
+                    _logger.LogInformation("Loading own user page for userId: {UserId}", targetUserId);
+                }
+                else
+                {
+                    _logger.LogInformation("Loading other user page for userId: {UserId}, current user: {CurrentUserId}", targetUserId, CurrentUserId);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnGetPostByIdAsync(int postId)
         {
             try
             {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return Unauthorized();
+
                 string postApiUrl = $"{_apiSettings.BaseUrl}/Post/{postId}";
+
+                var request = new HttpRequestMessage(HttpMethod.Get, postApiUrl);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
                 var response = await _httpClient.GetAsync(postApiUrl);
 
                 if (!response.IsSuccessStatusCode)
@@ -382,6 +441,7 @@ namespace final_project_fe.Pages
                 }
 
                 // Gửi PUT request
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PutAsync($"{BaseUrl}/Post", form);
 
                 if (response.IsSuccessStatusCode)
@@ -403,7 +463,6 @@ namespace final_project_fe.Pages
 
             return Page();
         }
-
 
         //Delete Post
         public async Task<IActionResult> OnPostDeleteAsync(int postId)
@@ -433,6 +492,7 @@ namespace final_project_fe.Pages
                 }
 
                 // Gọi API toggle delete
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var response = await _httpClient.PutAsync($"{_apiSettings.BaseUrl}/Post/toggle-deleted/{postId}", null);
 
                 if (response.IsSuccessStatusCode)

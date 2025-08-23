@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
@@ -34,15 +34,14 @@ namespace final_project_fe.Pages
         {
             if (!ModelState.IsValid)
             {
-                IsSuccess = false;
+                TempData["ErrorMessage"] = "Invalid information Please try again";
                 return Page();
             }
 
             var token = Request.Query["Token"].ToString();
             if (string.IsNullOrEmpty(token))
             {
-                Message = "Token is missing from URL.";
-                IsSuccess = false;
+                TempData["ErrorMessage"] = "Token is missing from URL.";
                 return Page();
             }
 
@@ -50,21 +49,20 @@ namespace final_project_fe.Pages
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using var client = new HttpClient();
+            using var client = _httpClientFactory.CreateClient(); // dùng factory thay vì new HttpClient
             var response = await client.PostAsync($"{_apiSettings.BaseUrl}/Auth/reset-password?Token={token}", content);
 
             if (response.IsSuccessStatusCode)
             {
-                Message = "Password reset successfully!";
-                IsSuccess = true;
+                TempData["SuccessMessage"] = "Password reset successfully!";
             }
             else
             {
-                Message = $"Error: {await response.Content.ReadAsStringAsync()}";
-                IsSuccess = false;
+                var error = await response.Content.ReadAsStringAsync();
+                TempData["ErrorMessage"] = $"Error: {error}";
             }
 
-            return Page();
+            return RedirectToPage(); // redirect lại để hiển thị TempData (tránh submit form nhiều lần)
         }
     }
 }
