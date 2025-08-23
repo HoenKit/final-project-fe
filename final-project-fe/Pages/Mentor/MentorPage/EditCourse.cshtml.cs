@@ -181,6 +181,20 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     }
                 }
 
+                var userResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/User/GetUserById/{CurrentUserId}");
+                if (!userResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Failed to load user info. Status: {StatusCode}", userResponse.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to load user information.";
+                    return Page();
+                }
+                var userJson = await userResponse.Content.ReadAsStringAsync();
+                UserInfo = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new User();
+
+                    
                 // Get Questions for each lesson
                 if (Modules != null)
                 {
@@ -442,8 +456,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                         .ToList();
                 }
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
+                var userResponse = await _httpClient.GetAsync($"{_apiSettings.BaseUrl}/User/GetUserById/{CurrentUserId}");
+                if (!userResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Failed to load user info. Status: {StatusCode}", userResponse.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to load user information.";
+                    return Page();
+                }
+                var userJson = await userResponse.Content.ReadAsStringAsync();
+                UserInfo = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new User();
 
                 IsPremium = UserInfo?.IsPremium ?? false;
                 if (!IsPremium)
@@ -452,7 +479,6 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     return RedirectToPage(new { courseId = Module.CourseId });
                 }
 
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
@@ -506,6 +532,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
                     return RedirectToPage("/Login");
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
                 if (jsonToken != null)
@@ -522,8 +549,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                
+
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
@@ -613,7 +639,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
@@ -744,10 +770,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                         .ToList();
                 }
 
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
@@ -861,10 +887,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
-                
+
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
                 if (!mentorResponse.IsSuccessStatusCode)
                 {
@@ -1029,7 +1056,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
@@ -1110,7 +1138,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
@@ -1316,7 +1345,18 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            if (jsonToken != null)
+            {
+                CurrentUserId = jsonToken.Claims
+                    .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
+                UserRoles = jsonToken.Claims
+                    .Where(c => c.Type == ClaimTypes.Role)
+                    .Select(c => c.Value)
+                    .ToList();
+            }
             // Validate input
             if (string.IsNullOrWhiteSpace(Topic))
             {
@@ -1335,6 +1375,19 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 TempData["ErrorMessage"] = "Number of questions must be greater than 0.";
                 return RedirectToPage(new { courseId = Module.CourseId });
             }
+            var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
+            if (!userResponse.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to load user info. Status: {StatusCode}", userResponse.StatusCode);
+                TempData["ErrorMessage"] = "Failed to load user information.";
+                return Page();
+            }
+            var userJson = await userResponse.Content.ReadAsStringAsync();
+            UserInfo = JsonSerializer.Deserialize<User>(userJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }) ?? new User();
+
             IsPremium = UserInfo?.IsPremium ?? false;
             if (!IsPremium)
             {
@@ -1400,6 +1453,86 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             return Page();
         }
 
+        //Handler Create Answer
+        public async Task<IActionResult> OnPostCreateAnswerAsync()
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            try
+            {
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                    return RedirectToPage("/Login");
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                    UserRoles = jsonToken.Claims
+                        .Where(c => c.Type == ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
+
+                if (UserRoles == null || !UserRoles.Contains("Mentor"))
+                    return RedirectToPage("/Index");
+
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                // Gọi API lấy thông tin mentor
+                var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");
+                if (!mentorResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Can not get Mentor.");
+                    ModelState.AddModelError("", "You are not Mentor");
+                    return Page();
+                }
+
+                var mentorJson = await mentorResponse.Content.ReadAsStringAsync();
+                var mentor = JsonSerializer.Deserialize<GetMentorDto>(mentorJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (mentor == null)
+                {
+                    ModelState.AddModelError("", "Mentor does not exist.");
+                    return Page();
+                }
+                var jsonContent = new StringContent(
+                    JsonSerializer.Serialize(Answer),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Gọi API tạo Answer
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Answer", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    var updateAnswer = JsonSerializer.Deserialize<AnswerResponseDto>(responseContent, options);
+
+                    TempData["SuccessMessage"] = "Answer create successfully!";
+                    return RedirectToPage(new { courseId = Module.CourseId }); // Redirect back to current page
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Create Answer failed! Status: " + response.StatusCode);
+                    TempData["ErrorMessage"] = "Failed to create answer: " + errorContent;
+                    return RedirectToPage(new { courseId = Module.CourseId });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while create question");
+                TempData["ErrorMessage"] = "An error occurred while create the question: " + ex.Message;
+                return Page();
+            }
+        }
 
         //Handler Update Answer
         public async Task<IActionResult> OnPostEditAnswerAsync()
@@ -1426,7 +1559,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (UserRoles == null || !UserRoles.Contains("Mentor"))
                     return RedirectToPage("/Index");
 
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                 // Gọi API lấy thông tin mentor
                 var mentorResponse = await _httpClient.GetAsync($"{BaseUrl}/Mentor/get-by-user/{CurrentUserId}");

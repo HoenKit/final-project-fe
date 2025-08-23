@@ -1,7 +1,7 @@
 ﻿@page
 @model final_project_fe.Pages.RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Phronesis - Register";
     Layout = null;
 }
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Register to Winku" />
     <meta name="keywords" content="social network, register, signup" />
-    <title>Register - Phronesis Social Network</title>
+    <title>Register - Register</title>
     <link rel="icon" href="~/images/fav.png" type="image/png" sizes="16x16">
 
     <link rel="stylesheet" href="~/css/main.min.css">
@@ -20,6 +20,34 @@
     <link rel="stylesheet" href="~/css/color.css">
     <link rel="stylesheet" href="~/css/responsive.css">
     <style>
+        .circle-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 40px auto 0 auto;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+            .circle-icon img {
+                width: 100px;
+                height: 100px;
+                object-fit: contain;
+            }
+
+        .land-featurearea {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .land-meta {
+            text-align: center;
+        }
         .back-home {
             display: flex;
             align-items: center;
@@ -52,15 +80,14 @@
     <div class="theme-layout">
         <div class="container-fluid pdng0">
             <div class="row merged">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                <div class="col-lg-6">
                     <div class="land-featurearea">
                         <div class="land-meta">
-                            <h1>Winku</h1>
-                            <p>Winku is free to use for as long as you want with two active projects.</p>
-                            <div class="friend-logo">
-                                <span><img src="images/wink.png" alt="Winku Logo"></span>
+                            <h1>Phronesis</h1>
+                            <p>Phronesis helps you master essential soft skills to thrive in life and work.</p>
+                            <div class="circle-icon">
+                                <img src="/images/learning.png" alt="Learning Icon" />
                             </div>
-                            <a href="#" class="folow-me">Follow Us on</a>
                         </div>
                     </div>
                 </div>

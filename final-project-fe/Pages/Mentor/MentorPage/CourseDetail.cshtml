@@ -317,10 +317,11 @@
                     @if (userIdToken == null || isUser || isMentor && Model.Course.Status == "Approved")
                     {
                         <!-- Action Buttons -->
-                        <form method="post" class="space-y-3 mb-4">
+                        <form id="buyForm" method="post" class="space-y-3 mb-4">
                             <input type="hidden" name="CourseId" value="@Model.Course.CourseId" />
                             <input type="hidden" name="SelectedCouponId" id="SelectedCouponId" value="0" />
-                            <button type="submit" class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
+                            <button type="submit"
+                                    class="w-full border border-gray-900 text-gray-900 font-bold py-3 px-6 rounded hover:bg-gray-50 transition-colors">
                                 Buy now
                             </button>
                         </form>
@@ -389,7 +390,7 @@
                 {
                     @if (userIdToken == null || isUser || isMentor && Model.Course.Status == "Approved")
                     {
-                        <!-- Share and Gift -->
+            <!-- Share and Gift -->
              <!-- Coupon Section -->
             <div class="mt-6 pt-6 border-t border-gray-200 relative z-30">
                 <div class="flex items-center justify-between text-sm">
@@ -585,15 +586,15 @@
                 <div class="border border-gray-200 rounded-lg p-6">
                     <h2 class="text-2xl font-bold mb-6">What you'll learn</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @foreach (var skill in Model.Course.SkillLearn.Split("\r\n"))
-                        {
-                            <div class="flex items-start">
-                                <svg class="w-4 h-4 text-gray-700 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span class="text-gray-700">@skill</span>
-                            </div>
-                        }
+                        @foreach (var skill in (Model?.Course?.SkillLearn ?? "").Split("\r\n", StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <div class="flex items-start">
+                                    <svg class="w-4 h-4 text-gray-700 mr-3 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span class="text-gray-700">@skill.Trim()</span>
+                                </div>
+                            }
                     </div>
                 </div>
             </section>
@@ -647,7 +648,7 @@
             <section class="mb-12">
                 <h2 class="text-2xl font-bold mb-4">Requirements</h2>
                 <ul class="space-y-2">
-                    @foreach (var req in Model.Course.Requirement.Split('.').Where(r => !string.IsNullOrWhiteSpace(r)))
+                    @foreach (var req in Model.Course?.Requirement.Split('.').Where(r => !string.IsNullOrWhiteSpace(r)))
                     {
                         <li class="flex items-start">
                             <span class="w-2 h-2 bg-gray-900 rounded-full mr-3 mt-2 flex-shrink-0"></span>
@@ -662,7 +663,7 @@
                 <h2 class="text-2xl font-bold mb-4">Description</h2>
                 <div class="expandable-content">
                     <div class="prose max-w-none text-gray-700 leading-relaxed">
-                        @Html.Raw(Model.Course.CourseContent.Replace("\n", "<br>"))
+                        @Html.Raw(Model.Course?.CourseContent?.Replace("\n", "<br>"))
                     </div>
                     <div class="expand-gradient"></div>
                 </div>
@@ -1160,6 +1161,12 @@
     <script>
         // Show/Hide report modal
         function showReportModal() {
+            if (!isAuthenticated) {
+                // Nếu chưa đăng nhập thì redirect sang trang login
+                window.location.href = "/Login" + encodeURIComponent(window.location.pathname);
+                return;
+            }
+
             const modal = document.getElementById('reportCourseModal');
             const body = document.body;
 
@@ -1198,6 +1205,37 @@
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && modal && !modal.classList.contains('modal-hidden')) {
                     hideReportModal();
+                }
+            });
+        });
+    </script>
+     <script>
+        const isAuthenticated = @(User.Identity?.IsAuthenticated.ToString().ToLower());
+        document.getElementById("buyForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (!isAuthenticated) {
+                showConfirm({
+                    type: 'warning',
+                    title: 'Not Logged In',
+                    message: 'You must login before buying this course.',
+                    confirmText: 'Login',
+                    cancelText: 'Cancel',
+                    onConfirm: () => {
+                        window.location.href = '/Login';
+                    }
+                });
+                return;
+            }
+
+            showConfirm({
+                type: 'info',
+                title: 'Confirm Purchase',
+                message: 'Are you sure you want to buy this course?',
+                confirmText: 'Yes, Buy',
+                cancelText: 'Cancel',
+                onConfirm: () => {
+                    e.target.submit();
                 }
             });
         });
@@ -1241,11 +1279,14 @@
         }
 
         // Close modal when clicking outside
-        document.getElementById('updateReviewModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeUpdateModal();
+            const modal = document.getElementById('updateReviewModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeUpdateModal();
+                    }
+                });
             }
-        });
 
              function deleteReview(reviewId, courseId) {
             if (confirm('Are you sure you want to delete this review? This action cannot be undone.')) {

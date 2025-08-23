@@ -1,7 +1,7 @@
 ﻿@page
 @model IndexModel
 @{
-	ViewData["Title"] = "Home page";
+	ViewData["Title"] = "Phronesis - Home page";
 }
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
@@ -35,10 +35,10 @@
 											</div>
 											<div class="banermeta">
 												<p>
-													create your own favourit page.
+													Learn Life Skills – Live with Confidence
 												</p>
-												<span>like them all</span>
-												<a data-ripple="" title="" href="#">start now!</a>
+												<span>Develop Yourself</span>
+												<a data-ripple="" title="" href="/Mentor/MentorPage">Learn now!</a>
 											</div>
 										</div>
 									</div>
@@ -465,7 +465,7 @@
 																	// Comment gốc
 																	var user = parent.User;
 																	var userMeta = user?.UserMetaData;
-																	var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar;
+																	var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar + "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
 																	var displayName = userMeta != null ? $"{userMeta.FirstName} {userMeta.LastName}" : user?.Email;
 
 																	<div class="comment" data-comment-id="@parent.CommentId">
@@ -515,7 +515,7 @@
 																	{
 																		var replyUser = reply.User;
 																		var replyMeta = replyUser?.UserMetaData;
-																		var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
+																		var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar + "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
 																		var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
 
 																		<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
@@ -622,7 +622,7 @@
 																<ul class="we-comet">
 																	<li class="post-comment">
 																		<div class="comet-avatar">
-																			<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																			<img src="@(string.IsNullOrEmpty(@Model.Profile?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : @Model.Profile?.UserMetaData?.Avatar)" alt="User Avatar">
 																		</div>
 																		<div class="post-comt-box">
 																			<form class="comment-form">
@@ -760,7 +760,7 @@
 	<script src="js/main.min.js"></script>
 	<script src="js/script.js"></script>
 	<script src="js/map-init.js"></script> *@
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -880,9 +880,12 @@
 				if (post.files && post.files.length > 0) {
 					post.files.forEach(file => {
 						if (file.postFileType?.toLowerCase() === "image") {
-							mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+						mediaContent += `<img src="${file.fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
 						} else if (file.postFileType?.toLowerCase() === "video") {
-							mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+					mediaContent += `<video width="100%" height="315" controls>
+															<source src="${file.fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" type="video/mp4">
+																Your browser does not support the video tag.
+															</video>`;
 						}
 					});
 				}
@@ -892,9 +895,13 @@
 					post.postFiles.forEach(file => {
 						if (!file.isDeleted && file.postFileType && file.fileUrl !== 'string') {
 							if (file.postFileType.toLowerCase() === 'image') {
-								mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+							mediaContent += `<img src="${file.fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
 							} else if (file.postFileType.toLowerCase() === 'video') {
-								mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+					mediaContent += `<video width="100%" height="315" controls>
+																<source src="${file.fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" type="video/mp4">
+																	Your browser does not support the video tag.
+																</video>`;
+																								
 							}
 						}
 					});
@@ -935,7 +942,7 @@
 						commentsHTML += `
 									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 										<div class="comet-avatar">
-											<img src="${commentUserInfo.avatar}" alt="User Avatar">
+										<img src="${commentUserInfo.avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
 										</div>
 										<div class="we-comment">
 											<div class="coment-head">
@@ -984,7 +991,7 @@
 								commentsHTML += `
 											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
 												<div class="comet-avatar">
-													<img src="${replyUserInfo.avatar}" alt="User Avatar">
+												<img src="${replyUserInfo.avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
 												</div>
 												<div class="we-comment">
 													<div class="coment-head">
@@ -1025,7 +1032,15 @@
 								<ul class="we-comet">
 									<li class="post-comment">
 										<div class="comet-avatar">
-											<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+												@if (Model.Profile?.UserMetaData != null)
+										{
+										<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
+										 alt="Avatar"
+										 class="rounded-circle"
+										 width="40"
+										 height="40"
+										 style="margin-right: 2%;" />
+										}
 										</div>
 										<div class="post-comt-box">
 											<form class="comment-form">
@@ -1114,7 +1129,7 @@
 				return `
 						<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 							<div class="comet-avatar">
-								<img src="${avatar}" alt="User Avatar">
+							<img src="${avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
 							</div>
 							<div class="we-comment">
 								<div class="coment-head">
@@ -1437,7 +1452,9 @@
 	</script>
 
 	<script>
-
+		const token = document.cookie.split('; ')
+			.find(row => row.startsWith('AccessToken='))
+			?.split('=')[1];
 		// Configuration from Razor model
 		const BASE_URL = "@Model.BaseUrl";
 
@@ -1507,6 +1524,145 @@
 			}, 3500);
 		}
 
+		// Improved modal close function
+		function closeModal(modalId) {
+			const modalElement = document.getElementById(modalId);
+			if (!modalElement) return;
+
+			// Store original body styles before any changes
+			const originalOverflow = document.body.style.overflow;
+			const originalPaddingRight = document.body.style.paddingRight;
+
+			// Try jQuery first if available (most reliable)
+			if (typeof $ !== 'undefined') {
+				$(`#${modalId}`).modal('hide');
+
+				// Force immediate cleanup without waiting
+				$('body').removeClass('modal-open');
+				$('.modal-backdrop').remove();
+				$('body').css({
+					'overflow': 'visible',
+					'padding-right': '0px'
+				});
+
+				// Additional cleanup after a short delay
+				setTimeout(() => {
+					// Ensure all modal remnants are gone
+					document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+						backdrop.remove();
+					});
+
+					// Force reset body scroll
+					document.body.classList.remove('modal-open');
+					document.body.style.overflow = 'visible';
+					document.body.style.paddingRight = '0px';
+					document.documentElement.style.overflow = 'visible';
+
+					// Remove any Bootstrap-added styles
+					document.body.removeAttribute('style');
+
+					// Force scroll enable on both body and html
+					document.body.style.overflow = 'auto';
+					document.documentElement.style.overflow = 'auto';
+				}, 100);
+				return;
+			}
+
+			// Try Bootstrap 5 Modal API (newer versions)
+			if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined') {
+				try {
+					// Try getInstance first (Bootstrap 5.1+)
+					if (typeof bootstrap.Modal.getInstance === 'function') {
+						const modalInstance = bootstrap.Modal.getInstance(modalElement);
+						if (modalInstance) {
+							modalInstance.hide();
+							// Force cleanup after Bootstrap modal hide
+							setTimeout(() => forceScrollEnable(), 200);
+							return;
+						}
+					}
+
+					// Fallback: Create new instance and hide
+					const modalInstance = new bootstrap.Modal(modalElement);
+					modalInstance.hide();
+					setTimeout(() => forceScrollEnable(), 200);
+					return;
+				} catch (error) {
+					console.warn('Bootstrap Modal API failed:', error);
+				}
+			}
+
+			// Manual modal close as final fallback
+			modalElement.classList.remove('show');
+			modalElement.setAttribute('aria-hidden', 'true');
+			modalElement.style.display = 'none';
+
+			// Force cleanup immediately
+			forceScrollEnable();
+		}
+
+		// Force enable scrolling function
+		function forceScrollEnable() {
+			// Remove ALL modal backdrops
+			document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+				backdrop.remove();
+			});
+
+			// Reset body classes and styles completely
+			document.body.classList.remove('modal-open');
+			document.body.className = document.body.className.replace(/modal-[a-z-]*/g, '');
+
+			// Force reset all potential scroll-blocking styles
+			document.body.style.overflow = 'auto';
+			document.body.style.paddingRight = '0px !important';
+			document.body.style.paddingLeft = '0px';
+			document.body.style.marginRight = '0px';
+			document.body.style.marginLeft = '0px';
+			document.documentElement.style.overflow = 'auto';
+			document.documentElement.style.paddingRight = '0px';
+
+			// Remove Bootstrap's calculated padding
+			document.body.style.setProperty('padding-right', '0px', 'important');
+			document.documentElement.style.setProperty('padding-right', '0px', 'important');
+
+			// Remove any inline styles that might block scrolling or cause indentation
+			const bodyComputedStyle = window.getComputedStyle(document.body);
+			if (bodyComputedStyle.paddingRight !== '0px') {
+				document.body.style.cssText = 'padding-right: 0px !important; overflow: auto !important;';
+			}
+
+			// Force browser reflow
+			document.body.offsetHeight;
+			document.documentElement.offsetHeight;
+
+			// Additional cleanup for persistent issues
+			setTimeout(() => {
+				// Final cleanup - completely reset styles
+				document.body.removeAttribute('style');
+				document.documentElement.removeAttribute('style');
+
+				// Ensure no remaining Bootstrap modal classes
+				document.querySelectorAll('.modal-open').forEach(el => {
+					el.classList.remove('modal-open');
+				});
+
+				// Force refresh layout
+				window.dispatchEvent(new Event('resize'));
+			}, 100);
+
+			// Emergency fix for persistent indentation
+			setTimeout(() => {
+				if (window.getComputedStyle(document.body).paddingRight !== '0px') {
+					document.body.style.paddingRight = '0px';
+					document.documentElement.style.paddingRight = '0px';
+					// Force page reflow
+					document.body.style.display = 'none';
+					document.body.offsetHeight; // Trigger reflow
+					document.body.style.display = '';
+				}
+			}, 200);
+		}
+
 		// Handle Report Post Form Submission
 		document.getElementById("reportPostForm").addEventListener("submit", async function (event) {
 			event.preventDefault(); // Prevent form submission (page refresh)
@@ -1524,7 +1680,8 @@
 				const response = await fetch(`${BASE_URL}/ReportPost`, {
 					method: "POST",
 					headers: {
-						"Content-Type": "application/json"
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
 					},
 					body: JSON.stringify({
 						reportId: 0, // The server will assign this
@@ -1535,31 +1692,16 @@
 				});
 
 				if (response.ok) {
-					// Close modal using jQuery if available (compatible with most Bootstrap versions)
-					if (typeof $ !== 'undefined') {
-						$("#reportPostModal").modal('hide');
-					} else {
-						// Direct DOM manipulation fallback
-						const modalElement = document.getElementById("reportPostModal");
-						modalElement.classList.remove('show');
-						modalElement.setAttribute('aria-hidden', 'true');
-						modalElement.style.display = 'none';
-
-						// Remove backdrop if it exists
-						const backdrop = document.querySelector('.modal-backdrop');
-						if (backdrop) backdrop.remove();
-
-						// Clean up body
-						document.body.classList.remove('modal-open');
-						document.body.style.overflow = '';
-						document.body.style.paddingRight = '';
-					}
+					// Close modal properly
+					closeModal("reportPostModal");
 
 					// Clear the form for future use
 					document.getElementById("reportPostContent").value = "";
 
-					// Show success message
-					showToast("Post reported successfully!");
+					// Show success message with slight delay to ensure modal is closed
+					setTimeout(() => {
+						showToast("Post reported successfully!");
+					}, 100);
 				} else {
 					const errorData = await response.json();
 					showToast(`Error reporting post: ${errorData.message || response.statusText}`, "danger");
@@ -1586,41 +1728,27 @@
 				const response = await fetch(`${BASE_URL}/ReportComment`, {
 					method: "POST",
 					headers: {
-						"Content-Type": "application/json"
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
 					},
 					body: JSON.stringify({
-						commentId: commentId, // The server will assign this
+						commentId: commentId,
 						userId: userId,
 						content: content
 					})
 				});
 
 				if (response.ok) {
-					// Close modal using jQuery if available (compatible with most Bootstrap versions)
-					if (typeof $ !== 'undefined') {
-						$("#reportCommentModal").modal('hide');
-					} else {
-						// Direct DOM manipulation fallback
-						const modalElement = document.getElementById("reportCommentModal");
-						modalElement.classList.remove('show');
-						modalElement.setAttribute('aria-hidden', 'true');
-						modalElement.style.display = 'none';
+					// Close modal properly
+					closeModal("reportCommentModal");
 
-						// Remove backdrop if it exists
-						const backdrop = document.querySelector('.modal-backdrop');
-						if (backdrop) backdrop.remove();
-
-						// Clean up body
-						document.body.classList.remove('modal-open');
-						document.body.style.overflow = '';
-						document.body.style.paddingRight = '';
-					}
-
-					// Clear the form for future use
+					// Clear the form
 					document.getElementById("reportCommentContent").value = "";
 
-					// Show success message
-					showToast("Comment reported successfully!");
+					// Show success message with slight delay
+					setTimeout(() => {
+						showToast("Comment reported successfully!");
+					}, 100);
 				} else {
 					const errorData = await response.json();
 					showToast(`Error reporting comment: ${errorData.message || response.statusText}`, "danger");
@@ -1647,7 +1775,8 @@
 				const response = await fetch(`${BASE_URL}/ReportUser`, {
 					method: "POST",
 					headers: {
-						"Content-Type": "application/json"
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
 					},
 					body: JSON.stringify({
 						userreportedId: userreportedId, // The server will assign this
@@ -1657,31 +1786,16 @@
 				});
 
 				if (response.ok) {
-					// Close modal using jQuery if available (compatible with most Bootstrap versions)
-					if (typeof $ !== 'undefined') {
-						$("#reportUserModal").modal('hide');
-					} else {
-						// Direct DOM manipulation fallback
-						const modalElement = document.getElementById("reportUserModal");
-						modalElement.classList.remove('show');
-						modalElement.setAttribute('aria-hidden', 'true');
-						modalElement.style.display = 'none';
-
-						// Remove backdrop if it exists
-						const backdrop = document.querySelector('.modal-backdrop');
-						if (backdrop) backdrop.remove();
-
-						// Clean up body
-						document.body.classList.remove('modal-open');
-						document.body.style.overflow = '';
-						document.body.style.paddingRight = '';
-					}
+					// Close modal properly
+					closeModal("reportUserModal");
 
 					// Clear the form for future use
 					document.getElementById("reportUserContent").value = "";
 
-					// Show success message
-					showToast("User reported successfully!");
+					// Show success message with slight delay
+					setTimeout(() => {
+						showToast("User reported successfully!");
+					}, 100);
 				} else {
 					const errorData = await response.json();
 					showToast(`Error reporting user: ${errorData.message || response.statusText}`, "danger");
@@ -1863,612 +1977,6 @@
 	</script>
 
 
-@* 	<!-- Script để xử lý Load More -->
-	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-			// Configuration from first script
-			const HubUrl = "@Model.HubUrl";
-			const BaseUrl = "@Model.BaseUrl";
-			const userId = currentUserId;
-			const token = "@token";
-
-			// Load More Posts Configuration
-			let currentPage = 1;
-			let isLoading = false;
-			const apiBaseUrl = `${BaseUrl}/Post`;
-
-			console.log("Initializing posts loading with SignalR integration");
-			console.log("Base API URL:", BaseUrl);
-			console.log("Current User ID:", userId);
-
-			// SignalR Connection (from first script)
-			const connection = new signalR.HubConnectionBuilder()
-				.withUrl(`${HubUrl}/postHub`)
-				.withAutomaticReconnect()
-				.build();
-
-			// Utility function to get user info (from first script)
-			async function getUserInfo(id) {
-				const defaultAvatar = "images/resources/friend-avatar9.jpg";
-				const defaultName = "Unknown User";
-				if (!id) return { avatar: defaultAvatar, name: defaultName };
-
-				try {
-					const res = await fetch(`${BaseUrl}/User/${id}`, { credentials: 'include' });
-					if (res.ok) {
-						const u = await res.json();
-						return {
-							avatar: u?.userMetaData?.avatar || defaultAvatar,
-							name: u?.userMetaData
-								? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
-								: u.email || defaultName
-						};
-					}
-				} catch (error) {
-					console.error("Error fetching user info:", error);
-				}
-				return { avatar: defaultAvatar, name: defaultName };
-			}
-
-			// Enhanced function to format date
-			function formatDate(dateString) {
-				const date = new Date(dateString);
-				return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {
-					hour: '2-digit',
-					minute: '2-digit'
-				});
-			}
-
-			// Enhanced function to create post HTML (combining both scripts)
-			async function createPostHtml(post, userInfo = null) {
-				// Get user info if not provided
-				if (!userInfo) {
-					userInfo = await getUserInfo(post.userId);
-				}
-
-				const { avatar, name } = userInfo;
-				const d = new Date(post.createAt).toLocaleString();
-
-				const hasAuth = token && token !== '' && token !== '@token';
-
-				// Handle file attachments (from first script)
-				let mediaContent = '';
-				if (post.files && post.files.length > 0) {
-					post.files.forEach(file => {
-						if (file.postFileType?.toLowerCase() === "image") {
-							mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
-						} else if (file.postFileType?.toLowerCase() === "video") {
-							mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
-						}
-					});
-				}
-
-				// Handle postFiles (from second script)
-				if (post.postFiles && post.postFiles.length > 0) {
-					post.postFiles.forEach(file => {
-						if (!file.isDeleted && file.postFileType && file.fileUrl !== 'string') {
-							if (file.postFileType.toLowerCase() === 'image') {
-								mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
-							} else if (file.postFileType.toLowerCase() === 'video') {
-								mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
-							}
-						}
-					});
-				}
-
-				// Generate comments HTML
-				let commentsHTML = '';
-				if (post.comments && post.comments.length > 0) {
-					const parentComments = post.comments.filter(c => !c.parentCommentId);
-
-					for (const comment of parentComments) {
-						const commentUserInfo = await getUserInfo(comment.userId);
-						const replyFormHTML = hasAuth ? `
-							<div class="reply-form" style="display:none; margin-top: 10px;">
-								<form class="comment-form">
-									<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
-									<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
-									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-								</form>
-							</div>
-						` : '';
-
-						const commentOptionsHTML = hasAuth ? `
-							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-								<div class="dropdown">
-									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-										<i class="fa fa-ellipsis-v"></i>
-									</button>
-									<ul class="dropdown-menu">
-										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
-										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
-									</ul>
-								</div>
-							</div>
-						` : '';
-
-						commentsHTML += `
-							<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
-								<div class="comet-avatar">
-									<img src="${commentUserInfo.avatar}" alt="User Avatar">
-								</div>
-								<div class="we-comment">
-									<div class="coment-head">
-										<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
-										<span>${d}</span>
-										${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-										${commentOptionsHTML}
-									</div>
-									<p>${comment.content}</p>
-									${replyFormHTML}
-								</div>
-							</div>
-						`;
-
-						// Add replies
-						const replies = post.comments.filter(c => c.parentCommentId === comment.commentId);
-						if (replies.length > 0) {
-							commentsHTML += `<div class="replies" style="margin-left: 50px;">`;
-							for (const reply of replies) {
-								const replyUserInfo = await getUserInfo(reply.userId);
-								const replyFormHTML = hasAuth ? `
-									<div class="reply-form" style="display:none; margin-top: 10px;">
-										<form class="comment-form">
-											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
-											<input type="hidden" name="NewComment.ParentCommentId" value="${reply.commentId}" />
-											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-										</form>
-									</div>
-								` : '';
-
-								const replyOptionsHTML = hasAuth ? `
-									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-										<div class="dropdown">
-											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-												<i class="fa fa-ellipsis-v"></i>
-											</button>
-											<ul class="dropdown-menu">
-												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
-												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
-											</ul>
-										</div>
-									</div>
-								` : '';
-
-								commentsHTML += `
-									<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
-										<div class="comet-avatar">
-											<img src="${replyUserInfo.avatar}" alt="User Avatar">
-										</div>
-										<div class="we-comment">
-											<div class="coment-head">
-												<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
-												<span>${d}</span>
-												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-												${replyOptionsHTML}
-											</div>
-											<p>${reply.content}</p>
-											${replyFormHTML}
-										</div>
-									</div>
-								`;
-							}
-							commentsHTML += `</div>`;
-						}
-					}
-				}
-
-				// Generate options menu for authenticated users
-				const optionsMenuHTML = hasAuth ? `
-					<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
-						<div class="dropdown">
-							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fa fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="${post.postId}">Report Post</a></li>
-								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${post.userId}">Report User</a></li>
-							</ul>
-						</div>
-					</div>
-				` : '';
-
-				// Generate comment form for authenticated users
-				const commentFormHTML = hasAuth ? `
-					<div class="coment-area">
-						<ul class="we-comet">
-							<li class="post-comment">
-								<div class="comet-avatar">
-									<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
-								</div>
-								<div class="post-comt-box">
-									<form class="comment-form">
-										<input type="hidden" name="NewComment.PostId" value="${post.postId}">
-										<input type="hidden" name="NewComment.ParentCommentId">
-										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-										<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
-									</form>
-								</div>
-							</li>
-						</ul>
-					</div>
-				` : '';
-
-				return `
-				<div id="post-${post.postId}">
-				<div class="card p-3 mb-3 shadow-sm rounded">
-					<div class="friend-info">
-						<figure>
-							<img src="${avatar}" alt="User Avatar">
-						</figure>
-						<div class="post-meta">
-							<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
-								${post.title}
-							</p>
-						</div>
-						<div class="friend-name">
-							<ins><a href="time-line.html" title="">${name}</a></ins>
-							<span>${d}</span>
-							${optionsMenuHTML}
-						</div>
-						<div class="post-meta">
-							${mediaContent}
-							<div class="description">
-								<p>${post.content}</p>
-							</div>
-						</div>
-						<div class="comments-section" id="commentList-${post.postId}">
-							${commentsHTML}
-						</div>
-						${commentFormHTML}
-					</div>
-					</div>
-				</div>`;
-			}
-
-			// Function to create comment HTML (from first script)
-			function createCommentHtml(comment, avatar, name) {
-				const isReply = comment.parentCommentId != null;
-				const cls = isReply ? "comment reply-comment" : "comment";
-				const date = new Date(comment.createAt);
-				const formattedDate = date.toLocaleDateString("vi-VN");
-				const formattedTime = date.toLocaleTimeString("vi-VN", {
-					hour: "2-digit",
-					minute: "2-digit"
-				});
-				const d = new Date(post.createAt).toLocaleString();
-				const hasAuth = token && token !== '' && token !== '@token';
-
-				const optionsHTML = hasAuth ? `
-					<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-						<div class="dropdown">
-							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-								<i class="fa fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu">
-								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
-								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
-							</ul>
-						</div>
-					</div>
-				` : '';
-
-				const replyFormHTML = hasAuth ? `
-					<div class="reply-form" style="display: none; margin-top: 10px;">
-						<form class="comment-form">
-							<input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
-							<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
-							<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-							<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-						</form>
-					</div>
-				` : '';
-
-				return `
-				<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
-					<div class="comet-avatar">
-						<img src="${avatar}" alt="User Avatar">
-					</div>
-					<div class="we-comment">
-						<div class="coment-head">
-							<h5><a href="time-line.html" title="">${name}</a></h5>
-							<span>${d}</span>
-							${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
-							${optionsHTML}
-						</div>
-						<p>${comment.content}</p>
-						${replyFormHTML}
-					</div>
-				</div>`;
-			}
-
-			// Enhanced function to load more posts
-			async function loadMorePosts() {
-				if (isLoading) return;
-
-				isLoading = true;
-				const loadMoreBtn = document.querySelector('.btn-load-more');
-				const originalText = loadMoreBtn?.innerHTML || 'Load More';
-
-				// Update button to show loading state
-				if (loadMoreBtn) {
-					loadMoreBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Loading...';
-					loadMoreBtn.disabled = true;
-				}
-
-				try {
-					currentPage++;
-					const response = await fetch(`${apiBaseUrl}?page=${currentPage}`, {
-						method: 'GET',
-						credentials: 'include',
-						headers: {
-							'Content-Type': 'application/json'
-						}
-					});
-
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
-
-					const data = await response.json();
-
-					// Check if there are posts to display
-					if (data.items && data.items.length > 0) {
-						const postsContainer = document.querySelector('#post-list') || document.querySelector('.posts-container');
-
-						if (postsContainer) {
-							// Add new posts to the container
-							for (const post of data.items) {
-								const postHTML = await createPostHtml(post);
-								postsContainer.insertAdjacentHTML('beforeend', postHTML);
-							}
-						}
-
-						// Update pagination info
-						const paginationInfo = document.querySelector('.pagination p');
-						if (paginationInfo) {
-							paginationInfo.textContent = `Page ${data.currentPage} / ${data.totalPages}`;
-						}
-
-						// Hide load more button if we've reached the last page
-						if (currentPage >= data.totalPages && loadMoreBtn) {
-							loadMoreBtn.style.display = 'none';
-						}
-					} else {
-						// No more posts to load
-						if (loadMoreBtn) {
-							loadMoreBtn.innerHTML = 'No more posts';
-							loadMoreBtn.disabled = true;
-							setTimeout(() => {
-								loadMoreBtn.style.display = 'none';
-							}, 2000);
-						}
-					}
-
-					console.log(`Loaded page ${currentPage} with ${data.items?.length || 0} posts`);
-
-				} catch (error) {
-					console.error('Error loading more posts:', error);
-					currentPage--; // Revert page counter on error
-
-					if (loadMoreBtn) {
-						loadMoreBtn.innerHTML = 'Error loading posts. Click to retry.';
-						loadMoreBtn.disabled = false;
-					}
-				} finally {
-					// Reset loading state if button is still visible and not permanently disabled
-					if (loadMoreBtn && loadMoreBtn.style.display !== 'none' && !loadMoreBtn.innerHTML.includes('No more posts')) {
-						loadMoreBtn.innerHTML = originalText;
-						loadMoreBtn.disabled = false;
-					}
-					isLoading = false;
-				}
-			}
-
-			// SignalR event handlers (from first script)
-			if (connection) {
-				// Receive new posts from SignalR
-				connection.on("ReceivePost", async post => {
-					console.log("Received post:", post);
-					const postHTML = await createPostHtml(post);
-					const postList = document.querySelector("#post-list");
-					if (postList) {
-						postList.insertAdjacentHTML("afterbegin", postHTML);
-						console.log("Post added to DOM at the beginning of list");
-					} else {
-						console.error("Element #post-list not found");
-					}
-				});
-
-				// Receive new comments from SignalR
-				connection.on("ReceiveComment", async comment => {
-					console.log("Received comment:", comment);
-					const { avatar, name } = await getUserInfo(comment.userId);
-
-					if (comment.parentCommentId) {
-						// This is a reply - insert into replies container
-						const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
-						if (parentComment) {
-							let repliesContainer = parentComment.querySelector('.replies');
-
-							if (repliesContainer) {
-								repliesContainer.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
-								console.log("Reply inserted into replies container");
-							} else {
-								// Create new replies container if it doesn't exist
-								const newRepliesDiv = document.createElement("div");
-								newRepliesDiv.className = "replies";
-								newRepliesDiv.style.marginLeft = "50px";
-								newRepliesDiv.innerHTML = createCommentHtml(comment, avatar, name);
-								parentComment.appendChild(newRepliesDiv);
-								console.log("Reply container created and reply added");
-							}
-						} else {
-							console.error(`Parent comment with ID ${comment.parentCommentId} not found`);
-						}
-					} else {
-						// This is a root comment - add to comment list
-						const commentList = document.querySelector(`#commentList-${comment.postId}`);
-						if (commentList) {
-							commentList.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
-							console.log("Comment added to the end of comment list");
-						} else {
-							console.error(`Element #commentList-${comment.postId} not found`);
-						}
-					}
-				});
-
-				// Start SignalR connection
-				connection.start()
-					.then(() => {
-						console.log("SignalR connected successfully");
-					})
-					.catch(err => {
-						console.error("SignalR connection error:", err);
-						setTimeout(() => connection.start(), 5000);
-					});
-
-				// Handle connection events
-				connection.onclose(error => {
-					console.log("SignalR connection closed, attempting to reconnect...");
-				});
-
-				connection.onreconnecting(error => {
-					console.log("SignalR reconnecting...", error);
-				});
-
-				connection.onreconnected(connectionId => {
-					console.log("SignalR reconnected. ConnectionId:", connectionId);
-				});
-			}
-
-			// Event handlers (from first script)
-
-			// Handle reply button clicks
-			document.body.addEventListener('click', e => {
-				const btn = e.target.closest('.we-reply');
-				if (!btn) return;
-				e.preventDefault();
-				const id = btn.getAttribute('data-reply-to');
-				const form = document.querySelector(`.comment[data-comment-id="${id}"] .reply-form`);
-				if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
-			});
-
-			// Handle comment form submissions
-			document.body.addEventListener('submit', async e => {
-				const form = e.target.closest('form.comment-form');
-				const replyform = e.target.closest('.reply-form');
-				if (!form) return;
-				e.preventDefault();
-
-				const fm = new FormData(form);
-				const payload = {
-					postId: Number(fm.get('NewComment.PostId')),
-					parentCommentId: fm.get('NewComment.ParentCommentId')
-						? Number(fm.get('NewComment.ParentCommentId'))
-						: null,
-					content: fm.get('NewComment.Content').trim(),
-					userId: userId
-				};
-
-				if (!payload.content) return;
-				console.log("Submitting comment:", payload);
-
-				try {
-					const res = await fetch(`${BaseUrl}/Comment`, {
-						method: 'POST',
-						credentials: 'include',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload)
-					});
-
-					if (!res.ok) {
-						const errorText = await res.text();
-						console.error('Post comment failed:', errorText);
-						alert('Comment could not be submitted. Please try again later.');
-						return;
-					}
-
-					console.log("Comment posted successfully");
-					form.reset();
-					if (replyform) replyform.style.display = 'none';
-				} catch (error) {
-					console.error("Error posting comment:", error);
-					alert('An error occurred while submitting the comment.');
-				}
-			});
-
-			// Handle post form submissions
-			document.body.addEventListener('submit', async e => {
-				const form = e.target.closest('form.post-form');
-				if (!form) return;
-				e.preventDefault();
-
-				const fm = new FormData(form);
-				const payload = {
-					title: fm.get('NewPost.Title').trim(),
-					content: fm.get('NewPost.Content').trim(),
-					userId: userId
-				};
-
-				if (!payload.title || !payload.content) return;
-				console.log("Submitting post:", payload);
-
-				try {
-					const res = await fetch(`${BaseUrl}/Post`, {
-						method: 'POST',
-						credentials: 'include',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload)
-					});
-
-					if (!res.ok) {
-						const errorText = await res.text();
-						console.error('Post creation failed:', errorText);
-						alert('Could not create post. Please try again later.');
-						return;
-					}
-
-					console.log("Post created successfully");
-					form.reset();
-				} catch (error) {
-					console.error("Error creating post:", error);
-					alert('An error occurred while creating the post.');
-				}
-			});
-
-			// Initialize load more functionality
-			const loadMoreBtn = document.querySelector('.btn-load-more');
-			if (loadMoreBtn) {
-				loadMoreBtn.addEventListener('click', loadMorePosts);
-			}
-
-			// Initialize current page based on existing posts
-			const paginationInfo = document.querySelector('.pagination p');
-			if (paginationInfo) {
-				const pageMatch = paginationInfo.textContent.match(/Page (\d+)/);
-				if (pageMatch) {
-					currentPage = parseInt(pageMatch[1]);
-				}
-			}
-
-			// Optional: Infinite scroll functionality
-			function enableInfiniteScroll() {
-				window.addEventListener('scroll', function() {
-					if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) {
-						loadMorePosts();
-					}
-				});
-			}
-
-			// Uncomment to enable infinite scroll
-			// enableInfiniteScroll();
-
-			console.log("Posts loading script initialized successfully");
-		});
-	</script> *@
 
 	@section Scripts {
 		<script>
@@ -2606,34 +2114,12 @@
 	</script>
 
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			var editModal = document.getElementById('editPostModal');
-			editModal.addEventListener('show.bs.modal', async function (event) {
-				var button = event.relatedTarget;
-				var postId = button.getAttribute('data-post-id');
-
-				try {
-					// Gọi đến handler OnGetPostByIdAsync
-				const response = await fetch(`/Index?handler=PostById&postId=${postId}`);
-					if (!response.ok) throw new Error('Lỗi khi fetch dữ liệu bài viết');
-
-					const post = await response.json();
-
-					// Fill vào modal
-					document.getElementById('editPostId').value = post.postId;
-					document.querySelector('[name="NewPost.Title"]').value = post.title;
-					document.querySelector('[name="NewPost.Content"]').value = post.content;
-				document.querySelector('[name="NewPost.CategoryId"]').value = post.categoryId;
-
-				} catch (error) {
-					console.error('Lỗi khi tải bài viết:', error);
-				}
-			});
-		});
-	</script>
 
 	<style>
+		body:not(.modal-open) {
+			padding-right: 0px !important;
+			overflow: auto !important;
+		}
 		/*category-tag*/
 		.category-selector-container {
 			position: relative;

@@ -1,0 +1,487 @@
+﻿@page
+@model final_project_fe.Pages.EventPageModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Phronesis - Daily Event</title>
+    <link rel="icon" type="image/x-icon" href="~/images/fav_icon.png" />
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+</head>
+<body>
+    @Html.Partial("_Notification")
+
+    <div class="mb-3">
+        <a class="btn btn-outline-secondary back-btn" href="/Index">
+            <i class="fas fa-arrow-left me-2"></i>Back To HomePage
+        </a>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg main-card">
+                    <div class="card-header text-center">
+                        <h2><i class="fas fa-gift"></i> Daily Lucky Draw Event</h2>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- User Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card info-card info-card-points text-center shadow-sm">
+                                    <div class="card-body">
+                                        <i class="fas fa-coins fa-2x mb-2"></i>
+                                        <h4>Current Point</h4>
+                                        <h2>@Model.TotalPoints</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card info-card info-card-turns text-center shadow-sm">
+                                    <div class="card-body">
+                                        <i class="fas fa-redo fa-2x mb-2"></i>
+                                        <h4>Turns</h4>
+                                        <h2>@Model.CurrentTurns</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Claim Turn Section -->
+                        <div class="text-center mb-4">
+                            <form method="post" asp-page-handler="ClaimTurn">
+                                <input type="hidden" asp-for="UserId" />
+                                <input type="hidden" asp-for="Email" />
+                                <button type="submit" class="btn btn-claim btn-lg">
+                                    <i class="fas fa-gift"></i> Get Daily Spins
+                                </button>
+                            </form>
+                            <small class="text-muted">Every day you can get 1 free spin</small>
+                        </div>
+
+                        <!-- Spin Wheel Section -->
+                        <div class="text-center mb-4">
+                            <div class="spin-wheel mb-3">
+                                <div class="wheel" id="wheel">
+                                    <div class="wheel-center">
+                                        <i class="fas fa-star fa-3x"></i>
+                                    </div>
+                                    <div class="wheel-pointer"></div>
+                                </div>
+                            </div>
+
+                            <form method="post" asp-page-handler="Spin">
+                                <input type="hidden" asp-for="UserId" />
+                                <input type="hidden" asp-for="CurrentTurns" />
+                                <button type="submit" class="btn btn-spin btn-lg" id="spinBtn" @(Model.CurrentTurns)>
+                                    <i class="fas fa-play"></i> ROLL NOW!
+                                </button>
+                            </form>
+
+                            @if (Model.CurrentTurns <= 0)
+                            {
+                                <p class="text-muted mt-2">You need at least 1 spin to participate</p>
+                            }
+                        </div>
+
+                        <!-- Rules -->
+                        <div class="mt-5">
+                            <h5><i class="fas fa-info-circle me-2"></i>Rules:</h5>
+                            <div class="rules-container">
+                                <div class="rule-item">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Every day you can get 1 free spin
+                                </div>
+                                <div class="rule-item">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Each spin can receive from 1-50 points
+                                </div>
+                                <div class="rule-item">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    This point can be used to purchase items on the site.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        :root {
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+            --medium-gray: #6c757d;
+            --accent-gold: #ffd700;
+        }
+
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .main-card {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+        }
+
+            .main-card .card-header {
+                background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
+                color: white;
+                border: none;
+                padding: 30px 20px;
+                border-radius: 0 !important;
+            }
+
+                .main-card .card-header h2 {
+                    margin: 0;
+                    font-weight: 600;
+                    font-size: 1.8rem;
+                }
+
+                .main-card .card-header i {
+                    color: var(--accent-gold);
+                    margin-right: 10px;
+                }
+
+        .info-card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .info-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, var(--primary-black), var(--dark-gray));
+            }
+
+        .info-card-points {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e9ecef;
+        }
+
+        .info-card-turns {
+            background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
+            color: white;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        }
+
+        .info-card i {
+            color: var(--accent-gold);
+        }
+
+        .info-card h4 {
+            font-weight: 500;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .info-card h2 {
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .btn-claim {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #ffed4a 100%);
+            border: none;
+            color: var(--primary-black);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+            .btn-claim:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+                color: var(--primary-black);
+            }
+
+        .btn-spin {
+            background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .btn-spin:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+                color: white;
+            }
+
+            .btn-spin::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+                transition: left 0.5s;
+            }
+
+            .btn-spin:hover::before {
+                left: 100%;
+            }
+
+        .spin-wheel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 40px 0;
+        }
+
+        .wheel {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            position: relative;
+            background: conic-gradient( #ff6b6b 0deg 45deg, #4ecdc4 45deg 90deg, #45b7d1 90deg 135deg, #f9ca24 135deg 180deg, #6c5ce7 180deg 225deg, #fd79a8 225deg 270deg, #00b894 270deg 315deg, #fdcb6e 315deg 360deg );
+            border: 6px solid var(--primary-black);
+            transition: transform 2s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 40px rgba(255,107,107,0.3), 0 0 60px rgba(78,205,196,0.2);
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid var(--primary-black);
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(255,255,255,0.8);
+        }
+
+            .wheel-center i {
+                color: var(--accent-gold);
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #ff6b6b;
+            z-index: 3;
+            filter: drop-shadow(0 2px 4px rgba(255,107,107,0.5));
+        }
+
+        .wheel.spinning {
+            transform: rotate(1800deg);
+        }
+
+        .btn-lg {
+            border-radius: 25px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            font-weight: 500;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--medium-gray) 0%, var(--dark-gray) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            margin-left: 60px;
+            margin-top: 30px;
+            text-decoration: none;
+        }
+
+            .back-btn:hover {
+                background: linear-gradient(135deg, var(--dark-gray) 0%, var(--primary-black) 100%);
+                color: #fff;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+
+            .back-btn i {
+                font-size: 14px;
+            }
+
+        .rules-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            margin-top: 15px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+            .rule-item:last-child {
+                border-bottom: none;
+            }
+
+            .rule-item i {
+                color: var(--primary-black);
+                font-size: 1.1rem;
+                width: 20px;
+            }
+
+        h5 {
+            color: var(--primary-black);
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .text-muted {
+            color: var(--medium-gray) !important;
+            font-style: italic;
+            margin-top: 10px !important;
+        }
+
+        /* Animation effects */
+        .info-card, .btn-claim, .btn-spin, .back-btn {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .wheel {
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        @@keyframes fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        @@keyframes fadeInScale {
+            from
+
+        {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .container
+
+        {
+            padding: 0 15px;
+        }
+
+        .wheel {
+            width: 200px;
+            height: 200px;
+        }
+
+        .wheel-center {
+            width: 60px;
+            height: 60px;
+        }
+
+            .wheel-center i {
+                font-size: 1.5rem;
+            }
+
+        .btn-lg {
+            padding: 12px 30px;
+            font-size: 1rem;
+        }
+
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const spinBtn = document.getElementById('spinBtn');
+            const wheel = document.getElementById('wheel');
+
+            spinBtn?.addEventListener('click', function(e) {
+                if (!spinBtn.disabled) {
+                    e.preventDefault(); // Ngăn form submit ngay lập tức
+                    wheel.classList.add('spinning');
+                    spinBtn.disabled = true;
+                    spinBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Spinning...';
+
+                    setTimeout(() => {
+                        wheel.classList.remove('spinning');
+                        spinBtn.disabled = false;
+                        spinBtn.innerHTML = '<i class="fas fa-play"></i> Spin Now!';
+                        // Submit form sau khi animation kết thúc
+                        spinBtn.closest('form').submit();
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+
+    <!-- Script Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

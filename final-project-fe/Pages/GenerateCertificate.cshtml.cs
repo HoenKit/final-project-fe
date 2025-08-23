@@ -5,10 +5,13 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace final_project_fe.Pages
 {
@@ -17,6 +20,7 @@ namespace final_project_fe.Pages
         private readonly IHttpClientFactory _clientFactory;
 
         private readonly ApiSettings _apiSettings;
+
         public GenerateCertificateModel(IHttpClientFactory clientFactory, IOptions<ApiSettings> apiSettings)
         {
             _clientFactory = clientFactory;
@@ -25,82 +29,118 @@ namespace final_project_fe.Pages
 
         [BindProperty] public int CourseId { get; set; }
         [BindProperty] public string UserId { get; set; }
-        [BindProperty] public IFormFile CertificateFile { get; set; }
-
-
+        public bool IsCurrentUser { get; set; }
+        
         public string UserFullName { get; set; }
         public string CourseName { get; set; }
         public string MentorSignature { get; set; }
-        public async Task<IActionResult> OnGetAsync( string userId ,int courseId)
+        public string MentorFullName { get; set; }
+        public string BaseUrl { get; set; }
+        public async Task<IActionResult> OnGetAsync(string userId, int courseId)
         {
             string token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+                return RedirectToPage("/Login");
+
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-            var userIdClaim = jsonToken?.Claims
+            var currentUserId = jsonToken?.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            userId = userIdClaim;
+
+            IsCurrentUser = currentUserId == userId;
+            UserId = userId;
             CourseId = courseId;
+            BaseUrl = _apiSettings.BaseUrl;
+
+            // 🔑 SAS token (nên config trong appsettings)
+            string sasToken = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
 
             var client = _clientFactory.CreateClient();
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/User/{userIdClaim}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            // 🔹 1. Kiểm tra trạng thái học tập
+            var courseCheckRequest = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/Learning/UserCourse?userId={userId}&courseId={courseId}");
+            courseCheckRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var courseCheckResp = await client.SendAsync(courseCheckRequest);
 
-            var response = await client.SendAsync(request);
+            if (!courseCheckResp.IsSuccessStatusCode)
+                return RedirectToPage("/ErrorPage");
 
-            if (response.IsSuccessStatusCode)
+            var userCourse = await courseCheckResp.Content.ReadFromJsonAsync<UserCourseDto>();
+            if (userCourse == null || !string.Equals(userCourse.Status, "Completed", StringComparison.OrdinalIgnoreCase))
             {
-                var userResp = await response.Content.ReadFromJsonAsync<UserDto>();
-                if (userResp?.UserMetaData != null)
-                {
-                    UserFullName = $"{userResp.UserMetaData.FirstName} {userResp.UserMetaData.LastName}";
-                }
+                TempData["ErrorMessage"] = $"You have not completed this course.";
+                return RedirectToPage("/UserCourse");
             }
-            // 2. Get Course Info
-            var courseResp = await client.GetFromJsonAsync<CourseCertificateDto>($"{_apiSettings.BaseUrl}/Course/{courseId}");
-            CourseName = courseResp?.courseName ?? "Unknown Course";
 
-            // 3. Get Mentor Info
-            var mentorResp = await client.GetFromJsonAsync<MentorInforDto>($"{_apiSettings.BaseUrl}/Mentor/by-course/{courseId}");
-            if (mentorResp != null)
+            // 🔹 2. Lấy thông tin user
+            var requestUser = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/User/GetUserById/{userId}");
+            requestUser.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var userResponse = await client.SendAsync(requestUser);
+
+            if (userResponse.IsSuccessStatusCode)
             {
-                MentorSignature = !string.IsNullOrWhiteSpace(mentorResp.Signature)
-                    ? mentorResp.Signature
-                    : $"{mentorResp.FirstName} {mentorResp.LastName}";
+                var userDto = await userResponse.Content.ReadFromJsonAsync<UserDto>();
+                if (userDto?.UserMetaData != null)
+                    UserFullName = RemoveDiacritics($"{userDto.UserMetaData.FirstName} {userDto.UserMetaData.LastName}");
+            }
+
+            // 🔹 3. Lấy thông tin khóa học
+            var courseRequest = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/Course/{courseId}");
+            courseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var courseResponse = await client.SendAsync(courseRequest);
+
+            if (courseResponse.IsSuccessStatusCode)
+            {
+                var courseDto = await courseResponse.Content.ReadFromJsonAsync<CourseCertificateDto>();
+                CourseName = courseDto?.courseName ?? "Unknown Course";
+            }
+
+            // 🔹 4. Lấy thông tin mentor
+            var mentorRequest = new HttpRequestMessage(HttpMethod.Get, $"{_apiSettings.BaseUrl}/Mentor/by-course/{courseId}");
+            mentorRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var mentorResponse = await client.SendAsync(mentorRequest);
+
+            if (mentorResponse.IsSuccessStatusCode)
+            {
+                var mentorDto = await mentorResponse.Content.ReadFromJsonAsync<MentorInforDto>();
+
+                if (!string.IsNullOrWhiteSpace(mentorDto?.Signature))
+                {
+                    MentorSignature = mentorDto.Signature.Contains("sig=")
+                        ? mentorDto.Signature
+                        : $"{mentorDto.Signature}?{sasToken}";
+                }
+                else
+                {
+                    MentorSignature = RemoveDiacritics($"{mentorDto?.FirstName} {mentorDto?.LastName}");
+                }
+
+                MentorFullName = RemoveDiacritics($"{mentorDto?.FirstName} {mentorDto?.LastName}");
             }
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+
+
+        private static string RemoveDiacritics(string text)
         {
-            if (CertificateFile == null || CertificateFile.Length == 0)
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
             {
-                return Page();
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
             }
 
-            using var content = new MultipartFormDataContent();
-            using var fileStream = CertificateFile.OpenReadStream();
-            content.Add(new StreamContent(fileStream)
-            {
-                Headers = { ContentType = new MediaTypeHeaderValue("application/pdf") }
-            }, "file", "certificate.pdf");
-
-            content.Add(new StringContent(UserId), "UserId");
-            content.Add(new StringContent(CourseId.ToString()), "CourseId");
-
-            var client = _clientFactory.CreateClient();
-            client.BaseAddress = new Uri(_apiSettings.BaseUrl);
-
-            var response = await client.PostAsync($"{_apiSettings.BaseUrl}/certificate/upload", content); 
-
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToPage("/Success");
-            }
-
-            ModelState.AddModelError(string.Empty, "Upload failed");
-            return Page();
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
 }

@@ -58,9 +58,17 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
 
             var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync($"{_apiSettings.BaseUrl}/Learning/not-presented?assignmentId={SelectedAssignmentId}");
+            // Tạo HttpRequestMessage thay cho GetAsync
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"{_apiSettings.BaseUrl}/Learning/not-presented?assignmentId={SelectedAssignmentId}"
+            );
+
+            // Gắn token vào header
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -117,10 +125,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         {
             BaseUrl = _apiSettings.BaseUrl;
             var token = Request.Cookies["AccessToken"];
-            if (string.IsNullOrEmpty(token)) {
-                RedirectToPage("/Login"); 
+            if (string.IsNullOrEmpty(token))
+            {
+                Response.Redirect("/Login");
+                return;
             }
-                
 
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
@@ -132,11 +141,16 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             UserId = userIdClaim.Value;
 
             var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // Dùng HttpRequestMessage thay cho GetAsync
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Assignment/by-creator?userId={UserId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             try
             {
-                var response = await client.GetAsync($"{BaseUrl}/Assignment/by-creator?userId={UserId}");
+                var response = await client.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
                 var content = await response.Content.ReadAsStringAsync();
                 Assignments = JsonSerializer.Deserialize<List<GetAssignmentbycreatorDto>>(content,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();

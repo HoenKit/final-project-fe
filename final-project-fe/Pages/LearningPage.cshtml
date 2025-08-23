@@ -1,6 +1,7 @@
 ﻿@page
 @model final_project_fe.Pages.Mentor.LearningPageModel
 @{
+    ViewData["Title"] = "Phronesis - Learning Page";
 }
 
 @using Newtonsoft.Json
@@ -680,7 +681,7 @@
     <script>
         const BaseUrl = "@Model.BaseUrl";
         const modules = @Html.Raw(modulesJson);
-        const userId = "@Model.UserId";
+        const currentUserId = "@Model.UserId";
         const imageKey = "@Model.ImageKey";
         const courseId = "@Model.Course?.CourseId";
 

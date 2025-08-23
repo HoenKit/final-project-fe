@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -54,7 +55,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             string userId = userIdClaim.Value;
 
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"{BaseUrl}/Mentor/get-by-user/{userId}");
+
+            // Tạo request GET với token riêng
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Mentor/get-by-user/{userId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -70,23 +76,31 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 }
             }
         }
+
         public async Task<IActionResult> OnPostCreateAsync()
         {
             BaseUrl = _apiSettings.BaseUrl;
-            if (!ModelState.IsValid)
+
+            var token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
             {
-                TempData["ErrorMessage"] = "Invalid data. Please check again.";
-                return Page();
+                ModelState.AddModelError(string.Empty, "Token missing.");
+                return RedirectToPage("/Login");
             }
+
 
             var client = _httpClientFactory.CreateClient();
 
+            // Tạo request POST với token riêng
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/workshop");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             var json = JsonSerializer.Serialize(Workshop);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             try
             {
-                var response = await client.PostAsync($"{BaseUrl}/workshop", content);
+                var response = await client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                 {

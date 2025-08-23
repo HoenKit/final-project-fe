@@ -9,7 +9,8 @@ namespace final_project_fe.Dtos.Users
 		public string Phone { get; set; }
 		public string Password { get; set; }
 		public decimal? Point { get; set; }
-		public bool IsBanned { get; set; } 
+        public int Turns { get; set; }
+        public bool IsBanned { get; set; } 
         public bool IsPremium { get; set; }
         public DateTime CreateAt { get; set; } 
 		public DateTime? UpdateAt { get; set; } 
@@ -40,4 +41,15 @@ namespace final_project_fe.Dtos.Users
 
         // các trường khác nếu cần
     }
+    public class UserCertificateDto
+    {
+        public string UserId { get; set; }
+        public int CourseId { get; set; }
+        public string CourseName { get; set; }
+        public string MentorName { get; set; }
+        public string Level { get; set; }
+        public string CertificateLink { get; set; }
+        public DateTime CompletedAt { get; set; }
+    }
+
 }

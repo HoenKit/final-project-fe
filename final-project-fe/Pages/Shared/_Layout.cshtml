@@ -1,12 +1,15 @@
-﻿﻿@using System.IdentityModel.Tokens.Jwt
+﻿@using System.IdentityModel.Tokens.Jwt
 @using System.Security.Claims
 @using Microsoft.Extensions.Options
 @using final_project_fe.Utils
+@inject IOptions<SignalrSetting> SignalrSetting
 @inject IOptions<ApiSettings> ApiSettings
 @{
 	var roles = new List<string>();
 	decimal userPoints = 0;
+	Guid? userId = null;
 	var BaseUrl = ApiSettings.Value.BaseUrl;
+	var HubUrl = SignalrSetting.Value.HubUrl;
 	var token = Context.Request.Cookies["AccessToken"];
 	bool isAuthenticated = !string.IsNullOrEmpty(token);
 	if (!string.IsNullOrEmpty(token))
@@ -32,6 +35,11 @@
 				userPoints = points;
 			}
 		}
+		var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+		if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var parsedId))
+		{
+			userId = parsedId;
+		}
 	}
 
 	bool isMentor = roles.Contains("Mentor");
@@ -52,6 +60,7 @@
 	<link rel="stylesheet" href="~/css/color.css">
 	<link rel="stylesheet" href="~/css/responsive.css">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+	
 	@* <link rel="stylesheet" href="~/final_project_fe.styles.css" asp-append-version="true" /> *@
 	<style>
 		ul, ol {
@@ -59,6 +68,15 @@
 			padding-left: 0;
 		}
 
+		.badge-new {
+			background-color: green;
+			color: white;
+			font-size: 10px;
+			font-weight: bold;
+			padding: 2px 4px;
+			border-radius: 4px;
+			margin-left: 6px;
+		}
 		.user-img {
 			position: relative;
 			display: inline-block;
@@ -175,7 +193,7 @@
 	<header>
 		<div class="topbar">
 			<div class="logo">
-				<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="images/Logoda.png" alt=""></a>
+				<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="~/images/Logoda.png" alt=""></a>
 			</div>
 
 			<div class="top-area">
@@ -244,79 +262,41 @@
 						</div>
 					</li>
 					@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
-					<li>
-						<a href="#" title="Notification" data-ripple="">
-							<i class="ti-bell"></i><span>20</span>
-						</a>
-						<div class="dropdowns">
-							<span>4 New Notifications</span>
-							<ul class="drops-menu">
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-1.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>sarah Loren</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag green">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-2.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Jhon doe</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag red">Reply</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-3.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Andrew</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag blue">Unseen</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-4.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Tom cruse</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-								<li>
-									<a href="notifications.html" title="">
-										<img src="images/resources/thumb-5.jpg" alt="">
-										<div class="mesg-meta">
-											<h6>Amy</h6>
-											<span>Hi, how r u dear ...?</span>
-											<i>2 min ago</i>
-										</div>
-									</a>
-									<span class="tag">New</span>
-								</li>
-							</ul>
-							<a href="notifications.html" title="" class="more-mesg">view more</a>
-						</div>
-					</li>
-					<li>
-						<a href="#" title="Languages" data-ripple=""><i class="fa fa-globe"></i></a>
-						<div class="dropdowns languages">
-							<a href="#" title=""><i class="ti-check"></i>English</a>
-							<a href="#" title="">Vietnam</a>
-						</div>
-					</li>
+					@if (isAuthenticated)
+					{
+						<li id="pointDisplay">
+							<div href="#" title="Your Points" data-ripple="">
+								<span id="userPointBadge" style="
+								display: inline-flex;
+								align-items: center;
+								justify-content: center;
+								margin-left: 5px;
+								background-color: #ff9800;
+								color: #fff;
+								font-size: 13px;
+								font-weight: bold;
+								padding: 2px 10px;
+								border-radius: 20px;
+								min-width: 40px;
+								text-align: center;
+								line-height: 1.2;
+								margin-bottom: -13px;
+									">0</span>
+							</div>
+						</li>
+						@* <li><a href="newsfeed.html" title="Home" data-ripple=""><i class="ti-home"></i></a></li> *@
+						<li id="notificationDropdown">
+							<a href="#" title="Notification" data-ripple="">
+								<i class="ti-bell"></i><span id="notificationCount">0</span>
+							</a>
+							<div class="dropdowns">
+								<span id="notificationHeader">Notifications</span>
+								<ul class="drops-menu" id="notificationList">
+									<!-- JS sẽ render -->
+								</ul>
+							</div>
+						</li>
+					}
 				</ul>
 				<div class="user-img" id="userImg">
 					<img src="~/images/fav_icon.png" alt="">
@@ -342,6 +322,7 @@
 									<a asp-page="/Chatting"><i class="bi bi-wechat"></i> Chatting</a>
 									<a asp-page="/UserCourse"><i class="bi bi-book-half"></i> My Own Course</a>
 								}
+								<a asp-page="/EventPage"><i class="bi bi-patch-check"></i> Event</a>
 								<a asp-page="/Logout"><i class="bi bi-box-arrow-in-left" style="font-size: 115%;"></i> Logout</a>
 							</text>
 						}
@@ -390,24 +371,24 @@
 			</ul>
 		</div><!-- side panel --> *@
 	</header>
-		<!-- Post Detail Modal -->
-		<div class="modal fade" id="postDetailModal" tabindex="-1" aria-labelledby="postDetailModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-xl" style="max-width: 50% !important;">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="postDetailModalLabel">Post Details</h5>
-						@* <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
-					</div>
-					<div class="modal-body" id="postModalBody">
-						<div class="d-flex justify-content-center">
-							<div class="spinner-border" role="status">
-								<span class="visually-hidden">Loading...</span>
-							</div>
+	<!-- Post Detail Modal -->
+	<div class="modal fade" id="postDetailModal" tabindex="-1" aria-labelledby="postDetailModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" style="max-width: 50% !important;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="postDetailModalLabel">Post Details</h5>
+					@* <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> *@
+				</div>
+				<div class="modal-body" id="postModalBody">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status">
+							<span class="visually-hidden">Loading...</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 	<div class="">
 		<main role="main" class="pb-3">
 			@RenderBody()
@@ -423,7 +404,7 @@
 					<div class="widget">
 						<div class="foot-logo">
 							<div class="logo">
-								<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="images/Logoda.png" alt=""></a>
+								<a style="width:85%; margin-bottom:7%" title="" asp-page="/Index"><img src="~/images/Logoda.png" alt=""></a>
 							</div>
 							<p>
 								The trio took this simple idea and built it into the world’s leading carpooling platform.
@@ -500,7 +481,167 @@
 	<script src="~/js/main.min.js"></script>
 	<script src="~/js/script.js"></script>
 	<script src="~/js/map-init.js"></script>
-	@* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8c55_YHLvDHGACkQscgbGLtLRdxBDCfI"></script> *@
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+	<script>
+		const apiBaseUrl = "@BaseUrl";   // từ ApiSettings
+		const hubUrl = "@HubUrl";        // từ SignalrSetting
+		const userId = "@(userId?.ToString() ?? "")"; // từ JWT claim
+
+		// Render 1 item notification
+		function renderNotificationItem(notification, isNew = false) {
+			return `
+				<li data-id="${notification.notificationId}">
+					<a href="/notifications" title="">
+						<div class="mesg-meta">
+							<span>${notification.message}</span>
+							<i>${new Date(notification.createdAt).toLocaleString()}</i>
+						</div>
+					</a>
+					<span class="tag ${isNew ? "green" : ""}">${isNew ? "New" : ""}</span>
+				</li>
+			`;
+		}
+
+		function getCookie(name) {
+			const value = `; ${document.cookie}`;
+			const parts = value.split(`; ${name}=`);
+			if (parts.length === 2) return parts.pop().split(";").shift();
+		}
+
+		// Load notification khi vừa load trang (chỉ render, không cộng count)
+				async function loadNotifications() {
+			if (!userId) {
+				console.log("👤 Guest user → skip loadNotifications");
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) headerEl.innerText = "No Notifications";
+				return;
+			}
+			try {
+				const token = getCookie("AccessToken");
+				const response = await fetch(`${apiBaseUrl}/Notification/get-by-user/${userId}`, {
+					headers: {
+						"Authorization": `Bearer ${token}`,
+						"Content-Type": "application/json"
+					}
+				});
+
+				if (!response.ok) throw new Error("Failed to fetch notifications");
+				const notifications = await response.json();
+
+				const list = document.getElementById("notificationList");
+				if (!list) return;
+				list.innerHTML = "";
+
+				notifications.forEach(noti => {
+					list.insertAdjacentHTML("beforeend", renderNotificationItem(noti, false));
+				});
+
+				const countEl = document.getElementById("notificationCount");
+				const headerEl = document.getElementById("notificationHeader");
+				if (countEl) countEl.innerText = 0;
+				if (headerEl) {
+					headerEl.innerText =
+						notifications.length > 0
+							? `${notifications.length} Notifications`
+							: "No Notifications";
+				}
+			} catch (err) {
+				console.error("❌ Error loading notifications:", err);
+			}
+		}
+
+		// Khi mở dropdown thì reset badge
+		const dropdown = document.getElementById("notificationDropdown");
+		if (dropdown) {
+			dropdown.addEventListener("click", () => {
+				clearNewBadges();
+			});
+		}
+
+		// ---- SignalR connection ----
+		if (userId) {
+			if (!window.signalRConnection) {
+				window.signalRConnection = new signalR.HubConnectionBuilder()
+					.withUrl(`${hubUrl}/postHub?UserId=${userId}`)
+					.withAutomaticReconnect()
+					.build();
+
+				window.signalRConnection.on("ReceiveNotification", (notification) => {
+					if (typeof notification === "string") {
+						try {
+							notification = JSON.parse(notification);
+						} catch {
+							return;
+						}
+					}
+					if (!notification || !notification.notificationId) return;
+
+					const list = document.getElementById("notificationList");
+					if (!list) return;
+
+					const countEl = document.getElementById("notificationCount");
+					let count = parseInt(countEl.innerText) || 0;
+					count++;
+					countEl.innerText = count;
+
+					list.insertAdjacentHTML("afterbegin", renderNotificationItem(notification, true));
+					const header = document.getElementById("notificationHeader");
+					header.innerText = `${list.children.length} Notifications`;
+				});
+
+				window.signalRConnection.start()
+					.then(() => console.log("✅ SignalR connected"))
+					.catch(err => console.error("❌ SignalR error:", err));
+			}
+		}
+
+		function clearNewBadges() {
+			document.getElementById("notificationCount").innerText = 0;
+			document.querySelectorAll("#notificationList li .tag").forEach(tag => {
+				tag.innerText = "";
+				tag.classList.remove("green");
+			});
+			const list = document.getElementById("notificationList");
+			const header = document.getElementById("notificationHeader");
+			if (list && list.children.length > 0) {
+				header.innerText = `Notifications`;
+			} else {
+				header.innerText = "No Notifications";
+			}
+		}
+
+		// gọi khi load trang
+		loadNotifications();
+	</script>
+	<script>
+				document.addEventListener("DOMContentLoaded", function () {
+			const userId = "@(userId?.ToString() ?? "")";
+			const badgeEl = document.getElementById("userPointBadge");
+
+			if (!userId) {
+				if (badgeEl) badgeEl.textContent = 0;
+				console.log("👤 Guest user → skip fetch point");
+				return;
+			}
+
+			const BaseUrl = "@BaseUrl";
+			const apiUrl = `${BaseUrl}/User/GetUserById/${userId}`;
+
+			fetch(apiUrl)
+				.then(response => {
+					if (!response.ok) throw new Error("Network response was not ok");
+					return response.json();
+				})
+				.then(user => {
+					if (badgeEl) badgeEl.textContent = user.point ?? 0;
+				})
+				.catch(() => {
+					if (badgeEl) badgeEl.textContent = 0;
+				});
+		});
+	</script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			const hasToken = document.cookie.includes('AccessToken=');
@@ -582,11 +723,16 @@
 					if (data.users && data.users.length > 0) {
 						html += `<li class="list-group-item fw-bold bg-light">Users</li>`;
 						data.users.forEach(u => {
+							const firstName = u.userMetaData?.firstName || "";
+							const lastName = u.userMetaData?.lastName || "";
+							const email = u.email || "Unknown";
+							const displayName = firstName || lastName ? `${firstName} ${lastName}`.trim() : email;
+
 							html += `
 								<li class="list-group-item search-item" data-type="user" data-id="${u.userId}">
 									<i class="ti-user me-2"></i>
-									${u.userMetaData?.firstName ?? ""} ${u.userMetaData?.lastName ?? ""}
-									<small class="text-muted">(${u.email ?? ""})</small>
+									${displayName}
+									<small class="text-muted">(${email})</small>
 								</li>`;
 						});
 					}
@@ -597,7 +743,7 @@
 						data.courses.forEach(c => {
 							html += `
 								<li class="list-group-item search-item" data-type="course" data-id="${c.courseId}">
-									<i class="ti-book me-2"></i> ${c.courseName}
+									<i class="ti-book me-2"></i> ${c.courseName || "Untitled Course"}
 								</li>`;
 						});
 					}
@@ -608,7 +754,7 @@
 						data.posts.forEach(p => {
 							html += `
 								<li class="list-group-item search-item" data-type="post" data-id="${p.postId}">
-									<i class="ti-pencil-alt me-2"></i> ${p.title ?? "(No title)"}
+									<i class="ti-pencil-alt me-2"></i> ${p.title || "Untitled Post"}
 								</li>`;
 						});
 					}
@@ -622,14 +768,11 @@
 							const id = this.getAttribute("data-id");
 
 							if (type === "user") {
-								// Nếu UserPage cũng theo query string thì đổi tương tự
 								window.location.href = `/UserPage?userId=${id}`;
 							} else if (type === "course") {
 								window.location.href = `/Mentor/MentorPage/CourseDetail?courseId=${id}`;
 							} else if (type === "post") {
-								// Hiển thị modal với chi tiết bài post thay vì chuyển hướng
 								showPostModal(id);
-								// Đóng search results và clear input
 								resultsContainer.innerHTML = "";
 								searchInput.value = "";
 							}
@@ -658,15 +801,11 @@
 				modal.show();
 
 				try {
-					// Tạm thời sử dụng dữ liệu từ trang hiện tại (nếu có)
-					// Hoặc bạn có thể tạo API endpoint riêng để lấy chi tiết post
-
-					// Tìm post trong trang hiện tại
+					// Tìm post trong trang hiện tại trước
 					const postElements = document.querySelectorAll('[data-post-id="' + postId + '"]');
 					let postFound = false;
 
 					if (postElements.length > 0) {
-						// Lấy thông tin từ DOM hiện tại
 						const postContainer = postElements[0].closest('.card');
 						if (postContainer) {
 							const postClone = postContainer.cloneNode(true);
@@ -675,7 +814,6 @@
 							const dropdownMenus = postClone.querySelectorAll('.dropdown');
 							dropdownMenus.forEach(menu => menu.remove());
 
-							// Loại bỏ form comment để tránh conflict
 							const commentForms = postClone.querySelectorAll('.comment-form');
 							commentForms.forEach(form => form.remove());
 
@@ -684,24 +822,29 @@
 						}
 					}
 
-					// Nếu không tìm thấy trong DOM, gọi API
+					// Nếu không tìm thấy trong DOM, gọi API để lấy full data
 					if (!postFound) {
 						try {
-							const response = await fetch(`${baseUrl}/api/Post/${postId}`);
+							// Gọi API GetDetail với endpoint mới
+							const response = await fetch(`${baseUrl}/Post/GetDetail/${postId}`);
 							if (response.ok) {
 								const postData = await response.json();
 								displayPostFromAPI(postData);
 							} else {
-								throw new Error("Post not found in API");
+								throw new Error(`HTTP ${response.status}: Post not found`);
 							}
 						} catch (apiError) {
-							console.log("API call failed, showing basic error message");
+							console.log("API call failed:", apiError);
 							modalBody.innerHTML = `
 								<div class="alert alert-warning">
 									<i class="ti-info-alt me-2"></i>
-									Post details are not available. The post might have been moved or deleted.
+									Unable to load post details. ${apiError.message}
 									<br><br>
 									<small class="text-muted">Post ID: ${postId}</small>
+									<br>
+									<button class="btn btn-sm btn-primary mt-2" onclick="window.location.reload()">
+										Try again
+									</button>
 								</div>
 							`;
 						}
@@ -713,83 +856,158 @@
 						<div class="alert alert-danger">
 							<i class="ti-alert-circle me-2"></i>
 							Error loading post details. Please try again later.
+							<br><br>
+							<small class="text-muted">Error: ${error.message}</small>
 						</div>
 					`;
 				}
 			}
 
-			// Hàm hiển thị post từ API data
+			// Hàm hiển thị post từ API data theo cấu trúc mới
 			function displayPostFromAPI(post) {
 				const modalBody = document.getElementById('postModalBody');
 
-				// API trả về trực tiếp object post, không có comments và categories
-				// Nếu cần comments và categories, cần gọi API riêng hoặc include trong response
+				// Xử lý thông tin user từ cấu trúc API mới
+				const userAvatar = post.avatar || 'images/resources/friend-avatar9.jpg';
+				const userFirstName = post.firstName || '';
+				const userLastName = post.lastName || '';
+				const displayName = `${userFirstName} ${userLastName}`.trim() || 'Anonymous User';
+
+				// Xử lý thời gian
+				const createDate = post.createAt || new Date().toISOString();
+				const formattedDate = new Date(createDate).toLocaleDateString('vi-VN');
+				const formattedTime = new Date(createDate).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
+
+				// Xử lý category
+				const categoryHtml = post.categoryName ?
+									`<div class="mb-2"><span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${post.categoryName}</span></div>` :
+									'';
+
+				// Xử lý files/media
+				let mediaHtml = '';
+				if (post.postFiles && post.postFiles.length > 0) {
+					mediaHtml = post.postFiles.map(file => {
+						const fileType = file.postFileType || file.fileType || '';
+						const fileUrl = file.fileUrl || file.url || '';
+
+						if (fileType.toLowerCase().includes('image') || fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+							return `<img src="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="Post Image" class="img-fluid mb-3" style="max-width: 100%; height: auto;">`;
+						} else if (fileType.toLowerCase().includes('video') || fileUrl.match(/\.(mp4|webm|ogg)$/i)) {
+							return `<video width="100%" controls class="mb-3">
+										<source src="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" type="video/mp4">
+										Your browser does not support the video tag.
+									</video>`;
+						} else {
+							return `<a href="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
+										<i class="ti-download me-1"></i>Download File
+									</a>`;
+						}
+					}).join('');
+				}
+
+				// Xử lý comments theo cấu trúc mới
+				let commentsHtml = '';
+				if (post.comments && post.comments.length > 0) {
+					// Lọc comments chính (không có parentCommentId)
+					const parentComments = post.comments.filter(c => !c.parentCommentId);
+
+					commentsHtml = parentComments.map(comment => {
+						// Tìm replies cho comment này
+						const replies = post.comments.filter(r => r.parentCommentId === comment.commentId);
+
+						const commentUserAvatar = comment.avatar || 'images/resources/friend-avatar9.jpg';
+						const commentUserName = `${comment.firstName || ''} ${comment.lastName || ''}`.trim() || 'Anonymous';
+
+						let repliesHtml = '';
+						if (replies.length > 0) {
+							repliesHtml = replies.map(reply => {
+								const replyUserAvatar = reply.avatar || 'images/resources/friend-avatar9.jpg';
+								const replyUserName = `${reply.firstName || ''} ${reply.lastName || ''}`.trim() || 'Anonymous';
+
+								return `
+									<div class="comment-reply ms-4 mt-2">
+										<div class="d-flex">
+											<div class="comet-avatar me-2">
+												<img src="${replyUserAvatar}" alt="User Avatar" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+											</div>
+											<div class="we-comment flex-grow-1">
+												<div class="coment-head">
+													<h6 class="mb-1"><a href="#" class="text-decoration-none">${replyUserName}</a></h6>
+												</div>
+												<p class="mb-1">${reply.content || ''}</p>
+											</div>
+										</div>
+									</div>
+								`;
+							}).join('');
+						}
+
+						return `
+							<div class="comment mb-3">
+								<div class="d-flex">
+									<div class="comet-avatar me-2">
+										<img src="${commentUserAvatar}" alt="User Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+									</div>
+									<div class="we-comment flex-grow-1">
+										<div class="coment-head">
+											<h5 class="mb-1"><a href="#" class="text-decoration-none">${commentUserName}</a></h5>
+										</div>
+										<p class="mb-2">${comment.content || ''}</p>
+										${repliesHtml}
+									</div>
+								</div>
+							</div>
+						`;
+					}).join('');
+				} else {
+					commentsHtml = '<p class="text-muted">No comments yet.</p>';
+				}
 
 				let postHtml = `
 					<div class="card border-0">
 						<div class="friend-info">
-							<figure>
-								<img src="${post.user?.userMetaData?.avatar || 'images/resources/friend-avatar9.jpg'}"
-									 alt="User Avatar" style="width: 50px; height: 50px; border-radius: 50%;">
-							</figure>
+							<div class="d-flex mb-3">
+								<figure class="me-3">
+									<img src="${userAvatar}" alt="User Avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+								</figure>
 
-							<div class="post-meta">
-								${post.category ? `<div class="mb-2"><span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${post.category.title}</span></div>` : ''}
-								<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">${post.title}</p>
-							</div>
-
-							<div class="friend-name">
-								<ins>
-									<a href="#" title="">
-										${post.user?.userMetaData ? `${post.user.userMetaData.firstName} ${post.user.userMetaData.lastName}` : post.user?.email}
-									</a>
-								</ins>
-								<span>${new Date(post.createAt).toLocaleDateString('vi-VN')} ${new Date(post.createAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}</span>
-							</div>
-
-							<div class="post-meta">
-								${post.postFiles && post.postFiles.length > 0 ?
-									post.postFiles.map(file => {
-										if (file.postFileType.toLowerCase() === 'image') {
-											return `<img src="${file.fileUrl}" alt="Post Image" width="400" class="img-fluid mb-3">`;
-										} else {
-											return `<video width="100%" height="315" controls class="mb-3">
-														<source src="${file.fileUrl}" type="video/mp4">
-														Your browser does not support the video tag.
-													</video>`;
-										}
-									}).join('') : ''
-								}
-
-								<div class="description">
-									<p>${post.content}</p>
+								<div class="flex-grow-1">
+									<div class="friend-name">
+										<ins>
+											<a href="#" class="text-decoration-none fw-bold">${displayName}</a>
+										</ins>
+										<div>
+											<span class="text-muted small">${formattedDate} ${formattedTime}</span>
+										</div>
+									</div>
 								</div>
 							</div>
 
-							<div class="comments-section">
-								<h6 class="mb-3"><i class="ti-comment"></i> Comments</h6>
-								${post.comments && post.comments.length > 0 ?
-									post.comments.filter(c => !c.parentCommentId).map(comment => {
-										const replies = post.comments.filter(r => r.parentCommentId === comment.commentId);
-										return `
-											<div class="comment mb-3">
-												<div class="comet-avatar">
-													<img src="${comment.user?.userMetaData?.avatar || 'images/resources/friend-avatar9.jpg'}" alt="User Avatar">
-												</div>
-												<div class="we-comment">
-													<div class="coment-head">
-														<h5><a href="#">${comment.user?.userMetaData ? `${comment.user.userMetaData.firstName} ${comment.user.userMetaData.lastName}` : comment.user?.email}</a></h5>
-														<span>${new Date(comment.createAt).toLocaleDateString('vi-VN')} ${new Date(comment.createAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'})}</span>
-													</div>
-													<p>${comment.content}</p>
+							<div class="post-meta">
+								${categoryHtml}
+								<h4 class="mb-3" style="color: #333; font-weight: 600;">
+									${post.title || 'Untitled Post'}
+								</h4>
 
-												
-												</div>
-											</div>
-										`;
-									}).join('') :
-									'<p class="text-muted">No comments yet.</p>'
-								}
+								${mediaHtml}
+
+								<div class="description">
+									<div style="white-space: pre-line; line-height: 1.6;">
+										${post.content || 'No content available'}
+									</div>
+								</div>
+							</div>
+
+							<hr>
+
+							<div class="comments-section mt-4">
+								<h6 class="mb-3">
+									<i class="ti-comment me-1"></i>
+									Comments (${post.comments ? post.comments.filter(c => !c.parentCommentId).length : 0})
+								</h6>
+								<div class="comments-list">
+									${commentsHtml}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -798,18 +1016,18 @@
 				modalBody.innerHTML = postHtml;
 			}
 
-			// Nhấn nút hoặc Enter = thực hiện search
+			// Event listeners
 			searchBtn.addEventListener("click", () => doSearch(false));
 			searchInput.addEventListener("keyup", function (e) {
 				if (e.key === "Enter") doSearch(false);
 			});
 
-			// Suggestion khi gõ
+			// Suggestion khi gõ với debounce
 			searchInput.addEventListener("input", function () {
 				clearTimeout(debounceTimer);
 				debounceTimer = setTimeout(() => {
 					doSearch(true);
-				}, 300); // debounce 300ms
+				}, 300);
 			});
 		});
 	</script>
