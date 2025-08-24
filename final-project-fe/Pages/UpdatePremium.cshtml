@@ -225,10 +225,10 @@
 
         <div class="sidebar">
             <div class="account-info">
-                <img src="@Model.UserInfo?.UserMetaData?.Avatar" class="avatar" />
+                <img src="@(Model.UserInfo?.UserMetaData?.Avatar ?? " images/resources/friend-avatar9.jpg")" class="avatar" />
                 <h3>@Model.UserInfo?.UserMetaData?.FirstName @Model?.UserInfo?.UserMetaData?.LastName</h3>
                 <p>@(Model.UserInfo.IsPremium ? "Already Premium" : "Free Member")</p>
-                <p>Your Point : @Model.UserInfo.Point Point</p>
+                <p>Your Point : @((int)Model.UserInfo.Point) Point</p>
             </div>
 
             <div class="benefits">

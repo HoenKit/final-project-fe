@@ -96,7 +96,7 @@
 												<div class="d-flex align-items-center">
 													@if (Model.Profile?.UserMetaData != null)
 													{
-														<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
+														<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
 															 alt="Avatar"
 															 class="rounded-circle"
 															 width="40"
@@ -138,7 +138,7 @@
 													<div class="d-flex align-items-center mb-3">
 														@if (Model.Profile?.UserMetaData != null)
 														{
-															<img src="@Model.Profile.UserMetaData?.Avatar ?? " https://cdn-icons-png.flaticon.com/512/149/149071.png""
+															<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
 																 alt="Avatar" class="rounded-circle" width="40" height="40"/>
 															<div style="color: #088dcd;" class="ms-2">
 																@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
@@ -214,7 +214,7 @@
 															</div>
 
 															<!-- Nút xóa tất cả ảnh -->
-															<button id="btnCloseAll" class="btn-close position-absolute top-0 end-0 m-2 z-3" style="z-index: 10;" onclick="clearAllImages()"></button>
+															<button id="btnCloseAll" type="button" class="btn-close position-absolute top-0 end-0 m-2 z-3" style="z-index: 10;" onclick="clearAllImages()"></button>
 
 															<!-- Container ảnh -->
 															<div id="imageContainer" class="border rounded p-2 d-flex flex-wrap gap-2 mt-2" style="min-height: 100px;"></div>

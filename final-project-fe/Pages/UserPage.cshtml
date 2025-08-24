@@ -15,23 +15,12 @@
 					<div class="profile-avatar-card">
 						@if (Model.Profile?.UserMetaData != null)
 						{
-							<img src="@Model.Profile.UserMetaData?.Avatar ?? " https://cdn-icons-png.flaticon.com/512/149/149071.png""
+							<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
 								 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 							<h4 class="profile-name mt-4">
 								@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 							</h4>
 						}
-						<div class="social-links">
-							<a href="#" class="social-link facebook">
-								<i class="bi bi-facebook"></i>
-							</a>
-							<a href="#" class="social-link linkedin">
-								<i class="bi bi-linkedin"></i>
-							</a>
-							<a href="#" class="social-link youtube">
-								<i class="bi bi-youtube"></i>
-							</a>
-						</div>
 					</div>
 				</div>
 			</div>

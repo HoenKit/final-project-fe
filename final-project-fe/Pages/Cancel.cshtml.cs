@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -57,6 +59,8 @@ namespace final_project_fe.Pages
                         CreateAt = DateTime.UtcNow
                     };
 
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     var jsonContent = JsonSerializer.Serialize(transaction);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
