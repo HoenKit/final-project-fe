@@ -868,7 +868,7 @@
 				const modalBody = document.getElementById('postModalBody');
 
 				// Xử lý thông tin user từ cấu trúc API mới
-				const userAvatar = post.avatar || 'images/resources/friend-avatar9.jpg';
+				const userAvatar = post.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'images/resources/friend-avatar9.jpg';
 				const userFirstName = post.firstName || '';
 				const userLastName = post.lastName || '';
 				const displayName = `${userFirstName} ${userLastName}`.trim() || 'Anonymous User';
@@ -915,13 +915,13 @@
 						// Tìm replies cho comment này
 						const replies = post.comments.filter(r => r.parentCommentId === comment.commentId);
 
-						const commentUserAvatar = comment.avatar || 'images/resources/friend-avatar9.jpg';
+						const commentUserAvatar = comment.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'images/resources/friend-avatar9.jpg';
 						const commentUserName = `${comment.firstName || ''} ${comment.lastName || ''}`.trim() || 'Anonymous';
 
 						let repliesHtml = '';
 						if (replies.length > 0) {
 							repliesHtml = replies.map(reply => {
-								const replyUserAvatar = reply.avatar || 'images/resources/friend-avatar9.jpg';
+								const replyUserAvatar = reply.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'images/resources/friend-avatar9.jpg';
 								const replyUserName = `${reply.firstName || ''} ${reply.lastName || ''}`.trim() || 'Anonymous';
 
 								return `

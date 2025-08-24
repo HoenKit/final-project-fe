@@ -37,6 +37,8 @@ namespace final_project_fe.Pages
             _apiSettings = apiSettings.Value;
             _signalrSetting = signalrSetting;
         }
+        [BindProperty]
+        public IFormFile? Avatar { get; set; }
         public string BaseUrl { get; set; }
         public List<UserCertificateDto> Certificates { get; set; } = new List<UserCertificateDto>();
         public bool IsOwnUser { get; set; } = false;
@@ -606,7 +608,120 @@ namespace final_project_fe.Pages
             }
         }
 
+        //Update UserAvatar
+        public async Task<IActionResult> OnPostUpdateAvatarAsync()
+        {
+            try
+            {
+                // Lấy token từ cookie
+                if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+                {
+                    TempData["ErrorMessage"] = "Please login to continue.";
+                    return RedirectToPage("/Login");
+                }
 
+                // Giải mã token để lấy UserId
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+                if (jsonToken != null)
+                {
+                    CurrentUserId = jsonToken.Claims
+                        .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+                }
+
+                if (string.IsNullOrEmpty(CurrentUserId))
+                {
+                    TempData["ErrorMessage"] = "Unable to identify user.";
+                    return RedirectToPage("/Login");
+                }
+
+                // Kiểm tra file avatar
+                if (Avatar == null || Avatar.Length == 0)
+                {
+                    TempData["ErrorMessage"] = "Please select an avatar file.";
+                    return Page();
+                }
+
+                // Validate file type và size
+                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(Avatar.ContentType.ToLowerInvariant()))
+                {
+                    TempData["ErrorMessage"] = "Only JPG, JPEG, PNG, GIF files are allowed.";
+                    return Page();
+                }
+
+                if (Avatar.Length > 5 * 1024 * 1024) // 5MB
+                {
+                    TempData["ErrorMessage"] = "File size cannot exceed 5MB.";
+                    return Page();
+                }
+
+                // Tạo form data - QUAN TRỌNG: Sử dụng đúng tên field như API expect
+                using var form = new MultipartFormDataContent();
+
+                // Thêm file với tên field chính xác như trong DTO
+                var fileContent = new StreamContent(Avatar.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(Avatar.ContentType);
+                form.Add(fileContent, "Avatar", Avatar.FileName); // Tên field phải là "Avatar" như trong UpdateAvatarDto
+
+                // Set authorization header
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                // Gửi PUT request với userId trong query string (như API expect)
+                var apiUrl = $"{_apiSettings.BaseUrl}/User/update-avatar?userId={CurrentUserId}";
+                var response = await _httpClient.PutAsync(apiUrl, form);
+
+                // Log response để debug
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation($"API Response: Status={response.StatusCode}, Content={responseContent}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Avatar updated successfully!";
+                    return RedirectToPage();
+                }
+                else
+                {
+                    // Log chi tiết lỗi
+                    _logger.LogError($"Update avatar failed. Status: {response.StatusCode}, Content: {responseContent}");
+
+                    // Parse error message từ response nếu có
+                    var errorMessage = "Failed to update avatar.";
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(responseContent))
+                        {
+                            // Nếu API trả về JSON error
+                            var errorObj = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                            if (errorObj.TryGetProperty("message", out var msgElement))
+                            {
+                                errorMessage = msgElement.GetString() ?? errorMessage;
+                            }
+                        }
+                        else
+                        {
+                            errorMessage = responseContent;
+                        }
+                    }
+                    catch
+                    {
+                        // Nếu không parse được JSON, dùng raw content
+                        if (!string.IsNullOrEmpty(responseContent))
+                            errorMessage = responseContent;
+                    }
+
+                    TempData["ErrorMessage"] = errorMessage;
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating avatar.");
+                TempData["ErrorMessage"] = $"Unexpected error occurred: {ex.Message}";
+                return Page();
+            }
+        }
 
         // Handler Update Profile
         public async Task<IActionResult> OnPostAsync()

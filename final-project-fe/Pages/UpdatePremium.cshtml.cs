@@ -139,8 +139,28 @@ namespace final_project_fe.Pages
             }
             else
             {
-                ModelState.AddModelError(string.Empty, $"Unauthorized or failed request: {responseBody}");
-                return Page();
+                ViewData["SelectedPlanId"] = PlanId;
+                try
+                {
+                    var errorResponse = JsonSerializer.Deserialize<JsonElement>(responseBody);
+                    if (errorResponse.TryGetProperty("message", out var messageElement))
+                    {
+                        TempData["ErrorMessage"] = messageElement.GetString();
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Purchase failed. Please try again.";
+                    }
+                }
+                catch
+                {
+                    // ✅ Fallback error message
+                    TempData["ErrorMessage"] = response.StatusCode == System.Net.HttpStatusCode.BadRequest
+                        ? "Insufficient points or invalid plan."
+                        : "Purchase failed. Please try again.";
+                }
+
+                return RedirectToPage("/UpdatePremium");
             }
         }
     }
