@@ -467,7 +467,7 @@ namespace final_project_fe.Pages.Admin.Dashboard
             switch (payment.ServiceType?.ToLower())
             {
                 case "course":
-                    return amountInVND * 0.35m; // 35% for courses
+                    return amountInVND * (payment.hasPremiumModules ? 0.25m : 0.35m); // 35% for courses
                 case "premium":
                     return amountInVND; // 100% for premiums
                 default:
