@@ -525,10 +525,20 @@
 																<div class="certificate-icon"><i class="bi bi-file-earmark-pdf-fill"></i></div>
 																<div class="certificate-content">
 																	<h3 class="certificate-title">@mCert.CertificateName</h3>
-																	<div>
-																		<a href="@mCert.FileUrl?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" target="_blank" class="btn btn-sm btn-outline-success mt-2">
+																	<div class="mt-2">
+																		<a href="@mCert.FileUrl" target="_blank" class="btn btn-sm btn-outline-success">
 																			View PDF
 																		</a>
+
+																		@if (Model.IsOwnUser)
+																		{
+																			<form method="post" asp-page-handler="DeleteCertificate" class="d-inline">
+																				<input type="hidden" name="certificateId" value="@mCert.MentorCertificateId" />
+																				<button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+																					Delete
+																				</button>
+																			</form>
+																		}
 																	</div>
 																</div>
 															</div>

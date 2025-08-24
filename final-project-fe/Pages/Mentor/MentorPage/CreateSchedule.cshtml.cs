@@ -1,4 +1,5 @@
-using final_project_fe.Dtos;
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Assignment;
 using final_project_fe.Dtos.Courses;
 using final_project_fe.Dtos.Mentors;
 using final_project_fe.Pages.Mentor.MentorPage;
@@ -102,6 +103,7 @@ namespace final_project_fe.Pages.Mentor
                 });
 
                 Course = result?.Items?.ToList() ?? new List<ListCourseDto>();
+
             }
             catch (Exception ex)
             {

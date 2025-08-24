@@ -723,6 +723,36 @@ namespace final_project_fe.Pages
             }
         }
 
+        public async Task<IActionResult> OnPostDeleteCertificateAsync(int certificateId)
+        {
+            BaseUrl = _apiSettings.BaseUrl;
+            var token = Request.Cookies["AccessToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please login first.";
+                return RedirectToPage("/Login");
+            }
+
+            var client = _httpClient;
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var apiUrl = $"{BaseUrl}/MentorCertificate/{certificateId}";
+            var response = await client.DeleteAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["SuccessMessage"] = "Certificate deleted successfully.";
+                return RedirectToPage(); 
+            }
+            else
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                TempData["ErrorMessage"] = errorMsg;
+                return RedirectToPage();
+            }
+        }
+
         // Handler Update Profile
         public async Task<IActionResult> OnPostAsync()
         {
