@@ -392,7 +392,7 @@
 
         <div class="main-content">
             <div class="topup-form">
-                <partial name="_Notification" />
+                @* <partial name="_Notification" /> *@
                 <form id="topupForm" method="post">
                     <div class="form-section">
                         <h3 class="section-title">
@@ -457,7 +457,7 @@
             <div class="sidebar">
                 <div class="account-info">
                     <div class="flex-shrink-0">
-                        <img src="@Model.UserInfo.UserMetaData.Avatar" alt="User" class="w-20 h-20 rounded-full object-cover">
+                            <img src="@(Model.UserInfo.UserMetaData.Avatar ?? "images/resources/friend-avatar9.jpg")" alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
                     </div>
                     <h3>@Model.UserInfo.UserMetaData.FirstName @Model.UserInfo.UserMetaData.LastName</h3>
                     <p>@(Model.UserInfo.IsPremium ? "Premium Member" : "Member")</p>
@@ -505,86 +505,38 @@
 </div>
 
     <script>
+        // Global variables
         let selectedAmount = 0;
         let selectedPoints = 0;
         let selectedPaymentMethod = '';
 
+        // DOM elements
         const amountOptions = document.querySelectorAll('.amount-option');
         const customAmountInput = document.getElementById('customAmount');
         const customPointsDisplay = document.getElementById('customPoints');
         const hiddenPoints = document.getElementById('hiddenPoints');
         const hiddenPaymentMethod = document.getElementById('hiddenPaymentMethod');
-        const paymentOptions = document.querySelectorAll('.payment-method');
-
-        // Handle amount option click
-        amountOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                // Remove 'selected' from others
-                amountOptions.forEach(o => o.classList.remove('selected'));
-
-                // Add 'selected' to current
-                option.classList.add('selected');
-
-                selectedAmount = parseInt(option.dataset.amount);
-                selectedPoints = parseInt(option.dataset.points);
-
-                customAmountInput.value = selectedAmount;
-                customPointsDisplay.innerText = `${selectedPoints} Points`;
-                hiddenPoints.value = selectedPoints;
-            });
-        });
-
-        // Handle custom input manually
-        customAmountInput.addEventListener('input', () => {
-            selectedAmount = parseInt(customAmountInput.value || 0);
-            selectedPoints = Math.floor(selectedAmount / 1000);
-
-            customPointsDisplay.innerText = `${selectedPoints} Points`;
-            hiddenPoints.value = selectedPoints;
-
-            // Unselect amount-option
-            amountOptions.forEach(o => o.classList.remove('selected'));
-        });
-
-        // Handle payment method selection
-        paymentOptions.forEach(method => {
-            method.addEventListener('click', () => {
-                paymentOptions.forEach(m => m.classList.remove('selected'));
-                method.classList.add('selected');
-
-                selectedPaymentMethod = method.dataset.method;
-                hiddenPaymentMethod.value = selectedPaymentMethod;
-            });
-        });
-    </script>
-
-    <script>
-        // Xử lý chọn gói nạp tiền
-        const amountOptions = document.querySelectorAll('.amount-option');
-        const customAmountInput = document.getElementById('customAmount');
-        const customPointsDisplay = document.getElementById('customPoints');
         const paymentMethods = document.querySelectorAll('.payment-method');
         const form = document.getElementById('topupForm');
-
-        let selectedAmount = 0;
-        let selectedPoints = 0;
-        let selectedPaymentMethod = '';
 
         // Handle preset amount selection
         amountOptions.forEach(option => {
             option.addEventListener('click', () => {
+                // Remove selected class from all options
                 amountOptions.forEach(opt => opt.classList.remove('selected'));
+
+                // Add selected class to current option
                 option.classList.add('selected');
-                
+
+                // Get selected values
                 selectedAmount = parseInt(option.dataset.amount);
                 selectedPoints = parseInt(option.dataset.points);
-                
-                // Update form inputs
+
+                // Update UI and form inputs
                 customAmountInput.value = selectedAmount;
-                document.getElementById('hiddenPoints').value = selectedPoints;
-                
-                customAmountInput.value = '';
-                
+                customPointsDisplay.innerText = `${selectedPoints.toLocaleString()} Points`;
+                hiddenPoints.value = selectedPoints;
+
                 // Animation effect
                 option.style.transform = 'scale(1.05)';
                 setTimeout(() => {
@@ -596,33 +548,38 @@
         // Handle custom amount input
         customAmountInput.addEventListener('input', (e) => {
             const amount = parseInt(e.target.value) || 0;
+
             if (amount > 0) {
+                // Remove selected class from preset options
                 amountOptions.forEach(opt => opt.classList.remove('selected'));
+
                 selectedAmount = amount;
-                // Calculate points: 100,000₫ = 100 points
+                // Calculate points: 1,000₫ = 1 point
                 selectedPoints = Math.floor(amount / 1000);
+
+                // Update UI
                 customPointsDisplay.textContent = `${selectedPoints.toLocaleString()} Points`;
-                
-                // Update hidden input
-                document.getElementById('hiddenPoints').value = selectedPoints;
+                hiddenPoints.value = selectedPoints;
             } else {
                 selectedAmount = 0;
                 selectedPoints = 0;
                 customPointsDisplay.textContent = '0 Points';
-                document.getElementById('hiddenPoints').value = 0;
+                hiddenPoints.value = 0;
             }
         });
 
         // Handle payment method selection
         paymentMethods.forEach(method => {
             method.addEventListener('click', () => {
+                // Remove selected class from all payment methods
                 paymentMethods.forEach(m => m.classList.remove('selected'));
+
+                // Add selected class to current method
                 method.classList.add('selected');
+
                 selectedPaymentMethod = method.dataset.method;
-                
-                // Update hidden input
-                document.getElementById('hiddenPaymentMethod').value = selectedPaymentMethod;
-                
+                hiddenPaymentMethod.value = selectedPaymentMethod;
+
                 // Animation effect
                 method.style.transform = 'scale(1.05)';
                 setTimeout(() => {
@@ -632,35 +589,39 @@
         });
 
         // Handle form submission
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
 
-            if (selectedAmount === 0) {
-                alert('Please select an amount to top up!');
-                return;
-            }
+                // Validation
+                if (selectedAmount === 0) {
+                    alert('Please select an amount to top up!');
+                    return;
+                }
 
-            if (!selectedPaymentMethod) {
-                alert('Please select a payment method!');
-                return;
-            }
+                if (!selectedPaymentMethod) {
+                    alert('Please select a payment method!');
+                    return;
+                }
 
-            // Loading effect
-            const btn = document.querySelector('.checkout-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            btn.disabled = true;
+                // Loading effect
+                const btn = document.querySelector('.checkout-btn');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    btn.disabled = true;
+                }
 
-            // Submit form sau khi xử lý xong
-            form.submit();
-        });
+                // Submit form
+                form.submit();
+            });
+        }
 
-
-        // Hiệu ứng parallax nhẹ
+        // Parallax effect
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX / window.innerWidth;
             const mouseY = e.clientY / window.innerHeight;
-            
+
             document.body.style.background = `linear-gradient(${135 + mouseX * 10}deg, #667eea 0%, #764ba2 100%)`;
         });
     </script>

@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -92,12 +93,12 @@ namespace final_project_fe.Pages
 
                 if (IsOwnUser)
                 {
-                    await LoadCurrentUserProfile();
+                    await LoadCurrentUserProfile(currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
                     await LoadMentorCertificates(CurrentUserId);   // 🔥 thêm dòng này
                 }
                 else
                 {
-                    await LoadOtherUserProfile(userId);
+                    await LoadOtherUserProfile(userId, currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
                     await LoadMentorCertificates(userId);         // 🔥 vẫn giữ dòng này
                 }
             }
@@ -111,7 +112,7 @@ namespace final_project_fe.Pages
             return Page();
         }
 
-        private async Task LoadCurrentUserProfile()
+        private async Task LoadCurrentUserProfile(int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
         {
             try
             {
@@ -171,7 +172,7 @@ namespace final_project_fe.Pages
                 // Nếu là mentor thì load thêm mentor info + courses
                 if (UserRoles.Contains("Mentor"))
                 {
-                    await LoadMentorInfo(CurrentUserId);
+                    await LoadMentorInfo(CurrentUserId, currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
                 }
                 await LoadUserCertificates(CurrentUserId);
             }
@@ -192,7 +193,7 @@ namespace final_project_fe.Pages
             }
         }
 
-        private async Task LoadOtherUserProfile(string userId)
+        private async Task LoadOtherUserProfile(string userId, int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
         {
             try
             {
@@ -250,7 +251,7 @@ namespace final_project_fe.Pages
                 Profile = userInfo;
 
                 // 👉 Gọi thêm API check xem user đó có phải Mentor không
-                await LoadMentorInfo(userId);
+                await LoadMentorInfo(userId, currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
                 await LoadUserCertificates(userId);
 
                 _logger.LogInformation("Successfully loaded profile for user: {UserId}", userId);
@@ -343,7 +344,7 @@ namespace final_project_fe.Pages
             }
         }
 
-        private async Task LoadMentorInfo(string userId)
+        private async Task LoadMentorInfo(string userId, int? currentPage, int? categoryId, string? title, string? sortOption, string? language, string? level, decimal? minCost, decimal? maxCost, decimal? minRate, decimal? maxRate, string? status)
         {
             try
             {
@@ -378,7 +379,7 @@ namespace final_project_fe.Pages
                             MentorId = CurrentMentor.MentorId;
 
                             // Load courses
-                            await LoadCoursesAsync(null, null, null, null, null, null, null, null, null, null, null);
+                            await LoadCoursesAsync(currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);
                         }
                     }
                 }

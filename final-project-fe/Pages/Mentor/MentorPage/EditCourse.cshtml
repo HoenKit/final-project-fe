@@ -2717,6 +2717,67 @@
                         }
                     });
                 });
+                addTextareaFormatting();
+            }
+
+            function addTextareaFormatting() {
+                const skillLearnTextarea = document.querySelector('textarea[name="Course.SkillLearn"]');
+                const requirementTextarea = document.querySelector('textarea[name="Course.Requirement"]');
+                const intendedlearnerTextarea = document.querySelector('textarea[name="Course.IntendedLearner"]');
+
+                    [skillLearnTextarea, requirementTextarea,intendedlearnerTextarea].forEach(textarea => {
+                    if (textarea) {
+                        textarea.addEventListener('input', function(e) {
+                            autoFormatTextarea(this);
+                        });
+
+                        // Also format on paste
+                        textarea.addEventListener('paste', function(e) {
+                            setTimeout(() => {
+                                autoFormatTextarea(this);
+                            }, 10);
+                        });
+                    }
+                });
+            }
+
+            function autoFormatTextarea(textarea) {
+                const cursorPosition = textarea.selectionStart;
+                let text = textarea.value;
+
+                // Split by periods and rejoin with period + newline
+                // But avoid splitting on common abbreviations or decimal numbers
+                const sentences = text.split(/\.(?!\d)(?!\s*[a-z])/);
+
+                // Process each sentence
+                let formattedText = '';
+                for (let i = 0; i < sentences.length; i++) {
+                    let sentence = sentences[i].trim();
+
+                    if (sentence.length > 0) {
+                        // Add the sentence
+                        formattedText += sentence;
+
+                        // Add period if it's not the last sentence or if the original had a period
+                        if (i < sentences.length - 1 || text.endsWith('.')) {
+                            formattedText += '.';
+
+                            // Add newline if it's not the last sentence and there's more content
+                            if (i < sentences.length - 1 && sentences[i + 1].trim().length > 0) {
+                                formattedText += '\n';
+                            }
+                        }
+                    }
+                }
+
+                // Only update if the text actually changed
+                if (formattedText !== text) {
+                    textarea.value = formattedText;
+
+                    // Restore cursor position (approximately)
+                    let newCursorPosition = Math.min(cursorPosition, formattedText.length);
+                    textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+                }
             }
 
             function validateField(field) {
@@ -2760,45 +2821,7 @@
                 field.classList.remove('is-invalid');
             }
 
-            function addAutoSave() {
-                let autoSaveTimer;
-                const form = document.getElementById('editCourseForm');
-
-                if (form) {
-                    const inputs = form.querySelectorAll('input, textarea, select');
-
-                    inputs.forEach(input => {
-                        input.addEventListener('input', function() {
-                            clearTimeout(autoSaveTimer);
-                            autoSaveTimer = setTimeout(() => {
-                                autoSaveForm();
-                            }, 3000); // Auto-save after 3 seconds of inactivity
-                        });
-                    });
-                }
-            }
-
-            function autoSaveForm() {
-                const form = document.getElementById('editCourseForm');
-                if (form) {
-                    const formData = new FormData(form);
-
-                    // Show auto-save indicator
-                    showNotification('Auto-saving...', 'info', 2000);
-
-                    // Here you would typically send the data to server
-                    // fetch('/auto-save-endpoint', { method: 'POST', body: formData })
-                    //     .then(response => response.json())
-                    //     .then(data => {
-                    //         if (data.success) {
-                    //             showNotification('Changes saved automatically', 'success', 2000);
-                    //         }
-                    //     })
-                    //     .catch(error => {
-                    //         console.error('Auto-save failed:', error);
-                    //     });
-                }
-            }
+            
 
             function showNotification(message, type = 'info', duration = 5000) {
                 // Remove existing notifications
