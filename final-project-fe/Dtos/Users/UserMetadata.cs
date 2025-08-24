@@ -17,4 +17,8 @@ namespace final_project_fe.Dtos.Users
         public string? Goals { get; set; }
         public string? FavouriteSubject { get; set; }
     }
+    public class UpdateAvatarDto
+    {
+        public IFormFile? Avatar { get; set; }
+    }
 }

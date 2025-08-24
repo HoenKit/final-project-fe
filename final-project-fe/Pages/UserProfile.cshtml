@@ -21,15 +21,98 @@
 		<div class="d-flex justify-content-between align-items-start">
 			<div class="avtar-header">
 				<div class="profile-content">
-					<div class="profile-avatar-card">
+					<div class="profile-avatar-card position-relative">
 						@if (Model.Profile?.UserMetaData != null)
 						{
-							<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
-							alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+							<div class="avatar-container position-relative">
+								<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+								@if (Model.IsOwnUser)
+								{
+									<button type="button" class="btn btn-primary btn-sm edit-avatar-btn"
+											data-bs-toggle="modal" data-bs-target="#avatarModal">
+										<i class="fa fa-camera"></i>
+									</button>
+								}
+							</div>
+
 							<h4 class="profile-name mt-4">
 								@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 							</h4>
 						}
+					</div>
+					<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="avatarModalLabel">
+										<i class="fa fa-user-circle me-2"></i>Update Avatars
+									</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+
+								<form method="post" enctype="multipart/form-data" asp-page-handler="UpdateAvatar" id="avatarForm">
+									<div class="modal-body">
+										<!-- Current Avatar Preview -->
+										<div class="text-center mb-4">
+											<div class="current-avatar-preview">
+												<img src="@(Model.Profile?.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+													 alt="Current Avatar" class="rounded-circle shadow" style="width: 80px; height: 75px;" id="currentAvatar" />
+												<p class="text-muted mt-2">Current avatar</p>
+											</div>
+										</div>
+
+										<!-- File Upload -->
+										<div class="mb-3">
+											<label for="avatarFileInput" class="form-label">Select new photo:</label>
+											<input type="file" class="form-control" id="avatarFileInput"
+												   asp-for="Avatar" accept="image/*" required />
+											<div class="form-text">
+												<i class="fa fa-info-circle"></i>
+												Accept: JPG, JPEG, PNG, GIF. Max 5MB.
+											</div>
+										</div>
+
+										<!-- New Avatar Preview -->
+										<div class="text-center" id="newAvatarPreview" style="display: none;">
+											<div class="new-avatar-preview">
+												<img src="" alt="New Avatar" class="rounded-circle shadow"
+													 style="width: 80px; height: 75px;"id="newAvatar" />
+												<p class="text-muted mt-2">New photo</p>
+											</div>
+										</div>
+
+										<!-- Error/Success Messages -->
+										@if (TempData["ErrorMessage"] != null)
+										{
+											<div class="alert alert-danger alert-dismissible fade show" role="alert">
+												<i class="fa fa-exclamation-triangle"></i>
+												@TempData["ErrorMessage"]
+												<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+											</div>
+										}
+
+										@if (TempData["SuccessMessage"] != null)
+										{
+											<div class="alert alert-success alert-dismissible fade show" role="alert">
+												<i class="fa fa-check-circle"></i>
+												@TempData["SuccessMessage"]
+												<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+											</div>
+										}
+									</div>
+
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+											<i class="fa fa-times"></i> Cancel
+										</button>
+										<button type="submit" class="btn btn-primary" id="updateAvatarBtn">
+											<i class="fa fa-upload"></i> Update Avatars
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -743,6 +826,71 @@
 </div>
 
 	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const fileInput = document.getElementById('avatarFileInput');
+			const newAvatarPreview = document.getElementById('newAvatarPreview');
+			const newAvatarImg = document.getElementById('newAvatar');
+			const updateBtn = document.getElementById('updateAvatarBtn');
+			const form = document.getElementById('avatarForm');
+
+			// File input change handler
+			fileInput.addEventListener('change', function(e) {
+				const file = e.target.files[0];
+
+				if (file) {
+					// Validate file type
+					const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+					if (!allowedTypes.includes(file.type)) {
+						alert('Only accept image files in format: JPG, JPEG, PNG, GIF.');
+						fileInput.value = '';
+						return;
+					}
+
+					// Validate file size (5MB)
+					if (file.size > 5 * 1024 * 1024) {
+					alert('Image file must not exceed 5MB.');
+						fileInput.value = '';
+						return;
+					}
+
+					// Show preview
+					const reader = new FileReader();
+					reader.onload = function(e) {
+						newAvatarImg.src = e.target.result;
+						newAvatarPreview.style.display = 'block';
+					};
+					reader.readAsDataURL(file);
+				} else {
+					newAvatarPreview.style.display = 'none';
+				}
+			});
+
+			// Form submit handler
+			form.addEventListener('submit', function(e) {
+				if (!fileInput.files[0]) {
+					e.preventDefault();
+				alert('Please select an image file to upload.');
+					return;
+				}
+
+				// Show loading state
+				updateBtn.disabled = true;
+			updateBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+			});
+
+			// Modal events
+			const avatarModal = document.getElementById('avatarModal');
+
+			avatarModal.addEventListener('hidden.bs.modal', function() {
+				// Reset form when modal is closed
+				fileInput.value = '';
+				newAvatarPreview.style.display = 'none';
+				updateBtn.disabled = false;
+			updateBtn.innerHTML = '<i class="fa fa-upload"></i> Update Avatar';
+			});
+		});
+	</script>
+	<script>
 		// Add smooth animations
 		const observerOptions = {
 			threshold: 0.1,
@@ -950,7 +1098,56 @@
 			align-items: center;
 			gap: 10px;
 			/* min-width: 200px; */
+			text-align: center;
+			padding: 20px;
 		}
+
+	.avatar-container {
+		display: inline-block;
+	}
+
+	.edit-avatar-btn {
+		position: absolute;
+		bottom: 5px;
+		right: 5px;
+		width: 35px;
+		height: 35px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+		transition: all 0.3s ease;
+	}
+
+		.edit-avatar-btn:hover {
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		}
+
+	.current-avatar-preview,
+	.new-avatar-preview {
+		margin: 10px 0;
+	}
+
+	.modal-body {
+		padding: 30px;
+	}
+
+	.form-text {
+		font-size: 0.875rem;
+		margin-top: 0.5rem;
+	}
+
+	.alert {
+		border: none;
+		border-radius: 8px;
+	}
+
+	.btn {
+		border-radius: 6px;
+		padding: 8px 16px;
+	}
 
 		.profile-avatar {
 			width: 140px;

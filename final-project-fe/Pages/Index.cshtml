@@ -99,9 +99,7 @@
 														<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
 															 alt="Avatar"
 															 class="rounded-circle"
-															 width="40"
-															 height="40"
-															 style="margin-right: 2%;" />
+															 style="width:35px;height:39px;margin-right: 2%;" />
 													}
 													<span class="text-muted">what are you thinking?</span>
 												</div>
@@ -139,7 +137,7 @@
 														@if (Model.Profile?.UserMetaData != null)
 														{
 															<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
-																 alt="Avatar" class="rounded-circle" width="40" height="40"/>
+																 alt="Avatar" class="rounded-circle" style="width:35px;height:39px;" />
 															<div style="color: #088dcd;" class="ms-2">
 																@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 															</div>
@@ -295,7 +293,7 @@
 													<div class="friend-info">
 														<figure>
 															<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-																 alt="User Avatar">
+																 alt="User Avatar" style="width: 50px; height: 51px;">
 
 														</figure>
 
@@ -470,7 +468,7 @@
 
 																	<div class="comment" data-comment-id="@parent.CommentId">
 																		<div class="comet-avatar">
-																			<img src="@avatar" alt="User Avatar">
+																			<img src="@avatar" alt="User Avatar" style="width: 50px; height: 51px;">
 																		</div>
 																		<div class="we-comment">
 																			<div class="coment-head">
@@ -520,7 +518,7 @@
 
 																		<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
 																			<div class="comet-avatar">
-																				<img src="@replyAvatar" alt="User Avatar">
+																				<img src="@replyAvatar" alt="User Avatar" style="width: 35px; height: 39px;">
 																			</div>
 																			<div class="we-comment">
 																				<div class="coment-head">
@@ -568,7 +566,7 @@
 
 																			<div class="comment reply-comment ms-5" data-comment-id="@level2.CommentId" data-parent-id="@level2.ParentCommentId">
 																				<div class="comet-avatar">
-																					<img src="@level2Avatar" alt="User Avatar">
+																					<img src="@level2Avatar" alt="User Avatar" style="width: 35px; height: 39px;">
 																				</div>
 																				<div class="we-comment">
 																					<div class="coment-head">
@@ -622,7 +620,7 @@
 																<ul class="we-comet">
 																	<li class="post-comment">
 																		<div class="comet-avatar">
-																			<img src="@(string.IsNullOrEmpty(@Model.Profile?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : @Model.Profile?.UserMetaData?.Avatar)" alt="User Avatar">
+																			<img src="@(string.IsNullOrEmpty(@Model.Profile?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : @Model.Profile?.UserMetaData?.Avatar)" alt="User Avatar" style="width: 30px; height: 34px;">
 																		</div>
 																		<div class="post-comt-box">
 																			<form class="comment-form">
@@ -942,7 +940,7 @@
 						commentsHTML += `
 									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 										<div class="comet-avatar">
-										<img src="${commentUserInfo.avatar}" alt="User Avatar">
+											<img src="${commentUserInfo.avatar}" alt="User Avatar"  style="width: 50px; height: 51px;">
 										</div>
 										<div class="we-comment">
 											<div class="coment-head">
@@ -991,7 +989,7 @@
 								commentsHTML += `
 											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
 												<div class="comet-avatar">
-												<img src="${replyUserInfo.avatar}" alt="User Avatar">
+													<img src="${replyUserInfo.avatar}" alt="User Avatar"  style="width: 35px; height: 39px;">
 												</div>
 												<div class="we-comment">
 													<div class="coment-head">
@@ -1033,14 +1031,12 @@
 									<li class="post-comment">
 										<div class="comet-avatar">
 												@if (Model.Profile?.UserMetaData != null)
-										{
-										<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
-										 alt="Avatar"
-										 class="rounded-circle"
-										 width="40"
-										 height="40"
-										 style="margin-right: 2%;" />
-										}
+												{
+													<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
+													 alt="Avatar"
+													 class="rounded-circle"
+													 style="width: 30px; height: 34px;" />
+												}
 										</div>
 										<div class="post-comt-box">
 											<form class="comment-form">
@@ -1060,7 +1056,7 @@
 							<div class="card p-3 mb-3 shadow-sm rounded">
 								<div class="friend-info">
 									<figure>
-										<img src="${avatar}" alt="User Avatar">
+									<img src="${avatar}" alt="User Avatar"  style="width: 50px; height: 51px;">
 									</figure>
 									<div class="friend-name">
 										<ins><a href="time-line.html" title="">${name}</a></ins>
