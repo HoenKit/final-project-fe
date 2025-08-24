@@ -261,6 +261,11 @@ namespace final_project_fe.Pages
                                     PropertyNameCaseInsensitive = true
                                 });
                                 post.User = apiResponse;
+                                if (post.User?.UserMetaData?.Avatar != null)
+                                {
+                                    post.User.UserMetaData.Avatar =
+                                        ImageUrlHelper.AppendSasTokenIfNeeded(post.User.UserMetaData.Avatar, SasToken);
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -300,8 +305,13 @@ namespace final_project_fe.Pages
                     {
                         try
                         {
-                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment?postId={post.PostId}&page=1";
-                            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+                            string token = Request.Cookies["AccessToken"]; // hoặc lấy từ nơi bạn lưu
+                            string apiUrl = $"{_apiSettings.BaseUrl}/Comment/GetByPostId?postId={post.PostId}&page=1";
+
+                            using var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+                            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                            HttpResponseMessage response = await _httpClient.SendAsync(request);
                             if (response.IsSuccessStatusCode)
                             {
                                 string jsonResponse = await response.Content.ReadAsStringAsync();
@@ -320,7 +330,10 @@ namespace final_project_fe.Pages
                                 {
                                     try
                                     {
-                                        HttpResponseMessage userResponse = await _httpClient.GetAsync(userApiUrl + comment.UserId);
+                                        using var userRequest = new HttpRequestMessage(HttpMethod.Get, userApiUrl + comment.UserId);
+                                        userRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                                        HttpResponseMessage userResponse = await _httpClient.SendAsync(userRequest);
                                         if (userResponse.IsSuccessStatusCode)
                                         {
                                             var userJson = await userResponse.Content.ReadAsStringAsync();
@@ -329,10 +342,11 @@ namespace final_project_fe.Pages
                                                 PropertyNameCaseInsensitive = true
                                             });
                                             comment.User = apiResponse;
+
                                             if (comment.User?.UserMetaData?.Avatar != null)
                                             {
-                                                // Append SAS token to avatar URL if needed
-                                                comment.User.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(comment.User.UserMetaData.Avatar, SasToken);
+                                                comment.User.UserMetaData.Avatar =
+                                                    ImageUrlHelper.AppendSasTokenIfNeeded(comment.User.UserMetaData.Avatar, SasToken);
                                             }
                                         }
                                     }
@@ -342,10 +356,10 @@ namespace final_project_fe.Pages
                                     }
                                 });
 
-								await Task.WhenAll(commentUserTasks);
-							}
-						}
-						catch (Exception ex)
+                                await Task.WhenAll(commentUserTasks);
+                            }
+                        }
+                        catch (Exception ex)
 						{
 							_logger.LogError($"Lỗi khi lấy comments {post.PostId}: {ex.Message}");
 						}

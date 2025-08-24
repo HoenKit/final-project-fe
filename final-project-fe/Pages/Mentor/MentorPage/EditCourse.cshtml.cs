@@ -1680,7 +1680,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             {
                 lessonId = Assignment.LessonId,
                 content = Assignment.Content,
-                meetLink = ""
+                MeetLink = Assignment.MeetLink
             };
 
             var response = await _httpClient.PostAsJsonAsync($"{_apiSettings.BaseUrl}/Assignment", requestPayload);
