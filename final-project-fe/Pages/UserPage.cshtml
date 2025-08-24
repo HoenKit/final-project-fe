@@ -12,25 +12,97 @@
 		<div class="d-flex justify-content-between align-items-start">
 			<div class="avtar-header">
 				<div class="profile-content">
-					<div class="profile-avatar-card">
+					<div class="profile-avatar-card position-relative">
 						@if (Model.Profile?.UserMetaData != null)
 						{
-							<img src="@Model.Profile.UserMetaData?.Avatar ?? " https://cdn-icons-png.flaticon.com/512/149/149071.png""
-								 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+							<div class="avatar-container position-relative">
+								<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
+
+								@if (Model.IsOwnUser){
+								<button type="button" class="btn btn-primary btn-sm edit-avatar-btn"
+										data-bs-toggle="modal" data-bs-target="#avatarModal">
+									<i class="fa fa-camera"></i>
+								</button>
+								}
+							</div>
+
 							<h4 class="profile-name mt-4">
 								@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 							</h4>
 						}
-						<div class="social-links">
-							<a href="#" class="social-link facebook">
-								<i class="bi bi-facebook"></i>
-							</a>
-							<a href="#" class="social-link linkedin">
-								<i class="bi bi-linkedin"></i>
-							</a>
-							<a href="#" class="social-link youtube">
-								<i class="bi bi-youtube"></i>
-							</a>
+					</div>
+					<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="avatarModalLabel">
+										<i class="fa fa-user-circle me-2"></i>Update Avatars
+									</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+								</div>
+
+								<form method="post" enctype="multipart/form-data" asp-page-handler="UpdateAvatar" id="avatarForm">
+									<div class="modal-body">
+										<!-- Current Avatar Preview -->
+										<div class="text-center mb-4">
+											<div class="current-avatar-preview">
+												<img src="@(Model.Profile?.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+													 alt="Current Avatar" class="rounded-circle shadow" style="width: 80px; height: 75px;" id="currentAvatar" />
+												<p class="text-muted mt-2">Current avatar</p>
+											</div>
+										</div>
+
+										<!-- File Upload -->
+										<div class="mb-3">
+											<label for="avatarFileInput" class="form-label">Select new photo:</label>
+											<input type="file" class="form-control" id="avatarFileInput"
+												   asp-for="Avatar" accept="image/*" required />
+											<div class="form-text">
+												<i class="fa fa-info-circle"></i>
+												Accept: JPG, JPEG, PNG, GIF. Max 5MB.
+											</div>
+										</div>
+
+										<!-- New Avatar Preview -->
+										<div class="text-center" id="newAvatarPreview" style="display: none;">
+											<div class="new-avatar-preview">
+												<img src="" alt="New Avatar" class="rounded-circle shadow"
+													id="newAvatar" style="width: 80px; height: 75px;" />
+												<p class="text-muted mt-2">New photo</p>
+											</div>
+										</div>
+
+										<!-- Error/Success Messages -->
+										@if (TempData["ErrorMessage"] != null)
+										{
+											<div class="alert alert-danger alert-dismissible fade show" role="alert">
+												<i class="fa fa-exclamation-triangle"></i>
+												@TempData["ErrorMessage"]
+												<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+											</div>
+										}
+
+										@if (TempData["SuccessMessage"] != null)
+										{
+											<div class="alert alert-success alert-dismissible fade show" role="alert">
+												<i class="fa fa-check-circle"></i>
+												@TempData["SuccessMessage"]
+												<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+											</div>
+										}
+									</div>
+
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+											<i class="fa fa-times"></i> Cancel
+										</button>
+										<button type="submit" class="btn btn-primary" id="updateAvatarBtn">
+											<i class="fa fa-upload"></i> Update Avatars
+										</button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -159,7 +231,7 @@
 													<div class="friend-info">
 														<figure>
 															<img src="@(string.IsNullOrEmpty(post.User?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : post.User?.UserMetaData.Avatar)"
-																 alt="User Avatar">
+																 alt="User Avatar" style="width: 50px; height: 51px;">
 
 														</figure>
 
@@ -337,7 +409,7 @@
 
 																	<div class="comment" data-comment-id="@parent.CommentId">
 																		<div class="comet-avatar">
-																			<img src="@avatar" alt="User Avatar">
+																			<img src="@avatar" alt="User Avatar" style="width: 50px; height: 51px;">
 																		</div>
 																		<div class="we-comment">
 																			<div class="coment-head">
@@ -374,7 +446,7 @@
 
 																		<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
 																			<div class="comet-avatar">
-																				<img src="@replyAvatar" alt="User Avatar">
+																				<img src="@replyAvatar" alt="User Avatar" style="width: 35px; height: 39px;">
 																			</div>
 																			<div class="we-comment">
 																				<div class="coment-head">
@@ -411,7 +483,7 @@
 
 																			<div class="comment reply-comment ms-5" data-comment-id="@level2.CommentId" data-parent-id="@level2.ParentCommentId">
 																				<div class="comet-avatar">
-																					<img src="@level2Avatar" alt="User Avatar">
+																					<img src="@level2Avatar" alt="User Avatar" style="width: 35px; height: 39px;">
 																				</div>
 																				<div class="we-comment">
 																					<div class="coment-head">
@@ -454,7 +526,7 @@
 																<ul class="we-comet">
 																	<li class="post-comment">
 																		<div class="comet-avatar">
-																			<img src="images/resources/friend-avatar9.jpg" alt="User Avatar">
+																			<img src="@(string.IsNullOrEmpty(@Model.CurrentUser?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : @Model.CurrentUser?.UserMetaData?.Avatar)" alt="User Avatar" style="width: 30px; height: 34px;">
 																		</div>
 																		<div class="post-comt-box">
 																			<form class="comment-form">
@@ -621,341 +693,736 @@
 	</script>
 
 	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const searchInput = document.getElementById("searchInput");
-			const searchBtn = document.getElementById("searchBtn");
-			const resultsContainer = document.getElementById("searchResults");
-			let debounceTimer;
+				document.addEventListener('DOMContentLoaded', () => {
+					// Razor variables
+					const currentUserId = "@Model.CurrentUserId";
+					const BaseUrl = "@Model.BaseUrl";
+					const HubUrl = "@Model.HubUrl";
 
-			const baseUrl = "@Model.BaseUrl";
+					// Lấy userId từ query string
+					const urlParams = new URLSearchParams(window.location.search);
+					const queryUserId = urlParams.get('userId'); // null nếu không có
+				const token = "@token";
+					let currentPage = 1; 
+					let isLoading = false; 
+					let categoriesCache = {};
+					// Nếu queryUserId khác currentUserId thì dùng queryUserId
+					const userIdToUse = (queryUserId && queryUserId !== currentUserId) ? queryUserId : currentUserId;
 
-			async function doSearch(isSuggestion = false) {
-				const term = searchInput.value.trim();
-				if (!term) {
-					resultsContainer.innerHTML = "";
-					return;
+					const apiBaseUrl = `${BaseUrl}/Post?userId=${userIdToUse}`;
+
+					console.log("API URL: ", apiBaseUrl);
+				
+
+				// SignalR Connection
+				const connection = new signalR.HubConnectionBuilder()
+					.withUrl(`${HubUrl}/postHub`)
+					.withAutomaticReconnect()
+					.build();
+
+				// Utility function to get user info
+				async function getUserInfo(id) {
+				const defaultAvatar = "images/resources/friend-avatar9.jpg";
+				const defaultName = "Unknown User";
+				if (!id) return { avatar: defaultAvatar, name: defaultName };
+
+				try {
+				const res = await fetch(`${BaseUrl}/User/GetUserById/${id}`, { credentials: 'include' });
+				if (res.ok) {
+					const u = await res.json();
+					return {
+					avatar: u?.userMetaData?.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || defaultAvatar,
+						name: u?.userMetaData
+							? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
+							: u.email || defaultName
+					};
+				}
+			} catch (error) {
+				console.error("Error fetching user info:", error);
+			}
+			return { avatar: defaultAvatar, name: defaultName };
+		}
+
+			// New function to get category info
+			async function getCategoryInfo(categoryId) {
+				if (!categoryId) return null;
+
+				// Check cache first
+				if (categoriesCache[categoryId]) {
+					return categoriesCache[categoryId];
 				}
 
 				try {
-					const response = await fetch(`${baseUrl}/Post/search-all?searchTerm=${encodeURIComponent(term)}&searchType=all`);
-					if (!response.ok) throw new Error("Search failed");
-					const data = await response.json();
-
-					let html = "";
-
-					// Users
-					if (data.users && data.users.length > 0) {
-						html += `<li class="list-group-item fw-bold bg-light">Users</li>`;
-						data.users.forEach(u => {
-							const firstName = u.userMetaData?.firstName || "";
-							const lastName = u.userMetaData?.lastName || "";
-							const email = u.email || "Unknown";
-							const displayName = firstName || lastName ? `${firstName} ${lastName}`.trim() : email;
-
-							html += `
-								<li class="list-group-item search-item" data-type="user" data-id="${u.userId}">
-									<i class="ti-user me-2"></i>
-									${displayName}
-									<small class="text-muted">(${email})</small>
-								</li>`;
-						});
+					const res = await fetch(`${BaseUrl}/Category/${categoryId}`, { credentials: 'include' });
+					if (res.ok) {
+						const category = await res.json();
+						// Cache the result
+						categoriesCache[categoryId] = category;
+						return category;
 					}
-
-					// Courses
-					if (data.courses && data.courses.length > 0) {
-						html += `<li class="list-group-item fw-bold bg-light">Courses</li>`;
-						data.courses.forEach(c => {
-							html += `
-								<li class="list-group-item search-item" data-type="course" data-id="${c.courseId}">
-									<i class="ti-book me-2"></i> ${c.courseName || "Untitled Course"}
-								</li>`;
-						});
-					}
-
-					// Posts
-					if (data.posts && data.posts.length > 0) {
-						html += `<li class="list-group-item fw-bold bg-light">Posts</li>`;
-						data.posts.forEach(p => {
-							html += `
-								<li class="list-group-item search-item" data-type="post" data-id="${p.postId}">
-									<i class="ti-pencil-alt me-2"></i> ${p.title || "Untitled Post"}
-								</li>`;
-						});
-					}
-
-					resultsContainer.innerHTML = html || `<li class="list-group-item">No results found</li>`;
-
-					// Gắn sự kiện click cho các item
-					document.querySelectorAll(".search-item").forEach(item => {
-						item.addEventListener("click", function () {
-							const type = this.getAttribute("data-type");
-							const id = this.getAttribute("data-id");
-
-							if (type === "user") {
-								window.location.href = `/UserPage?userId=${id}`;
-							} else if (type === "course") {
-								window.location.href = `/Mentor/MentorPage/CourseDetail?courseId=${id}`;
-							} else if (type === "post") {
-								showPostModal(id);
-								resultsContainer.innerHTML = "";
-								searchInput.value = "";
-							}
-						});
-					});
-				} catch (err) {
-					console.error(err);
-					resultsContainer.innerHTML = `<li class="list-group-item text-danger">Error searching</li>`;
+				} catch (error) {
+					console.error("Error fetching category info:", error);
 				}
+				return null;
 			}
 
-			// Hàm hiển thị modal chi tiết bài post
-			async function showPostModal(postId) {
-				const modal = new bootstrap.Modal(document.getElementById('postDetailModal'));
-				const modalBody = document.getElementById('postModalBody');
+			// Enhanced function to format date
+			function formatDate(dateString) {
+				const date = new Date(dateString);
+				return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {
+					hour: '2-digit',
+					minute: '2-digit'
+				});
+			}
 
-				// Hiển thị loading
-				modalBody.innerHTML = `
-					<div class="d-flex justify-content-center">
-						<div class="spinner-border" role="status">
-							<span class="visually-hidden">Loading...</span>
-						</div>
-					</div>
-				`;
+			// Enhanced function to create post HTML
+			async function createPostHtml(post, userInfo = null) {
+				// Get user info if not provided
+				if (!userInfo) {
+					userInfo = await getUserInfo(post.userId);
+				}
 
-				modal.show();
+				// Get category info
+				const categoryInfo = await getCategoryInfo(post.categoryId);
+				const { avatar, name } = userInfo;
+				const d = new Date(post.createAt).toLocaleString();
+				const hasAuth = token && token !== '' && token !== '@token';
 
-				try {
-					// Tìm post trong trang hiện tại trước
-					const postElements = document.querySelectorAll('[data-post-id="' + postId + '"]');
-					let postFound = false;
-
-					if (postElements.length > 0) {
-						const postContainer = postElements[0].closest('.card');
-						if (postContainer) {
-							const postClone = postContainer.cloneNode(true);
-
-							// Loại bỏ các element không cần thiết trong modal
-							const dropdownMenus = postClone.querySelectorAll('.dropdown');
-							dropdownMenus.forEach(menu => menu.remove());
-
-							const commentForms = postClone.querySelectorAll('.comment-form');
-							commentForms.forEach(form => form.remove());
-
-							modalBody.innerHTML = postClone.outerHTML;
-							postFound = true;
-						}
-					}
-
-					// Nếu không tìm thấy trong DOM, gọi API để lấy full data
-					if (!postFound) {
-						try {
-							// Gọi API GetDetail với endpoint mới
-							const response = await fetch(`${baseUrl}/Post/GetDetail/${postId}`);
-							if (response.ok) {
-								const postData = await response.json();
-								displayPostFromAPI(postData);
-							} else {
-								throw new Error(`HTTP ${response.status}: Post not found`);
-							}
-						} catch (apiError) {
-							console.log("API call failed:", apiError);
-							modalBody.innerHTML = `
-								<div class="alert alert-warning">
-									<i class="ti-info-alt me-2"></i>
-									Unable to load post details. ${apiError.message}
-									<br><br>
-									<small class="text-muted">Post ID: ${postId}</small>
-									<br>
-									<button class="btn btn-sm btn-primary mt-2" onclick="window.location.reload()">
-										Try again
-									</button>
+				// Create category badge HTML
+				let categoryBadgeHTML = '';
+				if (categoryInfo && categoryInfo.title) {
+					categoryBadgeHTML = `
+								<div class="mb-2">
+									<span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${categoryInfo.title}</span>
 								</div>
 							`;
-						}
-					}
-
-				} catch (error) {
-					console.error('Error loading post details:', error);
-					modalBody.innerHTML = `
-						<div class="alert alert-danger">
-							<i class="ti-alert-circle me-2"></i>
-							Error loading post details. Please try again later.
-							<br><br>
-							<small class="text-muted">Error: ${error.message}</small>
-						</div>
-					`;
 				}
-			}
 
-			// Hàm hiển thị post từ API data theo cấu trúc mới
-			function displayPostFromAPI(post) {
-				const modalBody = document.getElementById('postModalBody');
+				// Handle file attachments
+				let mediaContent = '';
+				if (post.files && post.files.length > 0) {
+					post.files.forEach(file => {
+						if (file.postFileType?.toLowerCase() === "image") {
+							mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+						} else if (file.postFileType?.toLowerCase() === "video") {
+							mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+						}
+					});
+				}
 
-				// Xử lý thông tin user từ cấu trúc API mới
-				const userAvatar = post.avatar || 'images/resources/friend-avatar9.jpg';
-				const userFirstName = post.firstName || '';
-				const userLastName = post.lastName || '';
-				const displayName = `${userFirstName} ${userLastName}`.trim() || 'Anonymous User';
-
-				// Xử lý thời gian
-				const createDate = post.createAt || new Date().toISOString();
-				const formattedDate = new Date(createDate).toLocaleDateString('vi-VN');
-				const formattedTime = new Date(createDate).toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'});
-
-				// Xử lý category
-				const categoryHtml = post.categoryName ?
-									`<div class="mb-2"><span class="badge bg-primary text-white px-2 py-1 rounded-pill">#${post.categoryName}</span></div>` :
-									'';
-
-				// Xử lý files/media
-				let mediaHtml = '';
+				// Handle postFiles
 				if (post.postFiles && post.postFiles.length > 0) {
-					mediaHtml = post.postFiles.map(file => {
-						const fileType = file.postFileType || file.fileType || '';
-						const fileUrl = file.fileUrl || file.url || '';
-
-						if (fileType.toLowerCase().includes('image') || fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-							return `<img src="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="Post Image" class="img-fluid mb-3" style="max-width: 100%; height: auto;">`;
-						} else if (fileType.toLowerCase().includes('video') || fileUrl.match(/\.(mp4|webm|ogg)$/i)) {
-							return `<video width="100%" controls class="mb-3">
-										<source src="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" type="video/mp4">
-										Your browser does not support the video tag.
-									</video>`;
-						} else {
-							return `<a href="${fileUrl}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" target="_blank" class="btn btn-outline-primary btn-sm mb-2">
-										<i class="ti-download me-1"></i>Download File
-									</a>`;
+					post.postFiles.forEach(file => {
+						if (!file.isDeleted && file.postFileType && file.fileUrl !== 'string') {
+							if (file.postFileType.toLowerCase() === 'image') {
+								mediaContent += `<img src="${file.fileUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin: 5px 0;" />`;
+							} else if (file.postFileType.toLowerCase() === 'video') {
+								mediaContent += `<iframe src="${file.fileUrl}" height="315" style="width: 100%; margin: 5px 0;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
+							}
 						}
-					}).join('');
+					});
 				}
 
-				// Xử lý comments theo cấu trúc mới
-				let commentsHtml = '';
+				// Generate comments HTML
+				let commentsHTML = '';
 				if (post.comments && post.comments.length > 0) {
-					// Lọc comments chính (không có parentCommentId)
 					const parentComments = post.comments.filter(c => !c.parentCommentId);
 
-					commentsHtml = parentComments.map(comment => {
-						// Tìm replies cho comment này
-						const replies = post.comments.filter(r => r.parentCommentId === comment.commentId);
+					for (const comment of parentComments) {
+						const commentUserInfo = await getUserInfo(comment.userId);
+						const replyFormHTML = `
+									<div class="reply-form" style="display:none; margin-top: 10px;">
+										<form class="comment-form">
+											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+											<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+										</form>
+									</div>
+								`;
 
-						const commentUserAvatar = comment.avatar || 'images/resources/friend-avatar9.jpg';
-						const commentUserName = `${comment.firstName || ''} ${comment.lastName || ''}`.trim() || 'Anonymous';
+						const commentOptionsHTML = `
+									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+										<div class="dropdown">
+											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+												<i class="fa fa-ellipsis-v"></i>
+											</button>
+											<ul class="dropdown-menu">
+												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+											</ul>
+										</div>
+									</div>
+								` ;
 
-						let repliesHtml = '';
-						if (replies.length > 0) {
-							repliesHtml = replies.map(reply => {
-								const replyUserAvatar = reply.avatar || 'images/resources/friend-avatar9.jpg';
-								const replyUserName = `${reply.firstName || ''} ${reply.lastName || ''}`.trim() || 'Anonymous';
-
-								return `
-									<div class="comment-reply ms-4 mt-2">
-										<div class="d-flex">
-											<div class="comet-avatar me-2">
-												<img src="${replyUserAvatar}" alt="User Avatar" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+						commentsHTML += `
+									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+										<div class="comet-avatar">
+											<img src="${commentUserInfo.avatar}" alt="User Avatar" style="width: 50px; height: 51px;">
+										</div>
+										<div class="we-comment">
+											<div class="coment-head">
+												<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
+												<span>${d}</span>
+												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+												${commentOptionsHTML}
 											</div>
-											<div class="we-comment flex-grow-1">
-												<div class="coment-head">
-													<h6 class="mb-1"><a href="#" class="text-decoration-none">${replyUserName}</a></h6>
-												</div>
-												<p class="mb-1">${reply.content || ''}</p>
-											</div>
+											<p>${comment.content}</p>
+											${replyFormHTML}
 										</div>
 									</div>
 								`;
-							}).join('');
-						}
 
-						return `
-							<div class="comment mb-3">
-								<div class="d-flex">
-									<div class="comet-avatar me-2">
-										<img src="${commentUserAvatar}" alt="User Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-									</div>
-									<div class="we-comment flex-grow-1">
-										<div class="coment-head">
-											<h5 class="mb-1"><a href="#" class="text-decoration-none">${commentUserName}</a></h5>
-										</div>
-										<p class="mb-2">${comment.content || ''}</p>
-										${repliesHtml}
-									</div>
-								</div>
-							</div>
-						`;
-					}).join('');
-				} else {
-					commentsHtml = '<p class="text-muted">No comments yet.</p>';
+						// Add replies
+						const replies = post.comments.filter(c => c.parentCommentId === comment.commentId);
+						if (replies.length > 0) {
+							commentsHTML += `<div class="replies" style="margin-left: 50px;">`;
+							for (const reply of replies) {
+								const replyUserInfo = await getUserInfo(reply.userId);
+								const replyFormHTML = `
+											<div class="reply-form" style="display:none; margin-top: 10px;">
+												<form class="comment-form">
+													<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+													<input type="hidden" name="NewComment.ParentCommentId" value="${reply.commentId}" />
+													<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+													<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+												</form>
+											</div>
+										` ;
+
+								const replyOptionsHTML = `
+											<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+												<div class="dropdown">
+													<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+														<i class="fa fa-ellipsis-v"></i>
+													</button>
+													<ul class="dropdown-menu">
+														<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
+														<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
+													</ul>
+												</div>
+											</div>
+										`;
+
+								commentsHTML += `
+											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
+												<div class="comet-avatar">
+													<img src="${replyUserInfo.avatar}" alt="User Avatar" style="width: 35px; height: 39px;">
+												</div>
+												<div class="we-comment">
+													<div class="coment-head">
+														<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
+														<span>${d}</span>
+														${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+														${replyOptionsHTML}
+													</div>
+													<p>${reply.content}</p>
+													${replyFormHTML}
+												</div>
+											</div>
+										`;
+							}
+							commentsHTML += `</div>`;
+						}
+					}
 				}
 
-				let postHtml = `
-					<div class="card border-0">
-						<div class="friend-info">
-							<div class="d-flex mb-3">
-								<figure class="me-3">
-									<img src="${userAvatar}" alt="User Avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
-								</figure>
+				// Generate options menu for authenticated users
+				const optionsMenuHTML = `
+							<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
+								<div class="dropdown">
+									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa fa-ellipsis-v"></i>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="${post.postId}">Report Post</a></li>
+										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${post.userId}">Report User</a></li>
+									</ul>
+								</div>
+							</div>
+						` ;
 
-								<div class="flex-grow-1">
+				// Generate comment form for authenticated users
+				const commentFormHTML = `
+							<div class="coment-area">
+								<ul class="we-comet">
+									<li class="post-comment">
+										<div class="comet-avatar">
+											<img src="@(string.IsNullOrEmpty(@Model.CurrentUser?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : @Model.CurrentUser?.UserMetaData?.Avatar)" alt="User Avatar" style="width: 30px; height: 34px;">
+										</div>
+										<div class="post-comt-box">
+											<form class="comment-form">
+												<input type="hidden" name="NewComment.PostId" value="${post.postId}">
+												<input type="hidden" name="NewComment.ParentCommentId">
+												<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+												<button type="submit" class="bi bi-send" style="font-size: 24px; color: black;"></button>
+											</form>
+										</div>
+									</li>
+								</ul>
+							</div>
+						` ;
+
+				return `
+							<div id="post-${post.postId}">
+							<div class="card p-3 mb-3 shadow-sm rounded">
+								<div class="friend-info">
+									<figure>
+									<img src="${avatar}" alt="User Avatar" style="width: 50px; height: 51px;">
+									</figure>
 									<div class="friend-name">
-										<ins>
-											<a href="#" class="text-decoration-none fw-bold">${displayName}</a>
-										</ins>
-										<div>
-											<span class="text-muted small">${formattedDate} ${formattedTime}</span>
+										<ins><a href="time-line.html" title="">${name}</a></ins>
+										<span>${d}</span>
+										${optionsMenuHTML}
+									</div>
+									<div class="post-meta">
+										${categoryBadgeHTML}
+										<p style="font-size: 20px; font-weight: bold; color: black; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+											${post.title}
+										</p>
+									</div>
+									<div class="post-meta">
+										${mediaContent}
+										<div class="description">
+											<p>${post.content}</p>
 										</div>
 									</div>
-								</div>
-							</div>
-
-							<div class="post-meta">
-								${categoryHtml}
-								<h4 class="mb-3" style="color: #333; font-weight: 600;">
-									${post.title || 'Untitled Post'}
-								</h4>
-
-								${mediaHtml}
-
-								<div class="description">
-									<div style="white-space: pre-line; line-height: 1.6;">
-										${post.content || 'No content available'}
+									<div class="comments-section" id="commentList-${post.postId}">
+										${commentsHTML}
 									</div>
+									${commentFormHTML}
 								</div>
-							</div>
-
-							<hr>
-
-							<div class="comments-section mt-4">
-								<h6 class="mb-3">
-									<i class="ti-comment me-1"></i>
-									Comments (${post.comments ? post.comments.filter(c => !c.parentCommentId).length : 0})
-								</h6>
-								<div class="comments-list">
-									${commentsHtml}
 								</div>
-							</div>
-						</div>
-					</div>
-				`;
-
-				modalBody.innerHTML = postHtml;
+							</div>`;
 			}
 
-			// Event listeners
-			searchBtn.addEventListener("click", () => doSearch(false));
-			searchInput.addEventListener("keyup", function (e) {
-				if (e.key === "Enter") doSearch(false);
+			// Function to create comment HTML
+			function createCommentHtml(comment, avatar, name) {
+				const isReply = comment.parentCommentId != null;
+				const cls = isReply ? "comment reply-comment" : "comment";
+				const date = new Date(comment.createAt);
+				const formattedDate = date.toLocaleDateString("vi-VN");
+				const formattedTime = date.toLocaleTimeString("vi-VN", {
+					hour: "2-digit",
+					minute: "2-digit"
+				});
+				const d = `${formattedDate} ${formattedTime}`;
+				const hasAuth = token && token !== '' && token !== '@token';
+
+				const optionsHTML = `
+							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+								<div class="dropdown">
+									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fa fa-ellipsis-v"></i>
+									</button>
+									<ul class="dropdown-menu">
+										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+									</ul>
+								</div>
+							</div>
+						` ;
+
+				const replyFormHTML = `
+							<div class="reply-form" style="display: none; margin-top: 10px;">
+								<form class="comment-form">
+									<input type="hidden" name="NewComment.PostId" value="${comment.postId}" />
+									<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+									<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+								</form>
+							</div>
+						` ;
+
+				return `
+						<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
+							<div class="comet-avatar">
+							<img src="${avatar}" alt="User Avatar" style="width: 35px; height: 39px;">
+							</div>
+							<div class="we-comment">
+								<div class="coment-head">
+									<h5><a href="time-line.html" title="">${name}</a></h5>
+									<span>${d}</span>
+									${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+									${optionsHTML}
+								</div>
+								<p>${comment.content}</p>
+								${replyFormHTML}
+							</div>
+						</div>`;
+			}
+
+			// Enhanced function to load more posts
+				async function loadMorePosts() {
+			if (isLoading) return;
+
+			isLoading = true;
+			const loadMoreBtn = document.querySelector('.btn-load-more');
+			const originalText = loadMoreBtn?.innerHTML || 'Load More';
+
+			// Update button to show loading state
+			if (loadMoreBtn) {
+				loadMoreBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Loading...';
+				loadMoreBtn.disabled = true;
+			}
+
+			try {
+				currentPage++;
+				const response = await fetch(`${apiBaseUrl}&page=${currentPage}`, {
+					method: 'GET',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+
+				if (data.items && data.items.length > 0) {
+
+					const postsContainer = document.querySelector('.posts-container');
+
+					if (postsContainer) {
+						for (const post of data.items) {
+							const postHTML = await createPostHtml(post);
+							postsContainer.insertAdjacentHTML('beforeend', postHTML);
+						}
+					} else {
+						console.error('Posts container not found');
+					}
+
+					// Update pagination info
+					const paginationInfo = document.querySelector('.pagination p');
+					if (paginationInfo) {
+						paginationInfo.textContent = `Page ${data.currentPage} / ${data.totalPages}`;
+					}
+
+					// Hide load more button if we've reached the last page
+					if (currentPage >= data.totalPages && loadMoreBtn) {
+						loadMoreBtn.style.display = 'none';
+					}
+				} else {
+					if (loadMoreBtn) {
+						loadMoreBtn.innerHTML = 'No more posts';
+						loadMoreBtn.disabled = true;
+						setTimeout(() => {
+							loadMoreBtn.style.display = 'none';
+						}, 2000);
+					}
+				}
+
+				console.log(`Loaded page ${currentPage} with ${data.items?.length || 0} posts`);
+
+			} catch (error) {
+				console.error('Error loading more posts:', error);
+				currentPage--;
+
+				if (loadMoreBtn) {
+					loadMoreBtn.innerHTML = 'Error loading posts. Click to retry.';
+					loadMoreBtn.disabled = false;
+				}
+			} finally {
+				if (loadMoreBtn && loadMoreBtn.style.display !== 'none' && !loadMoreBtn.innerHTML.includes('No more posts')) {
+					loadMoreBtn.innerHTML = originalText;
+					loadMoreBtn.disabled = false;
+				}
+				isLoading = false;
+			}
+		}
+
+
+			// SignalR event handlers
+			if (connection) {
+				// Receive new posts from SignalR
+				connection.on("ReceivePost", async post => {
+					console.log("Received post:", post);
+					const postHTML = await createPostHtml(post);
+					const postList = document.querySelector("#post-list");
+					if (postList) {
+						postList.insertAdjacentHTML("afterbegin", postHTML);
+						console.log("Post added to DOM at the beginning of list");
+					} else {
+						console.error("Element #post-list not found");
+					}
+				});
+
+				// Receive new comments from SignalR
+				connection.on("ReceiveComment", async comment => {
+					console.log("Received comment:", comment);
+					const { avatar, name } = await getUserInfo(comment.userId);
+
+					if (comment.parentCommentId) {
+						// This is a reply - insert into replies container
+						const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
+						if (parentComment) {
+							let repliesContainer = parentComment.querySelector('.replies');
+
+							if (repliesContainer) {
+								repliesContainer.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
+								console.log("Reply inserted into replies container");
+							} else {
+								// Create new replies container if it doesn't exist
+								const newRepliesDiv = document.createElement("div");
+								newRepliesDiv.className = "replies";
+								newRepliesDiv.style.marginLeft = "50px";
+								newRepliesDiv.innerHTML = createCommentHtml(comment, avatar, name);
+								parentComment.appendChild(newRepliesDiv);
+								console.log("Reply container created and reply added");
+							}
+						} else {
+							console.error(`Parent comment with ID ${comment.parentCommentId} not found`);
+						}
+					} else {
+						// This is a root comment - add to comment list
+						const commentList = document.querySelector(`#commentList-${comment.postId}`);
+						if (commentList) {
+							commentList.insertAdjacentHTML("beforeend", createCommentHtml(comment, avatar, name));
+							console.log("Comment added to the end of comment list");
+						} else {
+							console.error(`Element #commentList-${comment.postId} not found`);
+						}
+					}
+				});
+
+				// Start SignalR connection
+				connection.start()
+					.then(() => {
+						console.log("SignalR connected successfully");
+					})
+					.catch(err => {
+						console.error("SignalR connection error:", err);
+						setTimeout(() => connection.start(), 5000);
+					});
+
+				// Handle connection events
+				connection.onclose(error => {
+					console.log("SignalR connection closed, attempting to reconnect...");
+				});
+
+				connection.onreconnecting(error => {
+					console.log("SignalR reconnecting...", error);
+				});
+
+				connection.onreconnected(connectionId => {
+					console.log("SignalR reconnected. ConnectionId:", connectionId);
+				});
+			}
+
+			// Event handlers - CHỈ ĐĂNG KÝ MỘT LẦN
+
+			// Handle reply button clicks
+			document.body.addEventListener('click', e => {
+				const btn = e.target.closest('.we-reply');
+				if (!btn) return;
+				e.preventDefault();
+				const id = btn.getAttribute('data-reply-to');
+				const form = document.querySelector(`.comment[data-comment-id="${id}"] .reply-form`);
+				if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 			});
 
-			// Suggestion khi gõ với debounce
-			searchInput.addEventListener("input", function () {
-				clearTimeout(debounceTimer);
-				debounceTimer = setTimeout(() => {
-					doSearch(true);
-				}, 300);
+			// Handle comment form submissions - CHỈ MỘT EVENT LISTENER
+			let isSubmittingComment = false; // Flag to prevent double submission
+
+			document.body.addEventListener('submit', async e => {
+				const form = e.target.closest('form.comment-form');
+				if (!form) return;
+
+				// Prevent double submission
+				if (isSubmittingComment) {
+					e.preventDefault();
+					return;
+				}
+
+				e.preventDefault();
+				isSubmittingComment = true;
+
+				const replyform = e.target.closest('.reply-form');
+				const fm = new FormData(form);
+				const payload = {
+					postId: Number(fm.get('NewComment.PostId')),
+					parentCommentId: fm.get('NewComment.ParentCommentId')
+						? Number(fm.get('NewComment.ParentCommentId'))
+						: null,
+					content: fm.get('NewComment.Content').trim(),
+					userId: userId
+				};
+
+				if (!payload.content) {
+					isSubmittingComment = false;
+					return;
+				}
+
+				console.log("Submitting comment:", payload);
+
+				try {
+					const res = await fetch(`${BaseUrl}/Comment`, {
+						method: 'POST',
+						credentials: 'include',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+
+					if (!res.ok) {
+						const errorText = await res.text();
+						console.error('Post comment failed:', errorText);
+						alert('Comment could not be submitted. Please try again later.');
+						return;
+					}
+
+					console.log("Comment posted successfully");
+					form.reset();
+					if (replyform) replyform.style.display = 'none';
+				} catch (error) {
+					console.error("Error posting comment:", error);
+					alert('An error occurred while submitting the comment.');
+				} finally {
+					isSubmittingComment = false; // Reset flag
+				}
 			});
+
+			// Handle post form submissions
+			let isSubmittingPost = false; // Flag to prevent double submission
+
+			document.body.addEventListener('submit', async e => {
+				const form = e.target.closest('form.post-form');
+				if (!form) return;
+
+				// Prevent double submission
+				if (isSubmittingPost) {
+					e.preventDefault();
+					return;
+				}
+
+				e.preventDefault();
+				isSubmittingPost = true;
+
+				const fm = new FormData(form);
+				const payload = {
+					title: fm.get('NewPost.Title').trim(),
+					content: fm.get('NewPost.Content').trim(),
+					userId: userId
+				};
+
+				if (!payload.title || !payload.content) {
+					isSubmittingPost = false;
+					return;
+				}
+
+				console.log("Submitting post:", payload);
+
+				try {
+					const res = await fetch(`${BaseUrl}/Post`, {
+						method: 'POST',
+						credentials: 'include',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(payload)
+					});
+
+					if (!res.ok) {
+						const errorText = await res.text();
+						console.error('Post creation failed:', errorText);
+						alert('Could not create post. Please try again later.');
+						return;
+					}
+
+					console.log("Post created successfully");
+					form.reset();
+				} catch (error) {
+					console.error("Error creating post:", error);
+					alert('An error occurred while creating the post.');
+				} finally {
+					isSubmittingPost = false; // Reset flag
+				}
+			});
+
+			// Initialize load more functionality
+			const loadMoreBtn = document.querySelector('.btn-load-more');
+			if (loadMoreBtn) {
+				loadMoreBtn.addEventListener('click', loadMorePosts);
+			}
+
+			// Initialize current page based on existing posts
+			const paginationInfo = document.querySelector('.pagination p');
+			if (paginationInfo) {
+				const pageMatch = paginationInfo.textContent.match(/Page (\d+)/);
+				if (pageMatch) {
+					currentPage = parseInt(pageMatch[1]);
+				}
+			}
+
+			console.log("Combined posts loading script initialized successfully");
 		});
 	</script>
 
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const fileInput = document.getElementById('avatarFileInput');
+			const newAvatarPreview = document.getElementById('newAvatarPreview');
+			const newAvatarImg = document.getElementById('newAvatar');
+			const updateBtn = document.getElementById('updateAvatarBtn');
+			const form = document.getElementById('avatarForm');
+
+			// File input change handler
+			fileInput.addEventListener('change', function(e) {
+				const file = e.target.files[0];
+
+				if (file) {
+					// Validate file type
+					const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+					if (!allowedTypes.includes(file.type)) {
+						alert('Only accept image files in format: JPG, JPEG, PNG, GIF.');
+						fileInput.value = '';
+						return;
+					}
+
+					// Validate file size (5MB)
+					if (file.size > 5 * 1024 * 1024) {
+					alert('Image file must not exceed 5MB.');
+						fileInput.value = '';
+						return;
+					}
+
+					// Show preview
+					const reader = new FileReader();
+					reader.onload = function(e) {
+						newAvatarImg.src = e.target.result;
+						newAvatarPreview.style.display = 'block';
+					};
+					reader.readAsDataURL(file);
+				} else {
+					newAvatarPreview.style.display = 'none';
+				}
+			});
+
+			// Form submit handler
+			form.addEventListener('submit', function(e) {
+				if (!fileInput.files[0]) {
+					e.preventDefault();
+				alert('Please select an image file to upload.');
+					return;
+				}
+
+				// Show loading state
+				updateBtn.disabled = true;
+				updateBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+			});
+
+			// Modal events
+			const avatarModal = document.getElementById('avatarModal');
+
+			avatarModal.addEventListener('hidden.bs.modal', function() {
+				// Reset form when modal is closed
+				fileInput.value = '';
+				newAvatarPreview.style.display = 'none';
+				updateBtn.disabled = false;
+				updateBtn.innerHTML = '<i class="fa fa-upload"></i> Update Avatar';
+			});
+	});
+	</script>
 
 	<script>
 
@@ -1418,7 +1885,56 @@
 			align-items: center;
 			gap: 10px;
 			/* min-width: 200px; */
+			text-align: center;
+			padding: 20px;
 		}
+
+	.avatar-container {
+		display: inline-block;
+	}
+
+	.edit-avatar-btn {
+		position: absolute;
+		bottom: 5px;
+		right: 5px;
+		width: 35px;
+		height: 35px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+		transition: all 0.3s ease;
+	}
+
+		.edit-avatar-btn:hover {
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+		}
+
+	.current-avatar-preview,
+	.new-avatar-preview {
+		margin: 10px 0;
+	}
+
+	.modal-body {
+		padding: 30px;
+	}
+
+	.form-text {
+		font-size: 0.875rem;
+		margin-top: 0.5rem;
+	}
+
+	.alert {
+		border: none;
+		border-radius: 8px;
+	}
+
+	.btn {
+		border-radius: 6px;
+		padding: 8px 16px;
+	}
 
 		.profile-avatar {
 			width: 140px;

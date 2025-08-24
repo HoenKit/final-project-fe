@@ -11,6 +11,7 @@
         public decimal Amount { get; set; }
         public string Status { get; set; }
         public string ServiceType { get; set; }
+        public bool hasPremiumModules { get; set; }
         public DateTime CreatedAt { get; set; }
     }
     public class PremiumPackage

@@ -111,7 +111,7 @@ namespace final_project_fe.Pages
                     var json = await assignmentResponse.Content.ReadAsStringAsync();
                     var assignment = JsonSerializer.Deserialize<AssignmentDto>(json,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    MeetingLink = assignment?.meetLink;
+                    MeetingLink = assignment?.MeetLink;
                 }
             }
             catch (Exception ex)

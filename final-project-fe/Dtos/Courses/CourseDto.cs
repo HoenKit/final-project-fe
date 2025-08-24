@@ -1,4 +1,6 @@
-﻿namespace final_project_fe.Dtos.Courses
+﻿using final_project_fe.Dtos.Assignment;
+
+namespace final_project_fe.Dtos.Courses
 {
 	public class CourseDto
 	{
@@ -20,6 +22,7 @@
         public string? CourseName { get; set; }
 
         public int MentorId { get; set; }
+        public AssignmentDto? Assignment { get; set; }
     }
     public class CourseCertificateDto
     {

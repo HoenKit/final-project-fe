@@ -214,8 +214,8 @@
                         Our Premium Packages are not cumulative for all cases.
                     </div>
 
-                    <!-- Chỉ giữ 1 input hidden -->
-                    <input type="hidden" id="hiddenPlan" name="PlanId" value="" />
+                    <!-- Giữ lại giá trị đã chọn -->
+                    <input type="hidden" id="hiddenPlan" name="PlanId" value="@(ViewData["SelectedPlanId"]?.ToString() ?? "")" />
 
                     <button type="submit" class="checkout-btn">
                         <i class="fas fa-shopping-cart"></i> Upgrade Now
@@ -225,10 +225,10 @@
 
         <div class="sidebar">
             <div class="account-info">
-                <img src="@Model.UserInfo?.UserMetaData?.Avatar" class="avatar" />
+                <img src="@(Model.UserInfo?.UserMetaData?.Avatar ?? " images/resources/friend-avatar9.jpg")" class="avatar" />
                 <h3>@Model.UserInfo?.UserMetaData?.FirstName @Model?.UserInfo?.UserMetaData?.LastName</h3>
                 <p>@(Model.UserInfo.IsPremium ? "Already Premium" : "Free Member")</p>
-                <p>Your Point : @Model.UserInfo.Point Point</p>
+                <p>Your Point : @((int)(Model.UserInfo?.Point ?? 0)) Point</p>
             </div>
 
             <div class="benefits">
@@ -261,6 +261,12 @@
                 return;
             }
         });
+
+        const btn = e.target.querySelector('.checkout-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
     </script>
 
 </body>
