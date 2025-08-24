@@ -138,8 +138,10 @@ namespace final_project_fe.Pages
                             PropertyNameCaseInsensitive = true
                         });
 
+
                         if (apiResponse != null)
                             Profile = apiResponse;
+                        Profile.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(Profile.UserMetaData.Avatar, SasToken);
                     }
                     else
                     {
@@ -233,6 +235,7 @@ namespace final_project_fe.Pages
                                         PropertyNameCaseInsensitive = true
                                     });
                                     post.User = apiResponse;
+                                    post.User.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(Profile.UserMetaData.Avatar, SasToken);
                                 }
                             }
                         }
@@ -309,6 +312,7 @@ namespace final_project_fe.Pages
                                                         PropertyNameCaseInsensitive = true
                                                     });
                                                     comment.User = apiResponse;
+                                                    comment.User.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(comment.User.UserMetaData.Avatar, SasToken);
                                                 }
                                             }
                                         }

@@ -168,6 +168,7 @@ namespace final_project_fe.Pages
                 }
 
                 Profile = userInfo;
+                Profile.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(Profile.UserMetaData.Avatar, SasToken);
 
                 // Nếu là mentor thì load thêm mentor info + courses
                 if (UserRoles.Contains("Mentor"))
@@ -249,6 +250,7 @@ namespace final_project_fe.Pages
                 }
 
                 Profile = userInfo;
+             Profile.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(Profile.UserMetaData.Avatar, SasToken);
 
                 // 👉 Gọi thêm API check xem user đó có phải Mentor không
                 await LoadMentorInfo(userId, currentPage, categoryId, title, sortOption, language, level, minCost, maxCost, minRate, maxRate, status);

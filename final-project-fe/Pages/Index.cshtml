@@ -465,7 +465,7 @@
 																	// Comment gốc
 																	var user = parent.User;
 																	var userMeta = user?.UserMetaData;
-																	var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar + "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
+																	var avatar = string.IsNullOrEmpty(userMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : userMeta.Avatar;
 																	var displayName = userMeta != null ? $"{userMeta.FirstName} {userMeta.LastName}" : user?.Email;
 
 																	<div class="comment" data-comment-id="@parent.CommentId">
@@ -808,7 +808,7 @@
 					if (res.ok) {
 						const u = await res.json();
 						return {
-							avatar: u?.userMetaData?.avatar || defaultAvatar,
+						avatar: u?.userMetaData?.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || defaultAvatar,
 							name: u?.userMetaData
 								? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
 								: u.email || defaultName
@@ -942,7 +942,7 @@
 						commentsHTML += `
 									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 										<div class="comet-avatar">
-										<img src="${commentUserInfo.avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
+										<img src="${commentUserInfo.avatar}" alt="User Avatar">
 										</div>
 										<div class="we-comment">
 											<div class="coment-head">
@@ -991,7 +991,7 @@
 								commentsHTML += `
 											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
 												<div class="comet-avatar">
-												<img src="${replyUserInfo.avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
+												<img src="${replyUserInfo.avatar}" alt="User Avatar">
 												</div>
 												<div class="we-comment">
 													<div class="coment-head">
@@ -1355,7 +1355,8 @@
 					const res = await fetch(`${BaseUrl}/Comment`, {
 						method: 'POST',
 						credentials: 'include',
-						headers: { 'Content-Type': 'application/json' },
+						headers: { 'Content-Type': 'application/json',
+						"Authorization": `Bearer ${token}`},
 						body: JSON.stringify(payload)
 					});
 
@@ -1411,7 +1412,8 @@
 					const res = await fetch(`${BaseUrl}/Post`, {
 						method: 'POST',
 						credentials: 'include',
-						headers: { 'Content-Type': 'application/json' },
+						headers: { 'Content-Type': 'application/json',
+					"Authorization": `Bearer ${token}`},
 						body: JSON.stringify(payload)
 					});
 
@@ -1452,433 +1454,162 @@
 	</script>
 
 	<script>
-		const token = document.cookie.split('; ')
-			.find(row => row.startsWith('AccessToken='))
-			?.split('=')[1];
-		// Configuration from Razor model
+		const token = "@token";
 		const BASE_URL = "@Model.BaseUrl";
 
-		// Create toast notification system - replaces the old alert system
-		function showToast(message, type = "success") {
-			// Create toast container if it doesn't exist yet
-			let toastContainer = document.getElementById("toast-container");
-			if (!toastContainer) {
-				toastContainer = document.createElement("div");
-				toastContainer.id = "toast-container";
-				toastContainer.className = "position-fixed bottom-0 end-0 p-3";
-				toastContainer.style.zIndex = "1050";
-				document.body.appendChild(toastContainer);
-			}
-
-			// Create unique ID for this toast
-			const toastId = "toast-" + Date.now();
-
-			// Create the toast element with auto-hide enabled
-			const toastEl = document.createElement("div");
-			toastEl.id = toastId;
-			toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-			toastEl.setAttribute("role", "alert");
-			toastEl.setAttribute("aria-live", "assertive");
-			toastEl.setAttribute("aria-atomic", "true");
-			toastEl.setAttribute("data-bs-autohide", "true");
-			toastEl.setAttribute("data-bs-delay", "3000");
-
-			// Create toast content (without close button for auto-closing)
-			toastEl.innerHTML = `
-					<div class="d-flex">
-					  <div class="toast-body">
-						${message}
-					  </div>
-					</div>
-				  `;
-
-			// Add to container
-			toastContainer.appendChild(toastEl);
-
-			// Initialize and show the toast using jQuery if available
-			if (typeof $ !== 'undefined') {
-				$(toastEl).toast('show');
-			} else {
-				// Use the bootstrap object if available
-				if (typeof bootstrap !== 'undefined' && typeof bootstrap.Toast !== 'undefined') {
-					const bsToast = new bootstrap.Toast(toastEl, {
-						autohide: true,
-						delay: 3000
-					});
-					bsToast.show();
-				} else {
-					// Last resort - manual display if Bootstrap JS is not properly loaded
-					toastEl.classList.add('show');
-					setTimeout(() => {
-						toastEl.classList.remove('show');
-						setTimeout(() => toastEl.remove(), 150);
-					}, 3000);
-				}
-			}
-
-			// Ensure toast is removed after 3.5 seconds regardless of BS implementation
-			setTimeout(() => {
-				if (document.getElementById(toastId)) {
-					document.getElementById(toastId).remove();
-				}
-			}, 3500);
+		// --- Toast system ---
+			function showToast(message) {
+		// Kiểm tra container, nếu chưa có thì tự tạo
+		let toastContainer = document.getElementById("toast-container");
+		if (!toastContainer) {
+			toastContainer = document.createElement("div");
+			toastContainer.id = "toast-container";
+			toastContainer.className = "toast-container position-fixed bottom-0 end-0 p-3";
+			document.body.appendChild(toastContainer);
 		}
 
-		// Improved modal close function
+		// Tạo toast màu xanh cố định
+		const toast = document.createElement("div");
+		toast.className = `toast align-items-center bg-success text-white border-0 show mb-2`;
+		toast.setAttribute("role", "alert");
+		toast.innerHTML = `
+			<div class="d-flex">
+				<div class="toast-body">${message}</div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto"
+					data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+		`;
+
+		toastContainer.appendChild(toast);
+
+		// Auto remove sau 3s
+		setTimeout(() => {
+			toast.remove();
+		}, 3000);
+	}
+
+		// --- Modal open/close ---
+		function openModal(modalId) {
+			const modal = document.getElementById(modalId);
+			if (!modal) return;
+
+			modal.style.display = "block";
+			modal.classList.add("show");
+			document.body.classList.add("modal-open");
+			document.body.style.overflow = "hidden";
+
+			// thêm backdrop
+			const backdrop = document.createElement("div");
+			backdrop.className = "modal-backdrop fade show";
+			backdrop.addEventListener("click", () => closeModal(modalId)); // click backdrop để đóng
+			document.body.appendChild(backdrop);
+		}
+
 		function closeModal(modalId) {
-			const modalElement = document.getElementById(modalId);
-			if (!modalElement) return;
+			const modal = document.getElementById(modalId);
+			if (!modal) return;
 
-			// Store original body styles before any changes
-			const originalOverflow = document.body.style.overflow;
-			const originalPaddingRight = document.body.style.paddingRight;
+			modal.style.display = "none";
+			modal.classList.remove("show");
+			document.body.classList.remove("modal-open");
+			document.body.style.overflow = "auto";
 
-			// Try jQuery first if available (most reliable)
-			if (typeof $ !== 'undefined') {
-				$(`#${modalId}`).modal('hide');
-
-				// Force immediate cleanup without waiting
-				$('body').removeClass('modal-open');
-				$('.modal-backdrop').remove();
-				$('body').css({
-					'overflow': 'visible',
-					'padding-right': '0px'
-				});
-
-				// Additional cleanup after a short delay
-				setTimeout(() => {
-					// Ensure all modal remnants are gone
-					document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-						backdrop.remove();
-					});
-
-					// Force reset body scroll
-					document.body.classList.remove('modal-open');
-					document.body.style.overflow = 'visible';
-					document.body.style.paddingRight = '0px';
-					document.documentElement.style.overflow = 'visible';
-
-					// Remove any Bootstrap-added styles
-					document.body.removeAttribute('style');
-
-					// Force scroll enable on both body and html
-					document.body.style.overflow = 'auto';
-					document.documentElement.style.overflow = 'auto';
-				}, 100);
-				return;
-			}
-
-			// Try Bootstrap 5 Modal API (newer versions)
-			if (typeof bootstrap !== 'undefined' && typeof bootstrap.Modal !== 'undefined') {
-				try {
-					// Try getInstance first (Bootstrap 5.1+)
-					if (typeof bootstrap.Modal.getInstance === 'function') {
-						const modalInstance = bootstrap.Modal.getInstance(modalElement);
-						if (modalInstance) {
-							modalInstance.hide();
-							// Force cleanup after Bootstrap modal hide
-							setTimeout(() => forceScrollEnable(), 200);
-							return;
-						}
-					}
-
-					// Fallback: Create new instance and hide
-					const modalInstance = new bootstrap.Modal(modalElement);
-					modalInstance.hide();
-					setTimeout(() => forceScrollEnable(), 200);
-					return;
-				} catch (error) {
-					console.warn('Bootstrap Modal API failed:', error);
-				}
-			}
-
-			// Manual modal close as final fallback
-			modalElement.classList.remove('show');
-			modalElement.setAttribute('aria-hidden', 'true');
-			modalElement.style.display = 'none';
-
-			// Force cleanup immediately
-			forceScrollEnable();
+			// xóa backdrop
+			document.querySelectorAll(".modal-backdrop").forEach(b => b.remove());
 		}
 
-		// Force enable scrolling function
-		function forceScrollEnable() {
-			// Remove ALL modal backdrops
-			document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-				backdrop.remove();
+		// Close buttons
+		document.querySelectorAll(".btn-close").forEach(btn => {
+			btn.addEventListener("click", () => {
+				const modal = btn.closest(".modal");
+				if (modal) closeModal(modal.id);
 			});
+		});
 
-			// Reset body classes and styles completely
-			document.body.classList.remove('modal-open');
-			document.body.className = document.body.className.replace(/modal-[a-z-]*/g, '');
-
-			// Force reset all potential scroll-blocking styles
-			document.body.style.overflow = 'auto';
-			document.body.style.paddingRight = '0px !important';
-			document.body.style.paddingLeft = '0px';
-			document.body.style.marginRight = '0px';
-			document.body.style.marginLeft = '0px';
-			document.documentElement.style.overflow = 'auto';
-			document.documentElement.style.paddingRight = '0px';
-
-			// Remove Bootstrap's calculated padding
-			document.body.style.setProperty('padding-right', '0px', 'important');
-			document.documentElement.style.setProperty('padding-right', '0px', 'important');
-
-			// Remove any inline styles that might block scrolling or cause indentation
-			const bodyComputedStyle = window.getComputedStyle(document.body);
-			if (bodyComputedStyle.paddingRight !== '0px') {
-				document.body.style.cssText = 'padding-right: 0px !important; overflow: auto !important;';
-			}
-
-			// Force browser reflow
-			document.body.offsetHeight;
-			document.documentElement.offsetHeight;
-
-			// Additional cleanup for persistent issues
-			setTimeout(() => {
-				// Final cleanup - completely reset styles
-				document.body.removeAttribute('style');
-				document.documentElement.removeAttribute('style');
-
-				// Ensure no remaining Bootstrap modal classes
-				document.querySelectorAll('.modal-open').forEach(el => {
-					el.classList.remove('modal-open');
+		// --- Form submission helpers ---
+		async function submitReport(url, data, modalId, textareaId, successMsg) {
+			try {
+				const res = await fetch(url, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
+					},
+					body: JSON.stringify(data)
 				});
 
-				// Force refresh layout
-				window.dispatchEvent(new Event('resize'));
-			}, 100);
-
-			// Emergency fix for persistent indentation
-			setTimeout(() => {
-				if (window.getComputedStyle(document.body).paddingRight !== '0px') {
-					document.body.style.paddingRight = '0px';
-					document.documentElement.style.paddingRight = '0px';
-					// Force page reflow
-					document.body.style.display = 'none';
-					document.body.offsetHeight; // Trigger reflow
-					document.body.style.display = '';
+				if (res.ok) {
+					closeModal(modalId);
+					document.getElementById(textareaId).value = "";
+					showToast(successMsg);
+				} else {
+					const errData = await res.json();
+					showToast(errData.message || "Error submitting report", "danger");
 				}
-			}, 200);
+			} catch (err) {
+				showToast(err.message, "danger");
+			}
 		}
 
-		// Handle Report Post Form Submission
-		document.getElementById("reportPostForm").addEventListener("submit", async function (event) {
-			event.preventDefault(); // Prevent form submission (page refresh)
-
+		// --- Report Post ---
+		document.getElementById("reportPostForm").addEventListener("submit", e => {
+			e.preventDefault();
 			const postId = parseInt(document.getElementById("reportPostId").value);
-			const userId = '@Model.CurrentUserId';
-			const content = document.getElementById("reportPostContent").value;
+			const userId = "@Model.CurrentUserId";
+			const content = document.getElementById("reportPostContent").value.trim();
 
-			if (!content.trim()) {
-				showToast("Please provide a reason for reporting this post.", "danger");
-				return;
-			}
+			if (!content) return showToast("Please provide a reason for reporting this post.", "danger");
 
-			try {
-				const response = await fetch(`${BASE_URL}/ReportPost`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
-					body: JSON.stringify({
-						reportId: 0, // The server will assign this
-						postId: postId,
-						userId: userId,
-						content: content
-					})
-				});
-
-				if (response.ok) {
-					// Close modal properly
-					closeModal("reportPostModal");
-
-					// Clear the form for future use
-					document.getElementById("reportPostContent").value = "";
-
-					// Show success message with slight delay to ensure modal is closed
-					setTimeout(() => {
-						showToast("Post reported successfully!");
-					}, 100);
-				} else {
-					const errorData = await response.json();
-					showToast(`Error reporting post: ${errorData.message || response.statusText}`, "danger");
-				}
-			} catch (error) {
-				showToast(`Error reporting post: ${error.message}`, "danger");
-			}
+			submitReport(`${BASE_URL}/ReportPost`, { reportId: 0, postId, userId, content }, "reportPostModal", "reportPostContent", "Post reported successfully!");
 		});
 
-		// Handle Report Comment Form Submission
-		document.getElementById("reportCommentForm").addEventListener("submit", async function (event) {
-			event.preventDefault(); // Prevent form submission (page refresh)
-
+		// --- Report Comment ---
+		document.getElementById("reportCommentForm").addEventListener("submit", e => {
+			e.preventDefault();
 			const commentId = parseInt(document.getElementById("reportCommentId").value);
-			const userId = '@Model.CurrentUserId';
-			const content = document.getElementById("reportCommentContent").value;
+			const userId = "@Model.CurrentUserId";
+			const content = document.getElementById("reportCommentContent").value.trim();
 
-			if (!content.trim()) {
-				showToast("Please provide a reason for reporting this comment.", "danger");
-				return;
-			}
+			if (!content) return showToast("Please provide a reason for reporting this comment.", "danger");
 
-			try {
-				const response = await fetch(`${BASE_URL}/ReportComment`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
-					body: JSON.stringify({
-						commentId: commentId,
-						userId: userId,
-						content: content
-					})
-				});
-
-				if (response.ok) {
-					// Close modal properly
-					closeModal("reportCommentModal");
-
-					// Clear the form
-					document.getElementById("reportCommentContent").value = "";
-
-					// Show success message with slight delay
-					setTimeout(() => {
-						showToast("Comment reported successfully!");
-					}, 100);
-				} else {
-					const errorData = await response.json();
-					showToast(`Error reporting comment: ${errorData.message || response.statusText}`, "danger");
-				}
-			} catch (error) {
-				showToast(`Error reporting comment: ${error.message}`, "danger");
-			}
+			submitReport(`${BASE_URL}/ReportComment`, { commentId, userId, content }, "reportCommentModal", "reportCommentContent", "Comment reported successfully!");
 		});
 
-		// Handle Report User Form Submission
-		document.getElementById("reportUserForm").addEventListener("submit", async function (event) {
-			event.preventDefault(); // Prevent form submission (page refresh)
-
-			const userreportedId = '@Model.CurrentUserId';
+		// --- Report User ---
+		document.getElementById("reportUserForm").addEventListener("submit", e => {
+			e.preventDefault();
 			const userId = document.getElementById("reportUserreportedId").value;
-			const content = document.getElementById("reportUserContent").value;
+			const userreportedId = "@Model.CurrentUserId";
+			const content = document.getElementById("reportUserContent").value.trim();
 
-			if (!content.trim()) {
-				showToast("Please provide a reason for reporting this user.", "danger");
-				return;
-			}
+			if (!content) return showToast("Please provide a reason for reporting this user.", "danger");
 
-			try {
-				const response = await fetch(`${BASE_URL}/ReportUser`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
-					body: JSON.stringify({
-						userreportedId: userreportedId, // The server will assign this
-						userId: userId,
-						content: content
-					})
-				});
-
-				if (response.ok) {
-					// Close modal properly
-					closeModal("reportUserModal");
-
-					// Clear the form for future use
-					document.getElementById("reportUserContent").value = "";
-
-					// Show success message with slight delay
-					setTimeout(() => {
-						showToast("User reported successfully!");
-					}, 100);
-				} else {
-					const errorData = await response.json();
-					showToast(`Error reporting user: ${errorData.message || response.statusText}`, "danger");
-				}
-			} catch (error) {
-				showToast(`Error reporting user: ${error.message}`, "danger");
-			}
+			submitReport(`${BASE_URL}/ReportUser`, { userId, userreportedId, content }, "reportUserModal", "reportUserContent", "User reported successfully!");
 		});
 
-		// This is the key fix: Add event listeners to modal events
-		document.addEventListener('DOMContentLoaded', function () {
-			// Listen for Post reporting modal show event
-			document.getElementById('reportPostModal').addEventListener('show.bs.modal', function (event) {
-				// Get the button that triggered the modal
-				const button = event.relatedTarget;
-				// Extract post ID from data attribute
-				const postId = button.getAttribute('data-post-id');
-				// Update the modal's hidden input with this ID
-				document.getElementById('reportPostId').value = postId;
-			});
-
-			// Listen for Comment reporting modal show event
-			document.getElementById('reportCommentModal').addEventListener('show.bs.modal', function (event) {
-				// Get the button that triggered the modal
-				const button = event.relatedTarget;
-				// Extract comment ID from data attribute
-				const commentId = button.getAttribute('data-comment-id');
-				// Update the modal's hidden input with this ID
-				document.getElementById('reportCommentId').value = commentId;
-			});
-
-			// Listen for User reporting modal show event
-			document.getElementById('reportUserModal').addEventListener('show.bs.modal', function (event) {
-				// Get the button that triggered the modal
-				const button = event.relatedTarget;
-				// Extract user ID from data attribute
-				const userId = button.getAttribute('data-user-id');
-				// Update the modal's hidden input with this ID
-				document.getElementById('reportUserreportedId').value = userId;
-			});
-
-			// Add click event listeners to all report buttons as a backup method
-			document.querySelectorAll('.report-post').forEach(button => {
-				button.addEventListener('click', function () {
-					const postId = this.getAttribute('data-post-id');
-					document.getElementById('reportPostId').value = postId;
-				});
-			});
-
-			document.querySelectorAll('.report-comment').forEach(button => {
-				button.addEventListener('click', function () {
-					const commentId = this.getAttribute('data-comment-id');
-					document.getElementById('reportCommentId').value = commentId;
-				});
-			});
-
-			document.querySelectorAll('.report-user').forEach(button => {
-				button.addEventListener('click', function () {
-					const userId = this.getAttribute('data-user-id');
-					document.getElementById('reportUserreportedId').value = userId;
-				});
+		// --- Button triggers for opening modals ---
+		document.querySelectorAll(".report-post").forEach(btn => {
+			btn.addEventListener("click", () => {
+				document.getElementById("reportPostId").value = btn.dataset.postId;
+				openModal("reportPostModal");
 			});
 		});
 
-		// For backwards compatibility, keep these functions (but they shouldn't be needed anymore)
-		function openReportPostModal(postId) {
-			document.getElementById("reportPostId").value = postId;
-			const reportPostModal = new bootstrap.Modal(document.getElementById("reportPostModal"));
-			reportPostModal.show();
-		}
+		document.querySelectorAll(".report-comment").forEach(btn => {
+			btn.addEventListener("click", () => {
+				document.getElementById("reportCommentId").value = btn.dataset.commentId;
+				openModal("reportCommentModal");
+			});
+		});
 
-		function openReportCommentModal(commentId) {
-			document.getElementById("reportCommentId").value = commentId;
-			const reportCommentModal = new bootstrap.Modal(document.getElementById("reportCommentModal"));
-			reportCommentModal.show();
-		}
-
-		function openReportUserModal(userreportedId) {
-			document.getElementById("reportUserreportedId").value = userreportedId;
-			const reportUserModal = new bootstrap.Modal(document.getElementById("reportUserModal"));
-			reportUserModal.show();
-		}
+		document.querySelectorAll(".report-user").forEach(btn => {
+			btn.addEventListener("click", () => {
+				document.getElementById("reportUserreportedId").value = btn.dataset.userId;
+				openModal("reportUserModal");
+			});
+		});
 	</script>
+
 
 	<!-- Image Preview Script -->
 	<script>
