@@ -960,41 +960,6 @@
                                                                                                                 <i class="fa fa-plus me-1"></i>Add New Answer
                                                                                                             </button>
                                                                                                         </div>
-
-                                                                                                        <!-- Create Answer Form -->
-                                                                                                        <div id="create-answer-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
-                                                                                                            <div class="card-body">
-                                                                                                                <h6 class="card-title">Add New Answer</h6>
-                                                                                                                <form method="post" asp-page-handler="CreateAnswer">
-                                                                                                                    <input type="hidden" asp-for="Answer.QuestionId" value="@question.QuestionId" />
-                                                                                                                    <input type="hidden" asp-for="Question.LessonId" value="@question.LessonId" />
-                                                                                                                    <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
-
-                                                                                                                    <div class="mb-3">
-                                                                                                                        <label asp-for="Answer.Text" class="form-label">Answer Text *</label>
-                                                                                                                        <textarea asp-for="Answer.Text" class="form-control" rows="2" required placeholder="Enter your answer here..."></textarea>
-                                                                                                                    </div>
-
-                                                                                                                    <div class="mb-3">
-                                                                                                                        <div class="form-check">
-                                                                                                                            <input style="margin-top: 10px;" class="form-check-input" type="checkbox" asp-for="Answer.Is_correct" />
-                                                                                                                            <label class="form-check-label" asp-for="Answer.Is_correct">
-                                                                                                                                Is Correct Answer
-                                                                                                                            </label>
-                                                                                                                        </div>
-                                                                                                                    </div>
-
-                                                                                                                    <div class="d-flex gap-2">
-                                                                                                                        <button type="submit" class="btn btn-primary btn-sm">
-                                                                                                                            <i class="fa fa-save me-1"></i>Save Answer
-                                                                                                                        </button>
-                                                                                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateAnswer(@question.QuestionId)">
-                                                                                                                            <i class="fa fa-times me-1"></i>Cancel
-                                                                                                                        </button>
-                                                                                                                    </div>
-                                                                                                                </form>
-                                                                                                            </div>
-                                                                                                        </div>
                                                                                                     </div>
                                                                                                 }
                                                                                                 else
@@ -1006,6 +971,41 @@
                                                                                                         </button>
                                                                                                     </div>
                                                                                                 }
+
+                                                                                                <!-- Create Answer Form -->
+                                                                                                <div id="create-answer-form-@question.QuestionId" class="card mt-2 mb-2" style="display: none; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                                                                                    <div class="card-body">
+                                                                                                        <h6 class="card-title">Add New Answer</h6>
+                                                                                                        <form method="post" asp-page-handler="CreateAnswer">
+                                                                                                            <input type="hidden" asp-for="Answer.QuestionId" value="@question.QuestionId" />
+                                                                                                            <input type="hidden" asp-for="Question.LessonId" value="@question.LessonId" />
+                                                                                                            <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+
+                                                                                                            <div class="mb-3">
+                                                                                                                <label asp-for="Answer.Text" class="form-label">Answer Text *</label>
+                                                                                                                <textarea asp-for="Answer.Text" class="form-control" rows="2" required placeholder="Enter your answer here..."></textarea>
+                                                                                                            </div>
+
+                                                                                                            <div class="mb-3">
+                                                                                                                <div class="form-check">
+                                                                                                                    <input style="margin-top: 10px;" class="form-check-input" type="checkbox" asp-for="Answer.Is_correct" />
+                                                                                                                    <label class="form-check-label" asp-for="Answer.Is_correct">
+                                                                                                                        Is Correct Answer
+                                                                                                                    </label>
+                                                                                                                </div>
+                                                                                                            </div>
+
+                                                                                                            <div class="d-flex gap-2">
+                                                                                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                                                                                    <i class="fa fa-save me-1"></i>Save Answer
+                                                                                                                </button>
+                                                                                                                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelCreateAnswer(@question.QuestionId)">
+                                                                                                                    <i class="fa fa-times me-1"></i>Cancel
+                                                                                                                </button>
+                                                                                                            </div>
+                                                                                                        </form>
+                                                                                                    </div>
+                                                                                                </div>
                                                                                             </div>
 
                                                                                             <!-- Edit Question Form -->
