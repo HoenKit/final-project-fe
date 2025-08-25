@@ -245,28 +245,33 @@
     <script>
         const plans = document.querySelectorAll('.plan-option');
         const hiddenPlan = document.getElementById('hiddenPlan');
+        const premiumForm = document.getElementById('premiumForm');
 
+        // Plan selection
         plans.forEach(p => {
             p.addEventListener('click', () => {
                 plans.forEach(x => x.classList.remove('selected'));
                 p.classList.add('selected');
-                hiddenPlan.value = p.dataset.plan; // gán PlanId vào input hidden
+                hiddenPlan.value = p.dataset.plan; // set PlanId into hidden input
             });
         });
 
-        document.getElementById('premiumForm').addEventListener('submit', (e) => {
+        // Form submission
+        premiumForm.addEventListener('submit', (e) => {
             if (!hiddenPlan.value) {
                 e.preventDefault();
                 alert("Please select a Premium plan!");
                 return;
             }
+
+            // Handle checkout button loading state
+            const btn = premiumForm.querySelector('.checkout-btn'); // button inside the form
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                btn.disabled = true;
+            }
         });
-
-        const btn = e.target.querySelector('.checkout-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        btn.disabled = true;
-
     </script>
 
 </body>

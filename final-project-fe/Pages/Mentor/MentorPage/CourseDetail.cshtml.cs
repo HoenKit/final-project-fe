@@ -193,6 +193,13 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 {
                     PropertyNameCaseInsensitive = true
                 });
+                foreach (var review in Reviews.Reviews)
+                {
+                    if (review.User != null && review.User.UserMetaData != null && !string.IsNullOrWhiteSpace(review.User.UserMetaData.Avatar))
+                    {
+                        review.User.UserMetaData.Avatar = ImageUrlHelper.AppendSasTokenIfNeeded(review.User.UserMetaData.Avatar, SasToken);
+                    }
+                }
 
                 // Get Module and Lesson
                 var response = await _httpClient.GetAsync($"{BaseUrl}/Module/get-all-module-by-course/{courseId}");

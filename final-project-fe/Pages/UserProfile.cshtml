@@ -19,13 +19,13 @@
 	<!-- Profile Header -->
 	<div class="profile-header">
 		<div class="d-flex justify-content-between align-items-start">
-			<div class="avtar-header">
+			<div class="avatar-header">
 				<div class="profile-content">
 					<div class="profile-avatar-card position-relative">
 						@if (Model.Profile?.UserMetaData != null)
 						{
 							<div class="avatar-container position-relative">
-								<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+								<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 								@if (Model.IsOwnUser)
 								{
@@ -56,7 +56,7 @@
 										<!-- Current Avatar Preview -->
 										<div class="text-center mb-4">
 											<div class="current-avatar-preview">
-												<img src="@(Model.Profile?.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+												<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 													 alt="Current Avatar" class="rounded-circle shadow" style="width: 80px; height: 75px;" id="currentAvatar" />
 												<p class="text-muted mt-2">Current avatar</p>
 											</div>
@@ -385,7 +385,7 @@
 													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 												</div>
 												<div class="modal-body row g-3">
-													<div class="col-md-6" style="margin-top: 7%;">
+													<div class="col-md-6" style="margin-top: 11%;">
 														<div class="mb-3">
 															<label asp-for="Profile.UserMetaData.FirstName" class="form-label">First Name</label>
 															<input asp-for="Profile.UserMetaData.FirstName" class="form-control" />
@@ -446,11 +446,21 @@
 													</div>
 													<div class="col-md-6">
 														<label asp-for="Profile.Phone" class="form-label">Phone Number</label>
-														<input asp-for="Profile.Phone" class="form-control" />
+														<input asp-for="Profile.Phone" class="form-control"
+															   type="tel"
+															   pattern="^\+?\d{10,15}$"
+															   title="Enter a valid phone number (10-15 digits)"
+															   required />
+														<span asp-validation-for="Profile.Phone" class="text-danger"></span>
 													</div>
+
 													<div class="col-md-6">
 														<label asp-for="Profile.UserMetaData.Birthday" class="form-label">Birthday</label>
-														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date" />
+														<input asp-for="Profile.UserMetaData.Birthday" class="form-control" type="date"
+															   min="1900-01-01"
+															   max="@DateTime.Now.AddYears(-18).ToString("yyyy-MM-dd")"
+															   required />
+														<span asp-validation-for="Profile.UserMetaData.Birthday" class="text-danger"></span>
 													</div>
 													
 												</div>

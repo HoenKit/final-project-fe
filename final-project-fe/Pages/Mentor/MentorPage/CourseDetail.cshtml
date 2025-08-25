@@ -1210,11 +1210,13 @@
         });
     </script>
      <script>
-        const isAuthenticated = @(User.Identity?.IsAuthenticated.ToString().ToLower());
         document.getElementById("buyForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
-            if (!isAuthenticated) {
+            // Kiểm tra cookie "AccessToken"
+            const isLoggedIn = document.cookie.split(';').some(cookie => cookie.trim().startsWith('AccessToken='));
+
+            if (!isLoggedIn) {
                 showConfirm({
                     type: 'warning',
                     title: 'Not Logged In',

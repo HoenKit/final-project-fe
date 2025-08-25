@@ -16,7 +16,7 @@
 						@if (Model.Profile?.UserMetaData != null)
 						{
 							<div class="avatar-container position-relative">
-								<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+								<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 
 								@if (Model.IsOwnUser){
@@ -46,7 +46,7 @@
 										<!-- Current Avatar Preview -->
 										<div class="text-center mb-4">
 											<div class="current-avatar-preview">
-												<img src="@(Model.Profile?.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+												<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 													 alt="Current Avatar" class="rounded-circle shadow" style="width: 80px; height: 75px;" id="currentAvatar" />
 												<p class="text-muted mt-2">Current avatar</p>
 											</div>
