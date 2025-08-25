@@ -9,6 +9,7 @@
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!--<div class="se-pre-con"></div>-->
 <div class="theme-layout">
 	<section>
@@ -806,10 +807,12 @@
 					if (res.ok) {
 						const u = await res.json();
 						return {
-						avatar: u?.userMetaData?.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || defaultAvatar,
-							name: u?.userMetaData
-								? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
-								: u.email || defaultName
+						avatar: u?.userMetaData?.avatar
+							? u.userMetaData.avatar + "?" + "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D"
+							: "images/resources/friend-avatar9.jpg",
+						name: u?.userMetaData
+							? `${u.userMetaData.firstName} ${u.userMetaData.lastName}`
+							: u.email || defaultName
 						};
 					}
 				} catch (error) {
@@ -1125,7 +1128,7 @@
 				return `
 						<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 							<div class="comet-avatar">
-							<img src="${avatar}?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" alt="User Avatar">
+							<img src="${avatar}" alt="User Avatar">
 							</div>
 							<div class="we-comment">
 								<div class="coment-head">
