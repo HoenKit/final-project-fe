@@ -854,7 +854,7 @@
             chat: {
                  async loadChatPartners() {
             try {
-                const token = ChatApp.getCookie("access_token"); // lấy token từ cookie
+                const token = ChatApp.getCookie("AccessToken"); // lấy token từ cookie
 
                 const response = await fetch(
                     `${ChatApp.config.baseUrl}/Message/chat-rooms?userId=${ChatApp.config.currentUserId}`,
@@ -864,7 +864,7 @@
                             "Content-Type": "application/json",
                             ...(token ? { "Authorization": `Bearer ${token}` } : {})
                         },
-                        credentials: "include" // đảm bảo gửi cookie đi nếu server cần
+                        credentials: "include"
                     }
                 );
 
@@ -992,7 +992,7 @@
                                 ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
                                 : user.email || 'Unknown User';
 
-                            const avatar = user.userMetaData?.avatar || 'https://i.postimg.cc/FHnRyy40/default.jpg';
+                            const avatar = user.userMetaData?.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'https://i.postimg.cc/FHnRyy40/default.jpg';
 
                             return {
                                 fullName,

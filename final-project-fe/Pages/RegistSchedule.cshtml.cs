@@ -88,6 +88,17 @@ namespace final_project_fe.Pages
 
         public async Task<IActionResult> OnPostRegisterAsync(int ScheduleId, string UserId)
         {
+            // 🔑 Lấy token từ cookie
+            if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please login first.";
+                return RedirectToPage("/Login");
+            }
+
+            // Gắn token vào header
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
             BaseUrl = _apiSettings.BaseUrl;
             var registerData = new
             {

@@ -6,6 +6,7 @@
 @{
 	var token = HttpContext.Request.Cookies["AccessToken"];
 }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <div class="theme-layout">
 	<!-- Profile Header -->
 	<div class="profile-header">
@@ -265,8 +266,6 @@
 																			<i class="fa fa-ellipsis-v"></i>
 																		</button>
 																		<ul class="dropdown-menu">
-																			<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
-																			<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
 																			<!-- Nút bấm hiển thị modal -->
 																			@if (post.User != null && post.User.UserId.ToString() == Model.CurrentUserId)
 																			{

@@ -382,117 +382,119 @@
 
 @section Scripts {
     <script>
-        const Baseurl = "@Model.BaseUrl";
-        const assignmentId = "@Model.assignmentid";
-        const currentUserId = "@Model.UserId";
+        document.addEventListener("DOMContentLoaded", () => {
+            const Baseurl = "@Model.BaseUrl";
+            const assignmentId = "@Model.assignmentid";
+            const currentUserId = "@Model.UserId";
 
-        const btnLamBai = document.getElementById("btnLamBai");
-        const btnStartTest = document.getElementById("btnStartTest");
-        const testContainer = document.getElementById("testContainer");
-        const questionContent = document.getElementById("questionContent");
-        const examTimer = document.getElementById("examTimer");
-        const meetLink = document.getElementById("meetLink");
-        const btnSubmit = document.getElementById("btnSubmit");
+            const btnLamBai = document.getElementById("btnLamBai");
+            const btnStartTest = document.getElementById("btnStartTest");
+            const testContainer = document.getElementById("testContainer");
+            const questionContent = document.getElementById("questionContent");
+            const examTimer = document.getElementById("examTimer");
+            const meetLink = document.getElementById("meetLink");
+            const btnSubmit = document.getElementById("btnSubmit");
+            const answerContent = document.getElementById("answerContent");
 
-        let countdownTimer;
+            let countdownTimer;
 
-        // Lấy token từ cookie
-        const token = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('AccessToken='))
-            ?.split('=')[1];
+            // Lấy token từ cookie
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('AccessToken='))
+                ?.split('=')[1];
 
-        if (!token) console.error("Token is missing. Please login again.");
+            if (!token) console.error("Token is missing. Please login again.");
 
-        // Bắt buộc vào meeting trước khi làm bài
-        meetLink?.addEventListener("click", () => {
-            if (confirm("Are you joining the meeting now?")) btnLamBai.classList.remove("d-none");
-        });
+            // Bắt buộc vào meeting trước khi làm bài
+            meetLink?.addEventListener("click", () => {
+                if (confirm("Are you joining the meeting now?")) btnLamBai?.classList.remove("d-none");
+            });
 
-        btnLamBai?.addEventListener("click", () => {
-            btnLamBai.classList.add("d-none");
-            btnStartTest.classList.remove("d-none");
-        });
+            btnLamBai?.addEventListener("click", () => {
+                btnLamBai.classList.add("d-none");
+                btnStartTest?.classList.remove("d-none");
+            });
 
-        btnStartTest?.addEventListener("click", () => {
-            btnStartTest.classList.add("d-none");
-            testContainer.classList.remove("d-none");
-            loadAssignment();
-        });
+            btnStartTest?.addEventListener("click", () => {
+                btnStartTest.classList.add("d-none");
+                testContainer?.classList.remove("d-none");
+                loadAssignment();
+            });
 
-        btnSubmit?.addEventListener("click", () => submitAssignment(false));
+            btnSubmit?.addEventListener("click", () => submitAssignment(false));
 
-        // Hàm fetch chung với token, hỗ trợ cả JSON và plain text
-        async function fetchWithToken(url, options = {}) {
-            options.headers = {
-                ...options.headers,
-                'Authorization': `Bearer ${token}`
-            };
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || "Request failed");
-            }
-            const contentType = response.headers.get("content-type") || "";
-            if (contentType.includes("application/json")) {
-                return response.json();
-            } else {
-                return response.text();
-            }
-        }
-
-        async function loadAssignment() {
-            try {
-                const data = await fetchWithToken(`${Baseurl}/Assignment/${assignmentId}`);
-                questionContent.textContent = data.content;
-                examTimer.textContent = data.examTime;
-                meetLink.href = data.meetLink;
-                startCountdown(data.examTime);
-            } catch (err) {
-                console.error("Error loading assignment:", err);
-                showNotification("The assignment could not be loaded. Please try again later.", "error");
-            }
-        }
-
-        function startCountdown(timeStr) {
-            const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-            let totalSeconds = hours * 3600 + minutes * 60 + seconds;
-
-            countdownTimer = setInterval(() => {
-                if (totalSeconds <= 0) {
-                    clearInterval(countdownTimer);
-                    examTimer.textContent = "Time's up!";
-                    submitAssignment(true);
-                    return;
+            async function fetchWithToken(url, options = {}) {
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                };
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Request failed");
                 }
-
-                totalSeconds--;
-                const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-                const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-                const s = String(totalSeconds % 60).padStart(2, '0');
-                examTimer.textContent = `${h}:${m}:${s}`;
-            }, 1000);
-        }
-
-        async function submitAssignment(auto = false) {
-            const answer = document.getElementById("answerContent").value.trim();
-            const payload = { userId: currentUserId, assignmentId, content: answer };
-
-            try {
-                const result = await fetchWithToken(`${Baseurl}/Learning/submitAssignment`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                // result có thể là JSON hoặc plain text
-                const message = typeof result === "string" ? result : result.message || "Submitted successfully!";
-                showNotification(auto ? "⏱ Time's up. " + message : "✅ " + message, "success");
-                setTimeout(() => window.location.href = "/UserCourse", 2000);
-            } catch (err) {
-                console.error("Error when submitting assignment:", err);
-                showNotification("❌ Failed submission: " + err.message, "error");
+                const contentType = response.headers.get("content-type") || "";
+                if (contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return response.text();
+                }
             }
-        }
+
+            async function loadAssignment() {
+                try {
+                    const data = await fetchWithToken(`${Baseurl}/Assignment/${assignmentId}`);
+                    if(questionContent) questionContent.textContent = data.content || "";
+                    if(examTimer) examTimer.textContent = data.examTime || "00:00:00";
+                    if(meetLink && data.meetLink) meetLink.href = data.meetLink;
+                    startCountdown(data.examTime || "00:00:00");
+                } catch (err) {
+                    console.error("Error loading assignment:", err);
+                    showNotification("The assignment could not be loaded. Please try again later.", "error");
+                }
+            }
+
+            function startCountdown(timeStr) {
+                const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+                let totalSeconds = (hours || 0) * 3600 + (minutes || 0) * 60 + (seconds || 0);
+
+                countdownTimer = setInterval(() => {
+                    if (totalSeconds <= 0) {
+                        clearInterval(countdownTimer);
+                        if(examTimer) examTimer.textContent = "Time's up!";
+                        submitAssignment(true);
+                        return;
+                    }
+
+                    totalSeconds--;
+                    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+                    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+                    const s = String(totalSeconds % 60).padStart(2, '0');
+                    if(examTimer) examTimer.textContent = `${h}:${m}:${s}`;
+                }, 1000);
+            }
+
+            async function submitAssignment(auto = false) {
+                if(!answerContent) return;
+                const answer = answerContent.value.trim();
+                const payload = { userId: currentUserId, assignmentId, content: answer };
+
+                try {
+                    const result = await fetchWithToken(`${Baseurl}/Learning/submitAssignment`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const message = typeof result === "string" ? result : result.message || "Submitted successfully!";
+                    showNotification(auto ? "⏱ Time's up. " + message : "✅ " + message, "success");
+                    setTimeout(() => { window.location.href = "/UserCourse"; }, 2000);
+                } catch (err) {
+                    console.error("Error when submitting assignment:", err);
+                    showNotification("❌ Failed submission: " + err.message, "error");
+                }
+            }
+        });
     </script>
 }
