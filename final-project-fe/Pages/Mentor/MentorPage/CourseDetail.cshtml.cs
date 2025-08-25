@@ -12,6 +12,7 @@ using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -56,7 +57,9 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         {
             BaseUrl = _apiSettings.BaseUrl;
             Reviews.Page = currentPage ?? 1;
-            
+
+            string token = Request.Cookies["AccessToken"];
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             //Lưu trang trước đấy
             const string sessionKey = "PageHistory";
             var history = HttpContext.Session.GetString(sessionKey);
@@ -70,6 +73,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             {
                 pageHistory = JsonSerializer.Deserialize<List<string>>(history);
             }
+
 
             // Lấy URL hiện tại
             var currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
