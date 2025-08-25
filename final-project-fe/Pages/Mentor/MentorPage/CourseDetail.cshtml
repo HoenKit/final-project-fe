@@ -1159,6 +1159,7 @@
     }
     </script>
     <script>
+        var isAuthenticated = @(isAuthenticated.ToString().ToLower());
         // Show/Hide report modal
         function showReportModal() {
             if (!isAuthenticated) {
