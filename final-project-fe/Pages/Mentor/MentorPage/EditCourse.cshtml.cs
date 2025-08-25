@@ -1687,12 +1687,15 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             if (response.IsSuccessStatusCode)
             {
+                TempData["SuccessMessage"] = "Assignment Create successfully!";
                 return RedirectToPage(new { courseId = Module.CourseId });
             }
 
             ModelState.AddModelError(string.Empty, "Failed to create assignment.");
+            TempData["ErrorMessage"] = " error while Create the assignment ";
             return RedirectToPage(new { courseId = Module.CourseId });
         }
+
         public async Task<IActionResult> OnPostEditAssignmentAsync()
         {
             if (!Request.Cookies.TryGetValue("AccessToken", out var token) || string.IsNullOrEmpty(token))
@@ -1715,6 +1718,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
                 if (response.IsSuccessStatusCode)
                 {
+                    TempData["SuccessMessage"] = "Assignment Update successfully!";
                     return RedirectToPage(new { courseId = Module.CourseId });
                 }
 
@@ -1723,6 +1727,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
             catch (Exception ex)
             {
+                TempData["ErrorMessage"] = "Assignment Update Failed!";
                 ModelState.AddModelError(string.Empty, $"Exception: {ex.Message}");
             }
 
@@ -1742,10 +1747,12 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 if (response.IsSuccessStatusCode)
                 {
                     // Xóa thành công, reload lại trang
+                    TempData["SuccessMessage"] = "Assignment Delete successfully!";
                     return RedirectToPage(new { courseId = Module.CourseId });
                 }
 
                 var error = await response.Content.ReadAsStringAsync();
+                TempData["ErrorMessage"] = "Assignment Delete Failed!";
                 ModelState.AddModelError(string.Empty, $"Delete failed: {error}");
             }
             catch (Exception ex)

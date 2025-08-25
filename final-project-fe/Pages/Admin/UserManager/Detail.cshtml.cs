@@ -21,6 +21,8 @@ namespace final_project_fe.Pages.Admin.UserManager
         }
 
         public User UserDetail { get; set; } = new();
+        public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
+        public string AvatarUrl { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(Guid userId)
         {
@@ -42,30 +44,20 @@ namespace final_project_fe.Pages.Admin.UserManager
                 return BadRequest("Invalid user ID.");
             }
 
-            //Lấy trang trước đấy
+            // Lấy lịch sử trang
             const string sessionKey = "PageHistory";
             var history = HttpContext.Session.GetString(sessionKey);
-            List<string> pageHistory;
+            List<string> pageHistory = string.IsNullOrEmpty(history)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(history);
 
-            if (string.IsNullOrEmpty(history))
-            {
-                pageHistory = new List<string>();
-            }
-            else
-            {
-                pageHistory = JsonSerializer.Deserialize<List<string>>(history);
-            }
-
-            // Lấy URL hiện tại
             var currentUrl = HttpContext.Request.Path + HttpContext.Request.QueryString;
 
-            // Chỉ thêm nếu khác trang cuối cùng
             if (pageHistory.Count == 0 || pageHistory.Last() != currentUrl)
             {
                 pageHistory.Add(currentUrl);
             }
 
-            // Lưu lại vào session
             HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
 
             string apiUrl = $"{_apiSettings.BaseUrl}/User/GetUserById/{userId}";
@@ -81,6 +73,7 @@ namespace final_project_fe.Pages.Admin.UserManager
                         PropertyNameCaseInsensitive = true
                     }) ?? new User();
 
+                    // Nếu UserMetaData null -> tạo mặc định
                     if (UserDetail.UserMetaData == null)
                     {
                         UserDetail.UserMetaData = new UserMetadata
@@ -88,10 +81,17 @@ namespace final_project_fe.Pages.Admin.UserManager
                             FirstName = "N/A",
                             LastName = "N/A",
                             Gender = "Unknown",
-                            Avatar = "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg",
+                            Avatar = "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg",
                             Address = "None"
                         };
                     }
+
+                    // Gọi ImageUrlHelper để lấy URL Avatar
+                    var avatarPath = string.IsNullOrEmpty(UserDetail.UserMetaData.Avatar)
+                        ? "default-avatar.jpg"
+                        : UserDetail.UserMetaData.Avatar;
+
+                    AvatarUrl = ImageUrlHelper.AppendSasTokenIfNeeded(avatarPath, SasToken);
                 }
                 else
                 {
@@ -116,20 +116,16 @@ namespace final_project_fe.Pages.Admin.UserManager
 
                 if (pageHistory.Count > 1)
                 {
-                    // Xóa trang hiện tại
                     pageHistory.RemoveAt(pageHistory.Count - 1);
                     var previousPage = pageHistory.Last();
 
-                    // Lưu lại session sau khi back
                     HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(pageHistory));
 
                     return Redirect(previousPage);
                 }
             }
 
-            // Nếu không có lịch sử, quay về trang chủ
             return RedirectToPage("/Admin/Dashboard/Index");
         }
-
     }
 }

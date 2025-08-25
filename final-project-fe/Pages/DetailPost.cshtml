@@ -524,7 +524,7 @@
     <!-- Post Header -->
     <div class="post-header">
         <div class="post-meta">
-            <img src="@Model.Post.Avatar" alt="@Model.Post.FirstName @Model.Post.LastName" class="author-avatar" />
+            <img src="@(string.IsNullOrEmpty(Model.Post.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{Model.Post.Avatar}?{Model.SasToken}")" alt="@Model.Post.FirstName @Model.Post.LastName" class="author-avatar" />
             <div class="author-info">
                 @if (isAdmin)
                 {
@@ -559,27 +559,33 @@
         @if (Model.Post.PostFiles != null && Model.Post.PostFiles.Any())
         {
             <div class="post-files">
-                @foreach (var file in Model.Post.PostFiles)
+                @foreach (var postFile in Model.Post.PostFiles)
                 {
                     <div class="post-media">
-                        @if (Model.Post.PostFiles != null && Model.Post.PostFiles.Any())
+                        @if (postFile.PostFileType.ToLower() == "image")
                         {
-                            foreach (var postFile in Model.Post.PostFiles)
-                            {
-                                if (postFile.PostFileType.ToLower() == "image")
-                                {
-                                    <img src="@postFile.FileUrl" alt="Post Image" width="400" />
-                                }
-                                else
-                                {
-                                    <iframe src="@postFile.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-                                }
-                            }
+                            <img src="@postFile.FileUrl" alt="Post Image" width="400" />
+                        }
+                        else if (postFile.PostFileType.ToLower() == "video")
+                        {
+                            <video controls preload="metadata" style="max-width:100%; height:auto;">
+                                <source src="@postFile.FileUrl" type="video/mp4" />
+                                Trình duyệt của bạn không hỗ trợ phát video.
+                            </video>
+                        }
+                        else
+                        {
+                            <iframe src="@postFile.FileUrl"
+                                    style="width:560px; height:315px; border:0;"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen>
+                            </iframe>
                         }
                     </div>
                 }
             </div>
         }
+
     </div>
 
     <!-- Comments Section -->
@@ -598,13 +604,13 @@
                         @if (isAdmin)
                         {
                             <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.Post.UserId">
-                                <img src="@comment.Avatar" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                 <span class="comment-author">@comment.FirstName @comment.LastName</span>
                             </a>
                         }
                         @if (isNotAdmin)
                         {
-                            <img src="@comment.Avatar" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                            <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                             <span class="comment-author">@comment.FirstName @comment.LastName</span>
                         }
                     </div>
@@ -631,14 +637,14 @@
                                         @if (isAdmin)
                                         {
                                             <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.Post.UserId">
-                                                <img src="@comment.Avatar" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                                <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                                 <span class="comment-author">@comment.FirstName @comment.LastName</span>
                                                 <span class="reply-indicator">replied</span>
                                             </a>
                                         }
                                         @if (isNotAdmin)
                                         {
-                                            <img src="@comment.Avatar" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                            <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                             <span class="comment-author">@comment.FirstName @comment.LastName</span>
                                             <span class="reply-indicator">replied</span>
                                         }

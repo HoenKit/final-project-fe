@@ -16,7 +16,7 @@
 						@if (Model.Profile?.UserMetaData != null)
 						{
 							<div class="avatar-container position-relative">
-								<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+								<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 
 								@if (Model.IsOwnUser){
@@ -41,13 +41,12 @@
 									</h5>
 									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 								</div>
-
 								<form method="post" enctype="multipart/form-data" asp-page-handler="UpdateAvatar" id="avatarForm">
 									<div class="modal-body">
 										<!-- Current Avatar Preview -->
 										<div class="text-center mb-4">
 											<div class="current-avatar-preview">
-												<img src="@(Model.Profile?.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
+												<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 													 alt="Current Avatar" class="rounded-circle shadow" style="width: 80px; height: 75px;" id="currentAvatar" />
 												<p class="text-muted mt-2">Current avatar</p>
 											</div>
@@ -291,56 +290,80 @@
 																				}
 																			}
 																		</ul>
-																		<!-- Modal cập nhật -->
+																		<!-- Modal Update Post -->
 																		<div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
 																			<div class="modal-dialog">
 																				<form method="post" asp-page-handler="UpdatePost" enctype="multipart/form-data">
-																					<!-- hoặc form handler phù hợp -->
 																					<div class="modal-content">
 																						<div class="modal-header">
 																							<h5 class="modal-title">Update Post</h5>
 																							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																						</div>
+
 																						<div class="modal-body">
+																							<!-- Hidden PostId -->
 																							<input type="hidden" id="editPostId" asp-for="NewPost.PostId" />
-																							<div class="mb-3">
-																								<label asp-for="NewPost.Title" class="form-label"></label>
-																								<input asp-for="NewPost.Title" class="form-control" />
+
+																							<div class="mb-3"> 
+																								<label asp-for="NewPost.Title" class="form-label"></label> 
+																								<input asp-for="NewPost.Title" class="form-control" /> 
+																								</div> 
+																							<div class="mb-3"> 
+																								<label asp-for="NewPost.Content" class="form-label"></label> 
+																								<textarea asp-for="NewPost.Content" class="form-control"></textarea> 
 																							</div>
-																							<div class="mb-3">
-																								<label asp-for="NewPost.Content" class="form-label"></label>
-																								<textarea asp-for="NewPost.Content" class="form-control"></textarea>
-																							</div>
-																							<div class="mb-3">
-																								<label asp-for="NewPost.CategoryId" class="form-label">Category</label>
-																								<select asp-for="NewPost.CategoryId" class="form-control">
-																									<option value="">-- Select Category --</option>
-																									@if (Model.Categories?.Items != null)
-																									{
-																										foreach (var category in Model.Categories.Items)
+
+																							<!-- Category Selection -->
+																							<div class="form-group mb-3 category-selector-container">
+																								<div class="mb-3">
+																									<label asp-for="NewPost.CategoryId" class="form-label">Category</label> <select asp-for="NewPost.CategoryId" class="form-control">
+																										<option value="">-- Select Category --</option> @if (Model.Categories?.Items != null)
 																										{
-																											<option value="@category.CategoryId">
-																												@category.Title
-																											</option>
+																											foreach (var category in Model.Categories.Items)
+																											{
+																												<option value="@category.CategoryId"> @category.Title </option>
+																											}
 																										}
-																									}
-																								</select>
+																									</select>
+																								</div>
+																								<!-- Photos/Videos Button -->
+																								<div class="flex-shrink-0">
+																									<label class="btn btn-outline-success rounded-pill px-2 py-1 d-flexalign-items-start" style="cursor: pointer; white-space: nowrap; margin-left: 2%; margin-top: 3%;">
+																										<i class="fa fa-image me-1"></i>
+																										<span class="d-none d-sm-inline">Photos/videos</span>
+																										<span class="d-inline d-sm-none">Photos</span>
+																										<input type="file" asp-for="NewPost.PostFileLinks" accept="image/*,video/*" multiple hidden onchange="previewImage(event)" />
+																									</label>
+																								</div>
 																							</div>
-																							<div class="mb-3">
-																								<label class="form-label">Add Files (optional)</label>
-																								<input type="file" asp-for="NewPost.PostFileLinks" accept="image/*,video/*" multiple class="form-control" />
+
+																							<!-- Image Preview Area -->
+																							<div id="imagePreview" class="position-relative mb-3" style="display: none;">
+																								<div id="imageButtons" class="position-absolute top-0 start-0 z-3 d-flex gap-2 p-2">
+																									<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnEdit" style="cursor: pointer;">
+																										<i class="fa fa-pencil me-1"></i> Edit all
+																										<input type="file" accept="image/*" hidden onchange="replaceImages(event)" />
+																									</label>
+
+																									<label class="btn bg-white shadow-sm rounded-pill px-3 py-1 d-flex align-items-center" id="btnAddMore" style="cursor: pointer;">
+																										<i class="fa fa-plus me-1"></i> Add photos/videos
+																										<input type="file" multiple accept="image/*" hidden onchange="addMoreImages(event)" />
+																									</label>
+																								</div>
+
+																								<button id="btnCloseAll" type="button" class="btn-close position-absolute top-0 end-0 m-2 z-3" onclick="clearAllImages()"></button>
+
+																								<div id="imageContainer" class="border rounded p-2 d-flex flex-wrap gap-2 mt-2" style="min-height: 100px;"></div>
 																							</div>
 																						</div>
+
 																						<div class="modal-footer">
-																							<button type="submit" class="btn btn-primary">Update Post</button>
-																							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																							<button type="submit" class="btn btn-primary w-100">Update Post</button>
 																						</div>
 																					</div>
 																				</form>
 																			</div>
 																		</div>
-
-
 																	</div>
 																</div>
 															}
@@ -692,8 +715,99 @@
 		});
 	</script>
 
+	<!-- Image Preview Script -->
 	<script>
-				document.addEventListener('DOMContentLoaded', () => {
+		let allImages = [];
+
+		function previewImage(event) {
+			const files = Array.from(event.target.files);
+			if (files.length === 0) return;
+			allImages = files;
+			renderImages();
+		}
+
+		function replaceImages(event) {
+			const files = Array.from(event.target.files);
+			if (files.length === 0) return;
+			allImages = files;
+			renderImages();
+			updateFileInput();
+		}
+
+		function addMoreImages(event) {
+			const files = Array.from(event.target.files);
+			if (files.length === 0) return;
+			allImages = [...allImages, ...files];
+			renderImages();
+			updateFileInput();
+		}
+
+		function clearAllImages() {
+			allImages = [];
+			renderImages();
+			updateFileInput();
+		}
+
+		// ✅ Đồng bộ input file với allImages
+		function updateFileInput() {
+			const dt = new DataTransfer();
+			allImages.forEach(file => dt.items.add(file));
+
+			const fileInputs = document.querySelectorAll('input[name="NewPost.PostFileLinks"]');
+			fileInputs.forEach(input => {
+				input.files = dt.files;
+			});
+		}
+
+		function renderImages() {
+			const previewContainer = document.getElementById('imagePreview');
+			const imageContainer = document.getElementById('imageContainer');
+			const btnEdit = document.getElementById('btnEdit');
+			const btnAddMore = document.getElementById('btnAddMore');
+			const btnCloseAll = document.getElementById('btnCloseAll');
+
+			const hasImages = allImages.length > 0;
+			previewContainer.style.display = hasImages ? 'block' : 'none';
+			btnEdit.style.display = btnAddMore.style.display = btnCloseAll.style.display = hasImages ? 'inline-flex' : 'none';
+
+			imageContainer.innerHTML = '';
+
+			const maxToShow = 5;
+			const total = allImages.length;
+			const imagesToShow = allImages.slice(0, maxToShow);
+
+			imagesToShow.forEach((file, index) => {
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					const wrapper = document.createElement('div');
+					wrapper.className = 'image-thumb-wrapper';
+
+					const img = document.createElement('img');
+					img.src = e.target.result;
+					img.className = 'image-thumb';
+					wrapper.appendChild(img);
+
+					// Overlay nếu > 5 ảnh
+					if (index === maxToShow - 1 && total > maxToShow) {
+						const overlay = document.createElement('div');
+						overlay.className = 'image-thumb-overlay';
+						overlay.textContent = `+${total - maxToShow}`;
+						wrapper.appendChild(overlay);
+					}
+
+					imageContainer.appendChild(wrapper);
+				};
+				reader.readAsDataURL(file);
+			});
+
+			updateFileInput();
+		}
+	</script>
+
+
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
 					// Razor variables
 					const currentUserId = "@Model.CurrentUserId";
 					const BaseUrl = "@Model.BaseUrl";

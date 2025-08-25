@@ -40,7 +40,7 @@
                         <!-- Avatar and Status Section -->
                         <div class="col-md-4 text-center mb-4">
                             <div class="user-avatar mb-3">
-                                <img src="@(Model.UserDetail.UserMetaData.Avatar ?? "https://denngocson.com/wp-content/uploads/2024/10/avatar-fb-mac-dinh-62lnfy8F.jpg")"
+                                <img src="@(string.IsNullOrEmpty(Model.UserDetail.UserMetaData.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : Model.AvatarUrl)"
                                      class="img-fluid rounded-circle"
                                      style="width: 180px; height: 180px; object-fit: cover;"
                                      alt="User Avatar" />
