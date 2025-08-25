@@ -415,7 +415,7 @@
                 </div>
                 <div class="content">
                     <h6 class="mb-1">Total Hours</h6>
-                    <h4 class="text-bold">@Model.Courses.Items.Sum(c => c.CourseLength)</h4>
+                    <h4 class="text-bold">@string.Format("{0:F1}", Model.Courses.Items.Sum(c => c.CourseLength))</h4>
                 </div>
             </div>
         </div>

@@ -41,7 +41,7 @@ namespace final_project_fe.Pages
 
             if (RegisterData.Password != RegisterData.ConfirmPassword)
             {
-                ModelState.AddModelError("RegisterData.ConfirmPassword", "Mật khẩu xác nhận không khớp.");
+                TempData["ErrorMessage"] = "Password and ConfirmPassword Not Match!";
                 return Page();
             }
 
@@ -60,18 +60,19 @@ namespace final_project_fe.Pages
 
                 if (response.IsSuccessStatusCode)
                 {
+                    TempData["SuccessMessage"] = "Register successfully! Please Check Your Email.";
                     return RedirectToPage("/Login");
                 }
                 else
                 {
                     _logger.LogError($"Lỗi API Đăng Ký: {response.StatusCode}");
-                    ModelState.AddModelError(string.Empty, "Đăng ký thất bại! Vui lòng kiểm tra lại thông tin.");
+                    TempData["ErrorMessage"] = "Register Fail";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Lỗi khi gọi API: {ex.Message}");
-                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi trong quá trình đăng ký.");
+                TempData["ErrorMessage"] = "Error While Register";
             }
 
             return Page();

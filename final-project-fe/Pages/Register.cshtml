@@ -138,14 +138,15 @@
                                     <span asp-validation-for="RegisterData.UserMetadataDto.LastName" class="text-danger"></span>
                                 </div>
 
-                                <div class="form-group">
-                                    <input asp-for="RegisterData.UserMetadataDto.Birthday"
-                                           type="date"
-                                           required
-                                           max="@DateTime.Now.AddYears(-10).ToString("yyyy-MM-dd")" />
-                                    <label class="control-label">Birthday</label><i class="mtrl-select"></i>
-                                    <span asp-validation-for="RegisterData.UserMetadataDto.Birthday" class="text-danger"></span>
-                                </div>
+                            <div class="form-group">
+                                <input asp-for="RegisterData.UserMetadataDto.Birthday"
+                                       type="date"
+                                       min="1900-01-01"
+                                       max="@DateTime.Now.AddYears(-18).ToString("yyyy-MM-dd")"
+                                       required />
+                                <label class="control-label">Birthday</label><i class="mtrl-select"></i>
+                                <span asp-validation-for="RegisterData.UserMetadataDto.Birthday" class="text-danger"></span>
+                            </div>
 
                                 <div class="form-group">
                                     <select asp-for="RegisterData.UserMetadataDto.Gender" required>

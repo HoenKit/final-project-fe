@@ -524,7 +524,7 @@
     <!-- Post Header -->
     <div class="post-header">
         <div class="post-meta">
-            <img src="@Model.Post.Avatar?@Model.SasToken" alt="@Model.Post.FirstName @Model.Post.LastName" class="author-avatar" />
+            <img src="@(string.IsNullOrEmpty(Model.Post.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{Model.Post.Avatar}?{Model.SasToken}")" alt="@Model.Post.FirstName @Model.Post.LastName" class="author-avatar" />
             <div class="author-info">
                 @if (isAdmin)
                 {
@@ -604,13 +604,13 @@
                         @if (isAdmin)
                         {
                             <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.Post.UserId">
-                                <img src="@comment.Avatar?@Model.SasToken" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                 <span class="comment-author">@comment.FirstName @comment.LastName</span>
                             </a>
                         }
                         @if (isNotAdmin)
                         {
-                            <img src="@comment.Avatar?@Model.SasToken" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                            <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                             <span class="comment-author">@comment.FirstName @comment.LastName</span>
                         }
                     </div>
@@ -637,14 +637,14 @@
                                         @if (isAdmin)
                                         {
                                             <a asp-page="/Admin/UserManager/Detail" asp-route-userId="@Model.Post.UserId">
-                                                <img src="@comment.Avatar?@Model.SasToken" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                                <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                                 <span class="comment-author">@comment.FirstName @comment.LastName</span>
                                                 <span class="reply-indicator">replied</span>
                                             </a>
                                         }
                                         @if (isNotAdmin)
                                         {
-                                            <img src="@comment.Avatar?@Model.SasToken" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
+                                            <img src="@(string.IsNullOrEmpty(comment.Avatar) ? "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg" : $"{comment.Avatar}?{Model.SasToken}")" alt="@comment.FirstName @comment.LastName" class="comment-avatar" />
                                             <span class="comment-author">@comment.FirstName @comment.LastName</span>
                                             <span class="reply-indicator">replied</span>
                                         }

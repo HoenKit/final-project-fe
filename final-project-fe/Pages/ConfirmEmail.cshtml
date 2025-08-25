@@ -68,13 +68,13 @@
                     <div class="action-buttons">
                         @if (Model.IsSuccess)
                         {
-                            <a href="/Account/Login" class="btn btn-primary">Log in Now</a>
+                            <a href="/Login" class="btn btn-primary">Log in Now</a>
                             <a href="/" class="btn btn-secondary">Go to Homepage</a>
                         }
                         else
                         {
                             <button type="button" class="btn btn-primary" onclick="tryAgain()">Try Again</button>
-                            <a href="/Account/Login" class="btn btn-secondary">Go to Login Page</a>
+                            <a href="/Login" class="btn btn-secondary">Go to Login Page</a>
                         }
                     </div>
                 }
