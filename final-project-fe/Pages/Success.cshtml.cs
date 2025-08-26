@@ -64,6 +64,8 @@ namespace final_project_fe.Pages
                         CreateAt = DateTime.UtcNow
                     };
 
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     var jsonContent = JsonSerializer.Serialize(Transaction);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
@@ -80,10 +82,6 @@ namespace final_project_fe.Pages
                         _logger.LogError("Error while create transaction: {StatusCode}, Error message: {ErrorMessage}",
                                          response.StatusCode, errorMessage);
                     }
-
-                    // Update User Point
-                    var httpClient = new HttpClient();
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                     var queryParams = new Dictionary<string, string>
                     {
