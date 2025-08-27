@@ -78,6 +78,10 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public IFormFile? NewImage { get; set; }
         public IFormFile? Document { get; set; }
         public IFormFile? Video { get; set; }
+        [BindProperty]
+        public IFormFile PdfFile { get; set; }
+        [BindProperty]
+        public string Difficulty { get; set; }
         public PageResult<CategoryDto> Categories { get; set; } = new(new List<CategoryDto>(), 0, 1, 10);
         public string SasToken { get; set; } = "sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
         public async Task<IActionResult> OnGetAsync(int courseId)
@@ -1357,10 +1361,26 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                     .Select(c => c.Value)
                     .ToList();
             }
-            // Validate input
-            if (string.IsNullOrWhiteSpace(Topic))
+
+            if (PdfFile == null || PdfFile.Length == 0)
             {
-                TempData["ErrorMessage"] = "Topic cannot be left blank.";
+                TempData["ErrorMessage"] = "PDF file is required.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            // Validate file extension
+            var allowedExtensions = new[] { ".pdf"};
+            var fileExtension = Path.GetExtension(PdfFile.FileName).ToLower();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                TempData["ErrorMessage"] = "Only PDF files (.pdf) are accepted.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+
+            // Validate file size (limit 2MB)
+            if (PdfFile.Length > 2 * 1024 * 1024)
+            {
+                TempData["ErrorMessage"] = "File must not exceed 2MB.";
                 return RedirectToPage(new { courseId = Module.CourseId });
             }
 
@@ -1373,6 +1393,11 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             if (Number <= 0)
             {
                 TempData["ErrorMessage"] = "Number of questions must be greater than 0.";
+                return RedirectToPage(new { courseId = Module.CourseId });
+            }
+            if (string.IsNullOrWhiteSpace(Difficulty))
+            {
+                TempData["ErrorMessage"] = "Difficulty level is required.";
                 return RedirectToPage(new { courseId = Module.CourseId });
             }
             var userResponse = await _httpClient.GetAsync($"{BaseUrl}/User/GetUserById/{CurrentUserId}");
@@ -1396,19 +1421,21 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             }
             try
             {
-                // Tạo request object
-                var request = new QuizImportRequest
-                {
-                    Topic = Topic,
-                    LessonId = LessonId,
-                    Number = Number
-                };
+                // Tạo MultipartFormDataContent để gửi file
+                using var formData = new MultipartFormDataContent();
+
+                // Add file content
+                var fileContent = new StreamContent(PdfFile.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+                formData.Add(fileContent, "PdfFile", PdfFile.FileName);
+
+                // Add other form data
+                formData.Add(new StringContent(LessonId.ToString()), "LessonId");
+                formData.Add(new StringContent(Number.ToString()), "Number");
+                formData.Add(new StringContent(Difficulty), "Difficulty");
 
                 // Gọi API Backend
-                var json = JsonSerializer.Serialize(request);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var response = await _httpClient.PostAsync($"{BaseUrl}/Question/import-AI", content);
+                var response = await _httpClient.PostAsync($"{BaseUrl}/Question/import-AI", formData);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1678,6 +1705,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
 
             var requestPayload = new
             {
+                ExamTime = Assignment.ExamTime,
                 lessonId = Assignment.LessonId,
                 content = Assignment.Content,
                 MeetLink = Assignment.MeetLink
@@ -1709,7 +1737,8 @@ namespace final_project_fe.Pages.Mentor.MentorPage
                 assignmentId = EditAssignment.AssignmentId,
                 lessonId = EditAssignment.LessonId,
                 content = EditAssignment.Content,
-                meetLink = EditAssignment.MeetLink ?? ""
+                meetLink = EditAssignment.MeetLink ?? "",
+                examTime = EditAssignment.ExamTime,
             };
 
             try

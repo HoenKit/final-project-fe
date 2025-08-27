@@ -1,4 +1,5 @@
-﻿using final_project_fe.Dtos.Mentors;
+﻿using final_project_fe.Dtos.Assignment;
+using final_project_fe.Dtos.Mentors;
 
 namespace final_project_fe.Dtos.Courses
 {
@@ -24,6 +25,7 @@ namespace final_project_fe.Dtos.Courses
         public int CountModule { get; set; }
         public int CountLesson { get; set; }
         public MentorDto? Mentor { get; set; }
+        public List<AssignmentDto>? Assignments { get; set; }
     }
 
 }

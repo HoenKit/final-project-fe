@@ -142,6 +142,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
+            margin-top: 2rem; /* Thêm khoảng trống để tooltip không bị cắt */
         }
 
         .course-card {
@@ -150,6 +151,9 @@
             border: 1px solid #e5e7eb;
             overflow: hidden;
             transition: box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            height: 460px; /* Chiều cao tối thiểu cho card */
         }
 
             .course-card:hover {
@@ -161,6 +165,7 @@
             height: 180px;
             background-size: cover;
             background-position: center;
+            flex-shrink: 0; /* Không co lại */
         }
 
         .course-menu {
@@ -195,6 +200,9 @@
 
         .course-info {
             padding: 1rem;
+            flex: 1; /* Chiếm không gian còn lại */
+            display: flex;
+            flex-direction: column;
         }
 
         .course-title {
@@ -202,7 +210,71 @@
             color: #1f2937;
             margin-bottom: 0.5rem;
             line-height: 1.4;
+            height: 125px; /* Chiều cao cố định lớn hơn */
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* Giới hạn 6 dòng */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s ease;
         }
+
+            .course-title:hover {
+                color: #3b82f6;
+            }
+
+            /* Tooltip cho full title */
+            .course-title::before {
+                content: attr(data-full-title);
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1f2937;
+                color: white;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                line-height: 1.3;
+                white-space: normal;
+                max-width: 280px;
+                width: max-content;
+                text-align: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                pointer-events: none;
+            }
+
+            .course-title::after {
+                content: '';
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%) translateY(100%);
+                border: 6px solid transparent;
+                border-top-color: #1f2937;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 1000;
+            }
+
+            .course-title:hover::before,
+            .course-title:hover::after {
+                opacity: 1;
+                visibility: visible;
+                transform: translateX(-50%) translateY(-8px);
+            }
+
+            .course-title:hover::after {
+                transform: translateX(-50%) translateY(-2px);
+            }
 
         .course-instructor {
             color: #6b7280;
@@ -211,7 +283,11 @@
         }
 
         .progress-section {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            height: 40px; /* Đổi từ min-height thành height cố định */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .progress-header {
@@ -219,19 +295,27 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 0.5rem;
+            min-height: 28px; /* Chiều cao cố định cho header */
+            flex-shrink: 0; /* Ngăn không cho co lại */
         }
+
 
         .progress-text {
             font-size: 0.875rem;
             font-weight: 500;
             color: #374151;
+            white-space: nowrap; /* Không xuống dòng */
+            min-width: 80px; /* Đặt width tối thiểu */
         }
-
         .status-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 500;
+            white-space: nowrap; /* Không xuống dòng */
+            flex-shrink: 0; /* Không co lại */
+            min-width: 70px; /* Width tối thiểu cho badge */
+            text-align: center;
         }
 
         .status-complete {
@@ -250,6 +334,8 @@
             background-color: #e5e7eb;
             border-radius: 9999px;
             overflow: hidden;
+            flex-shrink: 0; /* Không co lại */
+            margin-top: auto; /* Đẩy xuống dưới */
         }
 
         .progress-fill {
@@ -268,7 +354,14 @@
 
         .course-action {
             text-align: center;
-            margin-top: 0.75rem;
+            margin-top: auto; /* Đẩy xuống dưới cùng */
+            /* padding-top: 0.75rem; */
+            height: 60px; /* Chiều cao cố định */
+            /* display: flex; */
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-shrink: 0; /* Không co lại */
         }
 
             .course-action a {
@@ -333,7 +426,7 @@
                             </div>
                         </div>
                             <div class="course-info">
-                                <h3 class="course-title">@course.CourseName</h3>
+                                <h3 class="course-title" data-full-title="@course.CourseName">@course.CourseName</h3>
                                 <div class="progress-section">
                                     <div class="progress-header">
                                         <span class="progress-text">@percentage.ToString("0")% Complete</span>
