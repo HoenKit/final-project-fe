@@ -487,7 +487,7 @@
 										<h2 class="section-title">My Certificates</h2>
 
 										<!-- Upload button (mentor only) -->
-										@if (Model.IsOwnUser)
+										@if (Model.IsOwnUser && Model.IsMentor == true)
 										{
 											<div class="text-end mb-3">
 												<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadCertificateModal">
@@ -994,7 +994,7 @@
 		}
 
 		.upgrade-card {
-			background: linear-gradient(135deg, #636363 0%, #1c76c2 100%);
+			background: linear-gradient(135deg, #757575 0%, #000000 100%);
 			border-radius: 12px;
 			transition: transform 0.2s ease-in-out;
 		}
@@ -1057,9 +1057,8 @@
 
 		/* Profile Header */
 		.profile-header {
-			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			background: linear-gradient(135deg, #000000 0%, #818181 100%);
 			padding: 40px 0;
-			margin-bottom: 30px;
 		}
 
 		.profile-content {
@@ -1128,6 +1127,8 @@
 	}
 
 	.edit-avatar-btn {
+		background-color: black;
+		border-color: black;
 		position: absolute;
 		bottom: 5px;
 		right: 5px;
@@ -1144,6 +1145,8 @@
 		.edit-avatar-btn:hover {
 			transform: scale(1.1);
 			box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+			background-color: grey;
+			border-color: grey;
 		}
 
 	.current-avatar-preview,
@@ -1175,7 +1178,7 @@
 			height: 140px;
 			border-radius: 50%;
 			object-fit: cover;
-			border: 3px solid #064071;
+			border: 3px solid #3e3f3f;
 			box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 		}
 
