@@ -1086,7 +1086,17 @@
                                                                                                     <div class="mb-3 border p-3 bg-light rounded">
                                                                                                         @assignment.Content
                                                                                                     </div>
-
+                                                                                                    <p><strong>Exam Time:</strong></p>
+                                                                                                    @if (assignment.ExamTime.HasValue)
+                                                                                                    {
+                                                                                                        <span class="badge bg-info text-dark px-3 py-2">
+                                                                                                            @assignment.ExamTime.Value.ToString(@"hh\:mm\:ss")
+                                                                                                        </span>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        <span class="text-muted">Exam time not set</span>
+                                                                                                    }
                                                                                                     <p><strong>Meeting Link:</strong></p>
                                                                                                     @if (!string.IsNullOrEmpty(assignment.MeetLink))
                                                                                                     {
@@ -1131,13 +1141,34 @@
                                                                                                                                 Assignment Content
                                                                                                                             </label>
                                                                                                                             <textarea class="form-control form-control-lg border-dark"
-                                                                                                              name="EditAssignment.Content"
-                                                                                                              rows="12"
-                                                                                                              style="height: 350px; min-height: 350px; resize: vertical; font-size: 14px; line-height: 1.6; border: 2px solid #000;"
-                                                                                                              placeholder="Enter assignment content here...">@assignment.Content</textarea>
+                                                                                                                              name="EditAssignment.Content"
+                                                                                                                              rows="12"
+                                                                                                                              style="height: 350px; min-height: 350px; resize: vertical; font-size: 14px; line-height: 1.6; border: 2px solid #000;"
+                                                                                                                              placeholder="Enter assignment content here...">@assignment.Content</textarea>
                                                                                                                             <div class="form-text text-muted">
                                                                                                                                 <i class="bi bi-info-circle me-1"></i>
                                                                                                                                 Provide detailed instructions and requirements for this assignment.
+                                                                                                                            </div>
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+
+                                                                                                                <div class="row">
+                                                                                                                    <div class="col-12">
+                                                                                                                        <div class="mb-4">
+                                                                                                                            <label class="form-label fw-bold fs-6 text-dark">
+                                                                                                                                <i class="bi bi-clock me-2"></i>
+                                                                                                                                Exam Time
+                                                                                                                            </label>
+                                                                                                                            <input type="text"
+                                                                                                                                   class="form-control form-control-lg border-dark"
+                                                                                                                                   name="EditAssignment.ExamTime"
+                                                                                                                                   value="@(assignment.ExamTime.HasValue ? assignment.ExamTime.Value.ToString(@"hh\:mm\:ss") : "")"
+                                                                                                                                   style="border: 2px solid #000;"
+                                                                                                                                   placeholder="HH:mm:ss (e.g., 01:30:00)" />
+                                                                                                                            <div class="form-text text-muted">
+                                                                                                                                <i class="bi bi-info-circle me-1"></i>
+                                                                                                                                Enter exam duration in format <code>HH:mm:ss</code>. Example: <code>01:30:00</code> for 1h30m.
                                                                                                                             </div>
                                                                                                                         </div>
                                                                                                                     </div>
@@ -1156,7 +1187,7 @@
                                                                                                                                    value="@assignment.MeetLink"
                                                                                                                                    style="border: 2px solid #000;"
                                                                                                                                    placeholder="https://meet.google.com/xxx-xxxx-xxx" />
-                                                                                                                            <div class="form-text text-muted">
+                                                                                                                                    <div class="form-text text-muted">
                                                                                                                                 <i class="bi bi-info-circle me-1"></i>
                                                                                                                                 Optional: Add a meeting link for discussion or presentation of this assignment.
                                                                                                                             </div>
@@ -1343,20 +1374,28 @@
 
                                                                                         <!-- AI Generate Form -->
                                                                                         <div id="ai-form-@lesson.LessonId" class="form-section" style="display: none;">
-                                                                                            <form id="aiForm-@lesson.LessonId" method="post" asp-page-handler="GenerateAI">
+                                                                                            <form id="aiForm-@lesson.LessonId" method="post" asp-page-handler="GenerateAI" enctype="multipart/form-data">
                                                                                                 <!-- Hidden field cho LessonId -->
                                                                                                 <input type="hidden" asp-for="LessonId" value="@lesson.LessonId" />
-                                                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                                                <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />                                                                                                
 
                                                                                                 <div class="mb-3">
-                                                                                                    <small class="text-danger">
-                                                                                                        <i class="bi bi-send-exclamation"></i>
-                                                                                                        Please fill out all course fields before using this feature (Only For Premium)!
-                                                                                                    </small>
-                                                                                                    <label class="form-label">Topic/Content for AI Generation *</label>
-                                                                                                    <textarea class="form-control" asp-for="Topic" rows="3" required
-                                                                                                              placeholder="Enter the topic or content you want AI to generate questions about..."></textarea>
-                                                                                                    <span asp-validation-for="Topic" class="text-danger"></span>
+                                                                                                    <label class="form-label">Upload PDF File *</label>
+                                                                                                    <input type="file" class="form-control" name="PdfFile" accept=".pdf" required>
+                                                                                                    <div class="text-danger">
+                                                                                                        <i class="fa fa-info-circle me-1"></i>
+                                                                                                        Please Upload a PDF (Max size 2MB) choose Difficulty and Number of Questions for AI to generate questions from. (Only For Premium!)
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                                <div class="mb-3">
+                                                                                                    <label class="form-label">Difficulty Level *</label>
+                                                                                                    <select class="form-select" asp-for="Difficulty" required>
+                                                                                                        <option value="Easy">Easy</option>
+                                                                                                        <option value="Medium" selected>Medium</option>
+                                                                                                        <option value="Hard">Hard</option>
+                                                                                                    </select>
+                                                                                                    <span asp-validation-for="Difficulty" class="text-danger"></span>
                                                                                                 </div>
 
                                                                                                 <div class="mb-3">
@@ -1402,6 +1441,23 @@
                                                                                             <textarea class="form-control" name="Assignment.Content" rows="3" placeholder="This Assignment's essay questions and the requirements you want." required></textarea>
                                                                                         </div>
                                                                                         <input type="hidden" asp-for="Module.CourseId" value="@Model.Course.CourseId" />
+                                                                                        <!-- Exam Time -->
+                                                                                        <div class="mb-3">
+                                                                                            <label class="form-label fw-bold">Exam Time (HH:mm:ss)</label>
+                                                                                            <input type="text" 
+                                                                                                   class="form-control" 
+                                                                                                   name="Assignment.ExamTime" 
+                                                                                                   placeholder="01:30:00"
+                                                                                                   pattern="^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
+                                                                                                   required />
+                                                                                            <div class="form-text text-muted">
+                                                                                                <i class="bi bi-info-circle me-1"></i>
+                                                                                                Enter duration in format HH:mm:ss (e.g. 01:30:00).
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                        <!-- Meeting Link -->
                                                                                         <div class="row">
                                                                                             <div class="col-12">
                                                                                                 <div class="mb-4">
@@ -1443,24 +1499,24 @@
 
                                                                                 <!-- Add New Question Button for this Lesson -->
                                                                                 <div class="mt-3">
-                                                                                    @if (!(lesson.Assignment != null && lesson.Assignment.Any()))
-                                                                                    {
-                                                                                        <button id="btn-question-@lesson.LessonId"
-                                                                                                class="btn btn-outline-primary btn-sm"
-                                                                                                onclick="showCreateQuestionForm(@lesson.LessonId)">
-                                                                                            <i class="fa fa-plus me-1"></i>Add New Question
-                                                                                        </button>
-                                                                                    }
+                                                                                @if (!(lesson.Assignment != null && lesson.Assignment.Any()))
+                                                                                {
+                                                                                    <button id="btn-question-@lesson.LessonId"
+                                                                                            class="btn btn-outline-primary btn-sm"
+                                                                                            onclick="showCreateQuestionForm(@lesson.LessonId)">
+                                                                                        <i class="fa fa-plus me-1"></i>Add New Question
+                                                                                    </button>
+                                                                                }
 
-                                                                                    @if (!(lesson.Questions.Any() && lesson.Questions.Any(q => q.Answers != null && q.Answers.Any()))
-                                                                                                                                                    && !(lesson.Assignment != null && lesson.Assignment.Any()))
-                                                                                    {
-                                                                                        <button id="btn-assignment-@lesson.LessonId"
-                                                                                                class="btn btn-outline-success btn-sm ms-2"
-                                                                                                onclick="showCreateAssignmentForm(@lesson.LessonId)">
-                                                                                            <i class="fa fa-tasks me-1"></i>Add New Assignment
-                                                                                        </button>
-                                                                                    }
+                                                                                @* Ẩn nút Add Assignment khi Course đã có Assignment HOẶC Lesson đã có Question *@
+                                                                                @if (!(Model.Course.Assignments != null && Model.Course.Assignments.Any()) && !(lesson.Questions != null && lesson.Questions.Any()))
+                                                                                {
+                                                                                    <button id="btn-assignment-@lesson.LessonId"
+                                                                                            class="btn btn-outline-success btn-sm ms-2"
+                                                                                            onclick="showCreateAssignmentForm(@lesson.LessonId)">
+                                                                                        <i class="fa fa-tasks me-1"></i>Add New Assignment
+                                                                                    </button>
+                                                                                }
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -1768,6 +1824,15 @@
             border-radius: 4px;
         }
 
+        .btn-outline-primary{
+            color: black;
+        }
+
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color:black;
+            border-color: black;
+        }
 
 
     .card {
@@ -2114,6 +2179,22 @@
             color: white;
         }
 
+        .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+            color: #fff;
+            background-color: #000000;
+        }
+
+        .nav-link:focus, .nav-link:hover{
+            color: #AAAAAA;
+        }
+        .nav-item a {
+		    color: black;
+        }
+
+        .bluesh:before {
+            background: #18181d;
+        }
+
         .step-number.completed {
             /* background: #28a745; */
             color: white;
@@ -2127,7 +2208,7 @@
         .step-header {
             margin-bottom: 30px;
             padding: 20px;
-            background: linear-gradient(135deg, #088dcd 0%, #152b3f 100%);
+            background: linear-gradient(135deg, #000000 0%, #757575 100%);
             border-radius: 10px;
             color: white;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -2206,8 +2287,18 @@
 
         p {
             color: white;
+            margin: auto;
         }
 
+        b, strong {
+            font-weight: bolder;
+            color: black;
+        }
+
+        .bg-info {
+            background-color: black !important;
+            color: white !important;    
+        }
 
         /* Learning Objectives Styles */
         .learning-objectives .input-group {
@@ -2340,9 +2431,15 @@
 
         .btn-primary {
             color: #fff;
-            background-color: #088dcd;
-            border-color: #088dcd;
+            background-color: black;
+            border-color: grey;
         }
+
+            .btn-primary:hover {
+                color: #fff;
+            background-color: grey;
+                border-color: grey;
+            }
 
 
         /* Responsive Design */

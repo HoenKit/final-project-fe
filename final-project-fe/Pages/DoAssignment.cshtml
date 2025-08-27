@@ -407,9 +407,7 @@
             if (!token) console.error("Token is missing. Please login again.");
 
             // Bắt buộc vào meeting trước khi làm bài
-            meetLink?.addEventListener("click", () => {
-                if (confirm("Are you joining the meeting now?")) btnLamBai?.classList.remove("d-none");
-            });
+            btnLamBai?.classList.remove("d-none");
 
             btnLamBai?.addEventListener("click", () => {
                 btnLamBai.classList.add("d-none");

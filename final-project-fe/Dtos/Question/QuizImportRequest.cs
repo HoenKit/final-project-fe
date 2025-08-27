@@ -2,8 +2,9 @@
 {
     public class QuizImportRequest
     {
-        public string Topic { get; set; }
+        public IFormFile PdfFile { get; set; }
         public int LessonId { get; set; }
         public int Number { get; set; }
+        public string Difficulty { get; set; }
     }
 }
