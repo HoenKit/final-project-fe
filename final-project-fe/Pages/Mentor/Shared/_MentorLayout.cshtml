@@ -614,12 +614,18 @@
 		loadNotifications();
 	</script>
 	<script>
-		document.addEventListener("DOMContentLoaded", function() {
-			const CurrentuserId = "@(userId?.ToString() ?? "")";
-			const BaseUrl = "@BaseUrl";
-			const apiUrl = `${BaseUrl}/User/GetUserById/${CurrentuserId}`;
+				document.addEventListener("DOMContentLoaded", function () {
+			const userId = "@(userId?.ToString() ?? "")";
+			const badgeEl = document.getElementById("userPointBadge");
 
-			console.log("userId:", CurrentuserId, "apiUrl:", apiUrl); // debug
+			if (!userId) {
+				if (badgeEl) badgeEl.textContent = 0;
+				console.log("👤 Guest user → skip fetch point");
+				return;
+			}
+
+			const BaseUrl = "@BaseUrl";
+			const apiUrl = `${BaseUrl}/User/GetUserById/${userId}`;
 
 			fetch(apiUrl)
 				.then(response => {
@@ -627,13 +633,10 @@
 					return response.json();
 				})
 				.then(user => {
-					const point = user.point ?? 0;
-					document.getElementById("userPointBadge").textContent = point;
+					if (badgeEl) badgeEl.textContent = user.point ?? 0;
 				})
-				.catch(err => {
-					console.error("Failed to fetch user point:", err);
-					const badge = document.getElementById("userPointBadge");
-					if (badge) badge.textContent = 0;
+				.catch(() => {
+					if (badgeEl) badgeEl.textContent = 0;
 				});
 		});
 	</script>

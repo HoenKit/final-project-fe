@@ -8,7 +8,7 @@
     ViewData["Title"] = Model.Course.CourseName;
 
     var roles = new List<string>();
-    String userIdToken = null;
+    string userIdToken = null;
     var token = HttpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
     bool isAuthenticated = !string.IsNullOrEmpty(token);
     if (!string.IsNullOrEmpty(token))
@@ -260,7 +260,7 @@
                             @Model.Course.Level
                         </div>
                     </div>
-                    @if (userIdToken == null || Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
+                    @if (isAuthenticated && !isAdmin && Guid.Parse(userIdToken) != Model.MentorInfor.UserId)
                     {
                     <div>
                         <button type="button"
@@ -1211,7 +1211,7 @@
         });
     </script>
      <script>
-        document.getElementById("buyForm").addEventListener("submit", function (e) {
+        document.getElementById("buyForm")?.addEventListener("submit", function (e) {
             e.preventDefault();
 
             // Kiểm tra cookie "AccessToken"
