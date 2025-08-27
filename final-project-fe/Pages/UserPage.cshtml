@@ -11,13 +11,13 @@
 	<!-- Profile Header -->
 	<div class="profile-header">
 		<div class="d-flex justify-content-between align-items-start">
-			<div class="avtar-header">
+			<div class="avatar-header">
 				<div class="profile-content">
 					<div class="profile-avatar-card position-relative">
 						@if (Model.Profile?.UserMetaData != null)
 						{
 							<div class="avatar-container position-relative">
-								<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
+								<img src="@(string.IsNullOrEmpty(Model.Profile?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 
 								@if (Model.IsOwnUser){
@@ -253,7 +253,7 @@
 
 														<div class="friend-name">
 															<ins>
-																<a href="time-line.html" title="">
+																<a href="time-line.html" title="" style="color: black">
 																	@((post.User?.UserMetaData != null) ? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}" : post.User?.Email)
 																</a>
 															</ins>
@@ -439,7 +439,7 @@
 																				<span>@parent.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 																				@if (!string.IsNullOrEmpty(token))
 																				{
-																					<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply"></i></a>
+																					<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply" style="color: black"></i></a>
 																				}
 																			</div>
 																			<p>@parent.Content</p>
@@ -476,7 +476,7 @@
 																					<span>@reply.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 																					@if (!string.IsNullOrEmpty(token))
 																					{
-																						<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply"></i></a>
+																						<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply" style="color: black"></i></a>
 																					}
 																				</div>
 																				<p>@reply.Content</p>
@@ -513,7 +513,7 @@
 																						<span>@level2.CreateAt.ToString("dd/MM/yyyy HH:mm")</span>
 																						@if (!string.IsNullOrEmpty(token))
 																						{
-																							<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply"></i></a>
+																							<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply" style="color: black"></i></a>
 																						}
 																					</div>
 																					<p>@level2.Content</p>
@@ -577,7 +577,7 @@
 										}
 									</div>
 								</div>
-								<button class="btn-view btn-load-more">Load More</button>
+								<button class="btn-view btn-load-more" style="background-color: black;">Load More</button>
 							</div><!-- centerl meta -->
 
 							<div class="col-lg-3">
@@ -977,7 +977,7 @@
 											<div class="coment-head">
 												<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
 												<span>${d}</span>
-												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+											${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply" style="color: black"></i></a>` : ''}
 												${commentOptionsHTML}
 											</div>
 											<p>${comment.content}</p>
@@ -1026,7 +1026,7 @@
 													<div class="coment-head">
 														<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
 														<span>${d}</span>
-														${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+													${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply" style="color: black"></i></a>` : ''}
 														${replyOptionsHTML}
 													</div>
 													<p>${reply.content}</p>
@@ -1084,7 +1084,7 @@
 									<img src="${avatar}" alt="User Avatar" style="width: 50px; height: 51px;">
 									</figure>
 									<div class="friend-name">
-										<ins><a href="time-line.html" title="">${name}</a></ins>
+									<ins><a href="time-line.html" title="" style="color: black">${name}</a></ins>
 										<span>${d}</span>
 										${optionsMenuHTML}
 									</div>
@@ -1156,7 +1156,7 @@
 								<div class="coment-head">
 									<h5><a href="time-line.html" title="">${name}</a></h5>
 									<span>${d}</span>
-									${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
+								${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply" style="color: black"></i></a>` : ''}
 									${optionsHTML}
 								</div>
 								<p>${comment.content}</p>
@@ -1868,6 +1868,30 @@
 	</script>
 
 	<style>
+		.bg-primary {
+			background-color: #000000 !important;
+		}
+
+		.btn-primary {
+			color: #fff;
+			background-color: #000000;
+			border-color: #000000;
+		}
+
+		.btn-primary:hover {
+			color: #fff;
+			background-color: grey;
+			border-color: grey;
+		}
+
+		.btn-primary:active,
+		.btn-primary:focus,
+		.btn-primary:focus:active {
+			color: #fff;
+			background-color: #000000 !important; /* màu khi click */
+			border-color: #000000 !important;
+			box-shadow: none !important; /* bỏ viền xanh mặc định khi focus */
+		}
 		.subscription-card {
 			background-color: #2c2c2c;
 			border-radius: 12px;
@@ -1999,6 +2023,7 @@
 			/* min-width: 200px; */
 			text-align: center;
 			padding: 20px;
+			margin-left: 88px;
 		}
 
 	.avatar-container {
