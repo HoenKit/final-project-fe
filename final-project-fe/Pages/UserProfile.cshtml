@@ -25,7 +25,7 @@
 						@if (Model.Profile?.UserMetaData != null)
 						{
 							<div class="avatar-container position-relative">
-								<img src="@(string.IsNullOrEmpty(Model.Profile.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
+								<img src="@(string.IsNullOrEmpty(Model.Profile?.UserMetaData?.Avatar) ? "images/resources/friend-avatar9.jpg" : Model.Profile.UserMetaData?.Avatar)"
 									 alt="Avatar" class="profile-avatar rounded-circle shadow" width="120" height="120" />
 								@if (Model.IsOwnUser)
 								{
@@ -1011,7 +1011,7 @@
 		}
 
 			.edit-icon:hover {
-				color: #0056b3; 
+				color: #000000; 
 				transform: scale(1.1);
 			}
 
@@ -1120,6 +1120,7 @@
 			/* min-width: 200px; */
 			text-align: center;
 			padding: 20px;
+			margin-left: 77px;
 		}
 
 	.avatar-container {
@@ -1263,7 +1264,7 @@
 			background: #f8f9fa;
 			border-radius: 10px;
 			transition: all 0.3s ease;
-			border-left: 4px solid #1c76c2;
+			border-left: 4px solid #000000;
 		}
 
 			.profile-detail-item:hover {
@@ -1275,7 +1276,7 @@
 			width: 45px;
 			height: 45px;
 			border-radius: 50%;
-			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			background: linear-gradient(135deg, #000000 0%, #818181 100%);
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -1335,7 +1336,7 @@
 			border-radius: 12px;
 			padding: 20px;
 			transition: all 0.3s ease;
-			border-left: 4px solid #1c76c2;
+			border-left: 4px solid #000000;
 			position: relative;
 			overflow: hidden;
 		}
@@ -1353,7 +1354,7 @@
 				right: 0;
 				width: 60px;
 				height: 60px;
-				background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+				background: linear-gradient(135deg, #000000 0%, #818181 100%);
 				border-radius: 0 12px 0 60px;
 			}
 
@@ -1361,7 +1362,7 @@
 			width: 50px;
 			height: 50px;
 			border-radius: 50%;
-			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			background: linear-gradient(135deg, #000000 0%, #818181 100%);
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -1402,7 +1403,7 @@
 		}
 
 		.badge-text {
-			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			background: linear-gradient(135deg, #000000 0%, #818181 100%);
 			color: white;
 			padding: 4px 12px;
 			border-radius: 15px;
@@ -1412,10 +1413,40 @@
 			letter-spacing: 0.5px;
 		}
 
+		.btn-primary {
+			color: #fff;
+			background-color: #000000;
+			border-color: #000000;
+		}
+
+		.btn-primary:hover {
+			color: #fff;
+			background-color: grey;
+			border-color: grey;
+		}
+
+		.btn-primary:active,
+		.btn-primary:focus,
+		.btn-primary:focus:active {
+			color: #fff;
+			background-color: #000000 !important; /* màu khi click */
+			border-color: #000000 !important;
+			box-shadow: none !important; /* bỏ viền xanh mặc định khi focus */
+		}
+
+		.page-link {
+			color: #000000;
+		}
+		.page-item.active .page-link {
+			z-index: 1;
+			color: #fff;
+			background-color: #000000;
+			border-color: #000000;
+		}
 		/* Certificates Summary Card */
 		.certificates-summary-card {
 			flex: 1;
-			background: linear-gradient(135deg, #1c76c2 0%, #000000 100%);
+			background: linear-gradient(135deg, #000000 0%, #818181 100%);
 			border-radius: 15px;
 			padding: 30px;
 			color: white;

@@ -20,12 +20,12 @@
         }
 
             .platform-option:hover {
-                border-color: #0d6efd;
+                border-color: #000000;
                 box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
             }
 
             .platform-option.selected {
-                border-color: #0d6efd;
+                border-color: #000000;
                 background-color: #f8f9ff;
                 box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
             }
@@ -69,7 +69,7 @@
 
         .card-header {
             border-bottom: none;
-            background: linear-gradient(104deg, #000000 20%, #6e0491 100%);
+            background: linear-gradient(135deg, #000000 0%, #818181 100%);
         }
 
         .input-group-text {
@@ -131,9 +131,33 @@
         }
 
         }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #000000;
+            border-color: #000000;
+        }
+        .btn-primary:hover {
+            color: #fff;
+            background-color: grey;
+                border-color: grey;
+        }
+
+            .btn-primary:active,
+            .btn-primary:focus,
+            .btn-primary:focus:active {
+                color: #fff;
+                background-color: #000000 !important; /* màu khi click */
+                border-color: #000000 !important;
+                box-shadow: none !important; /* bỏ viền xanh mặc định khi focus */
+            }
     </style>
 </head>
 <body class="bg-light">
+    <a style="margin:20px" href="/Mentor/MentorPage/Dashboard" class="btn btn-primary px-4">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Dashboard
+    </a>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
