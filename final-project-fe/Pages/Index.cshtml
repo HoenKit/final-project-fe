@@ -139,7 +139,7 @@
 														{
 															<img src="@(Model.Profile.UserMetaData?.Avatar ?? "images/resources/friend-avatar9.jpg")"
 																 alt="Avatar" class="rounded-circle" style="width:35px;height:39px;" />
-															<div style="color: #088dcd;" class="ms-2">
+															<div style="color: black;" class="ms-2">
 																@($"{Model.Profile.UserMetaData?.FirstName} {Model.Profile.UserMetaData?.LastName}")
 															</div>
 														}
@@ -315,7 +315,7 @@
 
 														<div class="friend-name">
 															<ins>
-																<a href="time-line.html" title="">
+																<a href="time-line.html" title="" style="color: black">
 																	@((post.User?.UserMetaData != null) ? $"{post.User.UserMetaData.FirstName} {post.User.UserMetaData.LastName}" : post.User?.Email)
 																</a>
 															</ins>
@@ -514,7 +514,7 @@
 																	{
 																		var replyUser = reply.User;
 																		var replyMeta = replyUser?.UserMetaData;
-																		var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar + "?sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D";
+																		var replyAvatar = string.IsNullOrEmpty(replyMeta?.Avatar) ? "images/resources/friend-avatar9.jpg" : replyMeta.Avatar;
 																		var replyName = replyMeta != null ? $"{replyMeta.FirstName} {replyMeta.LastName}" : replyUser?.Email;
 
 																		<div class="comment reply-comment ms-5" data-comment-id="@reply.CommentId" data-parent-id="@parent.CommentId">
@@ -651,7 +651,7 @@
 										}
 									</div>
 								</div>
-								<button class="btn-view btn-load-more">Load More</button>
+								<button class="btn-view btn-load-more" style="background: black">Load More</button>
 							</div><!-- centerl meta -->
 							<div class="col-lg-3">
 								<aside class="sidebar">
@@ -947,7 +947,7 @@
 										</div>
 										<div class="we-comment">
 											<div class="coment-head">
-												<h5><a href="time-line.html" title="">${commentUserInfo.name}</a></h5>
+											<h5><a href="time-line.html" title="" style="color: black">${commentUserInfo.name}</a></h5>
 												<span>${d}</span>
 												${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
 												${commentOptionsHTML}
@@ -996,7 +996,7 @@
 												</div>
 												<div class="we-comment">
 													<div class="coment-head">
-														<h5><a href="time-line.html" title="">${replyUserInfo.name}</a></h5>
+													<h5><a href="time-line.html" title="" style="color: black">${replyUserInfo.name}</a></h5>
 														<span>${d}</span>
 														${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${reply.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
 														${replyOptionsHTML}
@@ -1062,7 +1062,7 @@
 									<img src="${avatar}" alt="User Avatar"  style="width: 50px; height: 51px;">
 									</figure>
 									<div class="friend-name">
-										<ins><a href="time-line.html" title="">${name}</a></ins>
+									<ins><a href="time-line.html" title="" style="color: black">${name}</a></ins>
 										<span>${d}</span>
 										${optionsMenuHTML}
 									</div>
@@ -1132,7 +1132,7 @@
 							</div>
 							<div class="we-comment">
 								<div class="coment-head">
-									<h5><a href="time-line.html" title="">${name}</a></h5>
+								<h5><a href="time-line.html" title="" style="color: black">${name}</a></h5>
 									<span>${d}</span>
 									${hasAuth ? `<a class="we-reply" href="javascript:void(0)" data-reply-to="${comment.commentId}" title="Reply"><i class="fa fa-reply"></i></a>` : ''}
 									${optionsHTML}
@@ -1846,17 +1846,47 @@
 
 
 	<style>
+
+	.fa-reply{
+		color: black
+	}
+	.bg-primary {
+		background-color: #000000 !important;
+	}
 	.swiper-button-next,
 	.swiper-button-prev {
 		width: 5% !important;
 		height: 12% !important;
 		margin-top: -2% !important;
+		color: black;
 	}
 
 		.swiper-button-next:after,
 		.swiper-button-prev:after {
 			font-size: 150% !important;
 			font-weight: bold;
+		}
+
+		.btn-primary {
+			color: #fff;
+			background-color: #000000;
+			border-color: #000000;
+		}
+
+			.btn-primary:hover {
+				color: white;
+				background-color: grey;
+				border-color: grey;
+			}
+
+		.btn-outline-primary{
+			color: black;
+		}
+
+		.btn-outline-primary:hover {
+			color: white;
+			background-color: #000000;
+			border-color: #000000;
 		}
 
 		body:not(.modal-open) {

@@ -14,7 +14,7 @@
     }
 
     .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #000000 0%, #818181 100%);
         color: white;
         padding: 30px;
         border-radius: 12px;
@@ -32,6 +32,7 @@
         margin: 10px 0 0 0;
         opacity: 0.9;
         font-size: 1.1rem;
+        color: white;
     }
 
     .success-alert {
@@ -108,7 +109,7 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #000000 0%, #818181 100%);
         color: white;
     }
 
@@ -116,6 +117,25 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
+
+        .btn-primary:active,
+        .btn-primary:focus,
+        .btn-primary:focus:active {
+            color: #fff;
+            background-color: grey !important; /* màu khi click */
+            border-color: grey !important;
+            box-shadow: none !important; /* bỏ viền xanh mặc định khi focus */
+        }
+
+        .btn-outline-primary{
+            color: black;
+        }
+
+        .btn-outline-primary:hover {
+            background: black;
+            color: white;
+		    border-color: black;
+        }
 
     .btn-success {
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
@@ -136,7 +156,7 @@
     }
 
     .table-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #000000 0%, #818181 100%);
         color: white;
         padding: 20px;
     }
@@ -295,6 +315,7 @@
 
 <div class="attendance-container">
     <div class="page-header">
+        <a href="/Mentor/MentorPage/Dashboard"><i class="fa fa-arrow-left" style="margin-bottom:12px"></i></a>
         <h2> 📋 Student Attendance </h2>
         <p>Manage attendance for your assignments</p>
     </div>
