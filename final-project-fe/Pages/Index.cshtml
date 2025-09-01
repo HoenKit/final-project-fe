@@ -330,8 +330,11 @@
 																			<i class="fa fa-ellipsis-v"></i>
 																		</button>
 																		<ul class="dropdown-menu">
+																			@if (post.User == null || post.User.UserId.ToString() != Model.CurrentUserId)
+																			{
 																			<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
 																			<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
+																			}
 																			@if (post.User != null && post.User.UserId.ToString() == Model.CurrentUserId)
 																			{
 																				@* <li>
@@ -484,8 +487,11 @@
 																								<i class="fa fa-ellipsis-v"></i>
 																							</button>
 																							<ul class="dropdown-menu">
+																								@if (parent.UserId.ToString() != Model.CurrentUserId)
+																								{
 																								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																								}
 																							</ul>
 																						</div>
 																					</div>
@@ -534,8 +540,11 @@
 																									<i class="fa fa-ellipsis-v"></i>
 																								</button>
 																								<ul class="dropdown-menu">
+																									@if (replyUser.UserId.ToString() != Model.CurrentUserId)
+																									{
 																									<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																									<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																									}
 																								</ul>
 																							</div>
 																						</div>
@@ -582,8 +591,11 @@
 																										<i class="fa fa-ellipsis-v"></i>
 																									</button>
 																									<ul class="dropdown-menu">
+																										@if (level2User.UserId.ToString() != Model.CurrentUserId)
+																										{
 																										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
+																										}
 																									</ul>
 																								</div>
 																							</div>

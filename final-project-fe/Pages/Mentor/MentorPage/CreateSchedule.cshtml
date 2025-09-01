@@ -353,9 +353,9 @@
 
     <div id="customConfirm" class="modal" style="display:none; position:fixed; top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.5);z-index:9999;">
         <div style="background:white; padding:20px; max-width:400px; margin:100px auto; border-radius:8px; text-align:center;">
-            <p id="confirmMessage">Bạn có chắc muốn xóa lịch meeting này?</p>
-            <button id="confirmYes" class="btn btn-danger">Xác nhận</button>
-            <button id="confirmNo" class="btn btn-secondary">Hủy</button>
+            <p id="confirmMessage">Are you sure you want to delete this meeting schedule?</p>
+            <button id="confirmYes" class="btn btn-danger">Confirm</button>
+            <button id="confirmNo" class="btn btn-secondary">Cancel</button>
         </div>
     </div>
 
@@ -584,7 +584,7 @@
             const month = currentDate.getMonth();
 
             if (monthYear) {
-                monthYear.textContent = `Tháng ${month + 1}, ${year}`;
+                monthYear.textContent = `Month ${month + 1}, ${year}`;
             }
 
             calendar.innerHTML = '';
@@ -978,15 +978,15 @@
                 month: 'long',
                 day: 'numeric'
             };
-            return date.toLocaleDateString('vi-VN', options);
+            return date.toLocaleDateString('en-US', options);
         }
 
         function formatDateShort(date) {
-            return date.toLocaleDateString('vi-VN');
+            return date.toLocaleDateString('en-US');
         }
 
         function formatTime(date) {
-            return date.toLocaleTimeString('vi-VN', {
+            return date.toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit'
             });
