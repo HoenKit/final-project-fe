@@ -334,10 +334,11 @@
                 <label for="assignmentSelect" class="form-label">Assignment:</label>
                 <select id="assignmentSelect" name="SelectedAssignmentId" class="form-select" required>
                     <option value="">-- Select Assignment to check in --</option>
-                    @foreach (var assignment in Model.Assignments)
+                    @foreach (var course in Model.Courses)
                     {
-                        <option value="@assignment.AssignmentId" selected="@(Model.SelectedAssignmentId == assignment.AssignmentId)">
-                            @assignment.Title
+                        <option value="@course.Assignment!.AssignmentId"
+                                selected="@(Model.SelectedAssignmentId == course.Assignment.AssignmentId)">
+                            @course.CourseName
                         </option>
                     }
                 </select>

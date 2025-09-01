@@ -1,4 +1,7 @@
-﻿using final_project_fe.Dtos.Assignment;
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Assignment;
+using final_project_fe.Dtos.Courses;
+using final_project_fe.Dtos.Mentors;
 using final_project_fe.Dtos.Users;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +34,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         public string? UserId { get; set; }
         public string BaseUrl { get; set; }
         public string? AccessToken { get; set; }
-        public List<GetAssignmentbycreatorDto> Assignments { get; set; } = new();
+        public List<ListCourseDto> Courses { get; set; } = new();
         public List<SubmissionDto> Submissions { get; set; } = new();
 
         [BindProperty(SupportsGet = true)]
@@ -58,27 +61,69 @@ namespace final_project_fe.Pages.Mentor.MentorPage
         {
             BaseUrl = _apiSettings.BaseUrl;
             var token = Request.Cookies["AccessToken"];
-            if (string.IsNullOrEmpty(token)) return;
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please Login First";
+                Response.Redirect("/Login");
+                return;
+            }
 
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadJwtToken(token);
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c =>
                 c.Type == ClaimTypes.NameIdentifier || c.Type == "sub");
 
-            if (userIdClaim == null) return;
+            if (userIdClaim == null)
+                return;
 
             UserId = userIdClaim.Value;
+            var roleClaims = jwtToken.Claims
+                .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
 
-            var client = _httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Assignment/by-creator?userId={UserId}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            var response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
+            // 🔹 Nếu không có role Mentor thì chặn
+            if (roleClaims == null || !roleClaims.Any(r => r.Equals("Mentor", StringComparison.OrdinalIgnoreCase)))
             {
-                var json = await response.Content.ReadAsStringAsync();
-                Assignments = JsonSerializer.Deserialize<List<GetAssignmentbycreatorDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                TempData["ErrorMessage"] = "You do not have access to this page!";
+                RedirectToPage("/ErrorPage");
+                return;
             }
+            var client = _httpClientFactory.CreateClient();
+            var mentorUrl = $"{BaseUrl}/Mentor/get-by-user/{UserId}";
+            var mentorRequest = new HttpRequestMessage(HttpMethod.Get, mentorUrl);
+            mentorRequest.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var mentorResponse = await client.SendAsync(mentorRequest);
+            if (mentorResponse.IsSuccessStatusCode)
+            {
+                var mentorResp = await mentorResponse.Content.ReadFromJsonAsync<GetMentorDto>();
+
+                if (mentorResp != null)
+                {
+
+                    var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Course/?mentorId={mentorResp.MentorId}&statuses=Approved");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await client.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
+
+                    var courseResp = await response.Content.ReadFromJsonAsync<PageResult<ListCourseDto>>(
+                                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    Courses = courseResp?.Items?
+                        .Where(c => c.Assignment != null && !string.IsNullOrEmpty(c.Assignment.MeetLink))
+                        .Select(c => new ListCourseDto
+                        {
+                            CourseId = c.CourseId,
+                            CourseName = c.CourseName,
+                            Assignment = c.Assignment
+                        })
+                        .ToList() ?? new List<ListCourseDto>();
+                }
+            }
+
         }
 
         private async Task LoadSubmissionsAsync(int assignmentId)

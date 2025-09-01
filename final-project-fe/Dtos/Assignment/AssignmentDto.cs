@@ -7,6 +7,7 @@
         public string Content { get; set; }
         public TimeSpan? ExamTime { get; set; }
         public string? MeetLink { get; set; }
+        public DateTime? CreateAt { get; set; }
     }
     public class AssignmentResponseDto
     {

@@ -1,4 +1,8 @@
-﻿using final_project_fe.Dtos.Assignment;
+﻿using final_project_fe.Dtos;
+using final_project_fe.Dtos.Assignment;
+using final_project_fe.Dtos.Courses;
+using final_project_fe.Dtos.Mentors;
+using final_project_fe.Dtos.Payment;
 using final_project_fe.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -29,7 +33,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             _httpClientFactory = httpClientFactory;
         }
         public string BaseUrl { get; set; }
-        public List<GetAssignmentbycreatorDto> Assignments { get; set; } = new();
+        public List<ListCourseDto> Courses { get; set; } = new();
         public List<UserAssignmentDto> NotPresentUsers { get; set; } = new();
 
         [BindProperty]
@@ -127,6 +131,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             var token = Request.Cookies["AccessToken"];
             if (string.IsNullOrEmpty(token))
             {
+                TempData["ErrorMessage"] = "Please Login First";
                 Response.Redirect("/Login");
                 return;
             }
@@ -136,29 +141,58 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c =>
                 c.Type == ClaimTypes.NameIdentifier || c.Type == "sub");
 
-            if (userIdClaim == null) return;
+            if (userIdClaim == null) 
+                return;
 
             UserId = userIdClaim.Value;
+            var roleClaims = jwtToken.Claims
+                .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                .Select(c => c.Value)
+                .ToList();
 
+            // 🔹 Nếu không có role Mentor thì chặn
+            if (roleClaims == null || !roleClaims.Any(r => r.Equals("Mentor", StringComparison.OrdinalIgnoreCase)))
+            {
+                TempData["ErrorMessage"] = "You do not have access to this page!";
+                 RedirectToPage("/ErrorPage");
+                return;
+            }
             var client = _httpClientFactory.CreateClient();
+            var mentorUrl = $"{BaseUrl}/Mentor/get-by-user/{UserId}";
+            var mentorRequest = new HttpRequestMessage(HttpMethod.Get, mentorUrl);
+            mentorRequest.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            // Dùng HttpRequestMessage thay cho GetAsync
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Assignment/by-creator?userId={UserId}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-            try
+            var mentorResponse = await client.SendAsync(mentorRequest);
+            if (mentorResponse.IsSuccessStatusCode)
             {
-                var response = await client.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                var mentorResp = await mentorResponse.Content.ReadFromJsonAsync<GetMentorDto>();
 
-                var content = await response.Content.ReadAsStringAsync();
-                Assignments = JsonSerializer.Deserialize<List<GetAssignmentbycreatorDto>>(content,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                if (mentorResp != null)
+                {
+
+                    var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/Course/?mentorId={mentorResp.MentorId}&statuses=Approved");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await client.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
+
+                    var courseResp = await response.Content.ReadFromJsonAsync<PageResult<ListCourseDto>>(
+                                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    // Chỉ lấy course có ít nhất 1 assignment có MeetLink
+                    Courses = courseResp?.Items?
+                        .Where(c => c.Assignment != null && !string.IsNullOrEmpty(c.Assignment.MeetLink))
+                        .Select(c => new ListCourseDto
+                        {
+                            CourseId = c.CourseId,
+                            CourseName = c.CourseName,
+                            Assignment = c.Assignment
+                        })
+                        .ToList() ?? new List<ListCourseDto>();
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading assignments");
-            }
+
         }
     }
 }
