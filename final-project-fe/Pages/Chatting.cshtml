@@ -988,9 +988,9 @@
                         if (response.ok) {
                             const user = await response.json();
 
-                            const fullName = user.userMetaData
-                                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
-                                : user.email || 'Unknown User';
+                              const fullName = user.userMetaData
+                                                ? `${user.userMetaData.firstName} ${user.userMetaData.lastName}`.trim()
+                                                : user.email || "Unknown User";
 
                             const avatar = user.userMetaData?.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'https://i.postimg.cc/FHnRyy40/default.jpg';
 
@@ -1134,7 +1134,13 @@
             // UI Management
             ui: {
                 createChatPartnerItem(partner) {
-                    const fullName = partner.fullName || partner.email || 'Unknown User';
+                    let fullName = "Unknown User";
+
+                    if (partner.userMetaData) {
+                        fullName = `${partner.userMetaData.firstName || ""} ${partner.userMetaData.lastName || ""}`.trim();
+                    } else {
+                        fullName = partner.fullName || partner.email || 'Unknown User';
+                    }
                     const avatar = partner.avatar+"?"+"sp=r&st=2025-05-28T06:11:09Z&se=2026-01-01T14:11:09Z&spr=https&sv=2024-11-04&sr=c&sig=YdDYGbzpNp4XPSKVVDM0bb411XOEPgA8b0i2PFCfc1c%3D" || 'https://i.postimg.cc/FHnRyy40/default.jpg';
                     const lastTime = partner.lastSentAt || partner.updateAt || partner.createAt;
 

@@ -329,31 +329,25 @@
 																		<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 																			<i class="fa fa-ellipsis-v"></i>
 																		</button>
-																		<ul class="dropdown-menu">
-																			@if (post.User == null || post.User.UserId.ToString() != Model.CurrentUserId)
-																			{
-																			<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
-																			<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
-																			}
-																			@if (post.User != null && post.User.UserId.ToString() == Model.CurrentUserId)
-																			{
-																				@* <li>
-																					<a class="dropdown-item text-primary update-post"
-																					   href="#"
-																					   data-bs-toggle="modal"
-																					   data-bs-target="#editPostModal"
-																					   data-post-id="@post.PostId">
-																						Update Post
-																					</a>
-																				</li> *@
+
+																		@if (post.User == null || post.User.UserId.ToString() != Model.CurrentUserId)
+																		{
+																			<ul class="dropdown-menu">
+																				<li><a class="dropdown-item report-post" href="#" data-bs-toggle="modal" data-bs-target="#reportPostModal" data-post-id="@post.PostId">Report Post</a></li>
+																				<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@post.User?.UserId">Report User</a></li>
+																			</ul>
+																		}
+																		else
+																		{
+																			<ul class="dropdown-menu">
 																				<li>
 																					<form method="post" asp-page-handler="Delete" asp-route-postId="@post.PostId"
 																						  onsubmit="return confirm('Are you sure you want to delete this post?');">
 																						<button type="submit" class="dropdown-item text-danger delete-post">Delete Post</button>
 																					</form>
 																				</li>
-																			}
-																		</ul>
+																			</ul>
+																		}
 																		<!-- Modal cập nhật -->
 																		<div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
 																			<div class="modal-dialog">
@@ -412,24 +406,24 @@
 
 														<div class="post-meta">
 															@* 	@if (Model.PostFilesByPost.ContainsKey(post.PostId) && Model.PostFilesByPost[post.PostId].Any(f => f.PostFileType.ToLower() == "image" || f.PostFileType.ToLower() == "video"))
-                                                    {
-                                                    @foreach (var file in Model.PostFilesByPost[post.PostId])
-                                                    {
-                                                    @if (file.PostFileType.ToLower() == "image")
-                                                    {
-                                                    <img src="@file.FileUrl" alt="Post Image" width="400" />
-                                                    }
-                                                    else if (file.PostFileType.ToLower() == "video")
-                                                    {
-                                                    <iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-                                                    }
-                                                    }
-                                                    } *@
-															@* 	else
-                                                    {
-                                                    <img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
-                                                    alt="Default Post Image" width="400" />
-                                                    } *@
+															{
+															@foreach (var file in Model.PostFilesByPost[post.PostId])
+															{
+															@if (file.PostFileType.ToLower() == "image")
+															{
+															<img src="@file.FileUrl" alt="Post Image" width="400" />
+															}
+															else if (file.PostFileType.ToLower() == "video")
+															{
+															<iframe src="@file.FileUrl" height="315" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+															}
+															}
+															} *@
+																	@* 	else
+															{
+															<img src="https://toigingiuvedep.vn/wp-content/uploads/2021/06/hinh-anh-bau-troi-dem-day-sao-tuyet-dep-cho-may-tinh.jpg"
+															alt="Default Post Image" width="400" />
+															} *@
 
 															@if (post.PostFiles != null && post.PostFiles.Any())
 															{
@@ -482,18 +476,22 @@
 																				{
 																					<a class="we-reply" href="javascript:void(0)" data-reply-to="@parent.CommentId"><i class="fa fa-reply"></i></a>
 																					<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+																						@if (parent.UserId.ToString() != Model.CurrentUserId)
+																						{
 																						<div class="dropdown">
 																							<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 																								<i class="fa fa-ellipsis-v"></i>
 																							</button>
+																							
 																							<ul class="dropdown-menu">
-																								@if (parent.UserId.ToString() != Model.CurrentUserId)
-																								{
+																								
 																								<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																								<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																								}
+																								
 																							</ul>
+																							
 																						</div>
+																						}
 																					</div>
 																				}
 
@@ -535,18 +533,22 @@
 																					{
 																						<a class="we-reply" href="javascript:void(0)" data-reply-to="@reply.CommentId"><i class="fa fa-reply"></i></a>
 																						<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+                                                                                            @if (replyUser.UserId.ToString() != Model.CurrentUserId)
+                                                                                            {
 																							<div class="dropdown">
 																								<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 																									<i class="fa fa-ellipsis-v"></i>
 																								</button>
+																								
 																								<ul class="dropdown-menu">
-																									@if (replyUser.UserId.ToString() != Model.CurrentUserId)
-																									{
+													
 																									<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																									<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																									}
+																									
 																								</ul>
+																								
 																							</div>
+																							}
 																						</div>
 																					}
 																				</div>
@@ -586,18 +588,20 @@
 																						{
 																							<a class="we-reply" href="javascript:void(0)" data-reply-to="@level2.CommentId"><i class="fa fa-reply"></i></a>
 																							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+																								@if (level2User.UserId.ToString() != Model.CurrentUserId)
+																								{
 																								<div class="dropdown">
 																									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 																										<i class="fa fa-ellipsis-v"></i>
 																									</button>
 																									<ul class="dropdown-menu">
-																										@if (level2User.UserId.ToString() != Model.CurrentUserId)
-																										{
+																										
 																										<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="@parent.CommentId">Report Comment</a></li>
 																										<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="@parent.UserId">Report User</a></li>
-																										}
+																										
 																									</ul>
 																								</div>
+																								}
 																							</div>
 																						}
 																					</div>
@@ -793,7 +797,7 @@
 			const HubUrl = "@Model.HubUrl";
 			const BaseUrl = "@Model.BaseUrl";
 			const userId = currentUserId;
-			const token = "@token";
+			const token = '@token';
 
 			// Load More Posts Configuration
 			let currentPage = 1;
@@ -807,6 +811,7 @@
 				.withUrl(`${HubUrl}/postHub`)
 				.withAutomaticReconnect()
 				.build();
+
 
 			// Utility function to get user info
 			async function getUserInfo(id) {
@@ -876,7 +881,7 @@
 				const categoryInfo = await getCategoryInfo(post.categoryId);
 				const { avatar, name } = userInfo;
 				const d = new Date(post.createAt).toLocaleString();
-				const hasAuth = token && token !== '' && token !== '@token';
+				const hasAuth = token && token !== '';
 
 				// Create category badge HTML
 				let categoryBadgeHTML = '';
@@ -927,31 +932,37 @@
 
 					for (const comment of parentComments) {
 						const commentUserInfo = await getUserInfo(comment.userId);
-						const replyFormHTML = `
-									<div class="reply-form" style="display:none; margin-top: 10px;">
-										<form class="comment-form">
-											<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
-											<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
-											<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
-											<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
-										</form>
+
+							
+							const replyFormHTML = `
+								<div class="reply-form" style="display:none; margin-top: 10px;">
+									<form class="comment-form">
+										<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
+										<input type="hidden" name="NewComment.ParentCommentId" value="${comment.commentId}" />
+										<textarea name="NewComment.Content" placeholder="Write a reply..."></textarea>
+										<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
+									</form>
+								</div>
+							`;
+						
+
+							let commentOptionsHTML = '';
+							if (hasAuth && comment.userId.toString() !== currentUserId.toString()) {
+								commentOptionsHTML = `
+								<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+									<div class="dropdown">
+										<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="fa fa-ellipsis-v"></i>
+										</button>
+										<ul class="dropdown-menu">
+											<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
+											<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
+										</ul>
 									</div>
+								</div>
 								`;
-
-						const commentOptionsHTML = `
-									<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-										<div class="dropdown">
-											<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-												<i class="fa fa-ellipsis-v"></i>
-											</button>
-											<ul class="dropdown-menu">
-												<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${comment.commentId}">Report Comment</a></li>
-												<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${comment.userId}">Report User</a></li>
-											</ul>
-										</div>
-									</div>
-								` ;
-
+							}
+						
 						commentsHTML += `
 									<div class="comment" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
 										<div class="comet-avatar">
@@ -976,7 +987,9 @@
 							commentsHTML += `<div class="replies" style="margin-left: 50px;">`;
 							for (const reply of replies) {
 								const replyUserInfo = await getUserInfo(reply.userId);
-								const replyFormHTML = `
+									let replyFormHTML = '';
+									if(hasAuth){
+										replyFormHTML = `
 											<div class="reply-form" style="display:none; margin-top: 10px;">
 												<form class="comment-form">
 													<input type="hidden" name="NewComment.PostId" value="${post.postId}" />
@@ -985,21 +998,28 @@
 													<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
 												</form>
 											</div>
-										` ;
-
-								const replyOptionsHTML = `
-											<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
-												<div class="dropdown">
-													<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-														<i class="fa fa-ellipsis-v"></i>
-													</button>
-													<ul class="dropdown-menu">
-														<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
-														<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
-													</ul>
-												</div>
-											</div>
 										`;
+									}
+								
+
+
+									let replyOptionsHTML = '';
+									if (hasAuth && reply.userId.toString() !== currentUserId.toString()) {
+										replyOptionsHTML = `
+										<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
+											<div class="dropdown">
+												<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+													<i class="fa fa-ellipsis-v"></i>
+												</button>
+												<ul class="dropdown-menu">
+													<li><a class="dropdown-item report-comment" href="#" data-bs-toggle="modal" data-bs-target="#reportCommentModal" data-comment-id="${reply.commentId}">Report Comment</a></li>
+													<li><a class="dropdown-item report-user" href="#" data-bs-toggle="modal" data-bs-target="#reportUserModal" data-user-id="${reply.userId}">Report User</a></li>
+												</ul>
+											</div>
+										</div>
+										`;
+									}
+
 
 								commentsHTML += `
 											<div class="comment reply-comment" data-comment-id="${reply.commentId}" data-parent-id="${comment.commentId}" style="margin-bottom: 15px;">
@@ -1025,7 +1045,9 @@
 				}
 
 				// Generate options menu for authenticated users
-				const optionsMenuHTML = `
+					let optionsMenuHTML = '';
+						if (hasAuth && post.userId.toString() !== currentUserId.toString()) {
+							optionsMenuHTML = `
 							<div class="post-options-menu" style="position: absolute; right: 10px; top: 10px;">
 								<div class="dropdown">
 									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1037,21 +1059,19 @@
 									</ul>
 								</div>
 							</div>
-						` ;
+							`;
+						}
+
 
 				// Generate comment form for authenticated users
-				const commentFormHTML = `
+					let commentFormHTML = '';
+					if(hasAuth){
+						commentFormHTML = `
 							<div class="coment-area">
 								<ul class="we-comet">
 									<li class="post-comment">
 										<div class="comet-avatar">
-												@if (Model.Profile?.UserMetaData != null)
-												{
-													<img src="@(Model.Profile.UserMetaData?.Avatar ?? "https://cdn-icons-png.flaticon.com/512/149/149071.png")"
-													 alt="Avatar"
-													 class="rounded-circle"
-													 style="width: 30px; height: 34px;" />
-												}
+											<img src="${avatar}" alt="Avatar" style="width: 30px; height: 34px;" />
 										</div>
 										<div class="post-comt-box">
 											<form class="comment-form">
@@ -1064,7 +1084,8 @@
 									</li>
 								</ul>
 							</div>
-						` ;
+						`;
+					}
 
 				return `
 							<div id="post-${post.postId}">
@@ -1112,7 +1133,10 @@
 				const d = `${formattedDate} ${formattedTime}`;
 				const hasAuth = token && token !== '' && token !== '@token';
 
-				const optionsHTML = `
+
+				let optionsHTML = '';
+				if (comment.userId.toString() !== currentUserId.toString()) {
+						optionsHTML = `
 							<div class="comment-options-menu" style="position: absolute; right: 10px; top: 0;">
 								<div class="dropdown">
 									<button class="btn btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1125,6 +1149,7 @@
 								</div>
 							</div>
 						` ;
+				}
 
 				const replyFormHTML = `
 							<div class="reply-form" style="display: none; margin-top: 10px;">
@@ -1135,7 +1160,8 @@
 									<button type="submit" class="btn btn-sm btn-primary mt-1">Send</button>
 								</form>
 							</div>
-						` ;
+				` ;
+
 
 				return `
 						<div class="${cls}" data-comment-id="${comment.commentId}" data-parent-id="${comment.parentCommentId || ''}" style="margin-bottom: 15px;">
@@ -1326,6 +1352,50 @@
 				const id = btn.getAttribute('data-reply-to');
 				const form = document.querySelector(`.comment[data-comment-id="${id}"] .reply-form`);
 				if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+			});
+
+			document.body.addEventListener('click', e => {
+				const reportPostBtn = e.target.closest('.report-post');
+				if (reportPostBtn) {
+					e.preventDefault();
+					const postId = reportPostBtn.getAttribute('data-post-id');
+					const userId = reportPostBtn.getAttribute('data-user-id');
+					console.log('Report post clicked. PostId:', postId, 'UserId:', userId);
+
+					const modalInputPostId = document.querySelector('#reportPostModal input[name="PostId"]');
+					const modalInputUserId = document.querySelector('#reportPostModal input[name="UserId"]');
+					if(modalInputPostId) modalInputPostId.value = postId;
+					if(modalInputUserId) modalInputUserId.value = userId; // Cập nhật UserId
+
+					return;
+				}
+
+				const reportCommentBtn = e.target.closest('.report-comment');
+				if (reportCommentBtn) {
+					e.preventDefault();
+					const commentId = reportCommentBtn.getAttribute('data-comment-id');
+					const userId = reportCommentBtn.getAttribute('data-user-id'); // Lấy userId của tác giả comment
+					console.log('Report comment clicked. CommentId:', commentId, 'UserId:', userId);
+
+					const modalInputCommentId = document.querySelector('#reportCommentModal input[name="CommentId"]');
+					const modalInputUserId = document.querySelector('#reportCommentModal input[name="UserId"]');
+					if(modalInputCommentId) modalInputCommentId.value = commentId;
+					if(modalInputUserId) modalInputUserId.value = userId; // Cập nhật UserId
+
+					return;
+				}
+
+				const reportUserBtn = e.target.closest('.report-user');
+				if (reportUserBtn) {
+					e.preventDefault();
+					const userId = reportUserBtn.getAttribute('data-user-id');
+					console.log('Report user clicked. UserId:', userId);
+
+					const modalInput = document.querySelector('#reportUserModal input[name="UserId"]');
+					if(modalInput) modalInput.value = userId;
+
+					return;
+				}
 			});
 
 			// Handle comment form submissions - CHỈ MỘT EVENT LISTENER
