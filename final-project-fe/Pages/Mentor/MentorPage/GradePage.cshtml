@@ -418,11 +418,12 @@
             <div class="mb-3">
                 <label for="assignmentSelect" class="form-label">Select Assignment:</label>
                 <select id="assignmentSelect" name="SelectedAssignmentId" class="form-select" onchange="this.form.submit()">
-                    <option value="">-- Select Assignment --</option>
-                    @foreach (var assignment in Model.Assignments)
+                    <option value="">-- Select Course --</option>
+                    @foreach (var course in Model.Courses)
                     {
-                        <option value="@assignment.AssignmentId" selected="@(assignment.AssignmentId == Model.SelectedAssignmentId ? "selected" : null)">
-                            @assignment.Title
+                        <option value="@course.Assignment!.AssignmentId"
+                                selected="@(Model.SelectedAssignmentId == course.Assignment.AssignmentId)">
+                            @course.CourseName
                         </option>
                     }
                 </select>
@@ -432,7 +433,10 @@
 
     @if (Model.SelectedAssignmentId.HasValue)
     {
-        var selectedAssignment = Model.Assignments.FirstOrDefault(a => a.AssignmentId == Model.SelectedAssignmentId);
+        var selectedAssignment = Model.Courses
+        .Select(c => c.Assignment)
+        .FirstOrDefault(a => a != null && a.AssignmentId == Model.SelectedAssignmentId);
+
         if (selectedAssignment != null)
         {
             <div class="question-display">
@@ -462,8 +466,8 @@
                     @for (int i = 0; i < Model.Submissions.Count; i++)
                     {
                         var sub = Model.Submissions[i];
-                        var assignment = Model.Assignments.FirstOrDefault(a => a.AssignmentId == sub.AssignmentId);
-                        var question = assignment?.Content ?? "";
+                        var courseWithAssignment = Model.Courses.FirstOrDefault(c => c.Assignment != null && c.Assignment.AssignmentId == sub.AssignmentId);
+                        var assignment = courseWithAssignment?.Assignment;
                         var lessonId = assignment?.LessonId ?? 0;
 
                         <tr id="row-@i">
