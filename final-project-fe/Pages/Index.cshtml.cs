@@ -410,12 +410,19 @@ namespace final_project_fe.Pages
             }
 
             var form = new MultipartFormDataContent
-    {
-        { new StringContent(userId), "UserId" },
-        { new StringContent(NewPost.Title ?? ""), "Title" },
-        { new StringContent(NewPost.Content ?? ""), "Content" },
-        { new StringContent(NewPost.CategoryId.ToString()), "CategoryId" }
-    };
+            {
+                { new StringContent(userId), "UserId" },
+                { new StringContent(NewPost.Title ?? ""), "Title" },
+                { new StringContent(NewPost.Content ?? ""), "Content" },
+                { new StringContent(NewPost.CategoryId.ToString()), "CategoryId" }
+            };
+
+            if (NewPost.CategoryId <= 0)
+            {
+                TempData["ErrorMessage"] = "Category is required.";
+                await OnGetAsync(currentPage);
+                return Page();
+            }
 
             if (NewPost.PostFileLinks != null && NewPost.PostFileLinks.Count > 0)
             {
