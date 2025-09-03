@@ -62,7 +62,7 @@ namespace final_project_fe.Pages.Mentor.MentorPage
             // 🔹 Nếu không có role Mentor thì chặn
             if (roleClaims == null || !roleClaims.Any(r => r.Equals("Mentor", StringComparison.OrdinalIgnoreCase)))
             {
-                TempData["Error"] = "You do not have access to this page!";
+                TempData["ErrorMessage"] = "You do not have access to this page!";
                 return RedirectToPage("/ErrorPage");
             }
 
