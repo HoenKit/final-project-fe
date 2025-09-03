@@ -1302,14 +1302,14 @@
                                                                                                     <div class="form-text">
                                                                                                         <i class="fa fa-info-circle me-1"></i>
                                                                                                         Upload an Excel file containing questions and answers. (Max size: 10MB)
-                                                                                                        <a href="#" onclick="showExcelFormat(event)">View format requirements</a>
+                                                                                                        <a href="#" onclick="showExcelFormat(event, '@lesson.LessonId')">View format requirements</a>
                                                                                                     </div>
                                                                                                     <!-- File validation feedback -->
                                                                                                     <div id="file-feedback-@lesson.LessonId" class="invalid-feedback"></div>
                                                                                                 </div>
 
                                                                                                 <!-- Excel Format Info (Hidden by default) -->
-                                                                                                <div id="excel-format-info" class="alert alert-info" style="display: none;">
+                                                                                                <div id="excel-format-info-@lesson.LessonId" class="alert alert-info" style="display: none;">
                                                                                                     <h6><i class="fa fa-file-excel me-1"></i> Excel Format Requirements:</h6>
                                                                                                     <ul class="mb-0">
                                                                                                         <li><strong>Column A:</strong> QuestionText</li>
@@ -3311,16 +3311,18 @@
             document.getElementById(tabName + '-form').classList.remove('hidden');
         }
 
-        function showExcelFormat(event) {
-            // Prevent default behavior and stop propagation
+        function showExcelFormat(event, lessonId) {
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
             }
 
-            const formatInfo = document.getElementById(`excel-format-info`);
-            formatInfo.style.display = formatInfo.style.display === 'none' ? 'block' : 'none';
+            const formatInfo = document.getElementById(`excel-format-info-${lessonId}`);
+            if (formatInfo) {
+                formatInfo.style.display = formatInfo.style.display === 'none' ? 'block' : 'none';
+            }
         }
+
 
     function toggleQuestionForms(lessonId, selectedOption, clickedButton) {
         // Remove active class from all tab buttons in this lesson
